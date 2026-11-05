@@ -2,10 +2,10 @@
 schema: task
 id: TASK-004
 title: 電源の仕組みと機器の能力を macOS につなぐ
-status: todo
+status: done
 requirements: []
 depends_on: [TASK-003]
-assignee: OpenCode / GPT-6.1 Sol
+assignee: OpenCode / GPT-6.1 Sol・GPT-6 Astra
 ---
 
 # TASK-004 電源の仕組みと機器の能力を macOS につなぐ
@@ -20,14 +20,16 @@ assignee: OpenCode / GPT-6.1 Sol
 
 - `Packages/CapsaicinKit/Sources/CapsaicinPlatform/Power/`
 - `Packages/CapsaicinKit/Tests/CapsaicinPlatformTests/Power/`
+- `docs/specs/blocking.md`、`docs/meta/decisions/DEC-BLK-006-uncertain-assertion-ownership.md`、`docs/meta/evidence/EVID-BLK-007-assertion-rpc-uncertainty.md`（PM が承認された不明状態の扱いと根拠を記録する）
+- このチケット（PM の作業・レビュー・検証記録）
 
-触らない: `CapsaicinCore`、`CapsaicinIPC`、`Package.swift`、アプリ、CLI、ヘルパー、`docs/`、`project.yml`。ほかの場所の変更が必要なら、変更せずに報告する。
+触らない: `CapsaicinCore`、`CapsaicinIPC`、`Package.swift`、アプリ、CLI、ヘルパー、上記以外の `docs/`、`project.yml`。ほかの場所の変更が必要なら、変更せずに報告する。
 
 ## 作るもの
 
-仕様は `docs/specs/blocking.md`（`SPEC-BLK-001`、`SPEC-BLK-002`、`SPEC-BLK-006`、`SPEC-BLK-007`、`SPEC-BLK-012`）、`docs/specs/settings.md`（`SPEC-SET-005`、`SPEC-SET-006`）、`docs/specs/lifecycle.md`（`SPEC-LCY-006`、`SPEC-LCY-007`）に従う。方式は `DEC-BLK-001`、`DEC-BLK-002`、`DEC-BLK-004` にある。
+仕様は `docs/specs/blocking.md`（`SPEC-BLK-001`、`SPEC-BLK-002`、`SPEC-BLK-006`、`SPEC-BLK-007`、`SPEC-BLK-012`）、`docs/specs/settings.md`（`SPEC-SET-005`、`SPEC-SET-006`）、`docs/specs/lifecycle.md`（`SPEC-LCY-006`、`SPEC-LCY-007`）に従う。方式は `DEC-BLK-001`、`DEC-BLK-002`、`DEC-BLK-004`、操作結果が不明なアサーションの扱いは `DEC-BLK-006` にある。
 
-1. `PowerAssertionControlling` の実装。`AssertionKind` ごとに `DEC-BLK-001` の種類のアサーションを1つ作り、解放する。`pmset -g assertions` で Capsaicin のものと分かる名前を付ける。作成と解放はどちらも冪等にする。作ってある種類の作成と、作っていない種類の解放は、何もせずに成功とする。コントローラーは、操作に失敗した後の状態を「分からない」とみなし、作るのに失敗した後は解放を、解放に失敗した後は作成を試みることがあるためである。
+1. `PowerAssertionControlling` の実装。`AssertionKind` ごとに `DEC-BLK-001` の種類のアサーションを1つ作り、解放する。`pmset -g assertions` で Capsaicin のものと分かる名前を付ける。作成と解放はどちらも冪等にする。作成済みと確認できる種類の作成と、未作成と確定している種類の解放は、何もせずに成功とする。操作失敗後、コントローラーは反対向きの操作を試みることがあるが、不明を未作成とみなさない（`DEC-BLK-006`）。
 2. `LidSleepControlling` の実装。`IOPMrootDomain` の `kPMSetClamshellSleepState` を使う（`EVID-BLK-002`、`EVID-BLK-004`、`EVID-BLK-006`）。この制御で蓋閉じスリープだけが止まるかは未確認である（`HYP-BLK-002`）。
 3. `PowerStateProviding` の実装と、電源の変化の通知。`IOPSCopyPowerSourcesInfo` から残量と電源アダプターの接続を求め、変化したら登録された処理を呼ぶ。呼ばれたアプリが `BlockingController.powerStateChanged()` を呼ぶ。
 4. `BootTimeProviding` の実装。`kern.boottime` を読み、読めなければ取得不能を示す `Date.distantPast` を返す。これは過去の起動時刻ではなく、`SPEC-LCY-007` の取得不能の分岐に渡す値である。呼び出すコントローラーが通常の起動と判定し、自動再開せず、前回のセッションと所有を捨てる（`SPEC-HLP-005`）。
@@ -62,4 +64,24 @@ IOKit の呼び出しは、テストで偽物に差し替えられる境界の�
 
 ## レビュー
 
-未実施。
+### 2026-11-06 の実装・検証記録
+
+- Sol / high の初回実装は4スイート・26テストが成功し、対象の整形と lint も通った。
+- Astra / high の独立レビューで P1 が2件見つかった。アサーションの成功誤報・所有の不確実性と、画面消灯用の子プロセスの PID に対するシグナル送信競合・回収前の完了扱いである。
+- アサーションの P1 は Sol / high が2ファイルで修正した。旧実装では、解放応答の喪失後に作成済みと誤って成功を返すことと、所有未確認の ID の再解放を RED で確認した。修正後は13テスト・31ケースが GREEN となり、対象の strict lint と整形も通った。Astra / high の独立再レビューでは、完了を妨げる指摘はなかった。
+- 再レビュー後、数値のオーバーフローと破棄時の解放失敗のテストを補った。実装は変更しておらず、追加分も統合検証で成功した。
+- 利用者が同日に不明状態の制約を承認した。判断と調査根拠を `DEC-BLK-006`、`EVID-BLK-007` に記録した。
+- 画面消灯の P1 は Astra / high が再実装した。旧実装が KILL の直後に後片付けを完了することを RED で確認し、修正後は2スイート・16テスト・25ケースが GREEN となった。対象4ファイルの整形・strict lint も成功した。別の Astra / high による独立レビューでは、PID の所有・回収、キャンセル競合、資源解放に完了を妨げる指摘はなかった。
+
+`TASK-004` と `TASK-005` を合わせた状態で、`nix develop --command just check` と `nix develop --command just build` は成功した。スクリプト33件、パッケージ231件、アプリのバンドル検査3件が通った。整形・lint・文書検査も成功し、完了を妨げる指摘は残っていない。
+
+### 残る検証とアプリ統合の前提
+
+`canBlockLidSleepAlone` は1か所の定数で `false` とする。`HYP-BLK-002` が未検証のためであり、実機の結果で見直す。電源・蓋・機器判定に関する元の HYP の実機検証は未実施である。実際のアサーション操作、蓋制御、`pmset displaysleepnow` は検証で実行していない。
+
+画面消灯の実装と、後続のアプリ統合が守る契約は次のとおりである。SDK との照合、偽物のテストと独立レビューで確認しており、実機で子プロセスを起動・停止した結果ではない。
+
+- 自分が起動した子の回収とシグナル送信を一か所で直列化する。実行前に `SIGCHLD` が既定動作で、`SA_NOCLDWAIT` がないことを読み取って検査し、満たさなければ起動を拒否する。親のシグナル設定は変更しない。
+- 子の所有中に、別の処理がその子を回収したり、親の `SIGCHLD` の設定を変えたりしないことを統合時に確認する。実行前の検査だけでは、この前提を保証できない。
+- 2 秒で TERM、その後 0.5 秒で KILL とする停止スケジュールを持つ。ただし、合計 2.5 秒以内の回収完了を保証するものではない。
+- 子を回収する前に、後片付け成功として完了しない。
