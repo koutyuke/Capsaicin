@@ -1,0 +1,16 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "Capsaicin": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "Capsaicin" } }
+      }
+    },
+    "終了": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "終了" } }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -1,0 +1,107 @@
+name: Capsaicin
+options:
+  minimumXcodeGenVersion: 2.44.1
+  deploymentTarget:
+    macOS: "26.0"
+  developmentLanguage: ja
+  knownRegions: [ja]
+settings:
+  base:
+    ARCHS: arm64
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGN_STYLE: Manual
+    GENERATE_INFOPLIST_FILE: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  CapsaicinKit:
+    path: Packages/CapsaicinKit
+targets:
+  Capsaicin:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/Capsaicin
+        # XcodeGen 2.44 は syncedFolder だけでは Resources フェーズを作らない。
+        # ディレクトリ指定で新規 Swift ファイルと String Catalog の両方を取り込む。
+        type: group
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Capsaicin
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.debug
+    dependencies:
+      - package: CapsaicinKit
+        product: CapsaicinCore
+      - package: CapsaicinKit
+        product: CapsaicinIPC
+      - package: CapsaicinKit
+        product: CapsaicinPlatform
+      - target: CapsaicinCLI
+        link: false
+        embed: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
+      # CLI と同じ非公開の実行ファイル置き場。インストールや特権付与はしない。
+      - target: capsaicin-helper
+        link: false
+        embed: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
+  CapsaicinCLI:
+    productName: capsaicin
+    type: tool
+    platform: macOS
+    sources:
+      - path: Sources/capsaicin-cli
+        type: syncedFolder
+    settings:
+      base:
+        PRODUCT_NAME: capsaicin
+        PRODUCT_MODULE_NAME: CapsaicinCLI
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.cli
+        # tool の ad-hoc 署名は bundle ID だけでは識別子が固定されない。
+        OTHER_CODE_SIGN_FLAGS: "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)"
+  capsaicin-helper:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Sources/capsaicin-helper
+        type: syncedFolder
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.helper
+        OTHER_CODE_SIGN_FLAGS: "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)"
+        GCC_C_LANGUAGE_STANDARD: c17
+        GCC_WARN_INHIBIT_ALL_WARNINGS: NO
+        GCC_TREAT_WARNINGS_AS_ERRORS: YES
+  CapsaicinTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/CapsaicinTests
+        type: syncedFolder
+    dependencies:
+      - target: Capsaicin
+    settings:
+      base:
+        # ホストアプリを起動せず、生成したバンドルを検査する。
+        TEST_HOST: ""
+        BUNDLE_LOADER: ""
+schemes:
+  Capsaicin:
+    build:
+      targets:
+        Capsaicin: all
+    test:
+      targets:
+        - CapsaicinTests

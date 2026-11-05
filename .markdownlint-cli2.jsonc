@@ -1,0 +1,13 @@
+{
+  "globs": [
+    "**/*.md",
+    "!docs/**",
+    "!.build/**",
+    "!**/.build/**",
+    "!.t3-code/**",
+    "!CLAUDE.md",
+  ],
+  "config": {
+    "MD013": false,
+  },
+}

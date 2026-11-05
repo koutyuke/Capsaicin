@@ -35,19 +35,21 @@
 
 ## 領域
 
-| コード | 領域 | 対象 |
-| --- | --- | --- |
-| `BLK` | 抑止 | スリープの種類ごとの抑止、開始と解除、解除の条件 |
-| `LED` | LED | Caps Lock の LED による表示 |
-| `MENU` | メニューバー | ステータスアイコンとメニュー |
-| `HUD` | 画面表示 | 切り替えたときの HUD |
-| `SET` | 設定画面 | 設定ウインドウの構成と各項目 |
-| `CLI` | コマンドライン | `capsaicin` コマンド |
-| `KEY` | ホットキー | グローバルホットキー |
-| `HLP` | ヘルパー | root 権限で動く処理、その導入と削除 |
-| `LCY` | 起動と復旧 | ログイン時の起動、終了時の後片付け、クラッシュからの復旧、抑止の再開 |
-| `UI` | 共通デザイン | 画面をまたぐ見た目、動き、アクセシビリティ |
-| `SYS` | 横断 | 対応環境、配布、言語、セキュリティ、開発環境、文書運用 |
+| コード | 領域 | ファイル名 | 対象 |
+| --- | --- | --- | --- |
+| `BLK` | 抑止 | `blocking` | スリープの種類ごとの抑止、開始と解除、解除の条件 |
+| `LED` | LED | `led` | Caps Lock の LED による表示 |
+| `MENU` | メニューバー | `menu` | ステータスアイコンとメニュー |
+| `HUD` | 画面表示 | `hud` | 切り替えたときの HUD |
+| `SET` | 設定画面 | `settings` | 設定ウインドウの構成と各項目 |
+| `CLI` | コマンドライン | `cli` | `capsaicin` コマンド |
+| `KEY` | ホットキー | `hotkey` | グローバルホットキー |
+| `HLP` | ヘルパー | `helper` | root 権限で動く処理、その導入と削除 |
+| `LCY` | 起動と復旧 | `lifecycle` | ログイン時の起動、終了時の後片付け、クラッシュからの復旧、抑止の再開 |
+| `UI` | 共通デザイン | `ui` | 画面をまたぐ見た目、動き、アクセシビリティ |
+| `SYS` | 横断 | `system` | 対応環境、配布、言語、セキュリティ、開発環境、文書運用 |
+
+「ファイル名」は、要件の TOML（`meta/requirements/{ファイル名}.toml`）、仕様（`specs/{ファイル名}.md`）、要件 TOML の `domain` に使う。
 
 `SYS` は1つの領域に属さないものだけに使う。迷ったら、その知識を最初に必要とする領域に置く。
 
@@ -74,9 +76,23 @@ Front Matter の共通項目は `schema`、`id`、`title` である。`schema` �
 | `evidence` | `meta/evidence/` | `observed_on`、`environment`、`sources` |
 | `plan` | `meta/plans/` | `depends_on` |
 | `task` | `meta/tasks/` | `status`（`todo` / `in_progress` / `in_review` / `done`）、`requirements`、`depends_on`、`assignee` |
-| `specification` | `specs/` | `domain`。文書自体は ID を持たない |
+| `specification` | `specs/` | `domain`（領域のコード）。文書自体は ID を持たないので、共通項目のうち `id` を省く |
 
-参照項目（`requirements`、`based_on`、`affects`、`evidence`、`blocks`、`depends_on`、`supersedes`、`superseded_by`）は ID の配列で書き、実在する ID だけを指す。
+参照項目は ID の配列で書き、実在する ID だけを指す。指してよい層は次のとおりである。
+
+| 項目 | 指してよい層 |
+| --- | --- |
+| `requirements` | 要件 |
+| `based_on` | 根拠、仮説、判断 |
+| `affects` | 要件、仕様、判断 |
+| `evidence` | 根拠 |
+| `blocks` | 要件、計画、作業 |
+| `depends_on` | 計画なら計画、作業なら作業 |
+| `supersedes`、`superseded_by` | 判断 |
+
+根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+
+本文に書いた ID（`REQ-BLK-001` のような形の文字列）も、実在するものだけにする。
 
 ### 要件
 
@@ -106,11 +122,11 @@ sources = []
 | `priority` | `must`、`should`、`could` |
 | `status` | `draft`、`accepted` |
 
-`specs` は要件を具体化する仕様 ID の正本である。`sources` には要件の出どころになった判断・根拠・仮説の ID を書く。操作の詳細、例外、受け入れ例は TOML に書かず、仕様に書く。
+`specs` は要件を具体化する仕様 ID の正本である。`kind` が `constraint` の要件は、振る舞いを持たないので `specs = []` でよい。それ以外の要件は、少なくとも1つの仕様を指す。`sources` には要件の出どころになった判断・根拠・仮説の ID を書く。操作の詳細、例外、受け入れ例は TOML に書かず、仕様に書く。
 
 ### 仕様
 
-仕様は「画面」「データ」のような技術の層で分けず、領域ごとに1ファイルにまとめる。1つの振る舞いを1つの節 `## SPEC-{領域}-{番号} 名前` にし、節の先頭に `関連要件:` で要件 ID を示す。受け入れ例は、前提・操作・観測できる結果の順に書く。
+仕様は「画面」「データ」のような技術の層で分けず、領域ごとに1ファイルにまとめる。1つの振る舞いを1つの節 `## SPEC-{領域}-{番号} 名前` にし、節の先頭に `関連要件:` で要件 ID を示す。受け入れ例は、前提・操作・観測できる結果の順に番号付きの箇条書きで書く。1つの節に受け入れ例が複数あるときは、`### 受け入れ例: {何を確かめるか}` の見出しで分ける。
 
 要件の `specs` と仕様の `関連要件` は双方向で一致させる。食い違ったら要件の `specs` を正とする。
 
@@ -164,8 +180,9 @@ sources = []
 
 - `schema` の有無と、置き場所との一致
 - ID の形式、重複、ファイル名と `id` の一致
-- 参照している ID の実在
-- 要件の `specs` と仕様の `関連要件` の一致
+- 参照項目と本文に書いた ID の実在
+- 参照項目が、指してよい層の ID だけを指していること
+- 要件の `specs` と仕様の `関連要件` の一致と、`constraint` 以外の要件が仕様を持つこと
 - 列挙値（`kind`、`priority`、`status`）が許可値に含まれること
 
 検査で見られないこと（内容の正しさ、現在の状態だけが書かれているか、同じ命題が2か所にないか）は、レビューで確かめる。

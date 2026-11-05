@@ -1,0 +1,23 @@
+included:
+  - Sources
+  - Tests
+  - Packages/CapsaicinKit/Sources
+  - Packages/CapsaicinKit/Tests
+excluded:
+  - .build
+  - Packages/CapsaicinKit/.build
+# 空白・改行・カンマなどの整形は SwiftFormat が担当する。
+disabled_rules:
+  - colon
+  - comma
+  - opening_brace
+  - closing_brace
+  - statement_position
+  - return_arrow_whitespace
+  - trailing_comma
+  - trailing_whitespace
+  - vertical_whitespace
+  - vertical_whitespace_opening_braces
+  - vertical_whitespace_closing_braces
+  - operator_usage_whitespace
+  - line_length

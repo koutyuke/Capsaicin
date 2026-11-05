@@ -1,0 +1,6 @@
+assert_lefthook_installed: true
+
+pre-commit:
+  commands:
+    check:
+      run: nix develop --command just fmt-check lint
