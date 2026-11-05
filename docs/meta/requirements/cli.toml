@@ -1,0 +1,75 @@
+schema = "requirement-set"
+domain = "cli"
+domain_code = "CLI"
+
+[[requirements]]
+id = "REQ-CLI-001"
+title = "コマンドで抑止を開始できる"
+kind = "functional"
+statement = "利用者は、`capsaicin on` で抑止を開始でき、そのときタイマーか指定時刻のどちらかを指定できる。"
+reason = "スクリプトや端末での作業の前後に、抑止を組み込めるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-001", "SPEC-CLI-007", "SPEC-BLK-011"]
+depends_on = ["REQ-BLK-006"]
+sources = []
+
+[[requirements]]
+id = "REQ-CLI-002"
+title = "コマンドで抑止を解除できる"
+kind = "functional"
+statement = "利用者は、`capsaicin off` で抑止を解除できる。"
+reason = "スクリプトの処理が終わったときに、抑止を解除できるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-002", "SPEC-CLI-007", "SPEC-BLK-011"]
+depends_on = []
+sources = []
+
+[[requirements]]
+id = "REQ-CLI-003"
+title = "コマンドで抑止の状態を確かめられる"
+kind = "functional"
+statement = "利用者は、`capsaicin status` で抑止の状態を確かめられる。"
+reason = "スクリプトや端末から、いま抑止しているかを判断できるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-003", "SPEC-CLI-007"]
+depends_on = []
+sources = []
+
+[[requirements]]
+id = "REQ-CLI-004"
+title = "アプリが起動していなくてもコマンドが使える"
+kind = "functional"
+statement = "アプリが起動していないときに `capsaicin` を実行したら、CLI がアプリを起動する。"
+reason = "アプリの起動を気にせずにコマンドを使えるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-004"]
+depends_on = []
+sources = ["DEC-CLI-002"]
+
+[[requirements]]
+id = "REQ-CLI-005"
+title = "CLI からの操作を受け付けるかを選べる"
+kind = "functional"
+statement = "利用者は、CLI からの操作をアプリが受け付けるかどうかを、設定の「操作」セクションで切り替えられる。"
+reason = "すべての設定項目を個別に切り替えられるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-005", "SPEC-CLI-007"]
+depends_on = []
+sources = ["DEC-SET-001", "DEC-CLI-001"]
+
+[[requirements]]
+id = "REQ-CLI-006"
+title = "コマンドの場所を確かめられる"
+kind = "functional"
+statement = "利用者は、設定の「操作」セクションで `capsaicin` コマンドの場所を確かめ、コピーできる。"
+reason = "利用者が自分でシェルから使えるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-006"]
+depends_on = []
+sources = ["DEC-CLI-001"]

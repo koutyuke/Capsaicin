@@ -1,0 +1,75 @@
+schema = "requirement-set"
+domain = "settings"
+domain_code = "SET"
+
+[[requirements]]
+id = "REQ-SET-001"
+title = "すべての設定項目を個別に切り替えられる"
+kind = "functional"
+statement = "利用者は、設定画面のすべての項目を、ほかの項目とまとめずに1つずつ切り替えられる。"
+reason = "設定の結果を項目ごとに予測できるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-002"]
+depends_on = []
+sources = ["DEC-SET-001", "DEC-SET-002"]
+
+[[requirements]]
+id = "REQ-SET-002"
+title = "設定画面を macOS のシステム設定と同じ構成にする"
+kind = "quality"
+statement = "設定画面は、左のサイドバーでセクションを選び、右側に選んだセクションの項目を並べる、macOS のシステム設定と同じ構成にする。"
+reason = "macOS の利用者が、使い方を覚えずに目的の項目にたどり着けるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-001"]
+depends_on = []
+sources = ["EVID-UI-003"]
+
+[[requirements]]
+id = "REQ-SET-003"
+title = "項目名だけで内容が伝わる"
+kind = "quality"
+statement = "設定の各項目は、説明文なしに項目名だけで内容が伝わり、名前だけでは結果が分かりにくい項目では、項目名の横の (i) から説明を開ける。"
+reason = "画面を簡潔に保ちつつ、誤解しやすい項目で設定を誤らないようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-003"]
+depends_on = []
+sources = ["DEC-UI-002"]
+
+[[requirements]]
+id = "REQ-SET-004"
+title = "バージョンとビルド番号を確かめられる"
+kind = "functional"
+statement = "利用者は、設定画面の「このアプリについて」でバージョンとビルド番号を確かめられる。"
+reason = "動いているビルドを特定できるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-004"]
+depends_on = []
+sources = []
+
+[[requirements]]
+id = "REQ-SET-005"
+title = "実際に止まる範囲が設定画面で分かる"
+kind = "functional"
+statement = "設定画面の「止めるスリープ」は、ほかの設定の効果で実際に止まる種類を、その理由とともに示す。"
+reason = "ある種類を止めると別の種類も止まる仕組み上の制約を、利用者が設定画面で知れるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-005"]
+depends_on = []
+sources = ["DEC-BLK-004"]
+
+[[requirements]]
+id = "REQ-SET-006"
+title = "その Mac にない機能の項目を表示しない"
+kind = "functional"
+statement = "蓋のない Mac では蓋に関する項目を、内蔵バッテリーのない Mac ではバッテリーに関する項目を表示しない。"
+reason = "使えない項目の理由を読み解く手間をなくすため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-006", "SPEC-BLK-012"]
+depends_on = []
+sources = ["DEC-BLK-004", "HYP-SET-001", "HYP-SET-002"]

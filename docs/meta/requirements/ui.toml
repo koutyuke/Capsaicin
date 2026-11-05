@@ -1,0 +1,51 @@
+schema = "requirement-set"
+domain = "ui"
+domain_code = "UI"
+
+[[requirements]]
+id = "REQ-UI-001"
+title = "OS の外観と表示の設定に追従する"
+kind = "quality"
+statement = "どの画面も、OS のライト・ダーク、アクセントカラー、透明度を下げる、コントラストを上げるの設定に、OS のほかの部分と同じように追従する。"
+reason = "macOS の一部として違和感なく使え、利用者が選んだ見やすさの設定を損なわないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-UI-001", "SPEC-UI-002", "SPEC-UI-003", "SPEC-UI-004", "SPEC-UI-005"]
+depends_on = []
+sources = ["DEC-UI-003", "EVID-UI-002"]
+
+[[requirements]]
+id = "REQ-UI-002"
+title = "画面の側から注意を引かない"
+kind = "quality"
+statement = "抑止中であることは LED で伝え、Capsaicin の画面は点滅、脈動、通知などで注意を引かない。"
+reason = "抑止中に利用者の作業を妨げないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-UI-001", "SPEC-UI-006", "SPEC-UI-008"]
+depends_on = []
+sources = ["DEC-UI-004"]
+
+[[requirements]]
+id = "REQ-UI-003"
+title = "キーボードと VoiceOver だけで操作できる"
+kind = "quality"
+statement = "設定、メニュー、ダイアログのすべての操作を、キーボード（フルキーボードアクセス）と VoiceOver だけで行える。"
+reason = "マウスを使わない、または画面を見ない利用者も、すべての機能を使えるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-UI-001", "SPEC-UI-007"]
+depends_on = []
+sources = ["DEC-UI-002"]
+
+[[requirements]]
+id = "REQ-UI-004"
+title = "アイコンが macOS 26 以降の技術要件を満たす"
+kind = "quality"
+statement = "アプリアイコンとメニューバーのアイコンは、macOS 26 以降のアイコンの技術要件を満たす。"
+reason = "OS の外観（ダーク、ティント、メニューバーの明暗）で崩れずに表示されるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-UI-009", "SPEC-UI-010"]
+depends_on = []
+sources = ["EVID-UI-001", "HYP-UI-002"]

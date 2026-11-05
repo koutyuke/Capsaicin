@@ -1,0 +1,75 @@
+schema = "requirement-set"
+domain = "helper"
+domain_code = "HLP"
+
+[[requirements]]
+id = "REQ-HLP-001"
+title = "必要になったときに一度の管理者認証でヘルパーを設置できる"
+kind = "functional"
+statement = "ヘルパーが要る設定を初めてオンにしたとき、または設定画面で設置を選んだときに、管理者認証1回でヘルパーを設置できる。"
+reason = "root 権限が必要な機能を使う利用者だけに、設置の手間と権限の付与を求めるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-001", "SPEC-HLP-006"]
+depends_on = []
+sources = ["DEC-HLP-001", "DEC-HLP-002"]
+
+[[requirements]]
+id = "REQ-HLP-002"
+title = "root で実行する処理を最小限に絞る"
+kind = "quality"
+statement = "root 権限で実行できる処理は、スリープの禁止と、その解除の2つに限り、任意のコマンドや引数は実行できない。"
+reason = "パスワードなしで root として実行できる範囲を、悪用されても影響が小さい範囲に絞るため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-002"]
+depends_on = []
+sources = ["DEC-HLP-001", "DEC-HLP-002"]
+
+[[requirements]]
+id = "REQ-HLP-003"
+title = "設置で sudo を壊さない"
+kind = "quality"
+statement = "ヘルパーの設置が失敗しても、sudo が使えない状態にならない。"
+reason = "sudoers の書式を誤ると sudo 全体が使えなくなり、利用者が自分で直せなくなるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-001"]
+depends_on = []
+sources = ["DEC-HLP-002", "EVID-HLP-001"]
+
+[[requirements]]
+id = "REQ-HLP-004"
+title = "起動時にスリープの禁止を解く"
+kind = "functional"
+statement = "Mac の起動時に、アプリが動いているかどうかにかかわらず、ヘルパーで禁止したスリープを解除する。"
+reason = "アプリが動いていない状態で起動しても、スリープできない状態を残さないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-003"]
+depends_on = []
+sources = ["DEC-HLP-001", "HYP-BLK-007"]
+
+[[requirements]]
+id = "REQ-HLP-005"
+title = "ヘルパーの状態を確かめ、修復・削除できる"
+kind = "functional"
+statement = "利用者は、設定の「ヘルパー」セクションで、ヘルパーのインストールの状態を確かめ、一部だけ残っていれば修復し、設置したものをすべて削除できる。"
+reason = "root 権限で動くものを、利用者が把握し、壊れたら直し、不要になったら取り除けるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-004", "SPEC-HLP-006"]
+depends_on = []
+sources = ["DEC-HLP-002"]
+
+[[requirements]]
+id = "REQ-HLP-006"
+title = "Capsaicin が立てたスリープの禁止だけを解く"
+kind = "functional"
+statement = "アプリが解除、終了、復旧でスリープの禁止（`SleepDisabled`）を解くのは、Capsaicin が立てたものだけである。"
+reason = "ほかの道具や利用者が設定したスリープの禁止を、Capsaicin の解除で取り消さないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HLP-005"]
+depends_on = []
+sources = ["DEC-HLP-002", "EVID-BLK-003"]

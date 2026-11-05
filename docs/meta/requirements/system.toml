@@ -1,0 +1,87 @@
+schema = "requirement-set"
+domain = "system"
+domain_code = "SYS"
+
+[[requirements]]
+id = "REQ-SYS-001"
+title = "macOS 26 以降で動く"
+kind = "constraint"
+statement = "Capsaicin は macOS 26 以降で動き、macOS 25 以前には対応しない。"
+reason = "対応範囲を絞った理由は DEC-SYS-003 にある。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = ["DEC-SYS-003", "HYP-SYS-001"]
+
+[[requirements]]
+id = "REQ-SYS-002"
+title = "Apple Silicon の Mac で動く"
+kind = "constraint"
+statement = "Capsaicin は Apple Silicon の Mac で動き、Intel Mac には対応しない。"
+reason = "対応範囲を絞った理由は DEC-SYS-003 にある。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = ["DEC-SYS-003"]
+
+[[requirements]]
+id = "REQ-SYS-003"
+title = "表示言語は日本語"
+kind = "constraint"
+statement = "Capsaicin が表示する文字列は日本語だけで、英語の UI は持たない。"
+reason = "日本語だけにした理由は DEC-SYS-002 にある。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = ["DEC-SYS-002"]
+
+[[requirements]]
+id = "REQ-SYS-004"
+title = "あとから言語を追加できる"
+kind = "quality"
+statement = "表示する文字列は String Catalog で管理し、あとから言語を追加できる。"
+reason = "将来ほかの言語の利用者に配る場合に備えるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-UI-011"]
+depends_on = []
+sources = ["DEC-SYS-002", "DEC-SYS-007"]
+
+[[requirements]]
+id = "REQ-SYS-005"
+title = "Apple Developer Program なしでビルドして使える"
+kind = "constraint"
+statement = "v1 は、Apple Developer Program に加入せずに、自分の Mac でソースからビルドして使える。"
+reason = "加入しない判断は DEC-SYS-004 にある。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = ["DEC-SYS-004", "DEC-SYS-005"]
+
+[[requirements]]
+id = "REQ-SYS-006"
+title = "コード署名に依存しない"
+kind = "constraint"
+statement = "Capsaicin の機能は、Apple が発行した証明書によるコード署名がなくても動く。"
+reason = "将来ほかの人に無料で配る場合にも、同じ方式のまま動くようにするため。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = ["DEC-SYS-004", "DEC-HLP-001", "DEC-CLI-002", "HYP-HLP-003"]
+
+[[requirements]]
+id = "REQ-SYS-007"
+title = "Capsomnia と共有しない"
+kind = "constraint"
+statement = "Capsaicin は、既存の類似アプリ Capsomnia（MIT ライセンス）とコード、名前、アイコンを共有しない。"
+reason = "Capsomnia とは別のアプリとして、独立して作るため。"
+priority = "must"
+status = "accepted"
+specs = []
+depends_on = []
+sources = []

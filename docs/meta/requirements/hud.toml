@@ -1,0 +1,51 @@
+schema = "requirement-set"
+domain = "hud"
+domain_code = "HUD"
+
+[[requirements]]
+id = "REQ-HUD-001"
+title = "切り替えを画面の表示で知らせる"
+kind = "functional"
+statement = "ホットキーかメニューで抑止を切り替えたとき、または抑止が自動で解除されたとき、切り替わったことと解除条件を画面に短時間表示する。"
+reason = "LED を見ていなくても、操作が効いたことや自動で解除されたことに気づけるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HUD-001", "SPEC-HUD-002", "SPEC-HUD-004", "SPEC-HUD-005", "SPEC-HUD-006", "SPEC-HUD-007"]
+depends_on = []
+sources = ["DEC-HUD-001", "DEC-UI-004"]
+
+[[requirements]]
+id = "REQ-HUD-002"
+title = "HUD が作業を妨げない"
+kind = "quality"
+statement = "HUD は表示中もフォーカスを奪わず、クリックを受け付けない。"
+reason = "切り替えの通知のために、利用者の入力や操作を中断させないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HUD-003"]
+depends_on = ["REQ-HUD-001"]
+sources = ["DEC-HUD-001", "HYP-HUD-002"]
+
+[[requirements]]
+id = "REQ-HUD-003"
+title = "HUD を表示するかを選べる"
+kind = "functional"
+statement = "利用者は、切り替えたときに HUD を表示するかどうかを設定で切り替えられる。"
+reason = "画面の表示が不要な利用者がいるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HUD-001"]
+depends_on = ["REQ-HUD-001"]
+sources = ["DEC-SET-001"]
+
+[[requirements]]
+id = "REQ-HUD-004"
+title = "HUD の内容が支援技術でも伝わる"
+kind = "quality"
+statement = "HUD で伝える内容は、VoiceOver と、視差効果を減らす・透明度を下げる・コントラストを上げるの設定でも伝わる。"
+reason = "画面の表示を見られない、または動きや透明な表示が苦手な利用者にも、切り替わったことを伝えるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-HUD-008"]
+depends_on = ["REQ-HUD-001"]
+sources = ["DEC-UI-005", "HYP-HUD-003"]

@@ -1,0 +1,51 @@
+schema = "requirement-set"
+domain = "menu"
+domain_code = "MENU"
+
+[[requirements]]
+id = "REQ-MENU-001"
+title = "メニューから抑止を開始・解除できる"
+kind = "functional"
+statement = "利用者は、メニューバーのアイコンのメニューから抑止を開始し、解除できる。"
+reason = "常駐アプリの基本の操作として、いつでも手の届く場所から切り替えられるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-MENU-001", "SPEC-BLK-011"]
+depends_on = []
+sources = ["DEC-UI-001"]
+
+[[requirements]]
+id = "REQ-MENU-002"
+title = "メニューで今回の解除条件を選べる"
+kind = "functional"
+statement = "利用者は、メニューから抑止を開始するときに、今回の解除条件としてタイマーまたは指定時刻を選べる。"
+reason = "設定を変えずに、その場だけの時間で止められるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-MENU-002", "SPEC-MENU-003"]
+depends_on = ["REQ-BLK-006"]
+sources = []
+
+[[requirements]]
+id = "REQ-MENU-003"
+title = "メニューで抑止の状態と解除の条件を確かめられる"
+kind = "functional"
+statement = "利用者は、メニューを開くと、抑止中かどうかと、抑止中なら解除の条件を確かめられる。"
+reason = "いつ解除されるかを、操作する前に確かめられるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-MENU-004"]
+depends_on = []
+sources = []
+
+[[requirements]]
+id = "REQ-MENU-004"
+title = "メニューバーのアイコンで Capsaicin を見つけられる"
+kind = "quality"
+statement = "メニューバーに Capsaicin のアイコンを常に表示し、VoiceOver ではアイコンのラベルとして抑止の状態を読み上げる。"
+reason = "メニューの入口を見つけられるようにし、画面を見ない利用者にも状態を伝えるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-MENU-005"]
+depends_on = []
+sources = []

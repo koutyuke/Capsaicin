@@ -1,0 +1,87 @@
+schema = "requirement-set"
+domain = "led"
+domain_code = "LED"
+
+[[requirements]]
+id = "REQ-LED-001"
+title = "抑止中は Caps Lock の LED を点灯する"
+kind = "functional"
+statement = "「Caps Lock の LED で知らせる」がオンのとき、抑止中は Caps Lock の LED が点灯し続ける。"
+reason = "抑止中であることを、画面を見ずにキーボードで分かるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-001", "SPEC-LED-006"]
+depends_on = []
+sources = ["DEC-LED-001", "DEC-LED-002", "DEC-LED-003"]
+
+[[requirements]]
+id = "REQ-LED-002"
+title = "解除したら LED を通常の動作に戻す"
+kind = "functional"
+statement = "抑止を解除したら、Caps Lock の LED は Caps Lock の状態に連動する通常の動作に戻る。戻せなかったときは隠さずに伝え、戻るまで合わせ直す（詳細は SPEC-BLK-007）。"
+reason = "抑止していないときに、LED が Caps Lock の状態と食い違わないようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-001"]
+depends_on = []
+sources = ["DEC-LED-001"]
+
+[[requirements]]
+id = "REQ-LED-003"
+title = "Caps Lock の入力状態を変えない"
+kind = "constraint"
+statement = "Capsaicin は LED だけを制御し、Caps Lock の入力状態（大文字入力）を変えない。"
+reason = "抑止の表示で文字入力に影響を与えず、Caps Lock キーを別のキーに割り当てている人も使えるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-001"]
+depends_on = []
+sources = ["DEC-LED-001", "DEC-KEY-001"]
+
+[[requirements]]
+id = "REQ-LED-004"
+title = "内蔵と外付けのキーボードの LED を点灯する"
+kind = "functional"
+statement = "抑止中は、内蔵キーボードと、接続している外付けキーボードの Caps Lock の LED が点灯する。"
+reason = "外付けキーボードを使っているときにも、抑止中であることが分かるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-002"]
+depends_on = ["REQ-LED-001"]
+sources = ["EVID-LED-001", "EVID-LED-002", "HYP-LED-003"]
+
+[[requirements]]
+id = "REQ-LED-005"
+title = "LED で知らせるかを選べる"
+kind = "functional"
+statement = "利用者は、抑止中に Caps Lock の LED で知らせるかどうかを設定で切り替えられる。"
+reason = "LED を使いたくない利用者がいるため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-003"]
+depends_on = []
+sources = ["DEC-SET-001"]
+
+[[requirements]]
+id = "REQ-LED-007"
+title = "Karabiner-Elements による上書きの可能性を知らせる"
+kind = "functional"
+statement = "Karabiner-Elements の起動を検出したら、LED が上書きされる場合があることを、メニューと設定の「LED」セクションに表示する。"
+reason = "LED が点かない、または消えるときに、利用者が原因を推測できるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-005"]
+depends_on = []
+sources = ["DEC-LED-003", "HYP-LED-002"]
+
+[[requirements]]
+id = "REQ-LED-008"
+title = "入力監視の権限を求めない"
+kind = "constraint"
+statement = "LED の制御に、入力監視の権限を求めない。"
+reason = "キー入力を読める権限を、LED の表示のためだけに利用者へ求めないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-LED-001"]
+depends_on = []
+sources = ["DEC-LED-001", "HYP-LED-001"]

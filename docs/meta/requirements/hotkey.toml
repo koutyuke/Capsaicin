@@ -1,0 +1,27 @@
+schema = "requirement-set"
+domain = "hotkey"
+domain_code = "KEY"
+
+[[requirements]]
+id = "REQ-KEY-001"
+title = "ホットキーで抑止を切り替えられる"
+kind = "functional"
+statement = "ホットキーを割り当てていれば、利用者はどのアプリを使っているときでもホットキーで抑止の開始と解除を切り替えられる。"
+reason = "メニューを開かずに、キーボードだけで切り替えられるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-KEY-001", "SPEC-BLK-011"]
+depends_on = []
+sources = ["DEC-KEY-001"]
+
+[[requirements]]
+id = "REQ-KEY-002"
+title = "ホットキーを利用者が割り当てる"
+kind = "functional"
+statement = "利用者は、抑止を切り替えるホットキーを設定の「操作」セクションで割り当て、外せる。"
+reason = "ほかのアプリのショートカットと衝突させないため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-KEY-002"]
+depends_on = []
+sources = ["DEC-KEY-002"]
