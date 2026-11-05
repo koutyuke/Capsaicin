@@ -20,7 +20,7 @@ based_on: ["DEC-LED-001", "HYP-LED-002"]
 
 ## 背景
 
-- MacOSX27.2 の SDK の公開ヘッダー（`IOKit.framework/Headers/hidsystem/IOHIDEventSystemClient.h`、`IOKit.framework/Headers/hid/IOHIDServiceClient.h`）には、`IOHIDEventSystemClientCreateSimpleClient`、`IOHIDEventSystemClientCopyServices`、`IOHIDServiceClientSetProperty` がある。Passive 型のクライアントを作る関数は、これらのヘッダーにはない。
+- MacOSX27.2 の SDK の公開ヘッダー（`IOKit.framework/Headers/hidsystem/IOHIDEventSystemClient.h`、`IOKit.framework/Headers/hidsystem/IOHIDServiceClient.h`）には、`IOHIDEventSystemClientCreateSimpleClient`、`IOHIDEventSystemClientCopyServices`、`IOHIDServiceClientSetProperty` がある。Passive 型のクライアントを作る関数は、これらのヘッダーにはない。
 - Karabiner-Elements は、キーボードの Caps Lock の LED を 3000 ミリ秒ごとに書き直す。ソースの `hid_keyboard_caps_lock_led_state_manager.hpp` で、`timer_.start(...)` に `std::chrono::milliseconds(3000)` を渡し、そのたびに `update_caps_lock_led()` を呼んでいる（https://github.com/pqrs-org/Karabiner-Elements/blob/main/src/share/hid_keyboard_caps_lock_led_state_manager.hpp 、2026-11-06 に main ブランチで確認）。
 
 ## 選択肢

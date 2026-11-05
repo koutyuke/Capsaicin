@@ -15,7 +15,8 @@ let package = Package(
         .target(name: "CapsaicinCore"),
         // CLI の引数の検証に、設定のタイマーの範囲（CapsaicinCore が持つ）を使う。
         .target(name: "CapsaicinIPC", dependencies: ["CapsaicinCore"]),
-        .target(name: "CapsaicinPlatform", dependencies: ["CapsaicinCore"]),
+        .target(name: "CapsaicinPlatform", dependencies: ["CapsaicinCore", "CapsaicinLEDShim"]),
+        .target(name: "CapsaicinLEDShim", linkerSettings: [.linkedFramework("IOKit")]),
         .target(name: "CapsaicinCoreTesting", dependencies: ["CapsaicinCore"]),
         .testTarget(name: "CapsaicinCoreTests", dependencies: ["CapsaicinCore", "CapsaicinCoreTesting"]),
         .testTarget(name: "CapsaicinIPCTests", dependencies: ["CapsaicinIPC"]),
