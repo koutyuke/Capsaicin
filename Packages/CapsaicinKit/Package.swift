@@ -8,12 +8,16 @@ let package = Package(
         .library(name: "CapsaicinCore", targets: ["CapsaicinCore"]),
         .library(name: "CapsaicinIPC", targets: ["CapsaicinIPC"]),
         .library(name: "CapsaicinPlatform", targets: ["CapsaicinPlatform"]),
+        // ポートの偽物。パッケージのテストとアプリのテストの両方から使うため、テストターゲットではなくライブラリにする。
+        .library(name: "CapsaicinCoreTesting", targets: ["CapsaicinCoreTesting"]),
     ],
     targets: [
         .target(name: "CapsaicinCore"),
-        .target(name: "CapsaicinIPC"),
-        .target(name: "CapsaicinPlatform"),
-        .testTarget(name: "CapsaicinCoreTests", dependencies: ["CapsaicinCore"]),
+        // CLI の引数の検証に、設定のタイマーの範囲（CapsaicinCore が持つ）を使う。
+        .target(name: "CapsaicinIPC", dependencies: ["CapsaicinCore"]),
+        .target(name: "CapsaicinPlatform", dependencies: ["CapsaicinCore"]),
+        .target(name: "CapsaicinCoreTesting", dependencies: ["CapsaicinCore"]),
+        .testTarget(name: "CapsaicinCoreTests", dependencies: ["CapsaicinCore", "CapsaicinCoreTesting"]),
         .testTarget(name: "CapsaicinIPCTests", dependencies: ["CapsaicinIPC"]),
         .testTarget(name: "CapsaicinPlatformTests", dependencies: ["CapsaicinPlatform"]),
     ],

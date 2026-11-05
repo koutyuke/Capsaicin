@@ -27,10 +27,10 @@ assignee: OpenCode / GPT-6.1 Sol
 
 仕様は `docs/specs/blocking.md`（`SPEC-BLK-001`、`SPEC-BLK-002`、`SPEC-BLK-006`、`SPEC-BLK-007`、`SPEC-BLK-012`）、`docs/specs/settings.md`（`SPEC-SET-005`、`SPEC-SET-006`）、`docs/specs/lifecycle.md`（`SPEC-LCY-006`、`SPEC-LCY-007`）に従う。方式は `DEC-BLK-001`、`DEC-BLK-002`、`DEC-BLK-004` にある。
 
-1. `PowerAssertionControlling` の実装。`AssertionKind` ごとに `DEC-BLK-001` の種類のアサーションを1つ作り、解放する。`pmset -g assertions` で Capsaicin のものと分かる名前を付ける。
+1. `PowerAssertionControlling` の実装。`AssertionKind` ごとに `DEC-BLK-001` の種類のアサーションを1つ作り、解放する。`pmset -g assertions` で Capsaicin のものと分かる名前を付ける。作成と解放はどちらも冪等にする。作ってある種類の作成と、作っていない種類の解放は、何もせずに成功とする。コントローラーは、操作に失敗した後の状態を「分からない」とみなし、作るのに失敗した後は解放を、解放に失敗した後は作成を試みることがあるためである。
 2. `LidSleepControlling` の実装。`IOPMrootDomain` の `kPMSetClamshellSleepState` を使う（`EVID-BLK-002`、`EVID-BLK-004`、`EVID-BLK-006`）。この制御で蓋閉じスリープだけが止まるかは未確認である（`HYP-BLK-002`）。
 3. `PowerStateProviding` の実装と、電源の変化の通知。`IOPSCopyPowerSourcesInfo` から残量と電源アダプターの接続を求め、変化したら登録された処理を呼ぶ。呼ばれたアプリが `BlockingController.powerStateChanged()` を呼ぶ。
-4. `BootTimeProviding` の実装。`kern.boottime` を読み、読めなければ `Date.distantPast` を返す（ポートのコメントのとおり）。
+4. `BootTimeProviding` の実装。`kern.boottime` を読み、読めなければ取得不能を示す `Date.distantPast` を返す。これは過去の起動時刻ではなく、`SPEC-LCY-007` の取得不能の分岐に渡す値である。呼び出すコントローラーが通常の起動と判定し、自動再開せず、前回のセッションと所有を捨てる（`SPEC-HLP-005`）。
 5. `MachineCapabilities` を起動時に判定する処理。
    - 蓋の有無: `HYP-SET-001` の方法による。
    - 内蔵バッテリーの有無: `HYP-SET-002` の方法による。

@@ -2,10 +2,10 @@
 schema: task
 id: TASK-003
 title: 抑止の中核となる型と規則を作る
-status: todo
+status: done
 requirements: []
 depends_on: [TASK-001, TASK-002]
-assignee: OpenCode / GPT-6.1 Sol
+assignee: OpenCode / Codex
 ---
 
 # TASK-003 抑止の中核となる型と規則を作る
@@ -20,9 +20,12 @@ assignee: OpenCode / GPT-6.1 Sol
 
 - `Packages/CapsaicinKit/Sources/CapsaicinCore/` とそのテスト
 - `Packages/CapsaicinKit/Sources/CapsaicinIPC/` の要求・応答の型（通信路は作らない）とそのテスト
+- `Packages/CapsaicinKit/Sources/CapsaicinCoreTesting/`（アプリのテストとも共有する偽物）
 - `Packages/CapsaicinKit/Package.swift`（必要な場合だけ）
+- `docs/specs/lifecycle.md`、`docs/specs/helper.md`、`docs/meta/hypotheses/HYP-LCY-004-boottime-detects-reboot.md`（起動時刻の取得失敗時の承認済み方針と、再開規則の整合）
+- このチケット、`docs/meta/tasks/TASK-004-power-platform.md`、`docs/meta/tasks/TASK-005-led-platform.md`（PM による作業記録とポートの契約の補足）
 
-触らない: アプリ、CLI、ヘルパー、`CapsaicinPlatform`、`docs/`、`project.yml`
+触らない: アプリ、CLI、ヘルパー、`CapsaicinPlatform`、上記以外の `docs/`、`project.yml`
 
 ## 作るもの
 
@@ -56,4 +59,17 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+2026-11-06 に要件適合、責務と命名、複雑さ、安全性を独立レビューした。全体は OpenCode 経由の GPT-6 Astra（Effort high、Fast なし）、最後の再試行期限の修正は同モデル（Effort medium、Fast なし）で確認し、完了を妨げる指摘は残っていない。
+
+| 指摘 | 対応と確認 |
+| --- | --- |
+| ヘルパー削除失敗後に読み取りも失敗すると、古い観測値で抑止できていると判断する | 観測を不明にし、所有を保つ。警告の保存と 60 秒後の再適用をテストした |
+| 再開記録の不正な値を既定値で補い、自動再開する | 不正な既知フィールドは記録全体の読み取りエラーにする。欠落キーと未知キーの互換性は保つ |
+| 起動時刻を取得できないと、再起動前の所有を信じて外部の値を解除する | 利用者の承認により、自動再開せず旧セッションと所有を破棄する方針を仕様と実装へ反映した |
+| 無関係な設定変更が続くと、未試行の制御の再試行期限が延びる | 未試行の項目が残る間は期限を保つ。HUD と画面スリープの設定を繰り返し変更しても、元の期限で復旧することをテストした |
+
+各不具合は修正前に回帰テストが失敗し、修正後に成功した。所有の保存と `on` の後にセッション保存が失敗する場合、設定変更による解除と巻き戻しが失敗する場合のテストも追加した。
+
+`nix develop --command just check` と `nix develop --command just build` は成功した。スクリプト 33 件、パッケージ 157 件、アプリのバンドル検査 3 件が成功し、整形・lint・文書検査も通った。
+
+実機の電源管理・LED・ヘルパー設置は未検証で、後続チケットが扱う。壁時計の逆行による起動判定の制約は `HYP-LCY-004` に残す。起動時刻を取得できない場合は、自分が残した `disablesleep` も解除しないことがある。さらにヘルパーを削除すると、次の Mac 起動時の LaunchDaemon による解除も行われない（`SPEC-HLP-005`）。
