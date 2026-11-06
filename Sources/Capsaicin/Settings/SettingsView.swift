@@ -8,40 +8,57 @@ struct SettingsView: View {
     let hotkey: HotkeyController
     @Bindable var selection: SettingsSelection
     var bundle: Bundle = .main
+    @State private var sidebarSpacing: CGFloat = 0
+    @State private var titlebarHeight: CGFloat = 0
 
     var body: some View {
         NavigationSplitView {
-            GeometryReader { geometry in
-                List(selection: Binding<SettingsSection?>(get: { selection.section }, set: {
-                    if let section = $0 {
-                        selection.section = section
-                    }
-                })) {
-                    ForEach(Array(SettingsSection.allCases.prefix(5))) { navigation($0) }
-                    Color.clear.frame(height: max(0, geometry.size.height - 280))
-                        .listRowInsets(EdgeInsets()).selectionDisabled().accessibilityHidden(true)
-                    ForEach(Array(SettingsSection.allCases.suffix(2))) { navigation($0) }
-                }.listStyle(.sidebar)
+            List(selection: Binding<SettingsSection?>(get: { selection.section }, set: {
+                if let section = $0 {
+                    selection.section = section
+                }
+            })) {
+                ForEach(Array(SettingsSection.allCases.prefix(5))) { navigation($0) }
+                Color.clear.frame(height: sidebarSpacing)
+                    .listRowInsets(EdgeInsets()).selectionDisabled().accessibilityHidden(true)
+                ForEach(Array(SettingsSection.allCases.suffix(2))) { navigation($0) }
+            }
+            .listStyle(.sidebar)
+            // 行の高さはシステム設定（サイドバーのアイコンの大きさ）で変わるので、余った高さを空きに足して下の2つを下端に寄せる。
+            .onScrollGeometryChange(for: CGFloat.self) {
+                $0.containerSize.height - $0.contentInsets.top - $0.contentInsets.bottom - $0.contentSize.height
+            } action: { _, free in
+                sidebarSpacing = max(0, sidebarSpacing + free)
             }
             .frame(width: 200)
             .navigationSplitViewColumnWidth(200)
             .toolbar(removing: .sidebarToggle)
         } detail: {
-            if selection.section == .about {
-                about
-            } else {
-                Form {
-                    switch selection.section {
-                    case .general: general
-                    case .sleep: sleep
-                    case .release: release
-                    case .led: led
-                    case .controls: controls
-                    case .helper: helper
-                    case .about: EmptyView()
-                    }
-                }.formStyle(.grouped).toggleStyle(.switch)
+            Group {
+                if selection.section == .about {
+                    about
+                } else {
+                    Form {
+                        switch selection.section {
+                        case .general: general
+                        case .sleep: sleep
+                        case .release: release
+                        case .led: led
+                        case .controls: controls
+                        case .helper: helper
+                        case .about: EmptyView()
+                        }
+                    }.formStyle(.grouped).toggleStyle(.switch)
+                }
             }
+            // タイトルバーと同じ行に、項目のグループの左端（Form の既定の余白 20 pt）に揃えて見出しを置く。
+            // システムのタイトルはこの位置に揃えられないので隠し、`window.title` は VoiceOver とウインドウメニューに残す。
+            .overlay(alignment: .topLeading) {
+                Text(selection.section.title).font(.system(size: 15, weight: .semibold))
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(height: titlebarHeight).padding(.leading, 20).offset(y: -titlebarHeight)
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.top } action: { titlebarHeight = $0 }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .background {

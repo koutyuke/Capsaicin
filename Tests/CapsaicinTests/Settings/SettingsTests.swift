@@ -152,11 +152,52 @@ struct SettingsTests {
         let window = try #require(controller.window)
         #expect(window.frame.size == NSSize(width: 720, height: 500))
         #expect(window.styleMask.contains(.titled) && !window.styleMask.contains(.resizable))
+        #expect(window.styleMask.contains(.fullSizeContentView))
+        #expect(window.titlebarAppearsTransparent)
+        #expect(window.titleVisibility == .hidden)
         #expect(window.standardWindowButton(.miniaturizeButton)?.isEnabled == false)
+        #expect(window.standardWindowButton(.zoomButton)?.isEnabled == false)
+        #expect(window.title == SettingsSection.general.title)
         window.close()
     }
 
-    @Test("SPEC-UI-005 SPEC-UI-011 全セクションをアプリ起動なしでライト・ダークに描画する")
+    private func checkSidebar(_ window: NSWindow, selection: SettingsSelection) async throws {
+        let content = try #require(window.contentView)
+        let lists = descendants(NSOutlineView.self, in: content)
+        #expect(lists.count == 1)
+        let list = try #require(lists.first)
+        #expect(list.numberOfRows == SettingsSection.allCases.count + 1)
+        #expect(list.bounds.width == 200)
+        let scroll = try #require(list.enclosingScrollView)
+        let margin = scroll.contentInsets.top - content.safeAreaInsets.top
+        let bottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
+        #expect(abs(bottom - margin) <= 1)
+        #expect(list.rect(ofRow: 5).height > list.rect(ofRow: 0).height)
+        #expect(window.makeFirstResponder(list))
+        for section in SettingsSection.allCases.dropFirst() {
+            list.keyDown(with: arrow(NSDownArrowFunctionKey, keyCode: 125, window: window))
+            await layout(window)
+            #expect(selection.section == section)
+            #expect(window.title == section.title)
+        }
+        for section in SettingsSection.allCases.reversed().dropFirst() {
+            list.keyDown(with: arrow(NSUpArrowFunctionKey, keyCode: 126, window: window))
+            await layout(window)
+            #expect(selection.section == section)
+            #expect(window.title == section.title)
+        }
+        #expect(window.toolbar?.items.contains { $0.itemIdentifier == .toggleSidebar } != true)
+        #expect(content.bounds.size == NSSize(width: 720, height: 500))
+        let originalFrame = window.frame
+        window.setFrame(NSRect(origin: originalFrame.origin, size: NSSize(width: 720, height: 560)), display: false)
+        await layout(window)
+        let resizedBottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
+        #expect(abs(resizedBottom - margin) <= 1)
+        window.setFrame(originalFrame, display: false)
+        await layout(window)
+    }
+
+    @Test("SPEC-SET-001 SPEC-UI-005 SPEC-UI-011 配置と矢印移動を確かめ、全セクションをアプリ起動なしで描画する")
     func render() async throws {
         _ = NSApplication.shared
         let app = try appBundle()
@@ -170,27 +211,17 @@ struct SettingsTests {
             #expect(section.title != "title")
             selection.section = section
             for (name, appearance) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
-                let view = NSHostingView(rootView: SettingsView(
+                let window = SettingsWindowController.makeWindow(rootView: SettingsView(
                     model: makeModel(),
                     hotkey: HotkeyController(save: { _ in true }),
                     selection: selection,
                     bundle: app,
                 ).environment(\.colorScheme, name == "light" ? .light : .dark)
-                    .environment(\.controlActiveState, .key))
-                view.sizingOptions = []
-                let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 472),
-                                      styleMask: [.titled, .closable, .miniaturizable], backing: .buffered,
-                                      defer: false)
-                window.isReleasedWhenClosed = false
-                window.standardWindowButton(.miniaturizeButton)?.isEnabled = false
+                    .environment(\.controlActiveState, .key), selection: selection)
+                defer { window.close() }
                 window.appearance = NSAppearance(named: appearance)
-                window.contentView = view
-                view.layoutSubtreeIfNeeded()
-                window.setFrame(NSRect(x: 0, y: 0, width: 720, height: 500), display: false)
-                window.title = section.title
-                await Task.yield()
-                view.layoutSubtreeIfNeeded()
-                window.displayIfNeeded()
+                let view = try #require(window.contentView)
+                await layout(window)
                 let frame = try #require(view.superview)
                 let bitmap = try #require(frame.bitmapImageRepForCachingDisplay(in: frame.bounds))
                 window.appearance?.performAsCurrentDrawingAppearance {
@@ -199,7 +230,18 @@ struct SettingsTests {
                 let data = try #require(bitmap.representation(using: .png, properties: [:]))
                 try data.write(to: output.appendingPathComponent("\(section.rawValue)-\(name).png"))
                 #expect(bitmap.pixelsWide >= 720 && bitmap.pixelsHigh >= 500)
-                window.close()
+                #expect(window.frame.size == NSSize(width: 720, height: 500))
+                #expect(window.title == section.title)
+                if section == .general, name == "light" {
+                    try await checkSidebar(window, selection: selection)
+                }
+                if section == .release {
+                    for scroll in descendants(NSScrollView.self, in: view) where scroll.frame.width > 200 {
+                        let document = try #require(scroll.documentView)
+                        #expect(document.bounds.height + scroll.contentInsets.top + scroll.contentInsets.bottom
+                            <= scroll.contentSize.height + 1)
+                    }
+                }
             }
         }
     }
@@ -215,10 +257,33 @@ struct SettingsTests {
         let license = try #require(app.url(forResource: "KeyboardShortcuts-LICENSE", withExtension: "txt"))
         #expect(try String(contentsOf: license, encoding: .utf8).contains("MIT License"))
     }
+}
 
+private extension SettingsTests {
     private func appBundle() throws -> Bundle {
         let product = Bundle(for: SettingsTestResources.self).bundleURL.deletingLastPathComponent()
         return try #require(Bundle(url: product.appendingPathComponent("Capsaicin.app")))
+    }
+
+    private func layout(_ window: NSWindow) async {
+        for _ in 0 ..< 3 {
+            window.contentView?.layoutSubtreeIfNeeded()
+            await withCheckedContinuation { continuation in
+                DispatchQueue.main.async { continuation.resume() }
+            }
+        }
+        window.display()
+    }
+
+    private func descendants<T: NSView>(_ type: T.Type, in view: NSView) -> [T] {
+        (view as? T).map { [$0] } ?? view.subviews.flatMap { descendants(type, in: $0) }
+    }
+
+    private func arrow(_ code: Int, keyCode: UInt16, window: NSWindow) -> NSEvent {
+        let character = String(UnicodeScalar(code)!)
+        return NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                windowNumber: window.windowNumber, context: nil, characters: String(character),
+                                charactersIgnoringModifiers: String(character), isARepeat: false, keyCode: keyCode)!
     }
 
     private func makeModel() -> SettingsModel {
