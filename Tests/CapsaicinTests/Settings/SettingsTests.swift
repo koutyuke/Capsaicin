@@ -157,6 +157,8 @@ struct SettingsTests {
         #expect(window.titleVisibility == .visible)
         #expect(window.toolbar != nil)
         #expect(window.toolbarStyle == .unified)
+        // ツールバーのラベルの行を持たせず、上端を Xcode の設定ウインドウと同じ 52 pt にする。
+        #expect(window.frame.height - window.contentLayoutRect.height == 52)
         #expect(window.standardWindowButton(.miniaturizeButton)?.isEnabled == false)
         #expect(window.standardWindowButton(.zoomButton)?.isEnabled == false)
         #expect(window.title == SettingsSection.general.title)

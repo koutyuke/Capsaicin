@@ -50,7 +50,9 @@ final class SettingsWindowController: NSWindowController {
                               backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.titlebarAppearsTransparent = true
-        window.toolbar = NSToolbar()
+        let toolbar = NSToolbar()
+        toolbar.displayMode = .iconOnly
+        window.toolbar = toolbar
         window.toolbarStyle = .unified
         window.titlebarSeparatorStyle = .none
         window.standardWindowButton(.miniaturizeButton)?.isEnabled = false
