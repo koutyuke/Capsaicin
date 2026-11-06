@@ -7,6 +7,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private let model: AppModel
     private let isOnACPower: () -> Bool
     var openSettings: () -> Void = {}
+    var quit: () -> Void = {}
     var configureShortcut: (NSMenuItem) -> Void = { $0.setShortcut(for: HotkeyController.name) }
     private var statusItem: NSStatusItem?
     let menu = NSMenu()
@@ -127,7 +128,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             inputPanel?.close()
             inputPanel = StartPanel.make(mode: command == .durationPanel ? .duration : .time, model: model)
         case .settings: openSettings()
-        case .quit: (NSApplication.shared.delegate as? AppDelegate)?.quitByUser()
+        case .quit: quit()
         }
     }
 }

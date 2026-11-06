@@ -9,7 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_: Notification) {
         do {
-            let runtime = try AppComposition.make()
+            let runtime = try AppComposition.make(quit: { [weak self] in self?.quitByUser() })
             self.runtime = runtime
             let startup = Task { await runtime.start() }
             self.startup = startup

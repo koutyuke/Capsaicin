@@ -81,15 +81,15 @@ public final class LaunchAgent {
         } catch {
             return bootstrapped ? .launchFailed : .registrationFailed
         }
-        return restartStatus()
+        return .ready
     }
 
     /// 許可状態の照会であり、プロセスの稼働やクラッシュ復旧の成功は保証しない。
     public func restartStatus() -> LaunchAgentStatus {
+        // launchd が起動したプロセスだけが呼ぶので、記録がまだなくても無効ではない。
         switch serviceStatus(plistURL) {
-        case .enabled: .ready
         case .requiresApproval: .disabled
-        default: .unavailable
+        default: .ready
         }
     }
 

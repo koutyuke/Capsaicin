@@ -6,7 +6,7 @@ import CapsaicinPlatform
 @MainActor
 enum AppComposition {
     /// 実ポートを作る唯一の入口。テストとモデルの初期化からは呼ばない。
-    static func make() throws -> AppRuntime {
+    static func make(quit: @escaping () -> Void) throws -> AppRuntime {
         #if DEBUG
             let isDebug = true
         #else
@@ -39,6 +39,7 @@ enum AppComposition {
             model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
             karabiner: KarabinerElementsMonitor(), display: DisplaySleep(),
             server: IPCServer(endpoint: IPCEndpoint(namespace: isDebug ? .debug : .release)) { model.handle($0) },
+            quit: quit,
         )
         return AppRuntime(
             model: model,
@@ -95,7 +96,8 @@ private final class AppServices {
     private var wakeObserver: any NSObjectProtocol?
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
-         lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer)
+         lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer,
+         quit: @escaping () -> Void)
     {
         self.model = model
         self.settings = settings
@@ -108,6 +110,7 @@ private final class AppServices {
         menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
         hud = HUDPresenter(isEnabled: { model.settings.showsHUD })
         menuBar.openSettings = { [weak self] in self?.settingsWindow?.open() }
+        menuBar.quit = quit
     }
 
     func start() async {

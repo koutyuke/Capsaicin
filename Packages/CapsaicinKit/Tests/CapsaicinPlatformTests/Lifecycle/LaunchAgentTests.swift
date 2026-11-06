@@ -26,6 +26,7 @@ struct LaunchAgentTests {
     @Test("SPEC-LCY-005 plist を書いてから bootstrap、kickstart の順で要求する")
     func registration() async throws {
         try await withFixture { fixture in
+            fixture.serviceStatus = .notRegistered
             let agent = fixture.agent()
             let result = await agent.registerAndStart(launchAtLogin: false)
             #expect(result == .ready)
@@ -34,7 +35,7 @@ struct LaunchAgentTests {
                 ["kickstart", "gui/501/\(agent.label)"],
             ])
             #expect(fixture.plistExistedAtCommand == [true, true])
-            #expect(fixture.statusURLs == [agent.plistURL])
+            #expect(fixture.statusURLs.isEmpty)
             let plist = try decode(Data(contentsOf: agent.plistURL))
             #expect(plist["RunAtLoad"] as? Bool == false)
         }
@@ -74,27 +75,26 @@ struct LaunchAgentTests {
     func commandFailure(failing: [Int], expected: LaunchAgentStatus) async throws {
         try await withFixture { fixture in
             fixture.failingCommands = Set(failing)
+            fixture.serviceStatus = .requiresApproval
             #expect(await fixture.agent().registerAndStart(launchAtLogin: false) == expected)
             #expect(fixture.commands.count == 2)
+            #expect(fixture.statusURLs.isEmpty)
         }
     }
 
-    @Test("SPEC-LCY-005 無効化と登録不明を再確認できる", arguments: [
-        SMAppService.Status.enabled, .requiresApproval, .notRegistered, .notFound,
+    @Test("SPEC-LCY-005 launchd 由来では承認待ちだけを無効とみなす", arguments: [
+        (SMAppService.Status.enabled, LaunchAgentStatus.ready),
+        (.requiresApproval, .disabled),
+        (.notRegistered, .ready),
+        (.notFound, .ready),
     ])
-    func authorization(status: SMAppService.Status) async throws {
-        try await withFixture { fixture in
-            fixture.serviceStatus = status
-            let agent = fixture.agent()
-            let expected: LaunchAgentStatus = switch status {
-            case .enabled: .ready
-            case .requiresApproval: .disabled
-            default: .unavailable
-            }
-            #expect(await agent.registerAndStart(launchAtLogin: false) == expected)
-            fixture.serviceStatus = .requiresApproval
-            #expect(agent.restartStatus() == .disabled)
-        }
+    func authorization(status: SMAppService.Status, expected: LaunchAgentStatus) {
+        let fixture = LaunchAgentFixture()
+        fixture.serviceStatus = status
+        let agent = fixture.agent()
+        #expect(agent.restartStatus() == expected)
+        #expect(fixture.statusURLs == [agent.plistURL])
+        #expect(fixture.commands.isEmpty)
     }
 
     @Test("SPEC-LCY-005 XPC_SERVICE_NAME が自分のラベルと一致するときだけ launchd 由来とする")

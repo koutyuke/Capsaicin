@@ -2,7 +2,7 @@
 schema: task
 id: TASK-018
 title: launchd への引き渡しとメニューの終了を直す
-status: todo
+status: done
 requirements: []
 depends_on: [TASK-015]
 assignee: OpenCode / GPT-6.1 Sol
@@ -67,4 +67,6 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-（PM が記入する）
+PM が差分を読んでレビューした。`kickstart` が成功したら照会せずに `.ready` を返し、`restartStatus()` は承認待ちだけを無効とする。`restartStatus()` を呼ぶのは、`AppRuntime.start()` の launchd の分岐だけである。メニューの「終了」は、`AppDelegate` を弱参照で捕まえたクロージャーを `AppComposition` から受け取る。`MenuBarTests` には、コマンドを実行する仕組みがない。そのため、終了のテストは足していない。`just check` と `just build` が通った。実機での確認は `verification.md` の 2.1 からやり直す。
+
+`just check` では、Git が無視するファイル（`.direnv/` と、利用者のグローバルの除外設定にあるファイル）も Markdown lint の対象になり、検査が落ちた。これはチケットの範囲外なので、PM が別のコミットで直した。lint の対象を、Git が無視しないファイルに限った。
