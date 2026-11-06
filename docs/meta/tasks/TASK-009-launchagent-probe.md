@@ -2,7 +2,7 @@
 schema: task
 id: TASK-009
 title: LaunchAgent の非起動条件を確かめる手動検証を準備する
-status: in_review
+status: done
 requirements: [REQ-LCY-001, REQ-LCY-003, REQ-LCY-005]
 depends_on: []
 assignee: OpenCode / GPT-6.1 Sol
@@ -65,3 +65,5 @@ PM が実 UID と実効 UID の一致を求めるガードを追加し、修正�
 修正担当は RED の取得後、Python 26テストと対象整形・lint、警告をエラー扱いにしたコンパイル、ad-hoc 署名・署名検証の成功を報告した。証跡は `.build/task009-fixes*.log` にある。新しい独立レビュー用の生成物は `.build/manual/launchagent-probe-b688e742d05d464db8a403002f1c7d13/` である。
 
 いずれも登録・プローブ起動・撤去・`launchctl` は実行していない。launchd 出力の実機形式・意味、BTM、再ログインの振る舞いは未検証である。
+
+2026-11-06: 1つの仮説のために約950行の道具を保守するのは過剰なので、利用者の承認を得て取りやめた。`HYP-LCY-002` は手作業の手順で確かめる。
