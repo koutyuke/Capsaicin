@@ -32,11 +32,12 @@ struct HUDView: View {
     var body: some View {
         HUDLabel(content: presentation.content, reduceMotion: reduceMotion, increasedContrast: contrast == .increased)
             .frame(width: presentation.width, height: 48)
+            .clipShape(Capsule())
             .background {
                 if reduceTransparency {
                     Capsule().fill(Color(nsColor: .windowBackgroundColor))
                 } else {
-                    HUDGlass()
+                    Color.clear.glassEffect(.regular, in: Capsule())
                 }
             }
             .overlay {
@@ -72,33 +73,35 @@ struct HUDLabel: View {
                 .symbolRenderingMode(.monochrome)
                 .contentTransition(reduceMotion ? .opacity : .symbolEffect(.replace))
                 .accessibilityHidden(true)
-            HStack(spacing: 0) {
-                Text(verbatim: content.state).fontWeight(.semibold).fixedSize()
-                if let detail = content.detail {
-                    Text(verbatim: "·").foregroundStyle(Color(nsColor: .tertiaryLabelColor)).padding(.horizontal, 6)
-                    Text(verbatim: detail)
-                        .foregroundStyle(Color(nsColor: increasedContrast ? .labelColor : .secondaryLabelColor))
-                        .truncationMode(.tail)
-                        .monospacedDigit()
+            ZStack(alignment: .leading) {
+                HStack(spacing: 0) {
+                    Text(verbatim: content.state).fontWeight(.semibold).fixedSize()
+                    if let detail = content.detail {
+                        Text(verbatim: "·").foregroundStyle(Color(nsColor: .tertiaryLabelColor)).padding(.horizontal, 6)
+                        Text(verbatim: detail)
+                            .foregroundStyle(Color(nsColor: increasedContrast ? .labelColor : .secondaryLabelColor))
+                            .truncationMode(.tail)
+                            .monospacedDigit()
+                    }
                 }
+                .id([content.state, content.detail])
+                .transition(HUDTextTransition(reduceMotion: reduceMotion))
             }
-            .contentTransition(.opacity)
         }
         .font(.title3)
         .foregroundStyle(Color(nsColor: .labelColor))
         .lineLimit(1)
         .padding(.horizontal, 20)
-        .animation(.linear(duration: 0.15), value: content)
+        .animation(.timingCurve(0.2, 0, 0, 1, duration: 0.20), value: content)
     }
 }
 
-private struct HUDGlass: NSViewRepresentable {
-    func makeNSView(context _: Context) -> NSGlassEffectView {
-        let view = NSGlassEffectView()
-        view.style = .regular
-        view.cornerRadius = 24
-        return view
-    }
+private struct HUDTextTransition: Transition {
+    var reduceMotion: Bool
 
-    func updateNSView(_: NSGlassEffectView, context _: Context) {}
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content
+            .blur(radius: phase.isIdentity || reduceMotion ? 0 : 5)
+            .opacity(phase.isIdentity ? 1 : 0)
+    }
 }

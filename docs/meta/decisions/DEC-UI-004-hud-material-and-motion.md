@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-UI-004
 title: HUD は Liquid Glass の Regular で描き、揺れのない短い動きにする
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-UI-007"]
 requirements: ["REQ-HUD-001", "REQ-UI-002"]
 based_on: ["DEC-HUD-001", "EVID-UI-004", "EVID-UI-006"]
 ---

@@ -12,7 +12,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HUD-001", "SPEC-HUD-002", "SPEC-HUD-004", "SPEC-HUD-005", "SPEC-HUD-006", "SPEC-HUD-007"]
 depends_on = []
-sources = ["DEC-HUD-001", "DEC-UI-004"]
+sources = ["DEC-HUD-001", "DEC-UI-007"]
 
 [[requirements]]
 id = "REQ-HUD-002"
