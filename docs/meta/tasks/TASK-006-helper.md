@@ -2,7 +2,7 @@
 schema: task
 id: TASK-006
 title: ヘルパーと、その呼び出し・設置・削除を作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -99,3 +99,4 @@ Debug ビルドは、置き場所の名前、sudoers のファイル名、Launch
 
 - C ヘルパー（上の 1）は先に実装し、独立レビューで指摘はなかった。不正な引数の拒否、固定のコマンドと空の環境を、本番の `on`・`off` を実行せずに確かめている。
 - 2026-11-06: Codex が PM だった間に、Mac の起動ごとの journal、UID 共通のロック、Debug と Release の間の所有の引き渡しからなる「安全ゲート」が足された。期限切れへの対策としては過剰なので、利用者の承認を得て取りやめ、`SPEC-HLP-005` の期限と見届けの規則に置き換えた。
+- 2026-11-06: Swift 側（2〜5）を実装した。`CommandRunner` を1つ共有して `on`・`off`・読み取りを行い、設置・修復・削除は固定のスクリプトを `osascript` で1回の管理者認証で実行する。PM が差分を読んでレビューし、`just check` と `just build` を通した。実機での設置・`on`・`off`・削除・起動時の後片付けの確認は、アプリへの組み込みの後に、承認を得て行う。

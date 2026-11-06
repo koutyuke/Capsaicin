@@ -4,6 +4,21 @@ import Synchronization
 import Testing
 
 struct CommandRunnerTests {
+    @Test("SPEC-HLP-005 実行時にコマンドを変えても既存 API と実行中の状態を共有する")
+    func differentCommandsShareObservation() async throws {
+        let runner = CommandRunner(executable: "/bin/echo", arguments: ["default"], outputLimit: 1024)
+        #expect(try runner.run(executable: "/bin/echo", arguments: ["$HOME"], timeout: 2) == Data("$HOME\n".utf8))
+        #expect(throws: CommandRunnerError.timedOut) {
+            try runner.run(executable: "/bin/sleep", arguments: ["0.4"], timeout: 0.02)
+        }
+        #expect(throws: CommandRunnerError.alreadyRunning) { try runner.run(timeout: 1) }
+        #expect(throws: CommandRunnerError.alreadyRunning) {
+            try runner.run(executable: "/usr/bin/false", arguments: [], timeout: 1)
+        }
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(try runner.run(timeout: 2) == Data("default\n".utf8))
+    }
+
     @Test("SPEC-HLP-005 標準出力を上限まで返す。引数はシェルを通さない")
     func boundedOutput() throws {
         let text = "$HOME ; test"

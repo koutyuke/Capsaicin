@@ -22,6 +22,10 @@ final class CommandRunner: @unchecked Sendable {
     }
 
     func run(timeout: TimeInterval) throws -> Data {
+        try run(executable: executable, arguments: arguments, timeout: timeout)
+    }
+
+    func run(executable: String, arguments: [String], timeout: TimeInterval) throws -> Data {
         let deadline = DispatchTime.now() + timeout
         let process = Process()
         let pipe = Pipe()

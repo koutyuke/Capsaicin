@@ -2,7 +2,7 @@
 schema: task
 id: TASK-008
 title: 記録と設定の保存、LaunchAgent、終了の種類の判定を作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -122,3 +122,5 @@ assignee: OpenCode / GPT-6.1 Sol
 LaunchAgent は、`HYP-LCY-002` の非起動条件と `launchd.plist(5)` の KeepAlive に関する記述が整合するか未確認である。`TASK-009` で現行方式の手動検証を準備する。ログイン設定だけの変更は次回ログインへ反映し、実行中の自分を `bootout` しない。アプリの移動など、現在の監督対象の変更は別に判断する。
 
 起動由来と終了理由は `HYP-LCY-003`・`HYP-LCY-005` の実機保証が未確認である。判定不能の扱いは利用者が承認した `DEC-LCY-004` に従う。調査・自動検証で `launchctl` や実機の登録・設定変更は実行しない。
+
+2026-11-06: LaunchAgent（3）を実装し、PM がレビューした。読み込み済みのジョブで `bootstrap` が失敗しても `kickstart` が成功すれば起動できるよう、PM が直した。`HYP-LCY-002`、`HYP-LCY-003`、`HYP-LCY-005` の実機での確認は、アプリへの組み込みの後に、承認を得て行う。
