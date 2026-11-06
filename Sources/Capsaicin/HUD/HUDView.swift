@@ -18,8 +18,11 @@ final class HUDPresentation {
 
     func replace(_ content: HUDContent, measuredWidth: CGFloat) {
         entryDuration = phase.replacementDuration
-        self.content = content
-        width = min(420, max(200, measuredWidth))
+        // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。消えている間は動かさない。
+        withAnimation(phase == .hidden ? nil : .timingCurve(0.2, 0, 0, 1, duration: 0.20)) {
+            self.content = content
+            width = min(420, max(200, measuredWidth))
+        }
     }
 }
 
@@ -31,6 +34,8 @@ struct HUDView: View {
 
     var body: some View {
         HUDLabel(content: presentation.content, reduceMotion: reduceMotion, increasedContrast: contrast == .increased)
+            // 差し替えた文字を最終位置に置かず、アイコンと1つの行として一緒に動かす。
+            .geometryGroup()
             .frame(width: presentation.width, height: 48)
             .clipShape(Capsule())
             .background {
@@ -45,17 +50,16 @@ struct HUDView: View {
                     Capsule().strokeBorder(Color(nsColor: .separatorColor), lineWidth: 1)
                 }
             }
-            .animation(.timingCurve(0.2, 0, 0, 1, duration: 0.20), value: presentation.width)
-            .opacity(presentation.phase == .hidden || presentation.phase == .exiting ? 0 : 1)
-            .scaleEffect(reduceMotion ? 1 :
-                (presentation.phase == .hidden ? 0.96 : (presentation.phase == .exiting ? 0.98 : 1)))
-            .offset(y: !reduceMotion && presentation.phase == .hidden ? 8 : 0)
             .animation(
                 presentation.phase == .exiting
                     ? .timingCurve(0.4, 0, 1, 1, duration: 0.30)
                     : .timingCurve(0.2, 0, 0, 1, duration: presentation.entryDuration),
-                value: presentation.phase,
-            )
+            ) {
+                $0.opacity(presentation.phase == .hidden || presentation.phase == .exiting ? 0 : 1)
+                    .scaleEffect(reduceMotion ? 1 :
+                        (presentation.phase == .hidden ? 0.96 : (presentation.phase == .exiting ? 0.98 : 1)))
+                    .offset(y: !reduceMotion && presentation.phase == .hidden ? 8 : 0)
+            }
             .frame(width: 452, height: 80)
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(presentation.content.announcement)
@@ -92,7 +96,6 @@ struct HUDLabel: View {
         .foregroundStyle(Color(nsColor: .labelColor))
         .lineLimit(1)
         .padding(.horizontal, 20)
-        .animation(.timingCurve(0.2, 0, 0, 1, duration: 0.20), value: content)
     }
 }
 

@@ -25,11 +25,11 @@ HUD の素材は Liquid Glass の Regular とし、SwiftUI の `glassEffect(.reg
 - 新しい文字が最初から最終の位置に出て、伸びきる前のガラスからはみ出した。
 - 古い文字と新しい文字が重なって両方読めた。
 
-`NSGlassEffectView` は `NSViewRepresentable` として SwiftUI に置いていた。SwiftUI はこの枠を途中の値で補間せず、AppKit のレイヤーが左下を基準に大きさだけを動かしたと見ている（コードと画像からの推定）。
+原因は、幅のアニメーションがカプセルの内側にしか効いていなかったことである。カプセルを中央に置く外側の枠はアニメーションの外にあり、置き場所だけが一度で最終の位置に移った。画面外で描いた途中のコマで、置き換えた直後に左端が最終の位置に移ることを確かめた（`TASK-021`）。
 
 ## 選択肢
 
-- `NSGlassEffectView` のまま、`updateNSView` で AppKit のアニメーションを SwiftUI の時間に合わせる。SwiftUI が決める枠と AppKit のアニメーションを二重に管理することになる（不採用）。
+- `NSGlassEffectView` を `NSViewRepresentable` で置く。ガラスの枠を SwiftUI と AppKit の両方が扱うことになる（不採用）。
 - SwiftUI の `glassEffect` で描く。ガラスの形がビューの枠に結びつき、幅のアニメーションと一緒に補間される（採用）。
 - 文字はクロスフェードのままにする。途中で新旧の文字が重なって読める（不採用）。
 - 文字を拡大・縮小を伴うぼかし（`.blurReplace`）で切り替える。左揃えの行が中央を基準に縮み、揺れて見える（不採用）。
