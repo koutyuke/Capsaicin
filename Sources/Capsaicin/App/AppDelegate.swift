@@ -15,6 +15,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.startup = startup
             Task {
                 if await !startup.value {
+                    // 引き渡し済みで後片付けはない。Task の中で terminateLater を返すと、返答の Task が
+                    // メインキューで待たされて終了できないので、startup を外して terminateNow にする。
+                    self.startup = nil
                     NSApplication.shared.terminate(nil)
                 }
             }

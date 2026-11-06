@@ -70,3 +70,5 @@ assignee: OpenCode / GPT-6.1 Sol
 PM が差分を読んでレビューした。`kickstart` が成功したら照会せずに `.ready` を返し、`restartStatus()` は承認待ちだけを無効とする。`restartStatus()` を呼ぶのは、`AppRuntime.start()` の launchd の分岐だけである。メニューの「終了」は、`AppDelegate` を弱参照で捕まえたクロージャーを `AppComposition` から受け取る。`MenuBarTests` には、コマンドを実行する仕組みがない。そのため、終了のテストは足していない。`just check` と `just build` が通った。実機での確認は `verification.md` の 2.1 からやり直す。
 
 `just check` では、Git が無視するファイル（`.direnv/` と、利用者のグローバルの除外設定にあるファイル）も Markdown lint の対象になり、検査が落ちた。これはチケットの範囲外なので、PM が別のコミットで直した。lint の対象を、Git が無視しないファイルに限った。
+
+オーナーが確かめ直したところ、引き渡した後の直接起動のプロセスが終了しないまま残っていた。このため、Finder から開き直しても、残ったプロセスが前面に出るだけで、何も起きなかった。原因は、`Task` の中から `NSApplication.terminate` を呼んだことにある。`applicationShouldTerminate` が `terminateLater` を返すと、返答を送る `Task` がメインキューで待たされたまま止まる（`sample` でメインスレッドが `_shouldTerminate` で待っていることを確かめた）。PM が直した。引き渡した後は `startup` を外し、`terminateNow` で終了させる。同じ構成の小さなアプリで、直す前は止まり、直した後はすぐ終了することを確かめた。`just check` と `just build` が通った。
