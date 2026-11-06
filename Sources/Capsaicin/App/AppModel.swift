@@ -68,6 +68,42 @@ final class AppModel {
         refresh()
     }
 
+    func resetsSleepDisabledOnHelperRemoval() -> Bool {
+        controller.resetsSleepDisabledOnHelperRemoval()
+    }
+
+    func helperRemovalSucceeded() {
+        controller.helperRemovalSucceeded()
+        refresh()
+        saveSettings(settings)
+    }
+
+    func helperRemovalFailed() {
+        controller.helperRemovalFailed()
+        refresh()
+    }
+
+    func reconcile() {
+        controller.reconcile()
+        refresh()
+    }
+
+    func helperManagementCompleted(_ operation: HelperManagementOperation, _ result: HelperManagementResult) {
+        switch result {
+        case .success:
+            if operation == .remove {
+                helperRemovalSucceeded()
+            } else {
+                reconcile()
+            }
+        case let .failure(_, _, needsReadback):
+            if operation == .remove, needsReadback {
+                helperRemovalFailed()
+            }
+        case .cancelled: break
+        }
+    }
+
     @discardableResult
     func changeSettings(_ value: Settings) -> SettingsChangeResult {
         let previous = settings

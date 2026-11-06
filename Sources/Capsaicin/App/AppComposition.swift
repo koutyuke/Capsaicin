@@ -16,10 +16,11 @@ enum AppComposition {
         let store = UserDefaultsSettingsStore(defaults: .standard)
         let power = PowerStateMonitor()
         let led = CapsLockLEDController()
+        let helper = HelperSleepController()
         let controller = try BlockingController(
             settings: store.load(), capabilities: PowerMachineCapabilities.detect(),
             ports: .init(
-                assertions: PowerAssertions(), lidSleep: LidSleepControl(), helper: HelperSleepController(),
+                assertions: PowerAssertions(), lidSleep: LidSleepControl(), helper: helper,
                 led: led, power: power, bootTime: BootTimeProvider(),
                 records: FileResumeRecordStore(bundleID: isDebug
                     ? "io.github.koutyuke.capsaicin.debug" : "io.github.koutyuke.capsaicin"),
@@ -28,9 +29,14 @@ enum AppComposition {
         )
         let model = AppModel(controller: controller, saveSettings: { store.save($0) })
         model.onAlert = showAlert
+        let settings = SettingsModel(app: model, helper: .live(
+            helper: helper, installer: HelperInstaller(),
+            restoreSleep: model.resetsSleepDisabledOnHelperRemoval,
+            completed: model.helperManagementCompleted,
+        ))
         let agent = try LaunchAgent(executableURL: executableURL(in: bundle), isDebug: isDebug)
         let services = AppServices(
-            model: model, power: power, led: led, lid: LidStateMonitor(),
+            model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
             karabiner: KarabinerElementsMonitor(), display: DisplaySleep(),
             server: IPCServer(endpoint: IPCEndpoint(namespace: isDebug ? .debug : .release)) { model.handle($0) },
         )
@@ -50,16 +56,11 @@ enum AppComposition {
     }
 
     private static func showAlert(_ alert: AppAlert) {
+        guard alert == .terminationIncomplete else { return }
         let panel = NSAlert()
         panel.alertStyle = .informational
-        switch alert {
-        case .settingsReverted:
-            panel.messageText = "設定を反映できませんでした"
-            panel.informativeText = "スリープまたは LED の制御に失敗したため、設定を元に戻しました。"
-        case .terminationIncomplete:
-            panel.messageText = "一部の制御を元に戻せませんでした"
-            panel.informativeText = "スリープまたは LED の制御が残っています。次に Capsaicin を起動したときに戻し直します。"
-        }
+        panel.messageText = "一部の制御を元に戻せませんでした"
+        panel.informativeText = "スリープまたは LED の制御が残っています。次に Capsaicin を起動したときに戻し直します。"
         panel.addButton(withTitle: "OK")
         panel.runModal()
     }
@@ -79,6 +80,7 @@ private struct SystemTime: TimeProviding {
 @MainActor
 private final class AppServices {
     let model: AppModel
+    let settings: SettingsModel
     let power: PowerStateMonitor
     let led: CapsLockLEDController
     let lid: LidStateMonitor
@@ -87,14 +89,16 @@ private final class AppServices {
     let server: IPCServer
     private let menuBar: MenuBarController
     private let hud: HUDPresenter
+    private var settingsWindow: SettingsWindowController?
     private var minuteTimer: Timer?
     private var releaseTimer: Timer?
     private var wakeObserver: any NSObjectProtocol?
 
-    init(model: AppModel, power: PowerStateMonitor, led: CapsLockLEDController,
+    init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
          lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer)
     {
         self.model = model
+        self.settings = settings
         self.power = power
         self.led = led
         self.lid = lid
@@ -103,9 +107,13 @@ private final class AppServices {
         self.server = server
         menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
         hud = HUDPresenter(isEnabled: { model.settings.showsHUD })
+        menuBar.openSettings = { [weak self] in self?.settingsWindow?.open() }
     }
 
     func start() async {
+        settingsWindow = SettingsWindowController(
+            model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }),
+        )
         model.onStatusChange = { [weak self] in
             self?.scheduleRelease($0)
             self?.menuBar.refresh()
@@ -161,6 +169,9 @@ private final class AppServices {
         model.onStatusChange = nil
         model.onEvent = nil
         menuBar.stop()
+        HotkeyController.stop()
+        settingsWindow?.close()
+        settingsWindow = nil
         if let wakeObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(wakeObserver)
         }

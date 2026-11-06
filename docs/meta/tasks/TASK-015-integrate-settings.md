@@ -2,7 +2,7 @@
 schema: task
 id: TASK-015
 title: 設定ウインドウ・ホットキー・ヘルパーの操作をアプリにつなぐ
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-013, TASK-014]
 assignee: OpenCode / GPT-6.1 Sol
@@ -47,4 +47,4 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+PM が差分を読んでレビューした（本番コードの差分は 69 行）。設定ウインドウを「設定…」から開き、ホットキーをサービスの開始と終了に合わせて登録・解除し、ヘルパーの削除の成否と設置・修復の後の合わせ直しをモデルにつないでいる。設定を戻したときのアラートは `SettingsModel` のシートだけになった。`just check` と `just build` が通った。実機での操作は未確認である。
