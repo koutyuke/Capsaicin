@@ -50,14 +50,15 @@ final class SettingsWindowController: NSWindowController {
                               backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
+        window.toolbar = NSToolbar()
+        window.toolbarStyle = .unified
         window.titlebarSeparatorStyle = .none
         window.standardWindowButton(.miniaturizeButton)?.isEnabled = false
         window.standardWindowButton(.zoomButton)?.isEnabled = false
         let host = NSHostingView(rootView: rootView)
         host.sizingOptions = []
         window.contentView = host
-        // NavigationSplitView が標準ツールバーを用意してから、枠を含む寸法を決める。
+        // ツールバーと内容を配置してから、枠を含む寸法を決める。
         host.layoutSubtreeIfNeeded()
         window.setFrame(NSRect(x: 0, y: 0, width: 720, height: 500), display: false)
         window.title = selection.section.title

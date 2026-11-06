@@ -8,8 +8,7 @@ struct SettingsView: View {
     let hotkey: HotkeyController
     @Bindable var selection: SettingsSelection
     var bundle: Bundle = .main
-    @State private var sidebarSpacing: CGFloat = 0
-    @State private var titlebarHeight: CGFloat = 0
+    @State private var sidebarHeight: CGFloat = 0
 
     var body: some View {
         NavigationSplitView {
@@ -19,16 +18,15 @@ struct SettingsView: View {
                 }
             })) {
                 ForEach(Array(SettingsSection.allCases.prefix(5))) { navigation($0) }
-                Color.clear.frame(height: sidebarSpacing)
+                SettingsSidebarSpacer(availableHeight: sidebarHeight)
                     .listRowInsets(EdgeInsets()).selectionDisabled().accessibilityHidden(true)
                 ForEach(Array(SettingsSection.allCases.suffix(2))) { navigation($0) }
             }
             .listStyle(.sidebar)
-            // 行の高さはシステム設定（サイドバーのアイコンの大きさ）で変わるので、余った高さを空きに足して下の2つを下端に寄せる。
             .onScrollGeometryChange(for: CGFloat.self) {
-                $0.containerSize.height - $0.contentInsets.top - $0.contentInsets.bottom - $0.contentSize.height
-            } action: { _, free in
-                sidebarSpacing = max(0, sidebarSpacing + free)
+                $0.containerSize.height - $0.contentInsets.top - $0.contentInsets.bottom
+            } action: { _, height in
+                sidebarHeight = height
             }
             .frame(width: 200)
             .navigationSplitViewColumnWidth(200)
@@ -51,14 +49,6 @@ struct SettingsView: View {
                     }.formStyle(.grouped).toggleStyle(.switch)
                 }
             }
-            // タイトルバーと同じ行に、項目のグループの左端（Form の既定の余白 20 pt）に揃えて見出しを置く。
-            // システムのタイトルはこの位置に揃えられないので隠し、`window.title` は VoiceOver とウインドウメニューに残す。
-            .overlay(alignment: .topLeading) {
-                Text(selection.section.title).font(.system(size: 15, weight: .semibold))
-                    .accessibilityAddTraits(.isHeader)
-                    .frame(height: titlebarHeight).padding(.leading, 20).offset(y: -titlebarHeight)
-            }
-            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.top } action: { titlebarHeight = $0 }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .background {
@@ -233,6 +223,45 @@ struct SettingsView: View {
                 case .installed: helperButton(.remove)
                 }
             }
+        }
+    }
+}
+
+struct SettingsSidebarSpacer: NSViewRepresentable {
+    let availableHeight: CGFloat
+
+    func makeNSView(context _: Context) -> SpacerView {
+        SpacerView()
+    }
+
+    func updateNSView(_ view: SpacerView, context _: Context) {
+        view.availableHeight = availableHeight
+        view.updateHeight()
+    }
+
+    final class SpacerView: NSView {
+        var availableHeight: CGFloat = 0
+        private var height: CGFloat = 0
+
+        override var intrinsicContentSize: NSSize {
+            NSSize(width: NSView.noIntrinsicMetric, height: height)
+        }
+
+        override func layout() {
+            super.layout()
+            updateHeight()
+        }
+
+        func updateHeight() {
+            guard let table = enclosingScrollView?.documentView as? NSTableView,
+                  table.numberOfRows == SettingsSection.allCases.count + 1 else { return }
+            // SwiftUI の contentSize にはツールバー由来の余白も混ざるため、システム設定に従う実際の行の高さを読む。
+            let rowsHeight = (0 ..< table.numberOfRows).filter { $0 != 5 }
+                .reduce(CGFloat.zero) { $0 + table.rect(ofRow: $1).height }
+            let next = max(0, availableHeight - rowsHeight - 10)
+            guard next != height else { return }
+            height = next
+            invalidateIntrinsicContentSize()
         }
     }
 }

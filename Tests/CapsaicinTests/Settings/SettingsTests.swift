@@ -154,47 +154,13 @@ struct SettingsTests {
         #expect(window.styleMask.contains(.titled) && !window.styleMask.contains(.resizable))
         #expect(window.styleMask.contains(.fullSizeContentView))
         #expect(window.titlebarAppearsTransparent)
-        #expect(window.titleVisibility == .hidden)
+        #expect(window.titleVisibility == .visible)
+        #expect(window.toolbar != nil)
+        #expect(window.toolbarStyle == .unified)
         #expect(window.standardWindowButton(.miniaturizeButton)?.isEnabled == false)
         #expect(window.standardWindowButton(.zoomButton)?.isEnabled == false)
         #expect(window.title == SettingsSection.general.title)
         window.close()
-    }
-
-    private func checkSidebar(_ window: NSWindow, selection: SettingsSelection) async throws {
-        let content = try #require(window.contentView)
-        let lists = descendants(NSOutlineView.self, in: content)
-        #expect(lists.count == 1)
-        let list = try #require(lists.first)
-        #expect(list.numberOfRows == SettingsSection.allCases.count + 1)
-        #expect(list.bounds.width == 200)
-        let scroll = try #require(list.enclosingScrollView)
-        let margin = scroll.contentInsets.top - content.safeAreaInsets.top
-        let bottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
-        #expect(abs(bottom - margin) <= 1)
-        #expect(list.rect(ofRow: 5).height > list.rect(ofRow: 0).height)
-        #expect(window.makeFirstResponder(list))
-        for section in SettingsSection.allCases.dropFirst() {
-            list.keyDown(with: arrow(NSDownArrowFunctionKey, keyCode: 125, window: window))
-            await layout(window)
-            #expect(selection.section == section)
-            #expect(window.title == section.title)
-        }
-        for section in SettingsSection.allCases.reversed().dropFirst() {
-            list.keyDown(with: arrow(NSUpArrowFunctionKey, keyCode: 126, window: window))
-            await layout(window)
-            #expect(selection.section == section)
-            #expect(window.title == section.title)
-        }
-        #expect(window.toolbar?.items.contains { $0.itemIdentifier == .toggleSidebar } != true)
-        #expect(content.bounds.size == NSSize(width: 720, height: 500))
-        let originalFrame = window.frame
-        window.setFrame(NSRect(origin: originalFrame.origin, size: NSSize(width: 720, height: 560)), display: false)
-        await layout(window)
-        let resizedBottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
-        #expect(abs(resizedBottom - margin) <= 1)
-        window.setFrame(originalFrame, display: false)
-        await layout(window)
     }
 
     @Test("SPEC-SET-001 SPEC-UI-005 SPEC-UI-011 配置と矢印移動を確かめ、全セクションをアプリ起動なしで描画する")
@@ -232,6 +198,7 @@ struct SettingsTests {
                 #expect(bitmap.pixelsWide >= 720 && bitmap.pixelsHigh >= 500)
                 #expect(window.frame.size == NSSize(width: 720, height: 500))
                 #expect(window.title == section.title)
+                try checkToolbarTitle(window)
                 if section == .general, name == "light" {
                     try await checkSidebar(window, selection: selection)
                 }
@@ -244,6 +211,28 @@ struct SettingsTests {
                 }
             }
         }
+    }
+
+    @Test("SPEC-SET-001 空き行は実測した7行の高さに追従し、小さい領域ではゼロにする")
+    func sidebarSpacing() {
+        let rows = SidebarRows()
+        let table = NSTableView(frame: NSRect(x: 0, y: 0, width: 200, height: 500))
+        table.dataSource = rows
+        table.intercellSpacing = .zero
+        table.reloadData()
+        let scroll = NSScrollView(frame: table.frame)
+        scroll.documentView = table
+        let spacer = SettingsSidebarSpacer.SpacerView()
+        table.addSubview(spacer)
+        spacer.availableHeight = 434
+        for height: CGFloat in [24, 32, 40] {
+            table.rowHeight = height
+            spacer.updateHeight()
+            #expect(spacer.intrinsicContentSize.height == 434 - 7 * height - 10)
+        }
+        spacer.availableHeight = 100
+        spacer.updateHeight()
+        #expect(spacer.intrinsicContentSize.height == 0)
     }
 
     @Test("SPEC-UI-011 DEC-KEY-002 セクションのカタログと依存ライセンスを配布物に含める")
@@ -260,6 +249,56 @@ struct SettingsTests {
 }
 
 private extension SettingsTests {
+    private func checkSidebar(_ window: NSWindow, selection: SettingsSelection) async throws {
+        let content = try #require(window.contentView)
+        let lists = descendants(NSOutlineView.self, in: content)
+        #expect(lists.count == 1)
+        let list = try #require(lists.first)
+        #expect(list.numberOfRows == SettingsSection.allCases.count + 1)
+        #expect(list.bounds.width == 200)
+        let scroll = try #require(list.enclosingScrollView)
+        let bottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
+        #expect(abs(bottom - 10) <= 1)
+        #expect(list.rect(ofRow: 5).height > list.rect(ofRow: 0).height)
+        #expect(window.makeFirstResponder(list))
+        for section in SettingsSection.allCases.dropFirst() {
+            list.keyDown(with: arrow(NSDownArrowFunctionKey, keyCode: 125, window: window))
+            await layout(window)
+            #expect(selection.section == section)
+            #expect(window.title == section.title)
+            try checkToolbarTitle(window)
+        }
+        for section in SettingsSection.allCases.reversed().dropFirst() {
+            list.keyDown(with: arrow(NSUpArrowFunctionKey, keyCode: 126, window: window))
+            await layout(window)
+            #expect(selection.section == section)
+            #expect(window.title == section.title)
+            try checkToolbarTitle(window)
+        }
+        #expect(window.toolbar?.items.isEmpty == true)
+        #expect(content.bounds.size == NSSize(width: 720, height: 500))
+        let originalFrame = window.frame
+        window.setFrame(NSRect(origin: originalFrame.origin, size: NSSize(width: 720, height: 560)), display: false)
+        await layout(window)
+        let resizedBottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
+        #expect(abs(resizedBottom - 10) <= 1)
+        window.setFrame(originalFrame, display: false)
+        await layout(window)
+        #expect(abs(scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY - 10) <= 1)
+    }
+
+    private func checkToolbarTitle(_ window: NSWindow) throws {
+        let frame = try #require(window.contentView?.superview)
+        let close = try #require(window.standardWindowButton(.closeButton))
+        let title = try #require(descendants(NSTextField.self, in: frame).first { $0.stringValue == window.title })
+        let closeFrame = close.convert(close.bounds, to: frame)
+        let titleFrame = title.convert(title.bounds, to: frame)
+        #expect(abs(closeFrame.midY - titleFrame.midY) <= 1)
+        #expect(titleFrame.minX > 200)
+        #expect(title.font?.pointSize == 15)
+        #expect(abs(frame.bounds.maxY - closeFrame.midY - 26) <= 1)
+    }
+
     private func appBundle() throws -> Bundle {
         let product = Bundle(for: SettingsTestResources.self).bundleURL.deletingLastPathComponent()
         return try #require(Bundle(url: product.appendingPathComponent("Capsaicin.app")))
@@ -304,3 +343,9 @@ private extension SettingsTests {
 }
 
 private final class SettingsTestResources: NSObject {}
+
+private final class SidebarRows: NSObject, NSTableViewDataSource {
+    func numberOfRows(in _: NSTableView) -> Int {
+        SettingsSection.allCases.count + 1
+    }
+}
