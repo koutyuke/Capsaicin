@@ -99,12 +99,21 @@ targets:
       - path: Sources/capsaicin-cli/CLIOutput.swift
       - path: Sources/capsaicin-cli/CLIRunner.swift
       - path: Sources/capsaicin-cli/CLISystem.swift
+      # アプリを起動せずに画面とモデルをテストするため、入口（@main）以外のアプリのソースを含める。
+      - path: Sources/Capsaicin
+        type: group
+        excludes:
+          - MenuBar/CapsaicinApp.swift
     dependencies:
       - target: Capsaicin
       - package: CapsaicinKit
         product: CapsaicinIPC
       - package: CapsaicinKit
         product: CapsaicinCore
+      - package: CapsaicinKit
+        product: CapsaicinCoreTesting
+      - package: CapsaicinKit
+        product: CapsaicinPlatform
     settings:
       base:
         # ホストアプリを起動せず、生成したバンドルを検査する。

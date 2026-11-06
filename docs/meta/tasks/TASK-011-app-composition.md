@@ -2,7 +2,7 @@
 schema: task
 id: TASK-011
 title: アプリの組み立てと起動・終了の流れを作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-003, TASK-004, TASK-005, TASK-006, TASK-007, TASK-008]
 assignee: OpenCode / GPT-6.1 Sol
@@ -73,4 +73,4 @@ Core の `BlockingController` に Platform の実装をつなぎ、アプリと�
 
 ## レビュー
 
-未実施。
+PM が差分を読んでレビューした。実際のポートを作るのは `AppComposition` の1か所だけで、モデルは偽物で組み立ててテストしている。正確な解除のためのタイマーと 1 分ごとの処理、終了時の確認ダイアログ（モーダル）を確認した。アプリのテストのターゲットに HUD のソースが入っていなかったので、PM が `project.yml` に足して `just check` と `just build` を通した。HUD の組み込みでは、解除の直前の状態を渡す（指定時刻の表示のため）。実機での確認は、承認を得て行う。

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-012
 title: 切り替えたときの画面表示（HUD）を作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -54,4 +54,4 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+PM がレビューした。描画した画像（ライト・ダーク）で、カプセルの形と `SPEC-HUD-002` の並びを確かめた。指定時刻での解除の表示に要る解除前のセッションは、組み込みのときにモデルから渡す。実機での動き、フォーカス、クリックの透過、複数の画面、VoiceOver の読み上げは未確認である。

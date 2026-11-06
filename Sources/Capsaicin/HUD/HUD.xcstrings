@@ -1,0 +1,114 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "hud.state.on": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "スリープ防止 オン" }
+        }
+      }
+    },
+    "hud.state.off": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "スリープ防止 オフ" }
+        }
+      }
+    },
+    "hud.state.notStarted": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "開始できません" }
+        }
+      }
+    },
+    "hud.condition.until": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "%@まで" } }
+      }
+    },
+    "hud.condition.for": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "%@" } }
+      }
+    },
+    "hud.reason.timer": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "タイマー終了" }
+        }
+      }
+    },
+    "hud.reason.time": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "指定時刻（%@）" }
+        }
+      }
+    },
+    "hud.reason.timeReached": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指定時刻になりました"
+          }
+        }
+      }
+    },
+    "hud.reason.battery": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "バッテリー %d%%" }
+        }
+      }
+    },
+    "hud.reason.batteryLowAtStart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "バッテリー残量不足" }
+        }
+      }
+    },
+    "hud.reason.helperUnavailableAtStart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "ヘルパー未構成" }
+        }
+      }
+    },
+    "hud.reason.applyFailedAtStart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "設定の適用に失敗" }
+        }
+      }
+    },
+    "hud.reason.stateSaveFailedAtStart": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状態を保存できません"
+          }
+        }
+      }
+    },
+    "hud.reason.unalignedRemaining": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一部を戻せませんでした"
+          }
+        }
+      }
+    },
+    "hud.announcement.a11y": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "%1$@、%2$@" } }
+      }
+    }
+  },
+  "version": "1.0"
+}

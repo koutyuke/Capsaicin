@@ -3,10 +3,12 @@ import SwiftUI
 
 @main
 struct CapsaicinApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+
     var body: some Scene {
         MenuBarExtra {
             Button {
-                NSApplication.shared.terminate(nil)
+                delegate.quitByUser()
             } label: {
                 Text("終了", tableName: "MenuBar")
             }

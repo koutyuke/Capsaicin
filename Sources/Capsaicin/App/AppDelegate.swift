@@ -1,0 +1,47 @@
+import AppKit
+import CapsaicinPlatform
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private(set) var runtime: AppRuntime?
+    private var startup: Task<Bool, Never>?
+    private var explicitUserQuit = false
+
+    func applicationDidFinishLaunching(_: Notification) {
+        do {
+            let runtime = try AppComposition.make()
+            self.runtime = runtime
+            let startup = Task { await runtime.start() }
+            self.startup = startup
+            Task {
+                if await !startup.value {
+                    NSApplication.shared.terminate(nil)
+                }
+            }
+        } catch {
+            AppRuntime.log(error)
+            NSApplication.shared.terminate(nil)
+        }
+    }
+
+    func quitByUser() {
+        // この terminate 呼び出しの間だけ有効にし、次の終了試行には持ち越さない。
+        explicitUserQuit = true
+        defer { explicitUserQuit = false }
+        NSApplication.shared.terminate(nil)
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let startup, let runtime else { return .terminateNow }
+        let reason = TerminationReasonDetector.classify(
+            explicitUserQuit: explicitUserQuit, appleEvent: NSAppleEventManager.shared().currentAppleEvent,
+        )
+        Task {
+            if await startup.value {
+                await runtime.terminate(reason: reason)
+            }
+            sender.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+}
