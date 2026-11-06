@@ -27,6 +27,7 @@ public protocol HelperSleepControlling {
     var isHelperInstalled: Bool { get }
     /// `SleepDisabled` を読む。読めなければ throw する。
     /// 実装は期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
+    /// 期限を過ぎた子プロセスは止めずに終わるまで見届け、その間の読み取りと操作は子プロセスを起動せずに throw する。
     func readSleepDisabled() throws -> Bool
     /// ヘルパーの `on`。実装は期限を持ち、期限切れは throw する。
     func turnOn() throws

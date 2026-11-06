@@ -2,7 +2,7 @@
 schema: task
 id: TASK-007
 title: CLI とアプリの通信路と、capsaicin コマンドを作る
-status: todo
+status: in_review
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -21,10 +21,13 @@ CLI とアプリをつなぐ Unix ドメインソケットの通信路と、`cap
 - `Packages/CapsaicinKit/Sources/CapsaicinIPC/` の通信路のためのファイル（新しいサブディレクトリにまとめる）
 - `Packages/CapsaicinKit/Tests/CapsaicinIPCTests/` の通信路のテスト
 - `Sources/capsaicin-cli/`
+- `Sources/Capsaicin/CLI/CLI.xcstrings`（CLI 用カタログだけ）
+- `Tests/CapsaicinTests/`（CLI のロジック・バンドル・カタログの検査）
+- `project.yml`（CLI の package product 依存と、CLI ロジックをホストなしテストへ取り込む指定だけ）
 
 既存の `IPCMessages.swift`、`IPCCoding.swift`、`CLIArguments.swift`、`ExitCode.swift` は、通信路に必要な最小限の変更だけをしてよい。変更したら理由を報告する。
 
-触らない: `CapsaicinCore`、`CapsaicinPlatform`、`Package.swift`、アプリ、ヘルパー、`docs/`、`project.yml`。ほかの場所の変更が必要なら、変更せずに報告する。
+触らない: `CapsaicinCore`、`CapsaicinPlatform`、`Package.swift`、上記カタログ以外のアプリ、ヘルパー、`docs/`。ほかの場所の変更が必要なら、変更せずに報告する。
 
 ## 作るもの
 
@@ -54,9 +57,9 @@ CLI とアプリをつなぐ Unix ドメインソケットの通信路と、`cap
 
 文言の正本は String Catalog にする（`SPEC-UI-011`）。CLI はバンドルを持たないので、カタログをどこに置き、どう読むかを決め、理由を報告する。
 
-- たとえば、アプリのバンドルに CLI 用のテーブルを置き、CLI が自分を含む `.app` のバンドルから読む方法がある。
+- `Sources/Capsaicin/CLI/CLI.xcstrings` をアプリのバンドルへ収録し、CLI が自分を含む `.app` のバンドルから `CLI` テーブルを読む。
 - 文言は仮のものでよい。最終の文言は別のチケットで入れる。
-- カタログの置き場所が `project.yml` の変更を要するなら、変更せずに必要な変更を報告する。
+- `project.yml` の変更は、上の「範囲」に示した依存・テスト指定に限る。
 
 ## 守ること
 
@@ -87,4 +90,27 @@ CLI とアプリをつなぐ Unix ドメインソケットの通信路と、`cap
 
 ## レビュー
 
-未実施。
+初回の独立レビューで P2 が2件あり、修正後の独立再レビューで両方の解消を確認した。
+
+- クライアントが要求と応答の種類を照合していない。`off` に `.status` が返る場合などをプロトコルエラーとして拒否し、CLI は69と標準エラー出力で失敗を伝える。失敗後に再接続・再送しない。
+- 未対応バージョンを通常の handler へ渡している。元の実装は `Result.failure` として渡しており、実際に Core 操作が実行されたことを示す指摘ではない。PM は境界を明確にするため、通常の handler は検証済みの `IPCRequest` だけを受け取る契約とし、未対応版は handler を呼ばず接続を閉じる。拒否応答のための偽の状態や、別の状態取得 API は追加しない。
+
+実ソケットの不一致応答と未対応版で回帰を検証した。ヘルパーの独立した警告と wire version 2 の追補は、Core の追補後に `TASK-006` で実装した。追補の独立レビューは初回実装と分けて行う。
+
+修正担当は2件を6ファイルで修正した。実ソケットによる RED は26ケース中13ケース失敗、15 assertion であり、並列待ちによる別の失敗とは分けて取得した。最終ソースの SwiftPM 39テスト・8スイートと、生成後のホストなし CLI テスト10件が成功した。対象6ファイルの整形差分と strict SwiftLint の違反は0件で、証跡は `.build/task007-fixes-{red,green,style}.log` にある。
+
+Astra / medium の独立再レビューはブロッカーなしだった。全24組の応答照合、不一致時の切断とエラー伝播、未対応版・未知コマンドの handler 予約0回・実行0回、CLI の再接続・再送なしを確認した。期限・generation・MainActor の開始判定も維持されている。PM の最終 `check`・`build` が受け入れ条件として残る。
+
+## 実装の検証
+
+実装担当は、SwiftPM の対象38テスト・8スイートと、生成後のホストなしアプリテスト21件の成功を報告した。対象 Swift の整形差分はなく、strict SwiftLint は違反0件だった。初期 RED は未実装型と共有 CLI ソースの不足によるコンパイル・生成失敗である。証跡は `.build/task007-{final,ipc-test,cli-test,lint}.log` にある。
+
+標準の全体 `just check`・`just build` は、全 writer の終了後に PM が実行する。実機のアプリ起動・launchd 引き渡しと、Gemini による仮文言の検討は未実施である。
+
+## 実装と検証の分担
+
+通信路と CLI は同じ担当が実装し、公開 API の不一致を避ける。通信路は一時ソケット、CLI は偽の接続・起動処理で検証する。CLI のエントリーポイント以外のソースをホストなしテストへ取り込み、新しいモジュールは増やさない。
+
+既存バンドル検査の不正引数と終了コード 64 は維持する。テスト名の「雛形」は実装後の内容に合わせて直す。ヘルパーへ有効な `on`・`off` を渡す検査には変えない。
+
+実装担当が対象テストと整形・lint、独立レビュアーが認証・資源所有・期限・再送禁止の契約、PM が全体の `check`・`build` を担当する。CLI の日本語は仮文言とし、後続の Gemini による文言検討へ引き継ぐ。

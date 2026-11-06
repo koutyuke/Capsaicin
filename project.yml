@@ -71,6 +71,11 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.cli
         # tool の ad-hoc 署名は bundle ID だけでは識別子が固定されない。
         OTHER_CODE_SIGN_FLAGS: "$(inherited) --identifier $(PRODUCT_BUNDLE_IDENTIFIER)"
+    dependencies:
+      - package: CapsaicinKit
+        product: CapsaicinIPC
+      - package: CapsaicinKit
+        product: CapsaicinCore
   capsaicin-helper:
     type: tool
     platform: macOS
@@ -90,8 +95,16 @@ targets:
     sources:
       - path: Tests/CapsaicinTests
         type: syncedFolder
+      - path: Sources/capsaicin-cli/CLIApplication.swift
+      - path: Sources/capsaicin-cli/CLIOutput.swift
+      - path: Sources/capsaicin-cli/CLIRunner.swift
+      - path: Sources/capsaicin-cli/CLISystem.swift
     dependencies:
       - target: Capsaicin
+      - package: CapsaicinKit
+        product: CapsaicinIPC
+      - package: CapsaicinKit
+        product: CapsaicinCore
     settings:
       base:
         # ホストアプリを起動せず、生成したバンドルを検査する。

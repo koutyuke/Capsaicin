@@ -17,18 +17,30 @@ func menuBarApplicationBundle() throws {
     #expect(app.url(forResource: "MenuBar", withExtension: "strings", subdirectory: "ja.lproj") != nil)
 }
 
-@Test("埋め込んだ雛形の実行ファイルはすべての入力を拒否する")
+@Test("埋め込んだ実行ファイルは不正な引数を終了コード64で拒否する")
 func embeddedExecutablesRejectArguments() throws {
     let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
     for name in ["capsaicin", "capsaicin-helper"] {
         for arguments in [[], ["--help"], ["unexpected", "argument"]] {
             let process = Process()
+            let output = Pipe()
+            let error = Pipe()
             process.executableURL = products.appending(path: "Capsaicin.app/Contents/Helpers/\(name)")
             process.arguments = arguments
+            process.standardOutput = output
+            process.standardError = error
             try process.run()
+            let standardOutput = output.fileHandleForReading.readDataToEndOfFile()
+            let standardError = error.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
             #expect(process.terminationReason == .exit)
             #expect(process.terminationStatus == 64)
+            if name == "capsaicin" {
+                #expect(standardOutput.isEmpty)
+                let diagnostic = try #require(String(data: standardError, encoding: .utf8))
+                // native CLI の実行パス解決と、アプリからのカタログ読み込みも確かめる。
+                #expect(diagnostic.contains("使い方:"))
+            }
         }
     }
 }

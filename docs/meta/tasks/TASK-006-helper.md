@@ -2,7 +2,7 @@
 schema: task
 id: TASK-006
 title: ヘルパーと、その呼び出し・設置・削除を作る
-status: todo
+status: in_progress
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -46,8 +46,8 @@ root で動くコードと管理者認証を扱うので、ほかのチケット
 
 - `turnOn` と `turnOff` は、`/usr/bin/sudo -n <ヘルパーの固定パス> on|off` を、シェルを介さずに実行する。
   - 子の環境変数は最小にする。
-  - 期限を持ち、期限切れは throw する（ポートのコメントのとおり）。期限の値は 5 秒以下で決め、理由を報告する。
-- `readSleepDisabled` は、`EVID-BLK-003` の方法か、それと同じ値を一般ユーザーの権限で読める方法で実装し、選んだ理由を報告する。読めなければ throw する。
+  - 期限は 5 秒とし、過ぎたら throw する。期限を過ぎても子プロセスは止めずに終わるまで見届け、その間に来た `turnOn`、`turnOff`、`readSleepDisabled` は子プロセスを起動せずに throw する（`SPEC-HLP-005`）。
+- `readSleepDisabled` は、`EVID-BLK-003` の方法か、それと同じ値を一般ユーザーの権限で読める方法で実装し、選んだ理由を報告する。読めなければ throw する。期限と見届けの規則は `turnOn` と同じにする。
 - `isHelperInstalled` は、3つの構成要素がそろっているときだけ真にする。
 
 ### 3. インストールの状態の判定
@@ -97,4 +97,5 @@ Debug ビルドは、置き場所の名前、sudoers のファイル名、Launch
 
 ## レビュー
 
-未実施。
+- C ヘルパー（上の 1）は先に実装し、独立レビューで指摘はなかった。不正な引数の拒否、固定のコマンドと空の環境を、本番の `on`・`off` を実行せずに確かめている。
+- 2026-11-06: Codex が PM だった間に、Mac の起動ごとの journal、UID 共通のロック、Debug と Release の間の所有の引き渡しからなる「安全ゲート」が足された。期限切れへの対策としては過剰なので、利用者の承認を得て取りやめ、`SPEC-HLP-005` の期限と見届けの規則に置き換えた。

@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-LCY-005
 title: セッションの終了による終了を、利用者の終了と区別できる
 status: open
-affects: ["DEC-LCY-003", "REQ-LCY-004", "SPEC-LCY-002", "SPEC-LCY-007"]
+affects: ["DEC-LCY-003", "DEC-LCY-004", "REQ-LCY-004", "SPEC-LCY-002", "SPEC-LCY-007"]
 evidence: []
 ---
 
@@ -30,4 +30,4 @@ LaunchAgent の登録は永続的なシステム変更なので、承認を得�
 
 ## 結果
 
-未確認。
+未確認。理由を判定できない場合の扱いは `DEC-LCY-004` に従う。この方針の採用は、OS で理由を取得できることの検証結果ではない。

@@ -48,7 +48,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LCY-004", "SPEC-LCY-006", "SPEC-LCY-007"]
 depends_on = []
-sources = ["DEC-LCY-003"]
+sources = ["DEC-LCY-003", "DEC-LCY-004"]
 
 [[requirements]]
 id = "REQ-LCY-005"

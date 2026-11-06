@@ -69,6 +69,16 @@ public extension BlockingController {
         }
     }
 
+    /// 理由不明の終了。セッションを消して後片付けし、自動再開や終了を妨げるダイアログは要求しない。
+    func terminateForUnknownReason() {
+        notifyingWarnings {
+            restoreStopped(clearingCrashLaunches: true)
+            record.exitReason = nil
+            record.isRunning = false
+            saveRecord()
+        }
+    }
+
     /// ヘルパーの削除の処理の最初に `pmset -a disablesleep 0` を実行するか。
     func resetsSleepDisabledOnHelperRemoval() -> Bool {
         SleepDisabledOwnership.resetsOnHelperRemoval(

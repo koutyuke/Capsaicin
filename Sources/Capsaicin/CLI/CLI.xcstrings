@@ -1,0 +1,490 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "outcome.started": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抑止を開始しました。"
+          }
+        }
+      }
+    },
+    "outcome.alreadyBlocking": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すでに抑止中です。指定した条件は適用していません。"
+          }
+        }
+      }
+    },
+    "outcome.released": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抑止を解除しました。"
+          }
+        }
+      }
+    },
+    "outcome.alreadyStopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すでに停止中です。"
+          }
+        }
+      }
+    },
+    "outcome.rejected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抑止を開始できません。%@"
+          }
+        }
+      }
+    },
+    "outcome.disabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定で CLI からの操作を受け付けないようになっています。"
+          }
+        }
+      }
+    },
+    "error.version": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとコマンドの通信形式のバージョンが異なります。"
+          }
+        }
+      }
+    },
+    "error.connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとの通信を完了できませんでした。要求を送った後の失敗では、操作が実行済みの場合があります。"
+          }
+        }
+      }
+    },
+    "error.timeout": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとの通信が期限内に完了しませんでした。要求を送った後の失敗では、操作が実行済みの場合があります。"
+          }
+        }
+      }
+    },
+    "error.launch": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このコマンドを含むアプリを起動できませんでした。"
+          }
+        }
+      }
+    },
+    "error.protocol": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとの通信で正しい応答を受け取れませんでした。"
+          }
+        }
+      }
+    },
+    "error.authentication": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとの安全な接続を確認できませんでした。"
+          }
+        }
+      }
+    },
+    "error.usage": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 使い方: capsaicin on [--for <時間> | --until <時刻>] / off / status"
+          }
+        }
+      }
+    },
+    "argument.missingCommand": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サブコマンドを指定してください。"
+          }
+        }
+      }
+    },
+    "argument.unknownCommand": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不明なサブコマンドです: %@。"
+          }
+        }
+      }
+    },
+    "argument.unexpected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受け付けない引数です: %@。"
+          }
+        }
+      }
+    },
+    "argument.missingValue": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ の値を指定してください。"
+          }
+        }
+      }
+    },
+    "argument.duplicate": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ は1回だけ指定できます。"
+          }
+        }
+      }
+    },
+    "argument.conflicting": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "--for と --until は同時に指定できません。"
+          }
+        }
+      }
+    },
+    "argument.invalidDuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間の書式が正しくありません: %@。例: 1h30m。"
+          }
+        }
+      }
+    },
+    "argument.durationOutOfRange": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間は1分〜24時間で指定してください: %@。"
+          }
+        }
+      }
+    },
+    "argument.invalidTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻の書式が正しくありません: %@。例: 4:00。"
+          }
+        }
+      }
+    },
+    "status.blocking": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "抑止中"
+          }
+        }
+      }
+    },
+    "status.stopped": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止中"
+          }
+        }
+      }
+    },
+    "condition.timer": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タイマー: %@ に解除"
+          }
+        }
+      }
+    },
+    "condition.specifiedTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指定時刻: %@ に解除"
+          }
+        }
+      }
+    },
+    "condition.battery": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量 %@%% 未満で解除"
+          }
+        }
+      }
+    },
+    "condition.ignoresAC": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "（電源アダプター接続中は無視）"
+          }
+        }
+      }
+    },
+    "condition.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動解除の条件なし"
+          }
+        }
+      }
+    },
+    "warning.misalignment": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告: %@ %@"
+          }
+        }
+      }
+    },
+    "warning.unsaved": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告: 再開用の記録を保存できていません"
+          }
+        }
+      }
+    },
+    "direction.leftApplied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "を戻せていません"
+          }
+        }
+      }
+    },
+    "direction.notApplied": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "を適用できていません"
+          }
+        }
+      }
+    },
+    "mechanism.systemSleepDisabled": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動スリープの抑止"
+          }
+        }
+      }
+    },
+    "mechanism.lidSleepControl": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蓋閉じスリープの制御"
+          }
+        }
+      }
+    },
+    "mechanism.idleSleepAssertion": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動スリープの抑止"
+          }
+        }
+      }
+    },
+    "mechanism.displaySleepAssertion": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面の自動消灯の抑止"
+          }
+        }
+      }
+    },
+    "mechanism.led": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caps Lock の LED"
+          }
+        }
+      }
+    },
+    "rejection.battery": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量がしきい値を下回っています。"
+          }
+        }
+      }
+    },
+    "rejection.helper": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "必要なヘルパーが設置されていません。"
+          }
+        }
+      }
+    },
+    "rejection.mechanisms": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "必要な制御を適用できませんでした: %@。"
+          }
+        }
+      }
+    },
+    "rejection.record": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再開用の記録を保存できません。"
+          }
+        }
+      }
+    },
+    "format.separator": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " / "
+          }
+        }
+      }
+    },
+    "format.listSeparator": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "、"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

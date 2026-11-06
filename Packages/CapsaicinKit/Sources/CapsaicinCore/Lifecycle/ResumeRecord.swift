@@ -13,6 +13,7 @@ public struct ResumeRecord: Hashable, Sendable {
     public var ownsSleepDisabled = false
     /// アプリが動いている間だけ立つ印。
     public var isRunning = false
+    /// 正常終了の理由。実行中の印が下りていて nil なら、理由不明の終了。
     public var exitReason: ExitReason?
     public var misalignments: Misalignments = [:]
     /// 記録を最後に書いた壁時計の時刻。
