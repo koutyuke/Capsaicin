@@ -52,6 +52,17 @@ struct HUDContentTests {
         #expect(try value.announcement == "スリープ防止 オン、\(#require(value.detail))")
     }
 
+    @Test("SPEC-HUD-002 開始から HUD を作るまでの遅れでタイマーの時間を1分少なく出さない", arguments: [3600, 7200])
+    func startWithTimerAfterDelay(seconds: Double) throws {
+        var status = status
+        status.session = BlockingSession(timeLimit: TimeLimit(
+            date: Date(timeIntervalSince1970: seconds - 0.01),
+            source: .timer,
+        ))
+        let value = try content(.started(.user(.menu)), status: status)
+        #expect(value.detail == (seconds == 3600 ? "1時間" : "2時間"))
+    }
+
     @Test("SPEC-HUD-002 手動解除は輪郭のアイコンと状態だけを出す")
     func manualRelease() throws {
         let value = try content(.released(.user(.menu)))

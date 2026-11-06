@@ -34,10 +34,9 @@ struct HUDContent: Equatable {
                 formatter.calendar = calendar
                 formatter.allowedUnits = [.hour, .minute]
                 formatter.unitsStyle = .abbreviated
-                return String(
-                    format: text("hud.condition.for"),
-                    formatter.string(from: max(60, limit.date.timeIntervalSince(now))) ?? "",
-                )
+                // 開始から HUD を作るまでの遅れで端数の分が切り捨てられ、1分少なく出ないよう分に丸める。
+                let minutes = max(1, (limit.date.timeIntervalSince(now) / 60).rounded())
+                return String(format: text("hud.condition.for"), formatter.string(from: minutes * 60) ?? "")
             }
             return Self(symbol: "capslock.fill", state: text("hud.state.on"), detail: detail, bundle: bundle)
         case let .startRejected(_, reason):
