@@ -6,7 +6,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "防止中にCaps Lock LEDを点灯"
+            "value": "スリープ防止中にCaps LockのLEDを点灯"
           }
         }
       }

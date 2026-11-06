@@ -59,7 +59,7 @@
     "hud.reason.battery": {
       "localizations": {
         "ja": {
-          "stringUnit": { "state": "translated", "value": "バッテリー %d%%" }
+          "stringUnit": { "state": "translated", "value": "バッテリー%d%%" }
         }
       }
     },
@@ -73,7 +73,7 @@
     "hud.reason.helperUnavailableAtStart": {
       "localizations": {
         "ja": {
-          "stringUnit": { "state": "translated", "value": "ヘルパー未構成" }
+          "stringUnit": { "state": "translated", "value": "ヘルパー未準備" }
         }
       }
     },
@@ -99,7 +99,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "一部を戻せませんでした"
+            "value": "一部を戻せません"
           }
         }
       }

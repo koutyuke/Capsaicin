@@ -86,14 +86,14 @@ struct HUDContentTests {
             threshold: #require(BatteryThreshold(percent: 20)),
             ignoresOnACPower: false,
         )
-        #expect(try content(.released(.batteryBelowThreshold), status: status).detail == "バッテリー 20%")
+        #expect(try content(.released(.batteryBelowThreshold), status: status).detail == "バッテリー20%")
     }
 
     @Test("SPEC-HUD-002 開始拒否は理由を区別する")
     func rejectionReasons() throws {
         let cases: [(StartRejection, String)] = [
             (.batteryBelowThreshold, "バッテリー残量不足"),
-            (.helperNotInstalled, "ヘルパー未構成"),
+            (.helperNotInstalled, "ヘルパー未準備"),
             (.mechanismsFailed([.idleSleepAssertion]), "設定の適用に失敗"),
             (.recordNotSaved, "状態を保存できません"),
         ]
@@ -116,7 +116,7 @@ struct HUDContentTests {
             .batteryBelowThreshold,
         ] {
             let value = try content(.released(reason), status: status)
-            #expect(value.detail == "一部を戻せませんでした")
+            #expect(value.detail == "一部を戻せません")
             #expect(value.symbol == "capslock")
             #expect(value.state == "スリープ防止 オフ")
         }

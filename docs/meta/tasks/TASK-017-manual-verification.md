@@ -2,7 +2,7 @@
 schema: task
 id: TASK-017
 title: 実機での確認の手順書を作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-015]
 assignee: OpenCode / GPT-6.1 Sol
@@ -87,4 +87,4 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+PM がレビューした。9節の各手順に、開始前の状態の退避、中止の条件、元に戻す方法があり、削除は `trash` で行い、読み込み済みのジョブを勝手に `bootout` しない。ラベル、パス、ソケットの場所はソースと一致している。手順の実行はオーナーが行う。

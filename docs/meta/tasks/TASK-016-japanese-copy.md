@@ -2,10 +2,10 @@
 schema: task
 id: TASK-016
 title: アプリの日本語の文言を仕上げる
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-013, TASK-014]
-assignee: Antigravity / Gemini 3.8 Flash
+assignee: OpenCode / GPT-6.1 Sol（Gemini の利用上限のため、利用者の指示で交代）
 ---
 
 # TASK-016 アプリの日本語の文言を仕上げる
@@ -34,4 +34,4 @@ assignee: Antigravity / Gemini 3.8 Flash
 
 ## レビュー
 
-未実施。
+Gemini の利用上限のため、利用者の指示で Codex が `yomiyasu` の手順に従って推敲した。10 カタログ 201 キーのうち 55 キーを変えた。PM が全変更を読み、用語（スリープ防止のオン・オフ）、手動スリープの説明が `SPEC-BLK-001` と合うこと、HUD の理由の短さを確かめた。HUD のテストの期待値は文字列だけを合わせた。`just check` が通った。実画面での収まりと VoiceOver の読み上げは未確認である。

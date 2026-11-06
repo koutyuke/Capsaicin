@@ -7,7 +7,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "抑止を開始しました。"
+            "value": "スリープ防止をオンにしました。"
           }
         }
       }
@@ -18,7 +18,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すでに抑止中です。指定した条件は適用していません。"
+            "value": "スリープ防止はすでにオンです。指定した条件は適用していません。"
           }
         }
       }
@@ -29,7 +29,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "抑止を解除しました。"
+            "value": "スリープ防止をオフにしました。"
           }
         }
       }
@@ -40,7 +40,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "すでに停止中です。"
+            "value": "スリープ防止はすでにオフです。"
           }
         }
       }
@@ -51,7 +51,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "抑止を開始できません。%@"
+            "value": "スリープ防止をオンにできません。%@"
           }
         }
       }
@@ -62,7 +62,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "設定で CLI からの操作を受け付けないようになっています。"
+            "value": "設定でCLIからの操作が許可されていません。"
           }
         }
       }
@@ -84,7 +84,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "アプリとの通信を完了できませんでした。要求を送った後の失敗では、操作が実行済みの場合があります。"
+            "value": "アプリとの通信を完了できませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
           }
         }
       }
@@ -95,7 +95,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "アプリとの通信が期限内に完了しませんでした。要求を送った後の失敗では、操作が実行済みの場合があります。"
+            "value": "アプリとの通信が制限時間内に完了しませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
           }
         }
       }
@@ -161,7 +161,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "不明なサブコマンドです: %@。"
+            "value": "%@ は不明なサブコマンドです。"
           }
         }
       }
@@ -172,7 +172,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "受け付けない引数です: %@。"
+            "value": "%@ は受け付けない引数です。"
           }
         }
       }
@@ -216,7 +216,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "時間の書式が正しくありません: %@。例: 1h30m。"
+            "value": "%@ は時間の書式が正しくありません。例: 1h30m"
           }
         }
       }
@@ -227,7 +227,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "時間は1分〜24時間で指定してください: %@。"
+            "value": "%@ は指定できる時間の範囲外です。1分〜24時間で指定してください。"
           }
         }
       }
@@ -238,7 +238,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "時刻の書式が正しくありません: %@。例: 4:00。"
+            "value": "%@ は時刻の書式が正しくありません。例: 4:00"
           }
         }
       }
@@ -249,7 +249,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "抑止中"
+            "value": "スリープ防止: オン"
           }
         }
       }
@@ -260,7 +260,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "停止中"
+            "value": "スリープ防止: オフ"
           }
         }
       }
@@ -271,7 +271,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "タイマー: %@ に解除"
+            "value": "タイマー: %@にオフ"
           }
         }
       }
@@ -282,7 +282,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "指定時刻: %@ に解除"
+            "value": "指定時刻: %@にオフ"
           }
         }
       }
@@ -293,7 +293,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "バッテリー残量 %@%% 未満で解除"
+            "value": "バッテリー残量%@%%未満でオフ"
           }
         }
       }
@@ -304,7 +304,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "（電源アダプター接続中は無視）"
+            "value": "（電源アダプタ接続中は残量で解除しない）"
           }
         }
       }
@@ -326,7 +326,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "警告: %@ %@"
+            "value": "警告: %@%@"
           }
         }
       }
@@ -337,7 +337,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "警告: 再開用の記録を保存できていません"
+            "value": "警告: 状態を保存できていません"
           }
         }
       }
@@ -348,7 +348,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "を戻せていません"
+            "value": "を元に戻せていません"
           }
         }
       }
@@ -370,7 +370,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "手動スリープの抑止"
+            "value": "手動スリープ防止の設定"
           }
         }
       }
@@ -381,7 +381,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "蓋閉じスリープの制御"
+            "value": "蓋閉じスリープ防止の設定"
           }
         }
       }
@@ -392,7 +392,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "自動スリープの抑止"
+            "value": "自動スリープ防止の設定"
           }
         }
       }
@@ -403,7 +403,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "画面の自動消灯の抑止"
+            "value": "画面の自動消灯を防ぐ設定"
           }
         }
       }
@@ -414,7 +414,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Caps Lock の LED"
+            "value": "Caps LockのLED設定"
           }
         }
       }
@@ -436,7 +436,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "必要なヘルパーが設置されていません。"
+            "value": "ヘルパーが正しくインストールされていません。設定の「ヘルパー」でインストールまたは修復してください。"
           }
         }
       }
@@ -447,7 +447,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "必要な制御を適用できませんでした: %@。"
+            "value": "必要な設定を適用できませんでした: %@。"
           }
         }
       }
