@@ -16,6 +16,9 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
 packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    exactVersion: 3.1.0
   CapsaicinKit:
     path: Packages/CapsaicinKit
 targets:
@@ -38,6 +41,7 @@ targets:
         Debug:
           PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.debug
     dependencies:
+      - package: KeyboardShortcuts
       - package: CapsaicinKit
         product: CapsaicinCore
       - package: CapsaicinKit
@@ -105,6 +109,7 @@ targets:
         excludes:
           - MenuBar/CapsaicinApp.swift
     dependencies:
+      - package: KeyboardShortcuts
       - target: Capsaicin
       - package: CapsaicinKit
         product: CapsaicinIPC

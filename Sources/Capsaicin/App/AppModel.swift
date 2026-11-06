@@ -20,7 +20,8 @@ final class AppModel {
         launchAgentStatus == .ready
     }
 
-    @ObservationIgnored var onEvent: ((BlockingEvent) -> Void)?
+    /// 出来事と、その直前のセッション（指定時刻で解除したときの表示に使う）。
+    @ObservationIgnored var onEvent: ((BlockingEvent, BlockingSession?) -> Void)?
     @ObservationIgnored var onAlert: ((AppAlert) -> Void)?
     @ObservationIgnored var onStatusChange: ((BlockingStatus) -> Void)?
     @ObservationIgnored var onLaunchAtLoginChange: ((Bool) -> Void)?
@@ -34,8 +35,10 @@ final class AppModel {
         settings = controller.settings
         capabilities = controller.capabilities
         controller.onEvent = { [weak self] event in
-            self?.refresh()
-            self?.onEvent?(event)
+            guard let self else { return }
+            let previousSession = status.session
+            refresh()
+            onEvent?(event, previousSession)
         }
     }
 

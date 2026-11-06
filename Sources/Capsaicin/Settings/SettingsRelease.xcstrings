@@ -1,0 +1,206 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "battery.group.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー"
+          }
+        }
+      }
+    },
+    "battery.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量がしきい値を下回ったときに、スリープ防止を自動でオフにして電池切れを防ぎます。"
+          }
+        }
+      }
+    },
+    "battery.ignoreOnAdapter.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電源アダプタに接続されている間は、バッテリー残量がしきい値を下回ってもスリープ防止を継続します。"
+          }
+        }
+      }
+    },
+    "battery.ignoreOnAdapter.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電源アダプタ接続時は残量で解除しない"
+          }
+        }
+      }
+    },
+    "battery.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量"
+          }
+        }
+      }
+    },
+    "battery.threshold.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量による解除がオンのときに変更できます。"
+          }
+        }
+      }
+    },
+    "battery.threshold.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "しきい値"
+          }
+        }
+      }
+    },
+    "battery.threshold.value": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d%%"
+          }
+        }
+      }
+    },
+    "hours": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間"
+          }
+        }
+      }
+    },
+    "minutes": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分"
+          }
+        }
+      }
+    },
+    "time.group.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時間による解除"
+          }
+        }
+      }
+    },
+    "time.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指定した時刻に自動解除します。現在時刻を過ぎている場合は、翌日の同時刻に解除されます。"
+          }
+        }
+      }
+    },
+    "time.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指定時刻"
+          }
+        }
+      }
+    },
+    "time.value.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "指定時刻がオンのときに変更できます。"
+          }
+        }
+      }
+    },
+    "time.value.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "終了時刻"
+          }
+        }
+      }
+    },
+    "timer.duration.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の数値"
+          }
+        }
+      }
+    },
+    "timer.duration.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タイマーがオンのときに変更できます。"
+          }
+        }
+      }
+    },
+    "timer.duration.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "継続時間"
+          }
+        }
+      }
+    },
+    "timer.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タイマー"
+          }
+        }
+      }
+    },
+    "title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解除の条件"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

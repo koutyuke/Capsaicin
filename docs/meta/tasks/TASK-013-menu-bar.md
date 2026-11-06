@@ -2,7 +2,7 @@
 schema: task
 id: TASK-013
 title: メニューバーのメニューと入力パネルを作り、HUD をつなぐ
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-011, TASK-012]
 assignee: OpenCode / GPT-6.1 Sol
@@ -64,4 +64,4 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+PM がレビューした。メニューは項目の並びを作る関数にまとめてテストしており、HUD を出すかの判断は `SPEC-HUD-001` のとおりである。部品は標準の `NSMenu` と SwiftUI を使っている。出来事の通知の口が2つ重なっていたので、PM が「出来事と直前のセッション」を渡す1つにまとめた。`just check` と `just build` が通った。実機での操作、VoiceOver、メニューを開いたままの更新は未確認である。

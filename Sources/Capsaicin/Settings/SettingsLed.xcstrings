@@ -1,0 +1,46 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "enabled.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "防止中にCaps Lock LEDを点灯"
+          }
+        }
+      }
+    },
+    "karabiner.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karabiner-ElementsがLEDの状態を上書きするため、スリープ防止中であってもLEDが消灯することがあります。入力機能には影響ありません。"
+          }
+        }
+      }
+    },
+    "karabiner.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karabiner-Elementsが動作中"
+          }
+        }
+      }
+    },
+    "title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LED"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -1,0 +1,156 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "cli.group.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コマンドライン"
+          }
+        }
+      }
+    },
+    "cli.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ターミナルから capsaicin on [--for 1h | --until 4:00]、capsaicin off、capsaicin status で操作できます。オフにするとコマンドはエラーを表示し、何も変えません。"
+          }
+        }
+      }
+    },
+    "cli.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CLIからの操作を許可"
+          }
+        }
+      }
+    },
+    "cli.path.copied.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コピー完了"
+          }
+        }
+      }
+    },
+    "cli.path.copy.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パスをコピー"
+          }
+        }
+      }
+    },
+    "cli.path.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ターミナルで直接実行するには、このパスへのシンボリックリンクやエイリアスを作成してください（例: ln -s \"パス\" ~/.local/bin/capsaicin）。アプリによる自動作成や管理者権限の要求は行いません。"
+          }
+        }
+      }
+    },
+    "cli.path.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コマンドの場所"
+          }
+        }
+      }
+    },
+    "hotkey.clear.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ショートカットを消去"
+          }
+        }
+      }
+    },
+    "hotkey.error.taken": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このショートカットは他の機能で使用されています。"
+          }
+        }
+      }
+    },
+    "hotkey.group.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホットキー"
+          }
+        }
+      }
+    },
+    "hotkey.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ホットキーでスリープ防止をオンにしたときは、「解除の条件」で設定された条件が適用されます。"
+          }
+        }
+      }
+    },
+    "hotkey.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スリープ防止の切り替え"
+          }
+        }
+      }
+    },
+    "hotkey.placeholder": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーを記録"
+          }
+        }
+      }
+    },
+    "hotkey.recording": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーを入力…"
+          }
+        }
+      }
+    },
+    "title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

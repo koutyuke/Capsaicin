@@ -1,0 +1,196 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "display.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一定時間操作がないときの画面消灯を防ぎます。これをオンにすると、システム全体の自動スリープも連動して防止されます。"
+          }
+        }
+      }
+    },
+    "display.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画面の自動消灯"
+          }
+        }
+      }
+    },
+    "group.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スリープの種類"
+          }
+        }
+      }
+    },
+    "helperNotReady": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルパーが未構成のため防止できません。「ヘルパー」の「修復…」を実行してください。"
+          }
+        }
+      }
+    },
+    "helperNotReady.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ヘルパー未構成の警告"
+          }
+        }
+      }
+    },
+    "idle.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一定時間操作がないときのMac全体のスリープを防ぎます。画面の消灯は「画面の自動消灯」で個別に設定できます。"
+          }
+        }
+      }
+    },
+    "idle.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動スリープ"
+          }
+        }
+      }
+    },
+    "implied.byDisplay": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「画面の自動消灯」がオンのため、このスリープも防止されます。"
+          }
+        }
+      }
+    },
+    "implied.byManual": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「手動スリープ」がオンのため、このスリープも防止されます。"
+          }
+        }
+      }
+    },
+    "implied.byManualAndLid": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「手動および蓋閉じスリープ」がオンのため、このスリープも防止されます。"
+          }
+        }
+      }
+    },
+    "lid.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MacBookの蓋（ディスプレイ）を閉じてもスリープさせず、処理を継続させます。"
+          }
+        }
+      }
+    },
+    "lid.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蓋閉じスリープ"
+          }
+        }
+      }
+    },
+    "lidDisplayOff.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蓋閉じスリープの防止中に有効です。画面を消灯して消費電力を抑えつつ、Macの動作を維持します。"
+          }
+        }
+      }
+    },
+    "lidDisplayOff.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "蓋を閉じたときに画面を消灯"
+          }
+        }
+      }
+    },
+    "manual.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アップルメニューの「スリープ」などによる手動のスリープを防ぎます。これをオンにすると他のスリープもすべて防止されます。有効化には管理者パスワードによるヘルパーのインストールが必要です。"
+          }
+        }
+      }
+    },
+    "manual.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動スリープ"
+          }
+        }
+      }
+    },
+    "manualAndLid.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動スリープと蓋閉じスリープを防ぎます。macOSの仕様上これらは個別に防止できず、オンにすると他のスリープも連動して防止されます。有効化にはヘルパーのインストールが必要です。"
+          }
+        }
+      }
+    },
+    "manualAndLid.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動および蓋閉じスリープ"
+          }
+        }
+      }
+    },
+    "title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "防止するスリープ"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

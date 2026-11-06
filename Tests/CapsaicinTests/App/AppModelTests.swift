@@ -10,7 +10,7 @@ struct AppModelTests {
     func requests() {
         let fixture = AppFixture()
         var events: [BlockingEvent] = []
-        fixture.model.onEvent = { events.append($0) }
+        fixture.model.onEvent = { event, _ in events.append(event) }
         fixture.model.launch()
         #expect(fixture.model.requestStart(from: .menu) == .started)
         #expect(fixture.model.status.isBlocking)

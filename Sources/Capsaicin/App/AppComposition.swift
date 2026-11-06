@@ -85,6 +85,8 @@ private final class AppServices {
     let karabiner: KarabinerElementsMonitor
     let display: DisplaySleep
     let server: IPCServer
+    private let menuBar: MenuBarController
+    private let hud: HUDPresenter
     private var minuteTimer: Timer?
     private var releaseTimer: Timer?
     private var wakeObserver: any NSObjectProtocol?
@@ -99,13 +101,23 @@ private final class AppServices {
         self.karabiner = karabiner
         self.display = display
         self.server = server
+        menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
+        hud = HUDPresenter(isEnabled: { model.settings.showsHUD })
     }
 
     func start() async {
-        model.onStatusChange = { [weak self] in self?.scheduleRelease($0) }
+        model.onStatusChange = { [weak self] in
+            self?.scheduleRelease($0)
+            self?.menuBar.refresh()
+        }
+        model.onEvent = { [weak self] event, previous in
+            guard let self else { return }
+            MenuHUDRouting.deliver(event, status: model.status, previousSession: previous, to: hud)
+        }
+        menuBar.start()
         scheduleRelease(model.status)
         minuteTimer = Timer(timeInterval: 60, repeats: true) { [weak model] _ in
-            Task { @MainActor in model?.timePassed() }
+            MainActor.assumeIsolated { model?.timePassed() }
         }
         if let minuteTimer {
             RunLoop.main.add(minuteTimer, forMode: .common)
@@ -132,9 +144,13 @@ private final class AppServices {
                 catch { AppRuntime.log(error) }
             }
         }
-        karabiner.onStateChange = { [weak model] in model?.isKarabinerRunning = $0 }
+        karabiner.onStateChange = { [weak self] in
+            self?.model.isKarabinerRunning = $0
+            self?.menuBar.refresh()
+        }
         karabiner.start()
         model.isKarabinerRunning = karabiner.state
+        menuBar.refresh()
         do { try await server.start() }
         catch { AppRuntime.log(error) }
     }
@@ -143,6 +159,8 @@ private final class AppServices {
         minuteTimer?.invalidate()
         releaseTimer?.invalidate()
         model.onStatusChange = nil
+        model.onEvent = nil
+        menuBar.stop()
         if let wakeObserver {
             NSWorkspace.shared.notificationCenter.removeObserver(wakeObserver)
         }

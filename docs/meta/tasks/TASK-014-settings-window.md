@@ -2,7 +2,7 @@
 schema: task
 id: TASK-014
 title: 設定ウインドウとホットキーを作る
-status: in_progress
+status: done
 requirements: []
 depends_on: [TASK-011]
 assignee: OpenCode / GPT-6.1 Sol
@@ -67,4 +67,4 @@ assignee: OpenCode / GPT-6.1 Sol
 
 ## レビュー
 
-未実施。
+PM がレビューした。描画した 7 セクションの画像で、標準の `Form`、スイッチ、スライダー、ステッパー、タイトルバーを使っていることを確かめた（オフスクリーンの描画では、サイドバーの選択が黒く写る）。KeyboardShortcuts 3.1.0（MIT）を、アプリとアプリのテストだけの依存として固定した。`just check` と `just build` が通った。設定ウインドウとホットキーをアプリにつなぐ作業は、`TASK-015` で行う。

@@ -1,0 +1,156 @@
+{
+  "sourceLanguage": "ja",
+  "strings": {
+    "backgroundDisabled.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンド項目が無効の警告"
+          }
+        }
+      }
+    },
+    "backgroundDisabled.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOSのシステム設定でCapsaicinのバックグラウンド項目が無効になっているため、クラッシュ時に自動で再起動されません。「ログイン項目と機能拡張」で許可してください。"
+          }
+        }
+      }
+    },
+    "backgroundDisabled.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンド項目が無効です"
+          }
+        }
+      }
+    },
+    "help.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の説明"
+          }
+        }
+      }
+    },
+    "hud.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューやホットキーでの切り替え時、および自動解除時に画面下部へ表示します。CLIでの操作時は表示しません。"
+          }
+        }
+      }
+    },
+    "hud.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切り替え時にHUDを表示"
+          }
+        }
+      }
+    },
+    "launchAtLogin.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ログイン時に起動"
+          }
+        }
+      }
+    },
+    "restartUnavailable.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バックグラウンド項目の登録または起動に失敗しました。アプリはこのまま使えますが、クラッシュした場合は手動で起動してください。"
+          }
+        }
+      }
+    },
+    "restartUnavailable.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クラッシュ時に自動再起動できません"
+          }
+        }
+      }
+    },
+    "resume.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「アプリ再起動時」はクラッシュ後の自動再起動を指します。「アプリとMacの再起動時」を選ぶと、Macの再起動やログアウトの後も、次のログイン後にスリープ防止を再開します。"
+          }
+        }
+      }
+    },
+    "resume.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再起動後のスリープ防止"
+          }
+        }
+      }
+    },
+    "resume.option.app": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリ再起動時のみ"
+          }
+        }
+      }
+    },
+    "resume.option.appAndMac": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリとMacの再起動時"
+          }
+        }
+      }
+    },
+    "resume.option.never": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再開しない"
+          }
+        }
+      }
+    },
+    "title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一般"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

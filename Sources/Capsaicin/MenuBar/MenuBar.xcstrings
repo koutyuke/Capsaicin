@@ -1,14 +1,281 @@
 {
   "sourceLanguage": "ja",
   "strings": {
-    "Capsaicin": {
+    "statusItem.idle.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "Capsaicin、停止中" }
+        }
+      }
+    },
+    "statusItem.active.a11y": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capsaicin、スリープ防止中"
+          }
+        }
+      }
+    },
+    "menu.header.idle": {
       "localizations": {
         "ja": { "stringUnit": { "state": "translated", "value": "Capsaicin" } }
       }
     },
-    "終了": {
+    "menu.header.active": {
       "localizations": {
-        "ja": { "stringUnit": { "state": "translated", "value": "終了" } }
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "スリープ防止中" }
+        }
+      }
+    },
+    "menu.warning.remainingSleepSetting.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スリープを止める設定が残っています"
+          }
+        }
+      }
+    },
+    "menu.warning.remainingSleepSetting.helper.subtitle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定の「ヘルパー」で修復できます"
+          }
+        }
+      }
+    },
+    "menu.warning.unappliedSleep.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一部のスリープを防止できていません"
+          }
+        }
+      }
+    },
+    "menu.warning.unappliedSleep.helper.subtitle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定の「ヘルパー」で修復できます"
+          }
+        }
+      }
+    },
+    "menu.warning.unalignedLed.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caps LockのLEDを切り替えられていません"
+          }
+        }
+      }
+    },
+    "menu.warning.stateSaveFailed.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "状態を保存できていません"
+          }
+        }
+      }
+    },
+    "menu.warning.a11y": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "警告: %@" } }
+      }
+    },
+    "menu.start": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スリープ防止をオンにする"
+          }
+        }
+      }
+    },
+    "menu.start.subtitle.until": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "%@まで" } }
+      }
+    },
+    "menu.start.subtitle.none": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動でオフにするまで"
+          }
+        }
+      }
+    },
+    "menu.startFor": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "時間を指定してオン" }
+        }
+      }
+    },
+    "menu.startFor.custom": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "カスタム…" } }
+      }
+    },
+    "menu.startUntil": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻を指定してオン…"
+          }
+        }
+      }
+    },
+    "menu.stop": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スリープ防止をオフにする"
+          }
+        }
+      }
+    },
+    "menu.status.until": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@まで（残り%2$@）"
+          }
+        }
+      }
+    },
+    "menu.status.noCondition": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動でオフにするまで継続"
+          }
+        }
+      }
+    },
+    "menu.status.battery": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バッテリー残量%d%%未満でオフ"
+          }
+        }
+      }
+    },
+    "menu.status.battery.onAdapter": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電源アダプタ接続中（残量低下でも継続）"
+          }
+        }
+      }
+    },
+    "menu.duration.lessThanMinute": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "1分未満" } }
+      }
+    },
+    "menu.karabiner.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karabiner-Elementsが動作中"
+          }
+        }
+      }
+    },
+    "menu.karabiner.subtitle": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LEDが消灯する場合があります"
+          }
+        }
+      }
+    },
+    "menu.settings": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "設定…" } }
+      }
+    },
+    "menu.quit": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "Capsaicinを終了" }
+        }
+      }
+    },
+    "panel.duration.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "時間を指定してオン" }
+        }
+      }
+    },
+    "panel.duration.hours.label": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "時間" } }
+      }
+    },
+    "panel.duration.minutes.label": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "分" } }
+      }
+    },
+    "panel.time.title": {
+      "localizations": {
+        "ja": {
+          "stringUnit": { "state": "translated", "value": "指定時刻までオン" }
+        }
+      }
+    },
+    "panel.time.label": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "時刻" } }
+      }
+    },
+    "panel.time.nextDay": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "翌日のこの時刻にオフ"
+          }
+        }
+      }
+    },
+    "panel.cancel": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "キャンセル" } }
+      }
+    },
+    "panel.start": {
+      "localizations": {
+        "ja": { "stringUnit": { "state": "translated", "value": "オンにする" } }
       }
     }
   },
