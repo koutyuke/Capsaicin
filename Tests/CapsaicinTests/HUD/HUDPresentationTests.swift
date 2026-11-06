@@ -18,11 +18,11 @@ struct HUDPresentationTests {
         }
     }
 
-    @Test("SPEC-HUD-004 幅は200〜420 ptに収める")
+    @Test("SPEC-HUD-004 幅は内容に合わせ、420 ptを超えない")
     func widthBounds() {
         let presentation = HUDPresentation()
         let content = HUDContent(symbol: "capslock", state: "")
-        for (measured, expected) in [(100.0, 200.0), (300, 300), (800, 420)] {
+        for (measured, expected) in [(180.0, 180.0), (300, 300), (800, 420)] {
             presentation.replace(content, measuredWidth: measured)
             #expect(Double(presentation.width) == expected)
         }

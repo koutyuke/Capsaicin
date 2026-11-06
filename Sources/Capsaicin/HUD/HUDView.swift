@@ -21,7 +21,7 @@ final class HUDPresentation {
         // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。消えている間は動かさない。
         withAnimation(phase == .hidden ? nil : .timingCurve(0.2, 0, 0, 1, duration: 0.20)) {
             self.content = content
-            width = min(420, max(200, measuredWidth))
+            width = min(420, measuredWidth)
         }
     }
 }
@@ -95,7 +95,9 @@ struct HUDLabel: View {
         .font(.title3)
         .foregroundStyle(Color(nsColor: .labelColor))
         .lineLimit(1)
-        .padding(.horizontal, 20)
+        // SF Symbols は形の外側に約 3 pt の空白を持つため、左だけ減らして見える余白を右と揃える。
+        .padding(.leading, 17)
+        .padding(.trailing, 20)
     }
 }
 
