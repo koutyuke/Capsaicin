@@ -1,12 +1,6 @@
 {
-  "globs": [
-    "**/*.md",
-    "!docs/**",
-    "!.build/**",
-    "!**/.build/**",
-    "!.t3-code/**",
-    "!CLAUDE.md",
-  ],
+  // 対象のファイルは justfile が Git から渡す。ここでは除外だけを決める。
+  "ignores": ["docs/**", "CLAUDE.md"],
   "config": {
     "MD013": false,
   },

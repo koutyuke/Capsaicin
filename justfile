@@ -35,7 +35,8 @@ lint-docs:
 lint-code:
     # SwiftLint が Nix の Swift ではなく Xcode の SourceKit を読み込むための指定。
     TOOLCHAINS=com.apple.dt.toolchain.XcodeDefault XCODE_DEFAULT_TOOLCHAIN_OVERRIDE="$(/usr/bin/xcode-select -p)/Toolchains/XcodeDefault.xctoolchain" swiftlint lint --strict --no-cache
-    markdownlint-cli2
+    # Git が無視するファイル（グローバルの除外設定を含む）は検査しない。
+    git ls-files -z --cached --others --exclude-standard -- '*.md' | xargs -0 markdownlint-cli2
     shellcheck --shell=bash .envrc
     find scripts -name '*.sh' -exec shellcheck {} +
     ruff check scripts
