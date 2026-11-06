@@ -2,7 +2,7 @@
 schema: task
 id: TASK-007
 title: CLI とアプリの通信路と、capsaicin コマンドを作る
-status: in_review
+status: done
 requirements: []
 depends_on: [TASK-003]
 assignee: OpenCode / GPT-6.1 Sol
@@ -114,3 +114,5 @@ Astra / medium の独立再レビューはブロッカーなしだった。全24
 既存バンドル検査の不正引数と終了コード 64 は維持する。テスト名の「雛形」は実装後の内容に合わせて直す。ヘルパーへ有効な `on`・`off` を渡す検査には変えない。
 
 実装担当が対象テストと整形・lint、独立レビュアーが認証・資源所有・期限・再送禁止の契約、PM が全体の `check`・`build` を担当する。CLI の日本語は仮文言とし、後続の Gemini による文言検討へ引き継ぐ。
+
+2026-11-06: 通信路は TASK-010 でブロッキングの実装に簡素化し、PM が `just check` と `just build` を通して完了とした。CLI の最終の文言は文言の統合のチケットで入れる。
