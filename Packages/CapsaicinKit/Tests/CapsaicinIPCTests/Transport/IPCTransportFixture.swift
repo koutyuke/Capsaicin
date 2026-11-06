@@ -41,27 +41,40 @@ final class IPCTransportFixture {
     }
 
     func makeRawConnection() throws -> Int32 {
-        let descriptor = try IPCSocket.make()
+        let descriptor = try makeTestSocket()
         do {
-            guard try IPCSocket.connect(descriptor, endpoint: endpoint) else {
-                throw IPCTransportError.timedOut
-            }
+            try IPCSocket.timeout(descriptor, until: .now() + 1)
+            try IPCSocket.connect(descriptor, endpoint: endpoint)
             return descriptor
         } catch { close(descriptor); throw error }
     }
 
     func staleSocket(listening: Bool = false) throws -> Int32 {
-        _ = try IPCDirectory(endpoint, create: true)
-        let descriptor = try IPCSocket.make()
+        try FileManager.default.createDirectory(
+            atPath: endpoint.directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700],
+        )
+        let descriptor = try makeTestSocket()
         do {
-            try IPCSocket.bind(descriptor, endpoint: endpoint)
-            guard chmod(endpoint.socketPath, 0o600) == 0 else { throw IPCTransportError.system(errno) }
+            var address = try endpoint.address()
+            let result = withUnsafePointer(to: &address) {
+                $0.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                    bind(descriptor, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
+                }
+            }
+            guard result == 0, chmod(endpoint.socketPath, 0o600) == 0 else { throw IPCTransportError.system(errno) }
             if listening {
                 #expect(listen(descriptor, 8) == 0)
             }
             return descriptor
         } catch { close(descriptor); throw error }
     }
+}
+
+private func makeTestSocket() throws -> Int32 {
+    let descriptor = socket(AF_UNIX, SOCK_STREAM, 0)
+    guard descriptor >= 0 else { throw IPCTransportError.system(errno) }
+    do { try IPCSocket.configure(descriptor); return descriptor }
+    catch { close(descriptor); throw error }
 }
 
 func sendRaw(_ descriptor: Int32, _ data: Data, eof: Bool = true) throws {
@@ -118,7 +131,7 @@ func receiveRaw(_ descriptor: Int32) throws -> Data {
 }
 
 func verifiedTestPeer(_ descriptor: Int32) throws -> uid_t {
-    #expect(fcntl(descriptor, F_GETFL) & O_NONBLOCK != 0)
+    #expect(fcntl(descriptor, F_GETFL) & O_NONBLOCK == 0)
     #expect(fcntl(descriptor, F_GETFD) & FD_CLOEXEC != 0)
     var enabled: Int32 = 0
     var size = socklen_t(MemoryLayout<Int32>.size)

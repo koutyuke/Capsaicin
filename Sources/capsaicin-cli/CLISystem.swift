@@ -5,22 +5,11 @@ import Foundation
 @MainActor
 struct CLISystemConnector: CLIConnecting {
     func connect(namespace: IPCEndpoint.Namespace, timeout: Double) async throws -> any CLIConnected {
-        let connection = try await IPCClient(endpoint: IPCEndpoint(namespace: namespace)).connect(timeout: timeout)
-        return CLISystemConnection(connection: connection)
+        try await IPCClient(endpoint: IPCEndpoint(namespace: namespace)).connect(timeout: timeout)
     }
 }
 
-@MainActor
-private struct CLISystemConnection: CLIConnected {
-    let connection: IPCConnection
-    func request(_ request: IPCRequest) async throws -> IPCResponse {
-        try await connection.request(request)
-    }
-
-    func close() async {
-        await connection.close()
-    }
-}
+extension IPCConnection: CLIConnected {}
 
 @MainActor
 struct CLISystemLauncher: CLILaunching {

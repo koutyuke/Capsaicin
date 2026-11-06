@@ -3,7 +3,7 @@ import Darwin
 import Foundation
 import Testing
 
-/// main queue に到達する前の要求だけを止める。syscall や frame の実装は差し替えない。
+/// main queue に到達する前の要求だけを止める。ソケットの実装は差し替えない。
 private final class HeldIPCHandler: @unchecked Sendable {
     private let lock = NSLock()
     private var body: (@MainActor @Sendable () -> Void)?
@@ -49,7 +49,7 @@ struct IPCServerLifecycleTests {
         try await server.start()
         let descriptor = try fixture.makeRawConnection()
         defer { close(descriptor) }
-        try sendRaw(descriptor, IPCFrame.encode(IPCCoding.encode(IPCRequest(command: .stop))))
+        try sendRaw(descriptor, IPCCoding.encode(IPCRequest(command: .stop)))
         await held.wait()
         if expire {
             #expect(try receiveRaw(descriptor).isEmpty)
@@ -63,21 +63,20 @@ struct IPCServerLifecycleTests {
         await server.stop()
     }
 
-    @Test("SPEC-CLI-007 同時接続は8つに制限し、停止で全接続の FD を閉じる")
-    func connectionLimit() async throws {
+    @Test("SPEC-CLI-007 停止は受信中の接続の期限と後片付けを待つ")
+    func stopWaitsForConnections() async throws {
         let fixture = try IPCTransportFixture()
-        let server = IPCServer(endpoint: fixture.endpoint) { _ in
+        let server = IPCServer(endpoint: fixture.endpoint, timing: IPCTiming(requestRead: 0.08)) { _ in
             IPCResponse(outcome: .status, status: transportStopped)
         }
         try await server.start()
         var clients: [IPCConnection] = []
-        for _ in 0 ..< 8 {
+        for _ in 0 ..< 3 {
             try await clients.append(fixture.client().connect())
         }
-        let ninth = try fixture.makeRawConnection()
-        #expect(try receiveRaw(ninth).isEmpty)
-        close(ninth)
+        let started = ContinuousClock.now
         await server.stop()
+        #expect(started.duration(to: .now) < .seconds(1))
         for connection in clients {
             await connection.close()
         }

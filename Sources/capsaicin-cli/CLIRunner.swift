@@ -1,8 +1,7 @@
 import CapsaicinIPC
 import Foundation
 
-@MainActor
-protocol CLIConnected {
+protocol CLIConnected: Sendable {
     func request(_ request: IPCRequest) async throws -> IPCResponse
     func close() async
 }
