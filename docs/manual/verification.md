@@ -17,6 +17,21 @@
 [9. 開始前の状態へ復元・結果をPMへ渡す]
 ```
 
+## 0. 毎回の始め方
+
+1節は最初の1回だけ行う。1節を終えていれば、ここから2節以降の確認に入る。止める、ビルドする、起動する、変数を入れる、の手順は `scripts/manual/verify.sh` にまとめてある。このスクリプトはアプリを起動し、プロセスを止める。そのため、オーナーだけが実行する。
+
+```sh
+cd <リポジトリのルート>
+eval "$(scripts/manual/verify.sh env)"   # B・ID・JOB・PLIST・RECORD・APP・CLI・HELPER・RULE・DAEMON を入れる
+scripts/manual/verify.sh restart         # 動いている Debug アプリを止め、ビルドし、Finder と同じ経路で起動する
+```
+
+- `env` の `B` は、1節で作った `~/Capsaicin-verification.*` のうち、いちばん新しいものである。ログアウトや再起動の後も、`env` をもう一度実行すれば変数が戻る。`B` が空なら、1節がまだ終わっていない。
+- `restart` と `stop` は、まずアプリに quit を送る。この終了は「終了理由を判定できない」終了になり、抑止を停止中の状態に戻してから終わる（`SPEC-LCY-002`）。10秒たっても残るプロセスだけに、`SIGTERM` を送る。`SIGTERM` で止めたプロセスは後片付けを通らない。そのため、抑止中に残ったときは `status` で `SleepDisabled` とアサーションを確かめる。
+- `status` は、ジョブの状態、Debug アプリのプロセス、`SleepDisabled`、Capsaicin のアサーションを表示する。期待する状態は、ジョブが `state = running` で、プロセスが1つだけ動き、その PID がジョブの `pid` と一致することである。
+- コードを直してもらった後は、`restart` だけで新しいビルドに入れ替わる。
+
 ## 1. 準備し、開始前の状態を保存する
 
 ### 1.1 実行者と検証環境を固定する
@@ -63,7 +78,7 @@
      printf '%s\n' "$ROOT" > "$B/repository-path.txt"
      ```
 
-  2. 表示した `B` の絶対パスを、別のメモにも保存する。再ログイン後は `B='保存した絶対パス'` と `ROOT="$(cat "$B/repository-path.txt")"` を設定し、1の `ID`〜`DAEMON` の代入だけを貼り直す。`mktemp` を再実行しない。
+  2. 表示した `B` の絶対パスを、別のメモにも保存する。再ログイン後は、0節の `eval "$(scripts/manual/verify.sh env)"` で変数を戻す。`mktemp` を再実行しない。
   3. 開始前の状態を保存する。
 
      ```sh
@@ -166,7 +181,7 @@
 - **目的**: `HYP-LCY-003`、`SPEC-LCY-005`。
 - **前提**: 1.4 のゲートを通った。`SleepDisabled` の開始値が `0` である。開始値が `1` なら変更せず、動的確認を中止する。
 - **操作**:
-  1. `open -R "$APP"` で Finder に表示し、Capsaicin.app をダブルクリックする。
+  1. `scripts/manual/verify.sh restart` を実行する。`open` は、Finder のダブルクリックと同じ経路でアプリを起動する。続けてメニューから終了し、`open "$APP"` でもう一度起動する。終了した後にもう一度開けることも確かめる。
   2. 次を実行し、実行中のジョブの `pid` とプロセスを照合する。
 
      ```sh
