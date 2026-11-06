@@ -6,7 +6,7 @@ status: accepted
 supersedes: []
 superseded_by: []
 requirements: ["REQ-LCY-001", "REQ-LCY-003", "REQ-LCY-005"]
-based_on: ["DEC-LCY-001", "EVID-LCY-001", "HYP-LCY-002", "HYP-LCY-003"]
+based_on: ["DEC-LCY-001", "EVID-LCY-001", "EVID-LCY-002", "HYP-LCY-002", "HYP-LCY-003"]
 ---
 
 # DEC-LCY-002 アプリは常に launchd の管理下で動かす
@@ -16,7 +16,7 @@ based_on: ["DEC-LCY-001", "EVID-LCY-001", "HYP-LCY-002", "HYP-LCY-003"]
 `DEC-LCY-001` を補い、アプリは常に launchd の管理下で動かす。
 
 - LaunchAgent は常に `~/Library/LaunchAgents` に登録し、「ログイン時に起動する」は `RunAtLoad` の値で切り替える。`KeepAlive` は `{ Crashed = true }` にする。
-- 直接起動されたアプリは、`launchctl kickstart` で LaunchAgent からの起動を求めて自分は終了し、launchd が起動したアプリだけを動かす。
+- 直接起動されたアプリは、`launchctl kickstart` で LaunchAgent からの起動を求めて自分は終了し、launchd が起動したアプリだけを動かす。引き渡せたかは `kickstart` の成否で決める。バックグラウンド項目の照会は、初めて登録した直後にはまだ記録がないので、この判断に使わない（`EVID-LCY-002`）。
 
 登録や起動に失敗したとき、連続してクラッシュしたときの振る舞いは `SPEC-LCY-004` と `SPEC-LCY-005` にある。
 
