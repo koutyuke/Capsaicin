@@ -7,11 +7,13 @@ final class SettingsWindowController: NSWindowController {
     let model: SettingsModel
     private let selection: SettingsSelection
 
-    init(model: SettingsModel, hotkey: HotkeyController, defaults: UserDefaults = .standard) {
+    init(model: SettingsModel, hotkey: HotkeyController, quit: @escaping () -> Void,
+         defaults: UserDefaults = .standard)
+    {
         self.model = model
         selection = SettingsSelection(defaults: defaults)
         let window = Self.makeWindow(
-            rootView: SettingsView(model: model, hotkey: hotkey, selection: selection),
+            rootView: SettingsView(model: model, hotkey: hotkey, selection: selection, quit: quit),
             selection: selection,
         )
         super.init(window: window)

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Bindable var model: SettingsModel
     let hotkey: HotkeyController
     @Bindable var selection: SettingsSelection
+    let quit: () -> Void
     var bundle: Bundle = .main
     @State private var sidebarHeight: CGFloat = 0
 
@@ -23,6 +24,12 @@ struct SettingsView: View {
                 ForEach(Array(SettingsSection.allCases.suffix(2))) { navigation($0) }
             }
             .listStyle(.sidebar)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Button(MenuContent.text("menu.quit", bundle: bundle), action: quit)
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+            }
             .onScrollGeometryChange(for: CGFloat.self) {
                 $0.containerSize.height - $0.contentInsets.top - $0.contentInsets.bottom
             } action: { _, height in
@@ -76,6 +83,7 @@ struct SettingsView: View {
                 }.labelsHidden().pickerStyle(.menu)
             }
             toggle(.general, "hud", \.showsHUD, help: true)
+            toggle(.general, "menuBarIcon", \.showsMenuBarIcon, help: true)
             if !model.app.willRestartAfterCrash {
                 let key = model.app.launchAgentStatus == .disabled ? "backgroundDisabled" : "restartUnavailable"
                 SettingsRow(title: SettingsSection.general.text(key + ".label"),
@@ -260,7 +268,7 @@ struct SettingsSidebarSpacer: NSViewRepresentable {
             // SwiftUI の contentSize にはツールバー由来の余白も混ざるため、システム設定に従う実際の行の高さを読む。
             let rowsHeight = (0 ..< table.numberOfRows).filter { $0 != 5 }
                 .reduce(CGFloat.zero) { $0 + table.rect(ofRow: $1).height }
-            let next = max(0, availableHeight - rowsHeight - 10)
+            let next = max(0, availableHeight - rowsHeight)
             guard next != height else { return }
             height = next
             invalidateIntrinsicContentSize()

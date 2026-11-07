@@ -166,6 +166,32 @@ struct MenuBarTests {
         #expect(controller.menu.items.suffix(2).map(\.keyEquivalent) == [",", "q"])
     }
 
+    @Test("SPEC-MENU-006 起動時と設定変更時に、同じアイコンの表示だけを切り替える", arguments: [true, false])
+    func visibility(initiallyVisible: Bool) throws {
+        _ = NSApplication.shared
+        let fixture = makeFixture()
+        fixture.model.launch()
+        var settings = fixture.model.settings
+        settings.showsMenuBarIcon = initiallyVisible
+        fixture.model.changeSettings(settings)
+        let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
+        controller.configureShortcut = { _ in }
+        fixture.model.onStatusChange = { _ in controller.refresh() }
+        defer {
+            fixture.model.onStatusChange = nil
+            controller.stop()
+        }
+        controller.start()
+        let item = try #require(controller.statusItem)
+        #expect(item.isVisible == initiallyVisible)
+        for visible in [!initiallyVisible, initiallyVisible] {
+            settings.showsMenuBarIcon = visible
+            fixture.model.changeSettings(settings)
+            #expect(controller.statusItem === item)
+            #expect(item.isVisible == visible)
+        }
+    }
+
     @Test("SPEC-HUD-002 指定時刻で解除した出来事には直前のセッションを添える")
     func previousSession() throws {
         let fixture = makeFixture()

@@ -71,6 +71,26 @@
         }
       }
     },
+    "menuBarIcon.help": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフにしてもCapsaicinは動き続けます。設定を開くにはFinderやSpotlightからCapsaicinをもう一度開き、終了するには設定画面の左下にある「Capsaicinを終了」を押します。"
+          }
+        }
+      }
+    },
+    "menuBarIcon.label": {
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニューバーにアイコンを表示"
+          }
+        }
+      }
+    },
     "restartUnavailable.help": {
       "localizations": {
         "ja": {

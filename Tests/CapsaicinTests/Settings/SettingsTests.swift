@@ -147,6 +147,7 @@ struct SettingsTests {
         let controller = SettingsWindowController(
             model: model,
             hotkey: HotkeyController(save: { _ in true }),
+            quit: {},
             defaults: defaults,
         )
         let window = try #require(controller.window)
@@ -174,6 +175,7 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsRender-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         defer { defaults.removeObject(forKey: "settingsSection") }
+        var quits = 0
         for section in SettingsSection.allCases {
             #expect(section.title != "title")
             selection.section = section
@@ -182,21 +184,16 @@ struct SettingsTests {
                     model: makeModel(),
                     hotkey: HotkeyController(save: { _ in true }),
                     selection: selection,
+                    quit: { quits += 1 },
                     bundle: app,
                 ).environment(\.colorScheme, name == "light" ? .light : .dark)
+                    .environment(\.accessibilityEnabled, true)
                     .environment(\.controlActiveState, .key), selection: selection)
                 defer { window.close() }
                 window.appearance = NSAppearance(named: appearance)
                 let view = try #require(window.contentView)
                 await layout(window)
-                let frame = try #require(view.superview)
-                let bitmap = try #require(frame.bitmapImageRepForCachingDisplay(in: frame.bounds))
-                window.appearance?.performAsCurrentDrawingAppearance {
-                    frame.cacheDisplay(in: frame.bounds, to: bitmap)
-                }
-                let data = try #require(bitmap.representation(using: .png, properties: [:]))
-                try data.write(to: output.appendingPathComponent("\(section.rawValue)-\(name).png"))
-                #expect(bitmap.pixelsWide >= 720 && bitmap.pixelsHigh >= 500)
+                try saveRendering(window, to: output.appendingPathComponent("\(section.rawValue)-\(name).png"))
                 #expect(window.frame.size == NSSize(width: 720, height: 500))
                 #expect(window.title == section.title)
                 try checkToolbarTitle(window)
@@ -204,6 +201,7 @@ struct SettingsTests {
                 if [.general, .sleep, .led, .helper].contains(section) {
                     try checkFormTop(window)
                 }
+                #expect(try checkSidebarBottom(window).accessibilityPerformPress?() == true)
                 if section == .general, name == "light" {
                     try await checkSidebar(window, selection: selection)
                 }
@@ -216,9 +214,10 @@ struct SettingsTests {
                 }
             }
         }
+        #expect(quits == SettingsSection.allCases.count * 2)
     }
 
-    @Test("SPEC-SET-001 空き行は実測した7行の高さに追従し、小さい領域ではゼロにする")
+    @Test("SPEC-SET-001 空き行は終了ボタンを除く領域と実測した7行の高さに追従し、小さい領域ではゼロにする")
     func sidebarSpacing() {
         let rows = SidebarRows()
         let table = NSTableView(frame: NSRect(x: 0, y: 0, width: 200, height: 500))
@@ -229,11 +228,11 @@ struct SettingsTests {
         scroll.documentView = table
         let spacer = SettingsSidebarSpacer.SpacerView()
         table.addSubview(spacer)
-        spacer.availableHeight = 434
+        spacer.availableHeight = 390
         for height: CGFloat in [24, 32, 40] {
             table.rowHeight = height
             spacer.updateHeight()
-            #expect(spacer.intrinsicContentSize.height == 434 - 7 * height - 10)
+            #expect(spacer.intrinsicContentSize.height == 390 - 7 * height)
         }
         spacer.availableHeight = 100
         spacer.updateHeight()
@@ -254,6 +253,17 @@ struct SettingsTests {
 }
 
 private extension SettingsTests {
+    private func saveRendering(_ window: NSWindow, to url: URL) throws {
+        let frame = try #require(window.contentView?.superview)
+        let bitmap = try #require(frame.bitmapImageRepForCachingDisplay(in: frame.bounds))
+        window.appearance?.performAsCurrentDrawingAppearance {
+            frame.cacheDisplay(in: frame.bounds, to: bitmap)
+        }
+        let data = try #require(bitmap.representation(using: .png, properties: [:]))
+        try data.write(to: url)
+        #expect(bitmap.pixelsWide >= 720 && bitmap.pixelsHigh >= 500)
+    }
+
     private func checkSidebar(_ window: NSWindow, selection: SettingsSelection) async throws {
         let content = try #require(window.contentView)
         let lists = descendants(NSOutlineView.self, in: content)
@@ -261,9 +271,7 @@ private extension SettingsTests {
         let list = try #require(lists.first)
         #expect(list.numberOfRows == SettingsSection.allCases.count + 1)
         #expect(list.bounds.width == 200)
-        let scroll = try #require(list.enclosingScrollView)
-        let bottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
-        #expect(abs(bottom - 10) <= 1)
+        try checkSidebarBottom(window)
         #expect(list.rect(ofRow: 5).height > list.rect(ofRow: 0).height)
         #expect(window.makeFirstResponder(list))
         for section in SettingsSection.allCases.dropFirst() {
@@ -285,11 +293,33 @@ private extension SettingsTests {
         let originalFrame = window.frame
         window.setFrame(NSRect(origin: originalFrame.origin, size: NSSize(width: 720, height: 560)), display: false)
         await layout(window)
-        let resizedBottom = scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY
-        #expect(abs(resizedBottom - 10) <= 1)
+        try checkSidebarBottom(window)
         window.setFrame(originalFrame, display: false)
         await layout(window)
-        #expect(abs(scroll.documentVisibleRect.maxY - list.rect(ofRow: list.numberOfRows - 1).maxY - 10) <= 1)
+        try checkSidebarBottom(window)
+    }
+
+    private func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
+        [element] + (element.accessibilityChildren?() as? [AnyObject] ?? [])
+            .flatMap { accessibilityDescendants($0) }
+    }
+
+    /// 最後の行とボタンの間、ボタンと下端の間をどちらも 10 pt にし、ボタンをサイドバーの中央に置く。
+    @discardableResult
+    private func checkSidebarBottom(_ window: NSWindow) throws -> AnyObject {
+        let content = try #require(window.contentView)
+        let list = try #require(descendants(NSOutlineView.self, in: content).first)
+        let title = try MenuContent.text("menu.quit", bundle: appBundle())
+        #expect(title != "menu.quit")
+        let quit = try #require(accessibilityDescendants(content).first {
+            $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == title
+        })
+        let row = window.convertToScreen(list.convert(list.rect(ofRow: list.numberOfRows - 1), to: nil))
+        let frame = try #require(quit.accessibilityFrame?())
+        #expect(abs(row.minY - frame.maxY - 10) <= 1)
+        let local = window.convertFromScreen(frame)
+        #expect(abs(local.midX - 100) <= 1 && abs(local.minY - 10) <= 1)
+        return quit
     }
 
     private func checkToolbarTitle(_ window: NSWindow) throws {

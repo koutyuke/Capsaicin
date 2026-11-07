@@ -9,6 +9,7 @@ struct SettingsTests {
         #expect(settings.launchesAtLogin)
         #expect(settings.resumePolicy == .never)
         #expect(settings.showsHUD)
+        #expect(settings.showsMenuBarIcon)
         #expect(settings.blocksIdleSleep)
         #expect(!settings.blocksDisplaySleep)
         #expect(!settings.blocksManualSleep)
@@ -52,8 +53,18 @@ struct SettingsTests {
         settings.specifiedTime = time(23, 5)
         settings.batteryThreshold = try #require(BatteryThreshold(percent: 35))
         settings.blocksManualSleep = true
+        settings.showsMenuBarIcon = false
         let data = try JSONEncoder().encode(settings)
         #expect(try JSONDecoder().decode(Settings.self, from: data) == settings)
+    }
+
+    @Test("SPEC-SET-002 SPEC-MENU-006 アイコン表示は既定でオン、保存したオフを復元する")
+    func menuBarIconCoding() throws {
+        let data = try JSONEncoder().encode(Settings())
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(object["showsMenuBarIcon"] as? Bool == true)
+        let hidden = try JSONDecoder().decode(Settings.self, from: Data(#"{"showsMenuBarIcon": false}"#.utf8))
+        #expect(!hidden.showsMenuBarIcon)
     }
 
     @Test("SPEC-SET-002 欠けたキーは既定値で補い、未知のキーは無視する")
@@ -68,7 +79,7 @@ struct SettingsTests {
     func invalidValuesFallBack() throws {
         let json = """
         {"batteryThreshold": 150, "timerDuration": 0, "specifiedTime": {"hour": 24, "minute": 0},
-         "resumePolicy": "always", "showsHUD": "yes", "blocksLidSleep": true}
+         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "blocksLidSleep": true}
         """
         var expected = Settings()
         expected.blocksLidSleep = true

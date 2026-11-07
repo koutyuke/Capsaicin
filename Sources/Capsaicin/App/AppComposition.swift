@@ -116,7 +116,7 @@ private final class AppServices {
 
     func start() async {
         settingsWindow = SettingsWindowController(
-            model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }),
+            model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }), quit: menuBar.quit,
         )
         model.onStatusChange = { [weak self] in
             self?.scheduleRelease($0)

@@ -9,7 +9,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     var openSettings: () -> Void = {}
     var quit: () -> Void = {}
     var configureShortcut: (NSMenuItem) -> Void = { $0.setShortcut(for: HotkeyController.name) }
-    private var statusItem: NSStatusItem?
+    private(set) var statusItem: NSStatusItem?
     let menu = NSMenu()
     private var inputPanel: NSPanel?
     private var commands: [String: MenuCommand] = [:]
@@ -25,6 +25,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     func start() {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        item.isVisible = model.settings.showsMenuBarIcon
         let image = NSImage(systemSymbolName: "capslock", accessibilityDescription: nil)
         image?.isTemplate = true
         item.button?.image = image
@@ -58,6 +59,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     func refresh() {
+        statusItem?.isVisible = model.settings.showsMenuBarIcon
         statusItem?.button?.setAccessibilityLabel(MenuContent.text(model.status.isBlocking
                 ? "statusItem.active.a11y" : "statusItem.idle.a11y"))
         if model.status.isBlocking {
