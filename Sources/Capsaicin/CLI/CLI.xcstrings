@@ -381,7 +381,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "蓋閉じスリープ防止の設定"
+            "value": "ディスプレイを閉じたときのスリープ防止の設定"
           }
         }
       }
