@@ -69,5 +69,6 @@ private final class RuntimeFixture {
             #expect(app.system.storedRecord?.isRunning == true)
             calls.append("stop")
         },
+        openSettings: {},
     )
 }

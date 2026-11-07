@@ -48,6 +48,7 @@ enum AppComposition {
             restartStatus: { agent.restartStatus() },
             updateLaunchAtLogin: { try agent.updateLaunchAtLogin($0) },
             startServices: { await services.start() }, stopServices: { await services.stop() },
+            openSettings: { services.openSettings() },
         )
     }
 
@@ -109,7 +110,7 @@ private final class AppServices {
         self.server = server
         menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
         hud = HUDPresenter(isEnabled: { model.settings.showsHUD })
-        menuBar.openSettings = { [weak self] in self?.settingsWindow?.open() }
+        menuBar.openSettings = { [weak self] in self?.openSettings() }
         menuBar.quit = quit
     }
 
@@ -183,6 +184,10 @@ private final class AppServices {
         karabiner.stop()
         led.stopMonitoring()
         await server.stop()
+    }
+
+    func openSettings() {
+        settingsWindow?.open()
     }
 
     private func scheduleRelease(_ status: BlockingStatus) {

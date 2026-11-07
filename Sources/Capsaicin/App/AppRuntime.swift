@@ -4,6 +4,7 @@ import OSLog
 @MainActor
 final class AppRuntime {
     let model: AppModel
+    let openSettings: @MainActor () -> Void
     private let launchedByLaunchd: Bool
     private let registerAndStart: @MainActor (Bool) async -> LaunchAgentStatus
     private let restartStatus: () -> LaunchAgentStatus
@@ -18,6 +19,7 @@ final class AppRuntime {
         updateLaunchAtLogin: @escaping (Bool) throws -> Void,
         startServices: @escaping @MainActor () async -> Void,
         stopServices: @escaping @MainActor () async -> Void,
+        openSettings: @escaping @MainActor () -> Void,
     ) {
         self.model = model
         self.launchedByLaunchd = launchedByLaunchd
@@ -26,6 +28,7 @@ final class AppRuntime {
         self.updateLaunchAtLogin = updateLaunchAtLogin
         self.startServices = startServices
         self.stopServices = stopServices
+        self.openSettings = openSettings
         model.onLaunchAtLoginChange = { [weak self] in self?.updateLoginSetting($0) }
     }
 

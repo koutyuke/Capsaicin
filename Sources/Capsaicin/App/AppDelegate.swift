@@ -34,6 +34,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApplication.shared.terminate(nil)
     }
 
+    /// 起動中に Finder などからアプリを開き直すと呼ばれる。Dock のアイコンがないので、ここを設定画面の入口にする。
+    func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
+        runtime?.openSettings()
+        return false
+    }
+
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let startup, let runtime else { return .terminateNow }
         let reason = TerminationReasonDetector.classify(
