@@ -19,8 +19,9 @@ final class HUDPresentation {
     func replace(_ content: HUDContent, measuredWidth: CGFloat) {
         entryDuration = phase.replacementDuration
         // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。
-        // 消えている間は、文字のトランジションが持つアニメーションも含めて動かさない。
-        var transaction = Transaction(animation: .timingCurve(0.2, 0, 0, 1, duration: 0.20))
+        // 続けて切り替えても、動いている途中の速さから滑らかに向きを変えられるよう、揺れないバネを使う。
+        // 消えている間は動かさない。
+        var transaction = Transaction(animation: .smooth(duration: 0.30))
         transaction.disablesAnimations = phase == .hidden
         withTransaction(transaction) {
             self.content = content
@@ -80,21 +81,23 @@ struct HUDLabel: View {
                 .symbolRenderingMode(.monochrome)
                 .contentTransition(reduceMotion ? .opacity : .symbolEffect(.replace))
                 .accessibilityHidden(true)
-            ZStack(alignment: .leading) {
-                HStack(spacing: 0) {
-                    Text(verbatim: content.state).fontWeight(.semibold).fixedSize()
-                    if let detail = content.detail {
+            HStack(spacing: 0) {
+                Text(verbatim: content.state).fontWeight(.semibold).fixedSize()
+                    // 変わらない文字（「スリープ防止」など）は動かさず、変わる文字だけを形の補間で入れ替える。
+                    .contentTransition(reduceMotion ? .opacity : .interpolate)
+                if let detail = content.detail {
+                    HStack(spacing: 0) {
                         Text(verbatim: "·").foregroundStyle(Color(nsColor: .tertiaryLabelColor)).padding(.horizontal, 6)
                         Text(verbatim: detail)
                             .foregroundStyle(Color(nsColor: increasedContrast ? .labelColor : .secondaryLabelColor))
                             .truncationMode(.tail)
                             .monospacedDigit()
                     }
+                    // 解除の条件は出たり消えたりするため、文言ごとに入れ替える。形の補間に任せると、
+                    // 前に消えた文言の字が混ざって見える。
+                    .id(detail)
+                    .transition(HUDTextTransition(reduceMotion: reduceMotion))
                 }
-                .id([content.state, content.detail])
-                // 文字が消えて空になる瞬間を作らないよう、新旧を重ねて入れ替える。
-                // 幅より長い時間をかけ、ぼかしが目で追えるようにする。
-                .transition(HUDTextTransition(reduceMotion: reduceMotion).animation(.easeInOut(duration: 0.40)))
             }
         }
         .font(.title3)
@@ -111,7 +114,7 @@ private struct HUDTextTransition: Transition {
 
     func body(content: Content, phase: TransitionPhase) -> some View {
         content
-            .blur(radius: phase.isIdentity || reduceMotion ? 0 : 8)
+            .blur(radius: phase.isIdentity || reduceMotion ? 0 : 4)
             .opacity(phase.isIdentity ? 1 : 0)
     }
 }
