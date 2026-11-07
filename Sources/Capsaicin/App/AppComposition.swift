@@ -151,7 +151,11 @@ private final class AppServices {
                     Task { @MainActor in self?.systemStateChanged() }
                 }
         }
-        screenLock = ScreenLockObserver { [weak self] in self?.systemStateChanged() }
+        screenLock = ScreenLockObserver { [weak self] in
+            // 画面のスリープの直後にロックが始まることがある。眠っている間は OS が LED を消すので点けず、画面の復帰で点け直す。
+            guard CGDisplayIsAsleep(CGMainDisplayID()) == 0 else { return }
+            self?.systemStateChanged()
+        }
         screenLock?.start()
         karabiner.onStateChange = { [weak self] in
             self?.model.isKarabinerRunning = $0
