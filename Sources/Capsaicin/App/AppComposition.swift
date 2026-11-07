@@ -193,12 +193,9 @@ private final class AppServices {
         let policy: NSApplication.ActivationPolicy = model.settings.showsDockIcon ? .regular : .accessory
         guard NSApp.activationPolicy() != policy else { return }
         NSApp.setActivationPolicy(policy)
-        if let window = settingsWindow?.window, window.isVisible {
+        if let settingsWindow, settingsWindow.window?.isVisible == true {
             // 方針の切り替えに伴う非アクティブ化を処理した次のメインキューで、表示中の設定画面を前面に戻す。
-            DispatchQueue.main.async {
-                NSApp.activate()
-                window.makeKeyAndOrderFront(nil)
-            }
+            DispatchQueue.main.async { settingsWindow.bringToFront() }
         }
     }
 

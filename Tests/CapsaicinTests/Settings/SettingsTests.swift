@@ -134,7 +134,7 @@ struct SettingsTests {
         #expect(fixture.savedSettings.isEmpty && errors == 1)
     }
 
-    @Test("SPEC-SET-001 前回のセクションと固定サイズ、標準タイトルバーを使う")
+    @Test("SPEC-SET-001 前回のセクションと固定サイズ、標準タイトルバーを使い、フルスクリーンの上にも開ける")
     func window() throws {
         _ = NSApplication.shared
         let defaults = try #require(UserDefaults(suiteName: "SettingsTests-" + UUID().uuidString))
@@ -162,6 +162,9 @@ struct SettingsTests {
         #expect(window.standardWindowButton(.miniaturizeButton)?.isEnabled == false)
         #expect(window.standardWindowButton(.zoomButton)?.isEnabled == false)
         #expect(window.title == SettingsSection.general.title)
+        // 別の Space に表示中の画面を引っ越させず、その Space へ移れるようにする。
+        #expect(window.collectionBehavior.contains(.fullScreenAuxiliary))
+        #expect(window.collectionBehavior.isDisjoint(with: [.moveToActiveSpace, .canJoinAllSpaces]))
         window.close()
     }
 

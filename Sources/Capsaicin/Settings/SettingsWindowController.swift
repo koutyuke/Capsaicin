@@ -51,6 +51,8 @@ final class SettingsWindowController: NSWindowController {
                               styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
                               backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
+        // Space は標準の動きに任せ、フルスクリーンのアプリの上にも開けるようにだけする（DEC-SET-003）。
+        window.collectionBehavior.insert(.fullScreenAuxiliary)
         let toolbar = NSToolbar()
         toolbar.displayMode = .iconOnly
         window.toolbar = toolbar
@@ -70,7 +72,12 @@ final class SettingsWindowController: NSWindowController {
 
     func open() {
         model.refreshHelper()
-        NSApp.activate()
+        bringToFront()
+    }
+
+    func bringToFront() {
+        // activate() は常駐アプリでは前面のアプリに断られることがあるため、利用者の操作の直後に限って強制する（DEC-SET-003）。
+        NSApp.activate(ignoringOtherApps: true)
         showWindow(nil)
         window?.makeKeyAndOrderFront(nil)
     }
