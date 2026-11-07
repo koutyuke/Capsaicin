@@ -20,8 +20,9 @@ final class HUDPresentation {
         entryDuration = phase.replacementDuration
         // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。
         // 続けて切り替えても、動いている途中の速さから滑らかに向きを変えられるよう、揺れないバネを使う。
-        // 消えている間は動かさない。
-        var transaction = Transaction(animation: .smooth(duration: 0.30))
+        // 消えている間は、前に出していた内容から動かさず、新しい内容をそのまま出す。
+        // アニメーションを付けないだけでは、アイコンの置き換えが前のアイコンから動くため、暗黙のアニメーションも止める。
+        var transaction = Transaction(animation: phase == .hidden ? nil : .smooth(duration: 0.30))
         transaction.disablesAnimations = phase == .hidden
         withTransaction(transaction) {
             self.content = content
