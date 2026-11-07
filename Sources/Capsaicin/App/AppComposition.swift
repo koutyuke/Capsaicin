@@ -94,7 +94,7 @@ private final class AppServices {
     private var settingsWindow: SettingsWindowController?
     private var minuteTimer: Timer?
     private var releaseTimer: Timer?
-    private var wakeObserver: any NSObjectProtocol?
+    private var wakeObservers: [any NSObjectProtocol] = []
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
          lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer,
@@ -143,15 +143,17 @@ private final class AppServices {
             }
         } catch { AppRuntime.log(error) }
         led.onReapplyFailure = { AppRuntime.log($0) }
-        wakeObserver = NSWorkspace.shared.notificationCenter.addObserver(
-            forName: NSWorkspace.didWakeNotification, object: nil, queue: .main,
-        ) { [weak self] _ in
-            Task { @MainActor in
-                guard let self else { return }
-                self.model.timePassed()
-                do { try self.led.systemDidWake() }
-                catch { AppRuntime.log(error) }
-            }
+        // 画面だけのスリープでも OS が LED を "Auto" に戻すので、画面の復帰でも書き直す。
+        wakeObservers = [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification].map { name in
+            NSWorkspace.shared.notificationCenter
+                .addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                    Task { @MainActor in
+                        guard let self else { return }
+                        self.model.timePassed()
+                        do { try self.led.reapplyAfterWake() }
+                        catch { AppRuntime.log(error) }
+                    }
+                }
         }
         karabiner.onStateChange = { [weak self] in
             self?.model.isKarabinerRunning = $0
@@ -173,9 +175,8 @@ private final class AppServices {
         HotkeyController.stop()
         settingsWindow?.close()
         settingsWindow = nil
-        if let wakeObserver {
-            NSWorkspace.shared.notificationCenter.removeObserver(wakeObserver)
-        }
+        wakeObservers.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
+        wakeObservers = []
         power.stop()
         lid.stop()
         karabiner.stop()

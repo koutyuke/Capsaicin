@@ -24,7 +24,7 @@ struct LEDControllerTests {
         let controller = fake.makeController()
         #expect(!controller.isAvailable)
         try controller.setLit(true)
-        try controller.systemDidWake()
+        try controller.reapplyAfterWake()
         try controller.setLit(false)
         #expect(fake.creations == 0)
         #expect(fake.enumerations == 0)
@@ -57,7 +57,7 @@ struct LEDControllerTests {
         #expect(fake.writes.isEmpty)
         #expect(controller.isAvailable)
         fake.enumerationFails = true
-        #expect(throws: CapsLockLEDError.servicesUnavailable) { try controller.systemDidWake() }
+        #expect(throws: CapsLockLEDError.servicesUnavailable) { try controller.reapplyAfterWake() }
         #expect(controller.isAvailable)
         fake.enumerationFails = false
         try controller.setLit(false)
@@ -98,7 +98,7 @@ struct LEDControllerTests {
         #expect(throws: CapsLockLEDError.writeFailed(failedTargets: 1)) { try controller.setLit(false) }
         let attempts = fake.enumerations
         fake.changes[0]()
-        try controller.systemDidWake()
+        try controller.reapplyAfterWake()
         #expect(fake.enumerations == attempts)
         fake.failedDevices = []
         try controller.setLit(false)
@@ -117,7 +117,7 @@ struct LEDControllerTests {
         #expect(fake.writes.suffix(3).map(\.device) == ["internal", "external", "new"])
         fake.devices.removeFirst()
         fake.changes[0]()
-        try controller.systemDidWake()
+        try controller.reapplyAfterWake()
         #expect(fake.writes.suffix(4).map(\.device) == ["external", "new", "external", "new"])
         #expect(fake.enumerations == 4)
         #expect(fake.registrations == 1)
@@ -131,7 +131,7 @@ struct LEDControllerTests {
         fake.failedDevices = ["internal", "external"]
         fake.changes[0]()
         #expect(fake.errors == [.writeFailed(failedTargets: 2)])
-        #expect(throws: CapsLockLEDError.writeFailed(failedTargets: 2)) { try controller.systemDidWake() }
+        #expect(throws: CapsLockLEDError.writeFailed(failedTargets: 2)) { try controller.reapplyAfterWake() }
         #expect(fake.errors.count == 1)
     }
 
