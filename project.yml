@@ -30,9 +30,19 @@ targets:
         # XcodeGen 2.44 は syncedFolder だけでは Resources フェーズを作らない。
         # ディレクトリ指定で新規 Swift ファイルと String Catalog の両方を取り込む。
         type: group
+        excludes:
+          - Resources/capsaicin.icon
+      # Icon Composer の .icon はディレクトリのまま追加すると中身が個別のリソースに
+      # なり actool が走らない。1 ファイルとして Resources に入れる。
+      - path: Sources/Capsaicin/Resources/capsaicin.icon
+        type: file
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin
+        # XcodeGen はアプリターゲットに既定で AppIcon を設定する。
+        # ファイル名に合わせて上書きする（SPEC-UI-009）。
+        ASSETCATALOG_COMPILER_APPICON_NAME: capsaicin
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_CFBundleDisplayName: Capsaicin
         SWIFT_EMIT_LOC_STRINGS: YES

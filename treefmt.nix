@@ -21,6 +21,8 @@
       "flake.lock"
       "CLAUDE.md"
       ".agents/skills/**"
+      # Icon Composer が書き出すバンドルは生成物なので、整形せずそのまま残す。
+      "**/*.icon/**"
     ];
     formatter = {
       # treefmt-nix の swift-format は Apple 製なので、nicklockwood 版を明示する。
