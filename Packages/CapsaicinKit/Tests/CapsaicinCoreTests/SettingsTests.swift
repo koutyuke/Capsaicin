@@ -10,6 +10,7 @@ struct SettingsTests {
         #expect(settings.resumePolicy == .never)
         #expect(settings.showsHUD)
         #expect(settings.showsMenuBarIcon)
+        #expect(!settings.showsDockIcon)
         #expect(settings.blocksIdleSleep)
         #expect(!settings.blocksDisplaySleep)
         #expect(!settings.blocksManualSleep)
@@ -54,6 +55,7 @@ struct SettingsTests {
         settings.batteryThreshold = try #require(BatteryThreshold(percent: 35))
         settings.blocksManualSleep = true
         settings.showsMenuBarIcon = false
+        settings.showsDockIcon = true
         let data = try JSONEncoder().encode(settings)
         #expect(try JSONDecoder().decode(Settings.self, from: data) == settings)
     }
@@ -65,6 +67,19 @@ struct SettingsTests {
         #expect(object["showsMenuBarIcon"] as? Bool == true)
         let hidden = try JSONDecoder().decode(Settings.self, from: Data(#"{"showsMenuBarIcon": false}"#.utf8))
         #expect(!hidden.showsMenuBarIcon)
+    }
+
+    @Test("SPEC-SET-002 SPEC-MENU-007 Dock表示は既定でオフ、保存した値を復元する", arguments: [true, false])
+    func dockIconCoding(visible: Bool) throws {
+        let defaults = try JSONEncoder().encode(Settings())
+        let object = try #require(JSONSerialization.jsonObject(with: defaults) as? [String: Any])
+        #expect(object["showsDockIcon"] as? Bool == false)
+        let json = "{\"showsDockIcon\": \(visible)}"
+        let settings = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+        #expect(settings.showsDockIcon == visible)
+        let encoded = try JSONEncoder().encode(settings)
+        let restored = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        #expect(restored["showsDockIcon"] as? Bool == visible)
     }
 
     @Test("SPEC-SET-002 欠けたキーは既定値で補い、未知のキーは無視する")
@@ -79,7 +94,7 @@ struct SettingsTests {
     func invalidValuesFallBack() throws {
         let json = """
         {"batteryThreshold": 150, "timerDuration": 0, "specifiedTime": {"hour": 24, "minute": 0},
-         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "blocksLidSleep": true}
+         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "showsDockIcon": "yes", "blocksLidSleep": true}
         """
         var expected = Settings()
         expected.blocksLidSleep = true

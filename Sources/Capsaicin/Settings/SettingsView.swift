@@ -84,6 +84,7 @@ struct SettingsView: View {
             }
             toggle(.general, "hud", \.showsHUD, help: true)
             toggle(.general, "menuBarIcon", \.showsMenuBarIcon, help: true)
+            toggle(.general, "dockIcon", \.showsDockIcon, help: true)
             if !model.app.willRestartAfterCrash {
                 let key = model.app.launchAgentStatus == .disabled ? "backgroundDisabled" : "restartUnavailable"
                 SettingsRow(title: SettingsSection.general.text(key + ".label"),

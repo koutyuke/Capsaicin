@@ -118,16 +118,13 @@ private final class AppServices {
         settingsWindow = SettingsWindowController(
             model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }), quit: menuBar.quit,
         )
-        model.onStatusChange = { [weak self] in
-            self?.scheduleRelease($0)
-            self?.menuBar.refresh()
-        }
+        model.onStatusChange = { [weak self] in self?.refresh($0) }
         model.onEvent = { [weak self] event, previous in
             guard let self else { return }
             MenuHUDRouting.deliver(event, status: model.status, previousSession: previous, to: hud)
         }
         menuBar.start()
-        scheduleRelease(model.status)
+        refresh(model.status)
         minuteTimer = Timer(timeInterval: 60, repeats: true) { [weak model] _ in
             MainActor.assumeIsolated { model?.timePassed() }
         }
@@ -188,6 +185,21 @@ private final class AppServices {
 
     func openSettings() {
         settingsWindow?.open()
+    }
+
+    private func refresh(_ status: BlockingStatus) {
+        scheduleRelease(status)
+        menuBar.refresh()
+        let policy: NSApplication.ActivationPolicy = model.settings.showsDockIcon ? .regular : .accessory
+        guard NSApp.activationPolicy() != policy else { return }
+        NSApp.setActivationPolicy(policy)
+        if let window = settingsWindow?.window, window.isVisible {
+            // 方針の切り替えに伴う非アクティブ化を処理した次のメインキューで、表示中の設定画面を前面に戻す。
+            DispatchQueue.main.async {
+                NSApp.activate()
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
     }
 
     private func scheduleRelease(_ status: BlockingStatus) {

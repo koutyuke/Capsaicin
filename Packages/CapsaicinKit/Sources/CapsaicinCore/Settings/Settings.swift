@@ -10,6 +10,7 @@ public struct Settings: Hashable, Sendable {
     public var resumePolicy = ResumePolicy.never
     public var showsHUD = true
     public var showsMenuBarIcon = true
+    public var showsDockIcon = false
 
     // MARK: 止めるスリープ
 
@@ -44,7 +45,7 @@ public struct Settings: Hashable, Sendable {
 /// 保存の形式。未知のキーは無視し、欠けたキーと読めない値は既定値で補う。
 extension Settings: Codable {
     private enum CodingKeys: String, CodingKey {
-        case launchesAtLogin, resumePolicy, showsHUD, showsMenuBarIcon
+        case launchesAtLogin, resumePolicy, showsHUD, showsMenuBarIcon, showsDockIcon
         case blocksIdleSleep, blocksDisplaySleep, blocksManualSleep, blocksLidSleep, turnsOffDisplayOnLidClose
         case timerEnabled, timerDuration, specifiedTimeEnabled, specifiedTime
         case batteryConditionEnabled, batteryThreshold, ignoresBatteryOnACPower
@@ -61,6 +62,7 @@ extension Settings: Codable {
         resumePolicy = value(.resumePolicy, or: defaults.resumePolicy)
         showsHUD = value(.showsHUD, or: defaults.showsHUD)
         showsMenuBarIcon = value(.showsMenuBarIcon, or: defaults.showsMenuBarIcon)
+        showsDockIcon = value(.showsDockIcon, or: defaults.showsDockIcon)
         blocksIdleSleep = value(.blocksIdleSleep, or: defaults.blocksIdleSleep)
         blocksDisplaySleep = value(.blocksDisplaySleep, or: defaults.blocksDisplaySleep)
         blocksManualSleep = value(.blocksManualSleep, or: defaults.blocksManualSleep)

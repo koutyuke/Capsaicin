@@ -61,3 +61,15 @@ status = "accepted"
 specs = ["SPEC-MENU-006", "SPEC-SET-001"]
 depends_on = ["REQ-SET-002"]
 sources = ["DEC-UI-008"]
+
+[[requirements]]
+id = "REQ-MENU-006"
+title = "Dock にアイコンを表示できる"
+kind = "functional"
+statement = "利用者は、設定で Dock にアプリのアイコンを表示できる。表示している間は、Dock と ⌘Tab のアプリの切り替えで、アプリが動いていることを確かめられる。"
+reason = "常駐アプリが動いていることを、メニューバーを探さずに Dock で確かめたい利用者がいるため。"
+priority = "could"
+status = "accepted"
+specs = ["SPEC-MENU-007"]
+depends_on = ["REQ-SET-002"]
+sources = []

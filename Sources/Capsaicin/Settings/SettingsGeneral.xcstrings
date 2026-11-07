@@ -34,6 +34,28 @@
         }
       }
     },
+    "dockIcon.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンにすると、DockとCommand-Tabのアプリの切り替えにCapsaicinが表示されます。Dockのアイコンをクリックすると設定画面が開きます。"
+          }
+        }
+      }
+    },
+    "dockIcon.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dockにアイコンを表示"
+          }
+        }
+      }
+    },
     "help.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
