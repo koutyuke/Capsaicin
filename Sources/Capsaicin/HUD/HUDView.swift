@@ -92,12 +92,9 @@ struct HUDLabel: View {
                     }
                 }
                 .id([content.state, content.detail])
-                // 新旧の文字を重ねず、古い文字が消えてから新しい文字を現す。
-                .transition(AsymmetricTransition(
-                    insertion: HUDTextTransition(reduceMotion: reduceMotion)
-                        .animation(.easeInOut(duration: 0.15).delay(0.15)),
-                    removal: HUDTextTransition(reduceMotion: reduceMotion).animation(.easeInOut(duration: 0.15)),
-                ))
+                // 文字が消えて空になる瞬間を作らないよう、新旧を重ねて入れ替える。
+                // 幅より長い時間をかけ、ぼかしが目で追えるようにする。
+                .transition(HUDTextTransition(reduceMotion: reduceMotion).animation(.easeInOut(duration: 0.40)))
             }
         }
         .font(.title3)
