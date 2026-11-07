@@ -49,12 +49,10 @@ final class SettingsWindowController: NSWindowController {
                               styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
                               backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
-        window.titlebarAppearsTransparent = true
         let toolbar = NSToolbar()
         toolbar.displayMode = .iconOnly
         window.toolbar = toolbar
         window.toolbarStyle = .unified
-        window.titlebarSeparatorStyle = .none
         window.standardWindowButton(.miniaturizeButton)?.isEnabled = false
         window.standardWindowButton(.zoomButton)?.isEnabled = false
         let host = NSHostingView(rootView: rootView)

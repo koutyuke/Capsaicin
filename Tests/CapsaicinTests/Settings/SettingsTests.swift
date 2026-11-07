@@ -153,7 +153,6 @@ struct SettingsTests {
         #expect(window.frame.size == NSSize(width: 720, height: 500))
         #expect(window.styleMask.contains(.titled) && !window.styleMask.contains(.resizable))
         #expect(window.styleMask.contains(.fullSizeContentView))
-        #expect(window.titlebarAppearsTransparent)
         #expect(window.titleVisibility == .visible)
         #expect(window.toolbar != nil)
         #expect(window.toolbarStyle == .unified)
@@ -201,6 +200,10 @@ struct SettingsTests {
                 #expect(window.frame.size == NSSize(width: 720, height: 500))
                 #expect(window.title == section.title)
                 try checkToolbarTitle(window)
+                // 見出しのあるセクション（解除の条件、操作）は、見出しが先に来るので除く。
+                if [.general, .sleep, .led, .helper].contains(section) {
+                    try checkFormTop(window)
+                }
                 if section == .general, name == "light" {
                     try await checkSidebar(window, selection: selection)
                 }
@@ -299,6 +302,17 @@ private extension SettingsTests {
         #expect(titleFrame.minX > 200)
         #expect(title.font?.pointSize == 15)
         #expect(abs(frame.bounds.maxY - closeFrame.midY - 26) <= 1)
+    }
+
+    private func checkFormTop(_ window: NSWindow) throws {
+        let content = try #require(window.contentView)
+        let scroll = try #require(descendants(NSScrollView.self, in: content).first { $0.frame.width > 200 })
+        func frames(_ view: NSView) -> [NSRect] {
+            [view.convert(view.bounds, to: nil)] + view.subviews.flatMap(frames)
+        }
+        let document = try #require(scroll.documentView)
+        let groupTop = try #require(frames(document).filter { abs($0.minX - 220) <= 1 }.map(\.maxY).max())
+        #expect(abs(window.contentLayoutRect.maxY - groupTop - 12) <= 1)
     }
 
     private func appBundle() throws -> Bundle {

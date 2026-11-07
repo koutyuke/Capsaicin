@@ -47,6 +47,8 @@ struct SettingsView: View {
                         case .about: EmptyView()
                         }
                     }.formStyle(.grouped).toggleStyle(.switch)
+                        // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
+                        .contentMargins(.top, -8, for: .scrollContent)
                 }
             }
         }
