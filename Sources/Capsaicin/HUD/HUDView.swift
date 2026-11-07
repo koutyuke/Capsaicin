@@ -18,8 +18,11 @@ final class HUDPresentation {
 
     func replace(_ content: HUDContent, measuredWidth: CGFloat) {
         entryDuration = phase.replacementDuration
-        // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。消えている間は動かさない。
-        withAnimation(phase == .hidden ? nil : .timingCurve(0.2, 0, 0, 1, duration: 0.20)) {
+        // 表示中は、カプセルを中央に置く位置まで含めて同じアニメーションで補間する。
+        // 消えている間は、文字のトランジションが持つアニメーションも含めて動かさない。
+        var transaction = Transaction(animation: .timingCurve(0.2, 0, 0, 1, duration: 0.20))
+        transaction.disablesAnimations = phase == .hidden
+        withTransaction(transaction) {
             self.content = content
             width = min(420, measuredWidth)
         }
@@ -89,7 +92,12 @@ struct HUDLabel: View {
                     }
                 }
                 .id([content.state, content.detail])
-                .transition(HUDTextTransition(reduceMotion: reduceMotion))
+                // 新旧の文字を重ねず、古い文字が消えてから新しい文字を現す。
+                .transition(AsymmetricTransition(
+                    insertion: HUDTextTransition(reduceMotion: reduceMotion)
+                        .animation(.easeInOut(duration: 0.15).delay(0.15)),
+                    removal: HUDTextTransition(reduceMotion: reduceMotion).animation(.easeInOut(duration: 0.15)),
+                ))
             }
         }
         .font(.title3)
@@ -106,7 +114,7 @@ private struct HUDTextTransition: Transition {
 
     func body(content: Content, phase: TransitionPhase) -> some View {
         content
-            .blur(radius: phase.isIdentity || reduceMotion ? 0 : 5)
+            .blur(radius: phase.isIdentity || reduceMotion ? 0 : 8)
             .opacity(phase.isIdentity ? 1 : 0)
     }
 }
