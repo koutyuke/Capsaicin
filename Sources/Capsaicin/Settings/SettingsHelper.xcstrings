@@ -1,316 +1,347 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "cancel": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "キャンセル"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キャンセル"
           }
         }
       }
     },
-    "error.helperInstall.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーをインストールできませんでした。設定のスイッチから操作した場合は、スイッチをオフに戻し、設定は保存していません。"
+    "error.helperInstall.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーをインストールできませんでした。設定のスイッチから操作した場合は、スイッチをオフに戻し、設定は保存していません。"
           }
         }
       }
     },
-    "error.helperInstall.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーをインストールできませんでした"
+    "error.helperInstall.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーをインストールできませんでした"
           }
         }
       }
     },
-    "error.helperRemove.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "構成ファイルの削除に失敗しました。一部のファイルがシステムに残っている可能性があります。"
+    "error.helperRemove.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "構成ファイルの削除に失敗しました。一部のファイルがシステムに残っている可能性があります。"
           }
         }
       }
     },
-    "error.helperRemove.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーを削除できませんでした"
+    "error.helperRemove.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーを削除できませんでした"
           }
         }
       }
     },
-    "error.helperRepair.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーを修復できませんでした。インストールの状態を確認し、もう一度修復してください。"
+    "error.helperRepair.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーを修復できませんでした。インストールの状態を確認し、もう一度修復してください。"
           }
         }
       }
     },
-    "error.helperRepair.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーを修復できませんでした"
+    "error.helperRepair.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーを修復できませんでした"
           }
         }
       }
     },
-    "error.settingRollback.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止中の動作に反映できなかったため、設定を変更前の状態に戻しました。"
+    "error.settingRollback.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止中の動作に反映できなかったため、設定を変更前の状態に戻しました。"
           }
         }
       }
     },
-    "error.settingRollback.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "設定を変更できませんでした"
+    "error.settingRollback.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定を変更できませんでした"
           }
         }
       }
     },
-    "helperInstall.button": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "インストール…"
+    "helperInstall.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール…"
           }
         }
       }
     },
-    "helperInstall.confirm": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "インストール"
+    "helperInstall.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール"
           }
         }
       }
     },
-    "helperInstall.manualAndLid.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープとディスプレイを閉じたときのスリープを防止するにはヘルパーのインストールが必要です"
+    "helperInstall.manualAndLid.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープとディスプレイを閉じたときのスリープを防止するにはヘルパーのインストールが必要です"
           }
         }
       }
     },
-    "helperInstall.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ設定を切り替える小さなプログラム、その実行を許可する設定、Mac起動時にスリープ設定を元に戻す項目をシステムに登録します。管理者のパスワードが1回必要です。設定の「ヘルパー」から削除できます。"
+    "helperInstall.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ設定を切り替える小さなプログラム、その実行を許可する設定、Mac起動時にスリープ設定を元に戻す項目をシステムに登録します。管理者のパスワードが1回必要です。設定の「ヘルパー」から削除できます。"
           }
         }
       }
     },
-    "helperInstall.setting.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープを防止するにはヘルパーのインストールが必要です"
+    "helperInstall.setting.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープを防止するにはヘルパーのインストールが必要です"
           }
         }
       }
     },
-    "helperInstall.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーをインストールしますか？"
+    "helperInstall.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーをインストールしますか？"
           }
         }
       }
     },
-    "helperRemove.button": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "削除…"
+    "helperRemove.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除…"
           }
         }
       }
     },
-    "helperRemove.confirm": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "削除"
+    "helperRemove.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除"
           }
         }
       }
     },
-    "helperRemove.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "削除すると、ヘルパーを必要とするスリープ防止の設定がオフになります。スリープ防止中の場合は、手動スリープが防止されなくなります。削除には管理者のパスワードが必要です。"
+    "helperRemove.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除すると、ヘルパーを必要とするスリープ防止の設定がオフになります。スリープ防止中の場合は、手動スリープが防止されなくなります。削除には管理者のパスワードが必要です。"
           }
         }
       }
     },
-    "helperRemove.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーを削除しますか？"
+    "helperRemove.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーを削除しますか？"
           }
         }
       }
     },
-    "helperRepair.button": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "修復…"
+    "helperRepair.button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修復…"
           }
         }
       }
     },
-    "helperRepair.confirm": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "修復"
+    "helperRepair.confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修復"
           }
         }
       }
     },
-    "helperRepair.message": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーの構成ファイルの一部が見つかりません。必要なすべてのファイルを再登録するため、管理者のパスワードが必要です。"
+    "helperRepair.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーの構成ファイルの一部が見つかりません。必要なすべてのファイルを再登録するため、管理者のパスワードが必要です。"
           }
         }
       }
     },
-    "helperRepair.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーを修復しますか？"
+    "helperRepair.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーを修復しますか？"
           }
         }
       }
     },
-    "manage.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーの管理"
+    "manage.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーの管理"
           }
         }
       }
     },
-    "ok": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+    "ok" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
     },
-    "status.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープを防ぐ小さなプログラム、パスワードなしでの実行を許可する設定、Mac起動時にスリープ設定を安全に戻す項目の3つをシステムにインストールします。"
+    "status.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープを防ぐ小さなプログラム、パスワードなしでの実行を許可する設定、Mac起動時にスリープ設定を安全に戻す項目の3つをシステムにインストールします。"
           }
         }
       }
     },
-    "status.installed": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "インストール済み"
+    "status.installed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール済み"
           }
         }
       }
     },
-    "status.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "状態"
+    "status.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "状態"
           }
         }
       }
     },
-    "status.notInstalled": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未インストール"
+    "status.notInstalled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未インストール"
           }
         }
       }
     },
-    "status.partial": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "構成が不完全"
+    "status.partial" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "構成が不完全"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパー"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパー"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

@@ -1,196 +1,215 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "display.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一定時間操作がないときの画面の消灯を防ぎます。オンにすると、Mac全体の自動スリープも防ぎます。"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "display.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一定時間操作がないときの画面の消灯を防ぎます。オンにすると、Mac全体の自動スリープも防ぎます。"
           }
         }
       }
     },
-    "display.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画面の自動消灯"
+    "display.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画面の自動消灯"
           }
         }
       }
     },
-    "group.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープの種類"
+    "group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープの種類"
           }
         }
       }
     },
-    "helperNotReady": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーが正しくインストールされていないため、スリープを防止できません。設定の「ヘルパー」で修復してください。"
+    "helperNotReady" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが正しくインストールされていないため、スリープを防止できません。設定の「ヘルパー」で修復してください。"
           }
         }
       }
     },
-    "helperNotReady.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "警告、ヘルパーを使用できません"
+    "helperNotReady.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告、ヘルパーを使用できません"
           }
         }
       }
     },
-    "idle.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "一定時間操作がないときのMac全体のスリープを防ぎます。画面の消灯は「画面の自動消灯」で個別に設定できます。"
+    "idle.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一定時間操作がないときのMac全体のスリープを防ぎます。画面の消灯は「画面の自動消灯」で個別に設定できます。"
           }
         }
       }
     },
-    "idle.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自動スリープ"
+    "idle.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動スリープ"
           }
         }
       }
     },
-    "implied.byDisplay": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「画面の自動消灯」がオンのため、このスリープも防止されます。"
+    "implied.byDisplay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「画面の自動消灯」がオンのため、このスリープも防止されます。"
           }
         }
       }
     },
-    "implied.byManual": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「手動スリープ」がオンのため、このスリープも防止されます。"
+    "implied.byManual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「手動スリープ」がオンのため、このスリープも防止されます。"
           }
         }
       }
     },
-    "implied.byManualAndLid": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "「手動スリープとディスプレイを閉じたときのスリープ」がオンのため、このスリープも防止されます。"
+    "implied.byManualAndLid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「手動スリープとディスプレイを閉じたときのスリープ」がオンのため、このスリープも防止されます。"
           }
         }
       }
     },
-    "lid.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "MacBookのディスプレイを閉じてもスリープさせず、処理を継続させます。"
+    "lid.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MacBookのディスプレイを閉じてもスリープさせず、処理を継続させます。"
           }
         }
       }
     },
-    "lid.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ディスプレイを閉じたときのスリープ"
+    "lid.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディスプレイを閉じたときのスリープ"
           }
         }
       }
     },
-    "lidDisplayOff.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ディスプレイを閉じたときのスリープを防止しているときだけ使えます。画面を消灯して消費電力を抑えながら、Macは動き続けます。"
+    "lidDisplayOff.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディスプレイを閉じたときのスリープを防止しているときだけ使えます。画面を消灯して消費電力を抑えながら、Macは動き続けます。"
           }
         }
       }
     },
-    "lidDisplayOff.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "閉じたときに画面を消灯"
+    "lidDisplayOff.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じたときに画面を消灯"
           }
         }
       }
     },
-    "manual.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アップルメニューなどの手動スリープに加え、ディスプレイを閉じたときのスリープと自動スリープも防ぎますが、画面の自動消灯は防ぎません。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
+    "manual.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップルメニューなどの手動スリープに加え、ディスプレイを閉じたときのスリープと自動スリープも防ぎますが、画面の自動消灯は防ぎません。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
           }
         }
       }
     },
-    "manual.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープ"
+    "manual.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープ"
           }
         }
       }
     },
-    "manualAndLid.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープとディスプレイを閉じたときのスリープに加え、自動スリープも防ぎますが、画面の自動消灯は防ぎません。macOSの仕様上、手動スリープとディスプレイを閉じたときのスリープは個別に防止できず、利用にはヘルパーのインストールが必要です。"
+    "manualAndLid.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープとディスプレイを閉じたときのスリープに加え、自動スリープも防ぎますが、画面の自動消灯は防ぎません。macOSの仕様上、手動スリープとディスプレイを閉じたときのスリープは個別に防止できず、利用にはヘルパーのインストールが必要です。"
           }
         }
       }
     },
-    "manualAndLid.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープとディスプレイを閉じたときのスリープ"
+    "manualAndLid.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープとディスプレイを閉じたときのスリープ"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "防止するスリープ"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "防止するスリープ"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

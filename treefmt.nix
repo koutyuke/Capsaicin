@@ -23,6 +23,8 @@
       ".agents/skills/**"
       # Icon Composer が書き出すバンドルは生成物なので、整形せずそのまま残す。
       "**/*.icon/**"
+      # String Catalog は Xcode が開くたびに独自の形で書き直すので、その形を正とする。
+      "*.xcstrings"
     ];
     formatter = {
       # treefmt-nix の swift-format は Apple 製なので、nicklockwood 版を明示する。
@@ -40,7 +42,6 @@
         "*.yaml"
         "*.json"
         "*.jsonc"
-        "*.xcstrings"
       ];
     };
   };

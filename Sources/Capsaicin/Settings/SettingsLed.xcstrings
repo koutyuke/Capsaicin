@@ -1,46 +1,50 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "enabled.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止中にCaps LockのLEDを点灯"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "enabled.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止中にCaps LockのLEDを点灯"
           }
         }
       }
     },
-    "karabiner.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karabiner-ElementsがLEDの状態を上書きするため、スリープ防止中であってもLEDが消灯することがあります。入力機能には影響ありません。"
+    "karabiner.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karabiner-ElementsがLEDの状態を上書きするため、スリープ防止中であってもLEDが消灯することがあります。入力機能には影響ありません。"
           }
         }
       }
     },
-    "karabiner.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karabiner-Elementsが動作中"
+    "karabiner.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karabiner-Elementsが動作中"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "LED"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LED"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

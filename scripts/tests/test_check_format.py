@@ -71,6 +71,29 @@ class CheckFormatTests(unittest.TestCase):
             self.assertEqual((root / "AGENTS.md").read_text(), "# AGENTS\n")
             self.assertFalse(copies[0].exists())
 
+    def test_stale_string_catalog_keys_fail_even_when_formatter_passes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            catalog = root / "Sample.xcstrings"
+            files = b"Sample.xcstrings\0"
+            for state, expected in [("manual", 0), ("stale", 1)]:
+                with self.subTest(state=state):
+                    catalog.write_text(
+                        '{"strings": {"used": {}, "key": {"extractionState": "%s"}}}'
+                        % state
+                    )
+                    with (
+                        patch(
+                            "scripts.check_format.subprocess.check_output",
+                            return_value=files,
+                        ),
+                        patch(
+                            "scripts.check_format.subprocess.run",
+                            return_value=SimpleNamespace(returncode=0),
+                        ),
+                    ):
+                        self.assertEqual(check_format(root), expected)
+
 
 if __name__ == "__main__":
     unittest.main()

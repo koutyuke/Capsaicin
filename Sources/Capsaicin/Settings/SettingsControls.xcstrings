@@ -1,156 +1,171 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "cli.group.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "コマンドライン"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "cli.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コマンドライン"
           }
         }
       }
     },
-    "cli.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ターミナルからcapsaicin on [--for 1h | --until 4:00]、capsaicin off、capsaicin statusで操作できます。オフにするとコマンドはエラーを表示し、何も変えません。"
+    "cli.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルからcapsaicin on [--for 1h | --until 4:00]、capsaicin off、capsaicin statusで操作できます。オフにするとコマンドはエラーを表示し、何も変えません。"
           }
         }
       }
     },
-    "cli.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "CLIからの操作を許可"
+    "cli.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CLIからの操作を許可"
           }
         }
       }
     },
-    "cli.path.copied.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "コピー完了"
+    "cli.path.copied.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー完了"
           }
         }
       }
     },
-    "cli.path.copy.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "パスをコピー"
+    "cli.path.copy.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パスをコピー"
           }
         }
       }
     },
-    "cli.path.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ターミナルでcapsaicinコマンドを使うには、このパスへのシンボリックリンクやエイリアスを作成してください（例：ln -s \"パス\" ~/.local/bin/capsaicin）。アプリはリンクを作成せず、管理者権限も求めません。"
+    "cli.path.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルでcapsaicinコマンドを使うには、このパスへのシンボリックリンクやエイリアスを作成してください（例：ln -s \"パス\" ~/.local/bin/capsaicin）。アプリはリンクを作成せず、管理者権限も求めません。"
           }
         }
       }
     },
-    "cli.path.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "コマンドの場所"
+    "cli.path.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コマンドの場所"
           }
         }
       }
     },
-    "hotkey.clear.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ショートカットを消去"
+    "hotkey.clear.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ショートカットを消去"
           }
         }
       }
     },
-    "hotkey.error.taken": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このショートカットは他の機能で使用されています。"
+    "hotkey.error.taken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このショートカットは他の機能で使用されています。"
           }
         }
       }
     },
-    "hotkey.group.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ホットキー"
+    "hotkey.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホットキー"
           }
         }
       }
     },
-    "hotkey.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ホットキーでスリープ防止をオンにしたときは、「解除の条件」で設定された条件が適用されます。"
+    "hotkey.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホットキーでスリープ防止をオンにしたときは、「解除の条件」で設定された条件が適用されます。"
           }
         }
       }
     },
-    "hotkey.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止の切り替え"
+    "hotkey.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止の切り替え"
           }
         }
       }
     },
-    "hotkey.placeholder": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "キーを記録"
+    "hotkey.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キーを記録"
           }
         }
       }
     },
-    "hotkey.recording": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "キーを入力…"
+    "hotkey.recording" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キーを入力…"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "操作"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "操作"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

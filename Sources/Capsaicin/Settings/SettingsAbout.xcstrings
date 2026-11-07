@@ -1,36 +1,39 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "icon.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリアイコン"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "icon.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリアイコン"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このアプリについて"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアプリについて"
           }
         }
       }
     },
-    "version": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バージョン%1$@（%2$@）"
+    "version" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョン%1$@（%2$@）"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

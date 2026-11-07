@@ -1,206 +1,226 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "battery.group.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "battery.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー"
           }
         }
       }
     },
-    "battery.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー残量がしきい値を下回ると、スリープ防止を自動でオフにして電池切れを防ぎます。"
+    "battery.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量がしきい値を下回ると、スリープ防止を自動でオフにして電池切れを防ぎます。"
           }
         }
       }
     },
-    "battery.ignoreOnAdapter.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "電源アダプタに接続されている間は、バッテリー残量がしきい値を下回ってもスリープ防止を継続します。"
+    "battery.ignoreOnAdapter.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電源アダプタに接続されている間は、バッテリー残量がしきい値を下回ってもスリープ防止を継続します。"
           }
         }
       }
     },
-    "battery.ignoreOnAdapter.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "電源アダプタ接続中は残量で解除しない"
+    "battery.ignoreOnAdapter.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電源アダプタ接続中は残量で解除しない"
           }
         }
       }
     },
-    "battery.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー残量"
+    "battery.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量"
           }
         }
       }
     },
-    "battery.threshold.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー残量による解除がオンのときに変更できます。"
+    "battery.threshold.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量による解除がオンのときに変更できます。"
           }
         }
       }
     },
-    "battery.threshold.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "しきい値"
+    "battery.threshold.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しきい値"
           }
         }
       }
     },
-    "battery.threshold.value": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%d%%"
+    "battery.threshold.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d%%"
           }
         }
       }
     },
-    "hours": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "時間"
+    "hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間"
           }
         }
       }
     },
-    "minutes": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "分"
+    "minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分"
           }
         }
       }
     },
-    "time.group.title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "時間による解除"
+    "time.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間による解除"
           }
         }
       }
     },
-    "time.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "指定した時刻にスリープ防止を自動でオフにします。過ぎた時刻を指定した場合は、翌日の同じ時刻にオフになります。"
+    "time.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定した時刻にスリープ防止を自動でオフにします。過ぎた時刻を指定した場合は、翌日の同じ時刻にオフになります。"
           }
         }
       }
     },
-    "time.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "指定時刻"
+    "time.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定時刻"
           }
         }
       }
     },
-    "time.value.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "指定時刻がオンのときに変更できます。"
+    "time.value.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定時刻がオンのときに変更できます。"
           }
         }
       }
     },
-    "time.value.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "解除時刻"
+    "time.value.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除時刻"
           }
         }
       }
     },
-    "timer.duration.a11y": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@の数値"
+    "timer.duration.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の数値"
           }
         }
       }
     },
-    "timer.duration.help": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイマーがオンのときに変更できます。"
+    "timer.duration.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイマーがオンのときに変更できます。"
           }
         }
       }
     },
-    "timer.duration.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "継続時間"
+    "timer.duration.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "継続時間"
           }
         }
       }
     },
-    "timer.label": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイマー"
+    "timer.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイマー"
           }
         }
       }
     },
-    "title": {
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "解除の条件"
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除の条件"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
