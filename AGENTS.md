@@ -49,6 +49,15 @@ String Catalog は機能フォルダーごとに別のテーブルを置き、`T
 
 CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どちらもアプリに付属する非公開の実行ファイルなので同じ場所にまとめ、`Contents/MacOS/Capsaicin` との衝突も避ける。ヘルパーをシステムにインストールしたり、特権を付けたりはしない。
 
+## エージェントのスキル
+
+スキルの実体は `.agents/skills/` に置き、Claude Code が読む `.claude/skills/` からは相対パスの symlink を張る。実体、symlink、`skills-lock.json` はすべてコミットする。`skills-lock.json` は取得元のコミットを固定しておらず、lock から復元すると取得元の最新が入る。そのため実体をリポジトリに持ち、変更を差分でレビューできるようにする。未追跡のファイルは新しい worktree に入らないので、コミットしておけば委譲先の worktree でも同じスキルを使える。
+
+- 外部のスキル（`skills-lock.json` に載っているもの）は `bunx skills add <source>` で入れ、`bunx skills update` で更新する。手では編集しない。手で直しても次の更新で上書きされる。
+- 追加と更新は PM が判断する。更新したら差分を読み、意図しない指示が混ざっていないことを確かめてからコミットする。
+- このリポジトリには、Capsaicin の規約や手順に依存するスキルだけを置く。どのプロジェクトでも使う個人用のスキルは、各自のグローバル設定で管理する。
+- `.agents/skills/` は自動整形と Markdown lint の対象から除く。外部のスキルを整形すると、取得元との差分が更新のたびに生じるためである。自作のスキルの品質はレビューで確かめる。
+
 ## 検証
 
 変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。署名は ad-hoc で、Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。

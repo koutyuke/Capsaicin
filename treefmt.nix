@@ -20,6 +20,7 @@
       ".direnv/**"
       "flake.lock"
       "CLAUDE.md"
+      ".agents/skills/**"
     ];
     formatter = {
       # treefmt-nix の swift-format は Apple 製なので、nicklockwood 版を明示する。

@@ -1,6 +1,6 @@
 {
   // 対象のファイルは justfile が Git から渡す。ここでは除外だけを決める。
-  "ignores": ["docs/**", "CLAUDE.md"],
+  "ignores": ["docs/**", "CLAUDE.md", ".agents/skills/**"],
   "config": {
     "MD013": false,
   },
