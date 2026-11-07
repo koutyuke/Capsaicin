@@ -95,6 +95,7 @@ private final class AppServices {
     private var minuteTimer: Timer?
     private var releaseTimer: Timer?
     private var wakeObservers: [any NSObjectProtocol] = []
+    private var screenLock: ScreenLockObserver?
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
          lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer,
@@ -143,18 +144,15 @@ private final class AppServices {
             }
         } catch { AppRuntime.log(error) }
         led.onReapplyFailure = { AppRuntime.log($0) }
-        // 画面だけのスリープでも OS が LED を "Auto" に戻すので、画面の復帰でも書き直す。
+        // 画面のスリープ、スクリーンセーバー、画面のロックでも OS が LED を "Auto" に戻すので、それぞれで書き直す。
         wakeObservers = [NSWorkspace.didWakeNotification, NSWorkspace.screensDidWakeNotification].map { name in
             NSWorkspace.shared.notificationCenter
                 .addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                    Task { @MainActor in
-                        guard let self else { return }
-                        self.model.timePassed()
-                        do { try self.led.reapplyAfterWake() }
-                        catch { AppRuntime.log(error) }
-                    }
+                    Task { @MainActor in self?.systemStateChanged() }
                 }
         }
+        screenLock = ScreenLockObserver { [weak self] in self?.systemStateChanged() }
+        screenLock?.start()
         karabiner.onStateChange = { [weak self] in
             self?.model.isKarabinerRunning = $0
             self?.menuBar.refresh()
@@ -177,6 +175,8 @@ private final class AppServices {
         settingsWindow = nil
         wakeObservers.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
         wakeObservers = []
+        screenLock?.stop()
+        screenLock = nil
         power.stop()
         lid.stop()
         karabiner.stop()
@@ -186,6 +186,12 @@ private final class AppServices {
 
     func openSettings() {
         settingsWindow?.open()
+    }
+
+    private func systemStateChanged() {
+        model.timePassed()
+        do { try led.reapply() }
+        catch { AppRuntime.log(error) }
     }
 
     private func refresh(_ status: BlockingStatus) {

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-038
 title: 画面が復帰したときに Caps Lock の LED を点灯し直す
-status: in_review
+status: done
 requirements: ["REQ-LED-001", "REQ-LED-004"]
 depends_on: []
 assignee: PM（差分が数行のため PM が直接直した）
@@ -54,4 +54,4 @@ assignee: PM（差分が数行のため PM が直接直した）
 
 ## レビュー
 
-PM が直接直した。実機での確認が済むまで `in_review` にしておく。
+PM が直接直した。オーナーが実機で、画面だけのスリープ（ロックあり・なし）、「蓋を閉じたら画面を消す」での蓋の開閉、Mac 本体のスリープからの復帰で LED が点灯し直すことを確かめた。スクリーンセーバーとロックだけでも LED が消えることが分かったので、`TASK-039` で扱う（`EVID-LED-004`）。`reapplyAfterWake()` は `TASK-039` で `reapply()` に改めた。

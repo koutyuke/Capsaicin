@@ -17,7 +17,7 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
         symbolAvailable()
     }
 
-    /// 接続・切断による再適用の失敗。復帰時の失敗は reapplyAfterWake() が throw する。
+    /// 接続・切断による再適用の失敗。復帰やロックでの再適用の失敗は reapply() が throw する。
     public var onReapplyFailure: (@MainActor @Sendable (any Error) -> Void)?
 
     private let symbolAvailable: () -> Bool
@@ -70,8 +70,9 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
         }
     }
 
-    /// アプリが Mac か画面の復帰通知を受けて呼ぶ。画面のスリープで OS が "Auto" に戻すため。定期的な書き直しは行わない。
-    public func reapplyAfterWake() throws {
+    /// アプリが、Mac と画面の復帰、画面のロック（スクリーンセーバーを含む）の開始と終了で呼ぶ。
+    /// どれも OS が "Auto" に戻しうるため。定期的な書き直しは行わない。
+    public func reapply() throws {
         guard isAvailable, desiredLit else { return }
         try apply(mode: "On")
     }
