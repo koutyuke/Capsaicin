@@ -34,7 +34,7 @@ struct IPCMessagesTests {
             threshold: #require(BatteryThreshold(percent: 20)),
             ignoresOnACPower: true,
         )
-        let response = IPCResponse(outcome: .startRejected(.mechanismsFailed([.lidSleepControl])), status: status)
+        let response = IPCResponse(outcome: .startRejected(.mechanismsFailed([.displaySleepAssertion])), status: status)
         #expect(try IPCCoding.decodeResponse(IPCCoding.encode(response)) == response)
     }
 

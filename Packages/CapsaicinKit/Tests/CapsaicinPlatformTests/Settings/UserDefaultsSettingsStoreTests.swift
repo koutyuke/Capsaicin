@@ -20,11 +20,9 @@ struct UserDefaultsSettingsStoreTests {
             settings.launchesAtLogin = false
             settings.resumePolicy = .afterAppOrMacRestart
             settings.showsHUD = false
-            settings.blocksIdleSleep = false
-            settings.blocksDisplaySleep = true
+            settings.blocksDisplaySleep = false
             settings.blocksManualSleep = true
-            settings.blocksLidSleep = true
-            settings.turnsOffDisplayOnLidClose = false
+            settings.lidCloseDisplay = .keepOn
             settings.timerEnabled = true
             settings.timerDuration = try #require(TimerDuration(minutes: 90))
             settings.specifiedTimeEnabled = true
@@ -51,10 +49,10 @@ struct UserDefaultsSettingsStoreTests {
             let store = UserDefaultsSettingsStore(defaults: defaults)
             #expect(store.save(Settings()))
             let key = try #require(defaults.persistentDomain(forName: suite)?.keys.first)
-            let data = Data(#"{"timerDuration":0,"showsHUD":"bad","blocksLidSleep":true,"future":7}"#.utf8)
+            let data = Data(#"{"timerDuration":0,"showsHUD":"bad","lidCloseDisplay":"keepOn","future":7}"#.utf8)
             defaults.set(data, forKey: key)
             var expected = Settings()
-            expected.blocksLidSleep = true
+            expected.lidCloseDisplay = .keepOn
             #expect(store.load() == expected)
             #expect(defaults.data(forKey: key) == data)
         }

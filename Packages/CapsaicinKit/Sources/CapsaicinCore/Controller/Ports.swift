@@ -13,13 +13,6 @@ public protocol PowerAssertionControlling {
     func releaseAssertion(_ kind: AssertionKind) throws
 }
 
-/// 蓋閉じスリープの制御（kPMSetClamshellSleepState）。プロセスが終わっても戻らないものとして扱う。
-@MainActor
-public protocol LidSleepControlling {
-    /// true で蓋閉じスリープを無効化し、false で無効化を解く。
-    func setLidSleepDisabled(_ disabled: Bool) throws
-}
-
 /// ヘルパーによるシステムのスリープの制御。
 @MainActor
 public protocol HelperSleepControlling {

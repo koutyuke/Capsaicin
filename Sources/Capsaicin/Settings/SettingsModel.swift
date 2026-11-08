@@ -65,12 +65,12 @@ final class SettingsModel {
     }
 
     func changeSleep(_ row: SettingsSleepRow, to value: Bool) async {
-        guard row.isEnabled, !isBusy else { return }
+        guard let setting = row.setting, row.isEnabled, !isBusy else { return }
         refreshHelper()
-        if row.setting == \.blocksManualSleep, value, helperState != .installed {
+        if setting == \.blocksManualSleep, value, helperState != .installed {
             await manage(helperState == .partial ? .repair : .install, fromSetting: true)
         } else {
-            change(row.setting, to: value)
+            change(setting, to: value)
         }
     }
 

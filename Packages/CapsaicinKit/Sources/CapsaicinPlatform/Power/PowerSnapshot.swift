@@ -63,9 +63,6 @@ struct PowerSnapshot {
 
 @MainActor
 public enum PowerMachineCapabilities {
-    /// 蓋単独抑止の実機検証が済むまでは変種 B を使い、未検証の root 不要方式を有効にしない。
-    private static let canBlockLidSleepAlone = false
-
     public static func detect() -> MachineCapabilities {
         detect(clamshellProperty: readClamshellProperty(), snapshot: .read())
     }
@@ -74,7 +71,6 @@ public enum PowerMachineCapabilities {
         MachineCapabilities(
             hasLid: clamshellProperty != nil,
             hasInternalBattery: snapshot.internalBattery != nil,
-            canBlockLidSleepAlone: canBlockLidSleepAlone,
         )
     }
 }

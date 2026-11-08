@@ -4,8 +4,6 @@
 public enum Mechanism: String, Hashable, Sendable, Codable, CodingKeyRepresentable, CaseIterable {
     /// ヘルパーで立てる disablesleep。
     case systemSleepDisabled
-    /// 蓋閉じスリープの制御（kPMSetClamshellSleepState）。
-    case lidSleepControl
     /// 自動スリープを止めるアサーション（PreventUserIdleSystemSleep）。
     case idleSleepAssertion
     /// 画面の自動消灯を止めるアサーション（PreventUserIdleDisplaySleep）。

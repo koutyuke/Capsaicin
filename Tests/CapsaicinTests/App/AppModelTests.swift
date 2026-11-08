@@ -26,7 +26,7 @@ struct AppModelTests {
 
     @Test("SPEC-BLK-009 設定は受理したときだけ保存し、反映失敗は通知する")
     func settings() {
-        let fixture = AppFixture()
+        let fixture = AppFixture(displayBlocked: false)
         fixture.model.launch()
         fixture.model.requestStart(from: .menu)
         var settings = fixture.model.settings
@@ -103,13 +103,13 @@ struct AppModelTests {
         fixture.model.requestStart(from: .menu)
         #expect(!fixture.model.shouldSleepDisplayOnLidClose)
         var settings = fixture.model.settings
-        settings.blocksLidSleep = true
+        settings.blocksManualSleep = true
         fixture.model.changeSettings(settings)
         #expect(fixture.model.shouldSleepDisplayOnLidClose)
-        settings.turnsOffDisplayOnLidClose = false
+        settings.lidCloseDisplay = .keepOn
         fixture.model.changeSettings(settings)
         #expect(!fixture.model.shouldSleepDisplayOnLidClose)
-        settings.turnsOffDisplayOnLidClose = true
+        settings.lidCloseDisplay = .turnOff
         fixture.model.changeSettings(settings)
         fixture.model.requestStop(from: .menu)
         #expect(!fixture.model.shouldSleepDisplayOnLidClose)
@@ -159,12 +159,19 @@ struct AppModelTests {
 
 @MainActor
 final class AppFixture {
+    private let initialSettings: Settings
     let system = FakeSystem()
     var savedSettings: [Settings] = []
+    init(displayBlocked: Bool = true) {
+        var settings = Settings()
+        settings.blocksDisplaySleep = displayBlocked
+        initialSettings = settings
+    }
+
     lazy var model = AppModel(
         controller: BlockingController(
-            settings: Settings(),
-            capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true, canBlockLidSleepAlone: true),
+            settings: initialSettings,
+            capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true),
             ports: system.ports,
         ),
         saveSettings: { [unowned self] in savedSettings.append($0) },

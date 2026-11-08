@@ -82,8 +82,6 @@ struct PowerPlatformSnapshotTests {
         let capabilities = PowerMachineCapabilities.detect(clamshellProperty: false, snapshot: laptop)
         #expect(capabilities.hasLid)
         #expect(capabilities.hasInternalBattery)
-        #expect(!capabilities.canBlockLidSleepAlone)
-        #expect(!capabilities.usesLidSleepControl)
         #expect(clamshellIsClosed(false) == false)
         #expect(clamshellIsClosed(true) == true)
         #expect(clamshellIsClosed(nil) == nil)

@@ -43,7 +43,7 @@ final class AppModel {
     }
 
     var shouldSleepDisplayOnLidClose: Bool {
-        status.isBlocking && controller.effectiveSettings.turnsOffDisplayOnLidClose
+        status.isBlocking && controller.effectiveSettings.shouldSleepDisplayOnLidClose
     }
 
     func launch() {

@@ -8,7 +8,6 @@ public final class FakeSystem {
     public enum Operation: Hashable, Sendable {
         case createAssertion(AssertionKind)
         case releaseAssertion(AssertionKind)
-        case setLidSleepDisabled(Bool)
         case readSleepDisabled
         case helperOn
         case helperOff
@@ -33,7 +32,6 @@ public final class FakeSystem {
     public private(set) var heldAssertions: Set<AssertionKind> = []
     /// 冪等の約束により何もしなかったアサーションの操作（作ってある種類の作成、作っていない種類の解放）の数。
     public private(set) var redundantAssertionCalls = 0
-    public private(set) var isLidSleepDisabled = false
     public private(set) var isLEDLit = false
 
     // MARK: 記録
@@ -55,7 +53,7 @@ public final class FakeSystem {
 
     public var ports: BlockingController.Ports {
         BlockingController.Ports(
-            assertions: self, lidSleep: self, helper: self, led: self,
+            assertions: self, helper: self, led: self,
             power: self, bootTime: self, records: self, time: self,
         )
     }
@@ -91,13 +89,6 @@ extension FakeSystem: PowerAssertionControlling {
         if heldAssertions.remove(kind) == nil {
             redundantAssertionCalls += 1
         }
-    }
-}
-
-extension FakeSystem: LidSleepControlling {
-    public func setLidSleepDisabled(_ disabled: Bool) throws {
-        try perform(.setLidSleepDisabled(disabled))
-        isLidSleepDisabled = disabled
     }
 }
 

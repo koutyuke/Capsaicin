@@ -37,7 +37,6 @@ enum CLITextKey: String, CaseIterable {
     case leftApplied = "direction.leftApplied"
     case notApplied = "direction.notApplied"
     case systemSleepDisabled = "mechanism.systemSleepDisabled"
-    case lidSleepControl = "mechanism.lidSleepControl"
     case idleSleepAssertion = "mechanism.idleSleepAssertion"
     case displaySleepAssertion = "mechanism.displaySleepAssertion"
     case led = "mechanism.led"
@@ -159,7 +158,6 @@ struct CLIOutput {
     private static func name(_ mechanism: Mechanism, text: CLIText) -> String {
         let key: CLITextKey = switch mechanism {
         case .systemSleepDisabled: .systemSleepDisabled
-        case .lidSleepControl: .lidSleepControl
         case .idleSleepAssertion: .idleSleepAssertion
         case .displaySleepAssertion: .displaySleepAssertion
         case .led: .led

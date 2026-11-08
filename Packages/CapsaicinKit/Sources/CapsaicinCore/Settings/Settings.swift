@@ -12,14 +12,12 @@ public struct Settings: Hashable, Sendable {
     public var showsMenuBarIcon = true
     public var showsDockIcon = false
 
-    // MARK: 止めるスリープ
+    // MARK: 防止するスリープ
 
-    public var blocksIdleSleep = true
-    public var blocksDisplaySleep = false
-    /// 手動スリープ。変種 B のまとめた行も、この値を使う。
+    public var blocksDisplaySleep = true
+    /// 手動スリープと蓋閉じスリープをまとめて止める。
     public var blocksManualSleep = false
-    public var blocksLidSleep = false
-    public var turnsOffDisplayOnLidClose = true
+    public var lidCloseDisplay = LidCloseDisplay.turnOff
 
     // MARK: 解除の条件
 
@@ -46,7 +44,7 @@ public struct Settings: Hashable, Sendable {
 extension Settings: Codable {
     private enum CodingKeys: String, CodingKey {
         case launchesAtLogin, resumePolicy, showsHUD, showsMenuBarIcon, showsDockIcon
-        case blocksIdleSleep, blocksDisplaySleep, blocksManualSleep, blocksLidSleep, turnsOffDisplayOnLidClose
+        case blocksDisplaySleep, blocksManualSleep, lidCloseDisplay
         case timerEnabled, timerDuration, specifiedTimeEnabled, specifiedTime
         case batteryConditionEnabled, batteryThreshold, ignoresBatteryOnACPower
         case notifiesWithLED, acceptsCLIRequests
@@ -63,11 +61,9 @@ extension Settings: Codable {
         showsHUD = value(.showsHUD, or: defaults.showsHUD)
         showsMenuBarIcon = value(.showsMenuBarIcon, or: defaults.showsMenuBarIcon)
         showsDockIcon = value(.showsDockIcon, or: defaults.showsDockIcon)
-        blocksIdleSleep = value(.blocksIdleSleep, or: defaults.blocksIdleSleep)
         blocksDisplaySleep = value(.blocksDisplaySleep, or: defaults.blocksDisplaySleep)
         blocksManualSleep = value(.blocksManualSleep, or: defaults.blocksManualSleep)
-        blocksLidSleep = value(.blocksLidSleep, or: defaults.blocksLidSleep)
-        turnsOffDisplayOnLidClose = value(.turnsOffDisplayOnLidClose, or: defaults.turnsOffDisplayOnLidClose)
+        lidCloseDisplay = value(.lidCloseDisplay, or: defaults.lidCloseDisplay)
         timerEnabled = value(.timerEnabled, or: defaults.timerEnabled)
         timerDuration = value(.timerDuration, or: defaults.timerDuration)
         specifiedTimeEnabled = value(.specifiedTimeEnabled, or: defaults.specifiedTimeEnabled)

@@ -20,7 +20,7 @@ enum AppComposition {
         let controller = try BlockingController(
             settings: store.load(), capabilities: PowerMachineCapabilities.detect(),
             ports: .init(
-                assertions: PowerAssertions(), lidSleep: LidSleepControl(), helper: helper,
+                assertions: PowerAssertions(), helper: helper,
                 led: led, power: power, bootTime: BootTimeProvider(),
                 records: FileResumeRecordStore(bundleID: isDebug
                     ? "io.github.koutyuke.capsaicin.debug" : "io.github.koutyuke.capsaicin"),

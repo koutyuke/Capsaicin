@@ -13,13 +13,11 @@ struct ControllerReleaseTests {
         let controller = makeController(system, settings: .premise {
             $0.blocksManualSleep = true
             $0.blocksDisplaySleep = true
-            $0.blocksLidSleep = true
         })
         controller.requestStart(from: .menu)
         #expect(controller.requestStop(from: .menu) == .released)
         #expect(!controller.isBlocking)
         #expect(system.heldAssertions.isEmpty)
-        #expect(!system.isLidSleepDisabled)
         #expect(!system.sleepDisabled)
         #expect(!system.isLEDLit)
         #expect(system.storedRecord?.session == nil)

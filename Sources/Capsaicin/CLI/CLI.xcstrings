@@ -1,490 +1,479 @@
 {
-  "sourceLanguage": "ja",
-  "strings": {
-    "outcome.started": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止をオンにしました。"
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "outcome.started" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止をオンにしました。"
           }
         }
       }
     },
-    "outcome.alreadyBlocking": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止はすでにオンです。指定した条件は適用していません。"
+    "outcome.alreadyBlocking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止はすでにオンです。指定した条件は適用していません。"
           }
         }
       }
     },
-    "outcome.released": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止をオフにしました。"
+    "outcome.released" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止をオフにしました。"
           }
         }
       }
     },
-    "outcome.alreadyStopped": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止はすでにオフです。"
+    "outcome.alreadyStopped" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止はすでにオフです。"
           }
         }
       }
     },
-    "outcome.rejected": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止をオンにできません。%@"
+    "outcome.rejected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止をオンにできません。%@"
           }
         }
       }
     },
-    "outcome.disabled": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "設定でCLIからの操作が許可されていません。"
+    "outcome.disabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定でCLIからの操作が許可されていません。"
           }
         }
       }
     },
-    "error.version": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリとコマンドの通信形式のバージョンが異なります。"
+    "error.version" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリとコマンドの通信形式のバージョンが異なります。"
           }
         }
       }
     },
-    "error.connection": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリとの通信を完了できませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
+    "error.connection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリとの通信を完了できませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
           }
         }
       }
     },
-    "error.timeout": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリとの通信が制限時間内に完了しませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
+    "error.timeout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリとの通信が制限時間内に完了しませんでした。要求を送信した後に通信が失敗した場合は、操作が実行済みのことがあります。"
           }
         }
       }
     },
-    "error.launch": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このコマンドを含むアプリを起動できませんでした。"
+    "error.launch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このコマンドを含むアプリを起動できませんでした。"
           }
         }
       }
     },
-    "error.protocol": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリとの通信で正しい応答を受け取れませんでした。"
+    "error.protocol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリとの通信で正しい応答を受け取れませんでした。"
           }
         }
       }
     },
-    "error.authentication": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アプリとの安全な接続を確認できませんでした。"
+    "error.authentication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリとの安全な接続を確認できませんでした。"
           }
         }
       }
     },
-    "error.usage": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ 使い方: capsaicin on [--for <時間> | --until <時刻>] / off / status"
+    "error.usage" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 使い方: capsaicin on [--for <時間> | --until <時刻>] / off / status"
           }
         }
       }
     },
-    "argument.missingCommand": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "サブコマンドを指定してください。"
+    "argument.missingCommand" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サブコマンドを指定してください。"
           }
         }
       }
     },
-    "argument.unknownCommand": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は不明なサブコマンドです。"
+    "argument.unknownCommand" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は不明なサブコマンドです。"
           }
         }
       }
     },
-    "argument.unexpected": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は受け付けない引数です。"
+    "argument.unexpected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は受け付けない引数です。"
           }
         }
       }
     },
-    "argument.missingValue": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ の値を指定してください。"
+    "argument.missingValue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ の値を指定してください。"
           }
         }
       }
     },
-    "argument.duplicate": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は1回だけ指定できます。"
+    "argument.duplicate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は1回だけ指定できます。"
           }
         }
       }
     },
-    "argument.conflicting": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "--for と --until は同時に指定できません。"
+    "argument.conflicting" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "--for と --until は同時に指定できません。"
           }
         }
       }
     },
-    "argument.invalidDuration": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は時間の書式が正しくありません。例: 1h30m"
+    "argument.invalidDuration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は時間の書式が正しくありません。例: 1h30m"
           }
         }
       }
     },
-    "argument.durationOutOfRange": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は指定できる時間の範囲外です。1分〜24時間で指定してください。"
+    "argument.durationOutOfRange" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は指定できる時間の範囲外です。1分〜24時間で指定してください。"
           }
         }
       }
     },
-    "argument.invalidTime": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ は時刻の書式が正しくありません。例: 4:00"
+    "argument.invalidTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ は時刻の書式が正しくありません。例: 4:00"
           }
         }
       }
     },
-    "status.blocking": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止: オン"
+    "status.blocking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止: オン"
           }
         }
       }
     },
-    "status.stopped": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "スリープ防止: オフ"
+    "status.stopped" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止: オフ"
           }
         }
       }
     },
-    "condition.timer": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイマー: %@にオフ"
+    "condition.timer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイマー: %@にオフ"
           }
         }
       }
     },
-    "condition.specifiedTime": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "指定時刻: %@にオフ"
+    "condition.specifiedTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定時刻: %@にオフ"
           }
         }
       }
     },
-    "condition.battery": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー残量%@%%未満でオフ"
+    "condition.battery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量%@%%未満でオフ"
           }
         }
       }
     },
-    "condition.ignoresAC": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "（電源アダプタ接続中は残量で解除しない）"
+    "condition.ignoresAC" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "（電源アダプタ接続中は残量で解除しない）"
           }
         }
       }
     },
-    "condition.none": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自動解除の条件なし"
+    "condition.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動解除の条件なし"
           }
         }
       }
     },
-    "warning.misalignment": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "警告: %@%@"
+    "warning.misalignment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告: %@%@"
           }
         }
       }
     },
-    "warning.unsaved": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "警告: 状態を保存できていません"
+    "warning.unsaved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告: 状態を保存できていません"
           }
         }
       }
     },
-    "direction.leftApplied": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "を元に戻せていません"
+    "direction.leftApplied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "を元に戻せていません"
           }
         }
       }
     },
-    "direction.notApplied": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "を適用できていません"
+    "direction.notApplied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "を適用できていません"
           }
         }
       }
     },
-    "mechanism.systemSleepDisabled": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "手動スリープ防止の設定"
+    "mechanism.systemSleepDisabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手動スリープ防止の設定"
           }
         }
       }
     },
-    "mechanism.lidSleepControl": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ディスプレイを閉じたときのスリープ防止の設定"
+    "mechanism.idleSleepAssertion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動スリープ防止の設定"
           }
         }
       }
     },
-    "mechanism.idleSleepAssertion": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "自動スリープ防止の設定"
+    "mechanism.displaySleepAssertion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画面の自動消灯を防ぐ設定"
           }
         }
       }
     },
-    "mechanism.displaySleepAssertion": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "画面の自動消灯を防ぐ設定"
+    "mechanism.led" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caps LockのLED設定"
           }
         }
       }
     },
-    "mechanism.led": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Caps LockのLED設定"
+    "rejection.battery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量がしきい値を下回っています。"
           }
         }
       }
     },
-    "rejection.battery": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "バッテリー残量がしきい値を下回っています。"
+    "rejection.helper" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが正しくインストールされていません。設定の「ヘルパー」でインストールまたは修復してください。"
           }
         }
       }
     },
-    "rejection.helper": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ヘルパーが正しくインストールされていません。設定の「ヘルパー」でインストールまたは修復してください。"
+    "rejection.mechanisms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "必要な設定を適用できませんでした: %@。"
           }
         }
       }
     },
-    "rejection.mechanisms": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "必要な設定を適用できませんでした: %@。"
+    "rejection.record" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再開用の記録を保存できません。"
           }
         }
       }
     },
-    "rejection.record": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "再開用の記録を保存できません。"
+    "format.separator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " / "
           }
         }
       }
     },
-    "format.separator": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": " / "
-          }
-        }
-      }
-    },
-    "format.listSeparator": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "、"
+    "format.listSeparator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "、"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

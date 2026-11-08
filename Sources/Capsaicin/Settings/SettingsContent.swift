@@ -34,7 +34,7 @@ private final class SettingsResources: NSObject {}
 
 struct SettingsSleepRow: Identifiable {
     let key: String
-    let setting: WritableKeyPath<Settings, Bool>
+    let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
     var id: String {
@@ -44,7 +44,7 @@ struct SettingsSleepRow: Identifiable {
     var isOn: Bool {
         switch state {
         case let .editable(value), let .prerequisiteUnmet(value): value
-        case .onWithoutHelper, .implied: true
+        case .onWithoutHelper: true
         case .hidden: false
         }
     }
@@ -68,31 +68,21 @@ struct SettingsSleepRow: Identifiable {
     {
         let presentation = SleepSettingsPresentation(settings: settings, capabilities: capabilities,
                                                      isHelperInstalled: helper == .installed)
-        let manual = presentation.manualRowIncludesLidSleep ? "manualAndLid" : "manual"
+        let manual = capabilities.hasLid ? "manualAndLid" : "manual"
         let definitions: [Self] = [
-            Self(key: "idle", setting: \.blocksIdleSleep, state: presentation.idleSleep),
             Self(key: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep),
             Self(key: manual, setting: \.blocksManualSleep, state: presentation.manualSleep),
-            Self(key: "lid", setting: \.blocksLidSleep, state: presentation.lidSleep),
             Self(
-                key: "lidDisplayOff",
-                setting: \.turnsOffDisplayOnLidClose,
-                state: presentation.turnsOffDisplayOnLidClose,
+                key: "lidDisplay",
+                setting: nil,
+                state: presentation.lidCloseDisplay,
             ),
         ]
         return definitions.compactMap { row in
             guard row.state != .hidden else { return nil }
             var row = row
-            var prefix = ""
-            if case let .implied(causes) = row.state {
-                prefix = causes.map { cause in
-                    SettingsSection.sleep.text("implied." + (cause == .displaySleep ? "byDisplay" :
-                            presentation.manualRowIncludesLidSleep ? "byManualAndLid" : "byManual"))
-                }.joined()
-            } else if row.state == .onWithoutHelper {
-                prefix = SettingsSection.sleep.text("helperNotReady")
-            }
-            row.help = prefix + SettingsSection.sleep.text(row.key + ".help")
+            row.help = (row.state == .onWithoutHelper ? SettingsSection.sleep.text("helperNotReady") : "")
+                + SettingsSection.sleep.text(row.key + ".help")
             return row
         }
     }

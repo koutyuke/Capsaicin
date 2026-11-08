@@ -6,6 +6,7 @@ extension Settings {
     /// 受け入れ例の共通の前提: 既定値で、解除の条件はすべてオフ。
     static func premise(_ change: (inout Settings) -> Void = { _ in }) -> Settings {
         var settings = Settings()
+        settings.blocksDisplaySleep = false
         settings.batteryConditionEnabled = false
         change(&settings)
         return settings
@@ -13,14 +14,8 @@ extension Settings {
 }
 
 extension MachineCapabilities {
-    /// 蓋と内蔵バッテリーのある Mac で、変種 A。
-    static let laptop = MachineCapabilities(hasLid: true, hasInternalBattery: true, canBlockLidSleepAlone: true)
-    static let laptopVariantB = MachineCapabilities(
-        hasLid: true,
-        hasInternalBattery: true,
-        canBlockLidSleepAlone: false,
-    )
-    static let desktop = MachineCapabilities(hasLid: false, hasInternalBattery: false, canBlockLidSleepAlone: true)
+    static let laptop = MachineCapabilities(hasLid: true, hasInternalBattery: true)
+    static let desktop = MachineCapabilities(hasLid: false, hasInternalBattery: false)
 }
 
 /// コントローラーの通知を記録する。

@@ -111,7 +111,7 @@ struct AppSettingsTests {
             fixture.system.isHelperInstalled = true
             return .success
         }
-        let row = try #require(model.sleepRows.first { $0.key == "manual" })
+        let row = try #require(model.sleepRows.first { $0.key == "manualAndLid" })
         await model.changeSleep(row, to: true)
         #expect(fixture.model.settings.blocksManualSleep)
         #expect(fixture.savedSettings == [fixture.model.settings])

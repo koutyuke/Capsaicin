@@ -11,11 +11,9 @@ struct SettingsTests {
         #expect(settings.showsHUD)
         #expect(settings.showsMenuBarIcon)
         #expect(!settings.showsDockIcon)
-        #expect(settings.blocksIdleSleep)
-        #expect(!settings.blocksDisplaySleep)
+        #expect(settings.blocksDisplaySleep)
         #expect(!settings.blocksManualSleep)
-        #expect(!settings.blocksLidSleep)
-        #expect(settings.turnsOffDisplayOnLidClose)
+        #expect(settings.lidCloseDisplay == .turnOff)
         #expect(!settings.timerEnabled)
         #expect(settings.timerDuration.minutes == 60)
         #expect(!settings.specifiedTimeEnabled)
@@ -54,6 +52,7 @@ struct SettingsTests {
         settings.specifiedTime = time(23, 5)
         settings.batteryThreshold = try #require(BatteryThreshold(percent: 35))
         settings.blocksManualSleep = true
+        settings.lidCloseDisplay = .keepOn
         settings.showsMenuBarIcon = false
         settings.showsDockIcon = true
         let data = try JSONEncoder().encode(settings)
@@ -84,9 +83,9 @@ struct SettingsTests {
 
     @Test("SPEC-SET-002 欠けたキーは既定値で補い、未知のキーは無視する")
     func missingAndUnknownKeys() throws {
-        let json = #"{"blocksDisplaySleep": true, "futureOption": 3}"#
+        let json = #"{"blocksDisplaySleep": false, "futureOption": 3}"#
         var expected = Settings()
-        expected.blocksDisplaySleep = true
+        expected.blocksDisplaySleep = false
         #expect(try JSONDecoder().decode(Settings.self, from: Data(json.utf8)) == expected)
     }
 
@@ -94,10 +93,32 @@ struct SettingsTests {
     func invalidValuesFallBack() throws {
         let json = """
         {"batteryThreshold": 150, "timerDuration": 0, "specifiedTime": {"hour": 24, "minute": 0},
-         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "showsDockIcon": "yes", "blocksLidSleep": true}
+         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "showsDockIcon": "yes", "lidCloseDisplay": "dim"}
         """
-        var expected = Settings()
-        expected.blocksLidSleep = true
-        #expect(try JSONDecoder().decode(Settings.self, from: Data(json.utf8)) == expected)
+        #expect(try JSONDecoder().decode(Settings.self, from: Data(json.utf8)) == Settings())
+    }
+
+    @Test("SPEC-SET-002 画面と手動の保存キーを保ち、新しい閉じたときの画面を読み書きする")
+    func sleepSettingsCoding() throws {
+        let json = #"{"blocksDisplaySleep": false, "blocksManualSleep": true, "lidCloseDisplay": "keepOn"}"#
+        let settings = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+        #expect(!settings.blocksDisplaySleep && settings.blocksManualSleep)
+        #expect(settings.lidCloseDisplay == .keepOn)
+        let data = try JSONEncoder().encode(settings)
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(object["blocksDisplaySleep"] as? Bool == false)
+        #expect(object["blocksManualSleep"] as? Bool == true)
+        #expect(object["lidCloseDisplay"] as? String == "keepOn")
+    }
+
+    @Test("SPEC-SET-002 欠けた閉じたときの画面は消灯にし、古い保存値は読み飛ばす")
+    func oldSleepKeysIgnored() throws {
+        let oldValues: [String: Bool] = [
+            "blocksIdleSleep": false,
+            "blocksLidSleep": true,
+            "turnsOffDisplayOnLidClose": false,
+        ]
+        let data = try JSONSerialization.data(withJSONObject: oldValues)
+        #expect(try JSONDecoder().decode(Settings.self, from: data) == Settings())
     }
 }

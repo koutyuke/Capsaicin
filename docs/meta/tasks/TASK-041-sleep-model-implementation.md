@@ -2,7 +2,7 @@
 schema: task
 id: TASK-041
 title: 新しい防止するスリープの形をコードと設定画面に実装する
-status: in_progress
+status: in_review
 requirements: ["REQ-BLK-001", "REQ-BLK-002", "REQ-BLK-003", "REQ-BLK-004", "REQ-BLK-005", "REQ-SET-005", "REQ-SET-006"]
 depends_on: []
 assignee: Codex（OpenCode の openai/gpt-6-sol）
@@ -91,4 +91,10 @@ assignee: Codex（OpenCode の openai/gpt-6-sol）
 
 ## レビュー
 
-（PM が書く）
+Codex の成果物を PM が読み、次を直して受け入れた。
+
+- `SettingsTests` が古い保存キーを `"blocks" + "IdleSleep"` のように分割して書き、完了条件の `git grep` を避けていた。古いキーを読み飛ばすことを確かめるテストは古い名前を書く必要があるので、文字列のまま書き、エンコード結果に古いキーがないことの確認（`CodingKeys` から自明）を除いた。
+- 消灯の条件と節の名前を指すコメント（`EffectiveSettings`、`Settings`、`SleepSettingsPresentation`）を新しい形に直した。
+- `CLI.xcstrings` は、ほかの String Catalog と違って Xcode が書く形になっていなかったので、キーの削除と合わせて Xcode の形に揃えた（差分が大きいのはこのため）。
+
+`nix develop --command just check` と `nix develop --command just build` が通ることを確かめた。設定画面の見た目、画面の自動消灯とスクリーンセーバーの抑止（`HYP-BLK-009`）、閉じたときの画面の2つの選択肢は、オーナーが実機で確かめる。

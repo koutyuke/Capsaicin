@@ -224,29 +224,12 @@ struct ControllerStartTests {
         #expect(controller.misalignments.isEmpty)
     }
 
-    @Test(
-        "SPEC-BLK-007 SPEC-BLK-012 変種 B と蓋のない Mac では、蓋閉じスリープの制御をどの契機でも操作せず、合わせられていない制御にもしない",
-        arguments: [MachineCapabilities.laptopVariantB, .desktop],
-    )
-    func lidControlUnusedOutsideVariantA(capabilities: MachineCapabilities) {
+    @Test("SPEC-BLK-001 SPEC-BLK-012 画面の消灯を止めなくても自動スリープを必ず止める")
+    func idleStartsWithoutDisplay() {
         let system = FakeSystem()
-        system.failing = [.setLidSleepDisabled(true), .setLidSleepDisabled(false)]
-        let settings = Settings.premise {
-            $0.blocksLidSleep = true
-            $0.blocksManualSleep = true
-        }
-        let controller = makeController(system, settings: settings, capabilities: capabilities)
+        let controller = makeController(system, settings: .premise { $0.notifiesWithLED = false })
         #expect(controller.requestStart(from: .menu) == .started)
-        controller.requestStop(from: .menu)
-        controller.requestStart(from: .menu)
-        _ = controller.quitByUser()
-        #expect(!system.operations.contains {
-            if case .setLidSleepDisabled = $0 {
-                true
-            } else {
-                false
-            }
-        })
+        #expect(system.heldAssertions == [.preventUserIdleSystemSleep])
         #expect(controller.misalignments.isEmpty)
     }
 

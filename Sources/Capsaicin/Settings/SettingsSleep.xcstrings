@@ -7,7 +7,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一定時間操作がないときの画面の消灯を防ぎます。オンにすると、Mac全体の自動スリープも防ぎます。"
+            "value" : "一定時間操作がないときの画面の消灯とスクリーンセーバーを防ぎます。オフにすると、システム設定どおりに画面が消えます。"
           }
         }
       }
@@ -18,7 +18,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "画面の自動消灯"
+            "value" : "画面の自動消灯とスクリーンセーバー"
           }
         }
       }
@@ -56,101 +56,46 @@
         }
       }
     },
-    "idle.help" : {
+    "lidDisplay.help" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一定時間操作がないときのMac全体のスリープを防ぎます。画面の消灯は「画面の自動消灯」で個別に設定できます。"
+            "value" : "手動スリープとディスプレイを閉じたときのスリープを防止しているときだけ使えます。「消灯」にすると、Macを動かしたまま画面を消して消費電力を抑えます。"
           }
         }
       }
     },
-    "idle.label" : {
+    "lidDisplay.keepOn" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自動スリープ"
+            "value" : "つけたまま"
           }
         }
       }
     },
-    "implied.byDisplay" : {
+    "lidDisplay.label" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「画面の自動消灯」がオンのため、このスリープも防止されます。"
+            "value" : "閉じたときの画面"
           }
         }
       }
     },
-    "implied.byManual" : {
+    "lidDisplay.turnOff" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「手動スリープ」がオンのため、このスリープも防止されます。"
-          }
-        }
-      }
-    },
-    "implied.byManualAndLid" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「手動スリープとディスプレイを閉じたときのスリープ」がオンのため、このスリープも防止されます。"
-          }
-        }
-      }
-    },
-    "lid.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MacBookのディスプレイを閉じてもスリープさせず、処理を継続させます。"
-          }
-        }
-      }
-    },
-    "lid.label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイを閉じたときのスリープ"
-          }
-        }
-      }
-    },
-    "lidDisplayOff.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイを閉じたときのスリープを防止しているときだけ使えます。画面を消灯して消費電力を抑えながら、Macは動き続けます。"
-          }
-        }
-      }
-    },
-    "lidDisplayOff.label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "閉じたときに画面を消灯"
+            "value" : "消灯"
           }
         }
       }
@@ -161,7 +106,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップルメニューなどの手動スリープに加え、ディスプレイを閉じたときのスリープと自動スリープも防ぎますが、画面の自動消灯は防ぎません。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
+            "value" : "アップルメニューなどの手動スリープを防ぎます。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
           }
         }
       }
@@ -183,7 +128,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動スリープとディスプレイを閉じたときのスリープに加え、自動スリープも防ぎますが、画面の自動消灯は防ぎません。macOSの仕様上、手動スリープとディスプレイを閉じたときのスリープは個別に防止できず、利用にはヘルパーのインストールが必要です。"
+            "value" : "アップルメニューなどの手動スリープと、ディスプレイを閉じたときのスリープを防ぎます。macOSの仕様上、2つは個別に防止できません。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
           }
         }
       }

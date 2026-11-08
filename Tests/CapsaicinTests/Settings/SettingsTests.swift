@@ -8,46 +8,40 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct SettingsTests {
-    @Test("SPEC-SET-005 表示規則はCoreに従い、含意・前提・ヘルパー不足を区別する")
+    @Test("SPEC-SET-005 画面・手動・閉じたときの画面を保存値で表示し、前提とヘルパー不足を区別する")
     func sleepRows() throws {
         var settings = CapsaicinCore.Settings()
-        settings.blocksIdleSleep = false
-        settings.blocksDisplaySleep = true
-        settings.blocksManualSleep = true
-        let capabilities = MachineCapabilities(hasLid: true, hasInternalBattery: true, canBlockLidSleepAlone: true)
-        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed)
-        let idle = try #require(rows.first)
-        #expect(idle.state == .implied([.displaySleep, .manualSleep]))
-        #expect(idle.isOn && !idle.isEnabled && !idle.dimsLabel)
-        #expect(idle.help.contains(SettingsSection.sleep.text("implied.byDisplay")))
-        #expect(idle.help.contains(SettingsSection.sleep.text("implied.byManual")))
-        #expect(!settings.blocksIdleSleep)
         settings.blocksDisplaySleep = false
+        settings.blocksManualSleep = true
+        let capabilities = MachineCapabilities(hasLid: true, hasInternalBattery: true)
+        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed)
+        #expect(rows.map(\.key) == ["display", "manualAndLid", "lidDisplay"])
+        let display = try #require(rows.first)
+        #expect(display.state == .editable(isOn: false))
+        #expect(!display.isOn && display.isEnabled && !display.dimsLabel)
+        #expect(rows[2].state == .editable(isOn: true))
+        settings.lidCloseDisplay = .keepOn
         let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .partial)
         #expect(missing[0].state == .editable(isOn: false))
-        #expect(missing[2].state == .onWithoutHelper)
-        #expect(missing[2].isEnabled)
+        #expect(missing[1].state == .onWithoutHelper)
+        #expect(missing[1].isEnabled)
         #expect(missing.last?.dimsLabel == true)
-        #expect(missing.last?.isOn == true)
+        #expect(missing.last?.isOn == false)
+        #expect(missing.last?.help == SettingsSection.sleep.text("lidDisplay.help"))
     }
 
-    @Test("SPEC-SET-005 SPEC-SET-006 変種とハードウェアだけで行を選ぶ", arguments: [true, false], [true, false])
-    func variants(variantA: Bool, laptop: Bool) {
+    @Test("SPEC-SET-005 SPEC-SET-006 蓋のある Mac だけ子の行を表示する", arguments: [true, false])
+    func hardware(laptop: Bool) {
         let settings = CapsaicinCore.Settings()
-        let capabilities = MachineCapabilities(
-            hasLid: laptop,
-            hasInternalBattery: laptop,
-            canBlockLidSleepAlone: variantA,
-        )
+        let capabilities = MachineCapabilities(hasLid: laptop, hasInternalBattery: laptop)
         let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .notInstalled)
-        #expect(rows.count == (laptop ? (variantA ? 5 : 4) : 3))
-        #expect(rows[2].key == (!variantA && laptop ? "manualAndLid" : "manual"))
+        #expect(rows.map(\.key) == (laptop ? ["display", "manualAndLid", "lidDisplay"] : ["display", "manual"]))
         let release = SettingsReleasePresentation(settings: settings, capabilities: capabilities)
         #expect(release.showsBattery == laptop)
         #expect(!release.timerEnabled && !release.timeEnabled && release.batteryEnabled)
     }
 
-    @Test("SPEC-HLP-001 設置中は保存も含意も変えず、成功後だけオンにする",
+    @Test("SPEC-HLP-001 設置中は保存値を変えず、成功後だけ手動をオンにする",
           arguments: [HelperInstallationState.notInstalled, .partial])
     func installation(state: HelperInstallationState) async throws {
         let fixture = AppFixture()
@@ -68,9 +62,10 @@ struct SettingsTests {
             #expect(model.sleepRows[0].state == .editable(isOn: true))
             return true
         }
-        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manual" }), to: true)
+        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manualAndLid" }), to: true)
         #expect(completed && fixture.model.settings.blocksManualSleep)
-        #expect(model.sleepRows[0].state == .implied([.manualSleep]))
+        #expect(model.sleepRows[1].state == .editable(isOn: true))
+        #expect(model.sleepRows[2].state == .editable(isOn: true))
         #expect(!model.pendingManual && !model.isBusy)
     }
 
@@ -92,7 +87,7 @@ struct SettingsTests {
         )
         model.confirm = { _, _ in outcome != 0 }
         model.showError = { _, _ in errors += 1 }
-        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manual" }), to: true)
+        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manualAndLid" }), to: true)
         #expect(!fixture.model.settings.blocksManualSleep && fixture.savedSettings.isEmpty)
         #expect(!model.pendingManual && !model.isBusy)
         #expect(performed == (outcome != 0))
@@ -119,7 +114,7 @@ struct SettingsTests {
 
     @Test("SPEC-BLK-009 反映が戻されたら表示も戻し、エラーを1回通知する")
     func rollback() {
-        let fixture = AppFixture()
+        let fixture = AppFixture(displayBlocked: false)
         fixture.model.launch()
         fixture.model.requestStart(from: .menu)
         fixture.system.failing = [.createAssertion(.preventUserIdleDisplaySleep)]
@@ -380,7 +375,6 @@ private extension SettingsTests {
                                                           capabilities: MachineCapabilities(
                                                               hasLid: true,
                                                               hasInternalBattery: true,
-                                                              canBlockLidSleepAlone: true,
                                                           ),
                                                           ports: system.ports), saveSettings: { _ in })
         app.launchAgentStatus = .ready

@@ -7,14 +7,11 @@ enum AlignmentFailure: Hashable {
 
 /// 仕組みをあるべき状態に向けて操作する手順。
 extension BlockingController {
-    /// この環境で扱う仕組み。LED を制御できない環境と、蓋閉じスリープの制御を使わない環境では、それを除く。
+    /// この環境で扱う仕組み。LED を制御できない環境では LED を除く。
     var controllableMechanisms: Set<Mechanism> {
         var result = Set(Mechanism.allCases)
         if !ports.led.isAvailable {
             result.remove(.led)
-        }
-        if !capabilities.usesLidSleepControl {
-            result.remove(.lidSleepControl)
         }
         return result
     }
@@ -38,8 +35,6 @@ extension BlockingController {
         switch mechanism {
         case .systemSleepDisabled:
             alignSleepDisabled(applied: applied)
-        case .lidSleepControl:
-            set(mechanism, applied) { try ports.lidSleep.setLidSleepDisabled(applied) }
         case .idleSleepAssertion:
             set(mechanism, applied) { try setAssertion(.preventUserIdleSystemSleep, held: applied) }
         case .displaySleepAssertion:

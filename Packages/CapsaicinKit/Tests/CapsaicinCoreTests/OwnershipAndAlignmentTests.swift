@@ -45,7 +45,7 @@ struct OwnershipAndAlignmentTests {
     @Test("SPEC-BLK-007 止めるべきなのに適用できていないものと、戻すべきなのに残っているものを向きで分ける")
     func directions() {
         let observed: [Mechanism: Bool] = [
-            .idleSleepAssertion: false, .displaySleepAssertion: true, .lidSleepControl: false, .led: true,
+            .idleSleepAssertion: false, .displaySleepAssertion: true, .led: true,
         ]
         let result = misalignments(targets: [.idleSleepAssertion, .led], observed: observed)
         #expect(result == [.idleSleepAssertion: .notApplied, .displaySleepAssertion: .leftApplied])
@@ -54,13 +54,13 @@ struct OwnershipAndAlignmentTests {
     @Test("SPEC-BLK-007 状態が分からない仕組みは合っていないとみなす")
     func unknownIsMisaligned() {
         let result = misalignments(targets: [], observed: [.idleSleepAssertion: false, .displaySleepAssertion: false])
-        #expect(result == [.lidSleepControl: .leftApplied, .led: .leftApplied])
+        #expect(result == [.led: .leftApplied])
     }
 
     @Test("SPEC-BLK-007 SPEC-HLP-005 外部の disablesleep は常に合っているとみなし、自分が立てたものだけを残っているとする")
     func sleepDisabledUsesOwnership() {
         let known: [Mechanism: Bool] = [
-            .idleSleepAssertion: false, .displaySleepAssertion: false, .lidSleepControl: false, .led: false,
+            .idleSleepAssertion: false, .displaySleepAssertion: false, .led: false,
             .systemSleepDisabled: true,
         ]
         #expect(misalignments(targets: [], observed: known, owns: false).isEmpty)

@@ -1,7 +1,6 @@
 import CapsaicinCore
 @testable import CapsaicinPlatform
 import Foundation
-import IOKit.pwr_mgt
 import Testing
 
 @MainActor
@@ -74,77 +73,6 @@ struct PowerPlatformAssertionsTests {
         assertions = nil
         #expect(released == nil)
         #expect(fake.released == (afterFailure ? [1, 1] : [1]))
-    }
-
-    @Test("SPEC-BLK-001 / SPEC-LCY-006 蓋制御は毎回真偽値を渡し、接続を閉じる")
-    func clamshellControl() throws {
-        var events: [String] = []
-        let control = LidSleepControl(calls: LidSleepCalls(find: { events.append("find"); return 8 }, open: {
-            #expect($0 == 8)
-            $1.pointee = 9
-            events.append("open")
-            return 0
-        }, call: { connection, selector, input in
-            #expect(connection == 9)
-            #expect(selector == 12)
-            events.append("call:\(input)")
-            return 0
-        }, close: { #expect($0 == 9); events.append("close"); return 0 }, release: {
-            #expect($0 == 8)
-            events.append("release")
-        }))
-        try control.setLidSleepDisabled(true)
-        try control.setLidSleepDisabled(true)
-        try control.setLidSleepDisabled(false)
-        #expect(events == [
-            "find", "open", "call:1", "close", "release",
-            "find", "open", "call:1", "close", "release",
-            "find", "open", "call:0", "close", "release",
-        ])
-    }
-
-    @Test("SPEC-BLK-007 蓋制御の失敗でも獲得した資源だけを片付け、再試行する")
-    func clamshellFailureCleanup() throws {
-        var events: [String] = []
-        var findResult: UInt32 = 8
-        var openResult: Int32 = -1
-        var callResult: Int32 = -2
-        var closeResult: Int32 = 0
-        let control = LidSleepControl(calls: LidSleepCalls(find: { findResult }, open: { _, connection in
-            events.append("open")
-            connection.pointee = 9
-            return openResult
-        }, call: { _, _, _ in events.append("call"); return callResult }, close: { _ in
-            events.append("close")
-            return closeResult
-        }, release: { _ in events.append("release") }))
-        #expect(throws: PowerPlatformError.ioKit(operation: "IOServiceOpen", code: -1)) {
-            try control.setLidSleepDisabled(true)
-        }
-        #expect(events == ["open", "release"])
-        events = []
-        openResult = 0
-        #expect(throws: PowerPlatformError.ioKit(operation: "kPMSetClamshellSleepState", code: -2)) {
-            try control.setLidSleepDisabled(true)
-        }
-        #expect(events == ["open", "call", "close", "release"])
-        events = []
-        callResult = 0
-        closeResult = -3
-        #expect(throws: PowerPlatformError.ioKit(operation: "IOServiceClose", code: -3)) {
-            try control.setLidSleepDisabled(false)
-        }
-        #expect(events == ["open", "call", "close", "release"])
-        events = []
-        closeResult = 0
-        try control.setLidSleepDisabled(false)
-        #expect(events == ["open", "call", "close", "release"])
-        events = []
-        findResult = 0
-        #expect(throws: PowerPlatformError.unavailable("IOPMrootDomain")) {
-            try control.setLidSleepDisabled(false)
-        }
-        #expect(events.isEmpty)
     }
 }
 

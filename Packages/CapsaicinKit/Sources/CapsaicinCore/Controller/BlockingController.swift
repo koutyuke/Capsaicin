@@ -7,7 +7,6 @@ import Foundation
 public final class BlockingController {
     public struct Ports {
         public var assertions: any PowerAssertionControlling
-        public var lidSleep: any LidSleepControlling
         public var helper: any HelperSleepControlling
         public var led: any CapsLockLEDControlling
         public var power: any PowerStateProviding
@@ -17,7 +16,6 @@ public final class BlockingController {
 
         public init(
             assertions: any PowerAssertionControlling,
-            lidSleep: any LidSleepControlling,
             helper: any HelperSleepControlling,
             led: any CapsLockLEDControlling,
             power: any PowerStateProviding,
@@ -26,7 +24,6 @@ public final class BlockingController {
             time: any TimeProviding,
         ) {
             self.assertions = assertions
-            self.lidSleep = lidSleep
             self.helper = helper
             self.led = led
             self.power = power

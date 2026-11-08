@@ -55,14 +55,14 @@ struct ControllerSettingsTests {
         let system = FakeSystem()
         let controller = makeController(system)
         controller.requestStart(from: .menu)
-        system.failing = [.createAssertion(.preventUserIdleDisplaySleep), .createAssertion(.preventUserIdleSystemSleep)]
+        system.failing = [.createAssertion(.preventUserIdleDisplaySleep),
+                          .releaseAssertion(.preventUserIdleDisplaySleep)]
         let result = controller.changeSettings(.premise {
-            $0.blocksIdleSleep = false
             $0.blocksDisplaySleep = true
         })
         #expect(result == .reverted(failed: [.displaySleepAssertion]))
-        #expect(controller.settings.blocksIdleSleep)
-        #expect(controller.misalignments == [.idleSleepAssertion: .notApplied])
+        #expect(!controller.settings.blocksDisplaySleep)
+        #expect(controller.misalignments == [.displaySleepAssertion: .leftApplied])
 
         system.failing = []
         system.advance(by: 60)
@@ -116,22 +116,19 @@ struct ControllerSettingsTests {
         #expect(system.operations.isEmpty)
     }
 
-    @Test("SPEC-BLK-007 設定の巻き戻しで蓋閉じスリープの制御を戻せなければ、戻すべきなのに残っている制御になり、合わせ直しで消える")
-    func lidRevertLeavesControl() {
+    @Test("SPEC-BLK-002 SPEC-BLK-009 閉じたときの画面を変えても仕組みは触らず保存値だけ更新する")
+    func lidCloseDisplayDoesNotChangeMechanisms() {
         let system = FakeSystem()
-        let controller = makeController(system)
+        let controller = makeController(system, settings: .premise { $0.blocksManualSleep = true })
         controller.requestStart(from: .menu)
-        system.failing = [.setLidSleepDisabled(true), .setLidSleepDisabled(false)]
-        let result = controller.changeSettings(.premise { $0.blocksLidSleep = true })
-        #expect(result == .reverted(failed: [.lidSleepControl]))
-        #expect(!controller.settings.blocksLidSleep)
-        #expect(controller.misalignments == [.lidSleepControl: .leftApplied])
-
-        system.failing = []
-        system.advance(by: 60)
-        controller.timePassed()
+        system.clearHistory()
+        var changed = controller.settings
+        changed.lidCloseDisplay = .keepOn
+        #expect(controller.changeSettings(changed) == .applied)
+        #expect(controller.settings == changed)
+        #expect(system.operations == [.saveRecord])
         #expect(controller.misalignments.isEmpty)
-        #expect(!system.isLidSleepDisabled)
+        #expect(controller.isBlocking)
     }
 
     @Test("SPEC-BLK-007 SPEC-BLK-009 あるべき状態が変わらない合わせられていない仕組みは、設定の変更で操作せずに引き継ぐ")

@@ -26,7 +26,7 @@ struct ControllerLifecycleTests {
         #expect(system.storedRecord?.isRunning == true)
     }
 
-    @Test("SPEC-LCY-006 通常の起動でも、前のプロセスから残った蓋閉じスリープの制御と LED を戻す")
+    @Test("SPEC-LCY-006 通常の起動でも、前のプロセスから残った LED を戻す")
     func normalLaunchRestoresLeftovers() {
         let system = FakeSystem()
         var record = ResumeRecord(lastUpdated: system.now)
@@ -34,7 +34,6 @@ struct ControllerLifecycleTests {
         system.storedRecord = record
         let controller = makeController(system, launch: false)
         #expect(controller.launch() == .normal)
-        #expect(system.operations.contains(.setLidSleepDisabled(false)))
         #expect(system.operations.contains(.setLEDLit(false)))
         #expect(controller.misalignments.isEmpty)
     }

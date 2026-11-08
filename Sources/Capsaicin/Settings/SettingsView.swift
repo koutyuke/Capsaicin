@@ -100,13 +100,22 @@ struct SettingsView: View {
         Section {
             ForEach(model.sleepRows) { row in
                 SettingsRow(title: SettingsSection.sleep.text(row.key + ".label"), help: row.help,
-                            child: row.key == "lidDisplayOff", enabled: !row.dimsLabel,
+                            child: row.key == "lidDisplay", enabled: !row.dimsLabel,
                             warning: row.state == .onWithoutHelper)
                 {
-                    Toggle(SettingsSection.sleep.text(row.key + ".label"), isOn: Binding(get: {
-                        row.setting == \.blocksManualSleep && model.pendingManual || row.isOn
-                    }, set: { value in Task { await model.changeSleep(row, to: value) } }))
-                        .labelsHidden().disabled(!row.isEnabled || model.isBusy)
+                    if row.key == "lidDisplay" {
+                        Picker(SettingsSection.sleep.text(row.key + ".label"),
+                               selection: binding(\.lidCloseDisplay))
+                        {
+                            Text(SettingsSection.sleep.text("lidDisplay.keepOn")).tag(LidCloseDisplay.keepOn)
+                            Text(SettingsSection.sleep.text("lidDisplay.turnOff")).tag(LidCloseDisplay.turnOff)
+                        }.labelsHidden().pickerStyle(.menu).disabled(!row.isEnabled || model.isBusy)
+                    } else if let setting = row.setting {
+                        Toggle(SettingsSection.sleep.text(row.key + ".label"), isOn: Binding(get: {
+                            setting == \.blocksManualSleep && model.pendingManual || row.isOn
+                        }, set: { value in Task { await model.changeSleep(row, to: value) } }))
+                            .labelsHidden().disabled(!row.isEnabled || model.isBusy)
+                    }
                 }
             }
         }
