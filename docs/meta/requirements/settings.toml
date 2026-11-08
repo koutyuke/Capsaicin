@@ -52,15 +52,15 @@ sources = []
 
 [[requirements]]
 id = "REQ-SET-005"
-title = "実際に止まる範囲が設定画面で分かる"
+title = "設定の値と止まる範囲が分かる"
 kind = "functional"
-statement = "設定画面の「止めるスリープ」は、ほかの設定の効果で実際に止まる種類を、その理由とともに示す。"
-reason = "ある種類を止めると別の種類も止まる仕組み上の制約を、利用者が設定画面で知れるようにするため。"
+statement = "設定画面の「防止するスリープ」は、各行の値がそのまま追加で止まる範囲を表し、使えない行はその理由を示す。"
+reason = "利用者が設定した値から、止まる範囲と使えない理由を読み取れるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-005"]
 depends_on = []
-sources = ["DEC-BLK-004"]
+sources = ["DEC-BLK-006"]
 
 [[requirements]]
 id = "REQ-SET-006"
@@ -72,4 +72,4 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-006", "SPEC-BLK-012"]
 depends_on = []
-sources = ["DEC-BLK-004", "HYP-SET-001", "HYP-SET-002"]
+sources = ["DEC-BLK-006", "HYP-SET-001", "HYP-SET-002"]

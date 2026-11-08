@@ -2,7 +2,7 @@
 schema: task
 id: TASK-040
 title: 新しい防止するスリープの形に要件・仕様・手順書を合わせる
-status: in_progress
+status: done
 requirements: ["REQ-BLK-001", "REQ-BLK-002", "REQ-BLK-003", "REQ-BLK-004", "REQ-BLK-005", "REQ-SET-005", "REQ-SET-006"]
 depends_on: []
 assignee: Codex（OpenCode の openai/gpt-6-sol）
@@ -68,4 +68,10 @@ assignee: Codex（OpenCode の openai/gpt-6-sol）
 
 ## レビュー
 
-（PM が書く）
+Codex の成果物を PM が読み、次を直して受け入れた。
+
+- 削除を指示した `HYP-BLK-002`・`HYP-BLK-003` は、置き換えられた判断（`DEC-BLK-003`、`DEC-BLK-004`）と `HYP-SYS-001` が参照しており、削除すると ID の検査が通らなかった。指示が「仮説は削除しない」という文書の規則に反していたためである。2つは残し、`affects` を `DEC-BLK-004` だけにして、結果に「`DEC-BLK-006` で使わなくなったので確かめない」と書いた。
+- 範囲外として残された旧い項目名（`helper.md`、`lifecycle.md`、`menu.md`、`led.md` の受け入れ例の「手動スリープ」「蓋を閉じたら画面を消す」、`ui.md` の「止めるスリープ」と含意の記述）と、`verification.md` の 3.1 を新しい形に直した。
+- `SPEC-BLK-012` の、もうない設定の保存値に触れる一文を除いた。`overview.md` の非目標を「手動スリープと蓋閉じスリープの片方だけを止めること」にした。
+
+`nix develop --command just lint-docs` が通ることを確かめた。

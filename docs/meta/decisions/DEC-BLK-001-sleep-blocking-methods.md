@@ -18,7 +18,6 @@ based_on: ["EVID-BLK-001", "EVID-BLK-002"]
 | 自動スリープ | 電源管理アサーション `PreventUserIdleSystemSleep` | 不要 |
 | 画面の自動消灯 | 電源管理アサーション `PreventUserIdleDisplaySleep` | 不要 |
 | 手動スリープと蓋閉じスリープの両方 | ヘルパー経由で `pmset -a disablesleep 1`（`DEC-HLP-001`） | 必要 |
-| 手動スリープだけ、または蓋閉じスリープだけ | `DEC-BLK-004` が定める | `DEC-BLK-004` が定める |
 
 ## 背景
 
@@ -39,9 +38,9 @@ based_on: ["EVID-BLK-001", "EVID-BLK-002"]
 ## 影響
 
 - `disablesleep` を使う場合は、ヘルパーの設置が要る。どの設定でヘルパーが要るかは `SPEC-HLP-001` にある。
-- 片方だけを止める組み合わせの扱いは `DEC-BLK-004` にある。
+- 片方だけを止める組み合わせは設けない（`DEC-BLK-006`）。
 - `disablesleep` は文書化されていないため、macOS の更新で挙動が変わる可能性を引き受ける。
-- 画面の自動消灯を止めたときに自動スリープも止まる含意（`EVID-BLK-001`）の扱いは `DEC-BLK-004` にある。
+- 抑止中に自動スリープを常に止める扱いは `DEC-BLK-006` にある。
 
 ## 覆す条件
 

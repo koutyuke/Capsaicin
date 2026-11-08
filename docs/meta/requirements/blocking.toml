@@ -6,61 +6,61 @@ domain_code = "BLK"
 id = "REQ-BLK-001"
 title = "自動スリープを止められる"
 kind = "functional"
-statement = "抑止中は、「自動スリープ」を止める設定にしていれば、利用者が操作しなくても Mac が自動でスリープしない。"
+statement = "抑止中は、利用者が操作しなくても Mac が自動でスリープしない。"
 reason = "長時間の処理や放置中の作業を中断させないため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-001"]
 depends_on = []
-sources = ["DEC-BLK-001"]
+sources = ["DEC-BLK-001", "DEC-BLK-006"]
 
 [[requirements]]
 id = "REQ-BLK-002"
-title = "画面の自動消灯を止められる"
+title = "画面の自動消灯とスクリーンセーバーを止められる"
 kind = "functional"
-statement = "抑止中は、「画面の自動消灯」を止める設定にしていれば、利用者が操作しなくても画面が自動で消えない。"
+statement = "抑止中は、「画面の自動消灯とスクリーンセーバー」をオンにしていれば、利用者が操作しなくても画面が自動で消えず、スクリーンセーバーが自動で起動しない。"
 reason = "画面を見ている間に、画面が自動で消えないようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-001"]
 depends_on = []
-sources = ["DEC-BLK-001"]
+sources = ["DEC-BLK-001", "DEC-BLK-006", "HYP-BLK-009"]
 
 [[requirements]]
 id = "REQ-BLK-003"
 title = "手動スリープを止められる"
 kind = "functional"
-statement = "抑止中は、「手動スリープ」を止める設定にしていれば、利用者がスリープを指示しても Mac がスリープしない。"
+statement = "抑止中は、「手動スリープとディスプレイを閉じたときのスリープ」をオンにしていれば、利用者がスリープを指示しても Mac がスリープしない。"
 reason = "誤ってスリープさせて処理を中断させないため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-001", "SPEC-BLK-012"]
 depends_on = []
-sources = ["DEC-BLK-001", "DEC-BLK-004"]
+sources = ["DEC-BLK-001", "DEC-BLK-006"]
 
 [[requirements]]
 id = "REQ-BLK-004"
 title = "蓋閉じスリープを止められる"
 kind = "functional"
-statement = "抑止中は、「蓋閉じスリープ」を止める設定にしていれば、蓋を閉じても Mac がスリープしない。"
+statement = "抑止中は、「手動スリープとディスプレイを閉じたときのスリープ」をオンにしていれば、蓋を閉じても Mac がスリープしない。"
 reason = "蓋を閉じたまま処理を続けられるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-001", "SPEC-BLK-012"]
 depends_on = []
-sources = ["DEC-BLK-001", "DEC-BLK-004", "HYP-BLK-002"]
+sources = ["DEC-BLK-001", "DEC-BLK-006"]
 
 [[requirements]]
 id = "REQ-BLK-005"
-title = "蓋を閉じたら画面を消せる"
+title = "閉じたときの画面を消せる"
 kind = "functional"
-statement = "抑止中に蓋閉じスリープを止めているとき、「蓋を閉じたら画面を消す」をオンにしていれば、蓋を閉じると画面が消える。"
+statement = "抑止中に「手動スリープとディスプレイを閉じたときのスリープ」をオンにし、「閉じたときの画面」を「消灯」にしていれば、蓋を閉じると画面が消える。"
 reason = "蓋閉じスリープを止めている間も、閉じた蓋の中で画面を点けたままにしないため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-002"]
 depends_on = ["REQ-BLK-004"]
-sources = ["DEC-BLK-002"]
+sources = ["DEC-BLK-002", "DEC-BLK-006"]
 
 [[requirements]]
 id = "REQ-BLK-006"

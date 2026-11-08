@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-SET-001
 title: IOPMrootDomain の AppleClamshellState の有無で蓋のある Mac を判定できる
 status: open
-affects: ["REQ-SET-006", "SPEC-SET-006", "DEC-BLK-004"]
+affects: ["REQ-SET-006", "SPEC-SET-006", "DEC-BLK-006"]
 evidence: []
 ---
 
@@ -15,7 +15,7 @@ evidence: []
 
 ## 外れたときに起きること
 
-蓋のある Mac で蓋の行が消える、または蓋のない Mac で残る。`SPEC-SET-006` の判定の方法を変える。
+蓋のある Mac で「閉じたときの画面」が消える、または蓋のない Mac で残る。`SPEC-SET-006` の判定の方法を変える。
 
 ## 確かめ方
 

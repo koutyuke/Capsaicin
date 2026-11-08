@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-BLK-006
 title: disablesleep 1 は手動スリープと蓋閉じスリープの両方を止め、片方だけは指定できない
 status: open
-affects: ["DEC-BLK-001", "DEC-BLK-004", "REQ-BLK-003", "REQ-BLK-004", "SPEC-BLK-001"]
+affects: ["DEC-BLK-001", "DEC-BLK-006", "REQ-BLK-003", "REQ-BLK-004", "SPEC-BLK-001"]
 evidence: []
 ---
 
@@ -19,7 +19,7 @@ evidence: []
 ## 外れたときに起きること
 
 - 主張1が外れた（どちらかでスリープする）場合: `DEC-BLK-001` の手動スリープと蓋閉じスリープの方式を見直し、`REQ-BLK-003` か `REQ-BLK-004` を満たす別の方式が要る。
-- 主張2が外れた（片方だけを指定できる）場合: `DEC-BLK-004` の含意が狭まり、`SPEC-BLK-001` の含意の一覧が変わる。
+- 主張2が外れた（片方だけを指定できる）場合: まとめた項目を設ける判断（`DEC-BLK-006`）を見直す。
 
 ## 確かめ方
 

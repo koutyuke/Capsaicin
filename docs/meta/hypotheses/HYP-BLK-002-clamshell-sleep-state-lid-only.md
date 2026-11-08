@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-BLK-002
 title: kPMSetClamshellSleepState で root なしに蓋閉じスリープだけを止められる
 status: open
-affects: ["REQ-BLK-004", "DEC-BLK-004", "SPEC-BLK-001", "SPEC-SET-005", "SPEC-LCY-006"]
+affects: ["DEC-BLK-004"]
 evidence: []
 ---
 
@@ -30,4 +30,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+未確認。`DEC-BLK-006` でこの方式を使わなくなったので、確かめない。

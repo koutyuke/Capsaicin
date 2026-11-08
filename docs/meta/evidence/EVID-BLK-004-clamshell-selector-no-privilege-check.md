@@ -25,5 +25,5 @@ sources: ["https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/io
 ## 未確認のこと
 
 - main ブランチのソースが、macOS 26 や開発用の Mac（macOS 27.0.1）のカーネルと同じか。
-- 一般ユーザーの権限のアプリが `IOPMrootDomain` のユーザークライアントを開けるか、sandbox などで止められないか（`HYP-BLK-002`）。
-- 設定する値の印が `kClamshellSleepDisablePowerd` であり、powerd が同じ印を書き換えて、設定が取り消されないか（`HYP-BLK-002`）。
+- 一般ユーザーの権限のアプリが `IOPMrootDomain` のユーザークライアントを開けるか、sandbox などで止められないか。
+- 設定する値の印が `kClamshellSleepDisablePowerd` であり、powerd が同じ印を書き換えて、設定が取り消されないか。

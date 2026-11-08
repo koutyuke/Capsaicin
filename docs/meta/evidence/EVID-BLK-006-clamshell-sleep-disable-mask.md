@@ -25,5 +25,5 @@ sources: ["https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/io
 
 ## 未確認のこと
 
-- `kClamshellSleepDisablePowerd` のビットを powerd がほかの理由で書き換えるか。スリープと復帰の後も、立てたビットが残るか（`HYP-BLK-002`）。
+- `kClamshellSleepDisablePowerd` のビットを powerd がほかの理由で書き換えるか。スリープと復帰の後も、立てたビットが残るか。
 - `clamshellDisabled` がどこで設定されるか（読んだ範囲には出てこなかった）。
