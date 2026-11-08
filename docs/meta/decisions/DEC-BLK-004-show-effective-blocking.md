@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-BLK-004
 title: 止めるスリープは各設定の値を保ち、実際に止まる範囲を設定画面に示す
-status: accepted
+status: superseded
 supersedes: ["DEC-BLK-003"]
-superseded_by: []
+superseded_by: ["DEC-BLK-006"]
 requirements: ["REQ-BLK-003", "REQ-BLK-004", "REQ-SET-005", "REQ-SET-006"]
 based_on: ["EVID-BLK-001", "EVID-BLK-004", "EVID-BLK-005", "HYP-BLK-002", "HYP-BLK-006"]
 ---
