@@ -13,7 +13,7 @@ based_on: ["EVID-HLP-001"]
 
 ## 結論
 
-Capsomnia と同じく、アプリ本体は一般ユーザーの権限で動かし、root 権限が必要な処理だけを Capsaicin 専用の小さなヘルパーに任せる。アプリは sudoers のルールでヘルパーを呼び、Mac の起動時の後片付けも LaunchDaemon から同じヘルパーを呼ぶ。ヘルパーが受け付ける処理と構成は `specs/helper.md`、実装と設置の手順は `DEC-HLP-002` にある。
+Capsomnia と同じく、アプリ本体は一般ユーザーの権限で動かし、root 権限が必要な処理だけを Capsaicin 専用の小さなヘルパーに任せる。アプリは sudoers のルールでヘルパーを呼び、Mac の起動時の後片付けも LaunchDaemon から同じヘルパーを呼ぶ。ヘルパーが受け付ける処理と構成は `specs/helper.md`、実装と設置の手順は `DEC-HLP-003` にある。
 
 ## 背景
 
@@ -35,7 +35,7 @@ Capsomnia と同じく、アプリ本体は一般ユーザーの権限で動か�
 ## 影響
 
 - 設置に管理者認証が要り、設置と削除の手段を設定画面に用意する必要がある（`SPEC-HLP-001`、`SPEC-HLP-004`）。
-- sudoers の書式を誤ると sudo 全体が使えなくなる危険を引き受け、設置の手順で防ぐ（`DEC-HLP-002`、`EVID-HLP-001`）。
+- sudoers の書式を誤ると sudo 全体が使えなくなる危険を引き受け、設置の手順で防ぐ（`DEC-HLP-003`、`EVID-HLP-001`）。
 - `pmset displaysleepnow` に root が要ると分かった場合は、ヘルパーのサブコマンドが増える（`HYP-BLK-001`）。
 
 ## 覆す条件

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-HLP-002
 title: ヘルパーは C の小さな実行ファイルにし、検証してから設置する
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-HLP-003"]
 requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-003", "REQ-HLP-005", "REQ-HLP-006"]
 based_on: ["DEC-HLP-001", "EVID-HLP-001"]
 ---

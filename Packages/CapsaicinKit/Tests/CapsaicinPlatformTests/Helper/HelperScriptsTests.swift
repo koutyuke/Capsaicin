@@ -54,8 +54,10 @@ struct HelperScriptsTests {
                 "/bin/test \"$source_hash\" = \"$installed_hash\"", "rules=$(/usr/bin/mktemp",
                 "/usr/sbin/chown root:wheel \"$rules\"", "/bin/chmod 440 \"$rules\"",
                 "/usr/sbin/visudo -c -f \"$rules\"", "/bin/mv -f \"$rules\"",
-                "/usr/sbin/visudo -c\n", "<key>Label</key>", "/bin/chmod 644",
+                "<key>Label</key>", "/bin/chmod 644",
             ])
+            // 引数なしの visudo -c はほかのツールの sudoers の権限でも失敗するので、自分のルールだけを検証する。
+            #expect(script.components(separatedBy: "/usr/sbin/visudo").count == 2)
             #expect(script.contains(HelperScripts.shellQuote(paths.sudoers + ".XXXXXX")))
             #expect(script.contains("trap '/bin/rm -f \"$rules\"' EXIT"))
             #expect(!script.contains("launchctl"))
@@ -82,8 +84,9 @@ struct HelperScriptsTests {
             try expectOrder(script, [
                 "/bin/launchctl print system/\(paths.label)", "/bin/launchctl bootout system/\(paths.label)",
                 "/bin/rm -f '\(paths.daemon)'", "/bin/rm -f '\(paths.sudoers)'",
-                "/usr/sbin/visudo -c", "/bin/rm -f '\(paths.helper)'",
+                "/bin/rm -f '\(paths.helper)'",
             ])
+            #expect(!script.contains("visudo"))
             try checkShellSyntax(script)
         }
     }

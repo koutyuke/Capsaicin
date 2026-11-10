@@ -63,7 +63,6 @@ enum HelperScripts {
         /bin/chmod 440 "$rules"
         /usr/sbin/visudo -c -f "$rules"
         /bin/mv -f "$rules" \(sudoersPath)
-        /usr/sbin/visudo -c
         /usr/bin/printf '%s\\n' \(shellQuote(daemonPlist(paths: paths))) > \(daemon)
         /usr/sbin/chown root:wheel \(daemon)
         /bin/chmod 644 \(daemon)
@@ -79,7 +78,6 @@ enum HelperScripts {
         fi
         /bin/rm -f \(shellQuote(paths.daemon))
         /bin/rm -f \(shellQuote(paths.sudoers))
-        /usr/sbin/visudo -c
         /bin/rm -f \(shellQuote(paths.helper))
         """
     }

@@ -12,7 +12,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-001", "SPEC-HLP-006"]
 depends_on = []
-sources = ["DEC-HLP-001", "DEC-HLP-002"]
+sources = ["DEC-HLP-001", "DEC-HLP-003"]
 
 [[requirements]]
 id = "REQ-HLP-002"
@@ -24,7 +24,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-002"]
 depends_on = []
-sources = ["DEC-HLP-001", "DEC-HLP-002"]
+sources = ["DEC-HLP-001", "DEC-HLP-003"]
 
 [[requirements]]
 id = "REQ-HLP-003"
@@ -36,7 +36,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-001"]
 depends_on = []
-sources = ["DEC-HLP-002", "EVID-HLP-001"]
+sources = ["DEC-HLP-003", "EVID-HLP-001"]
 
 [[requirements]]
 id = "REQ-HLP-004"
@@ -60,7 +60,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-004", "SPEC-HLP-006"]
 depends_on = []
-sources = ["DEC-HLP-002"]
+sources = ["DEC-HLP-003"]
 
 [[requirements]]
 id = "REQ-HLP-006"
@@ -72,4 +72,4 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-005"]
 depends_on = []
-sources = ["DEC-HLP-002", "EVID-BLK-003"]
+sources = ["DEC-HLP-003", "EVID-BLK-003"]
