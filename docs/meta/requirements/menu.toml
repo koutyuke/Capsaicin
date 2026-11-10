@@ -42,8 +42,8 @@ sources = []
 id = "REQ-MENU-004"
 title = "メニューバーのアイコンで Capsaicin を見つけられる"
 kind = "quality"
-statement = "メニューバーに Capsaicin のアイコンを既定で表示し、VoiceOver ではアイコンのラベルとして抑止の状態を読み上げる。"
-reason = "メニューの入口を見つけられるようにし、画面を見ない利用者にも状態を伝えるため。"
+statement = "メニューバーに Capsaicin のアイコンを既定で表示し、抑止中かどうかをアイコンの見た目で示す。VoiceOver ではアイコンのラベルとして抑止の状態を読み上げる。"
+reason = "メニューの入口を見つけられるようにし、Caps Lock の LED が見えないときや画面を見ない利用者にも状態を伝えるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-MENU-005"]
@@ -58,9 +58,9 @@ statement = "利用者は、設定でメニューバーのアイコンを隠せ�
 reason = "ホットキー、LED、CLI だけで使う利用者が、メニューバーの場所を空けられるようにするため。"
 priority = "should"
 status = "accepted"
-specs = ["SPEC-MENU-006", "SPEC-SET-001"]
+specs = ["SPEC-MENU-006", "SPEC-SET-001", "SPEC-SET-004"]
 depends_on = ["REQ-SET-002"]
-sources = ["DEC-UI-008"]
+sources = ["DEC-UI-010"]
 
 [[requirements]]
 id = "REQ-MENU-006"

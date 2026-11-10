@@ -1,13 +1,68 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "battery.ignoreOnAdapter.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電源アダプタ接続中は残量でオフにしない"
+          }
+        }
+      }
+    },
+    "battery.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量"
+          }
+        }
+      }
+    },
+    "battery.threshold.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "しきい値"
+          }
+        }
+      }
+    },
+    "battery.threshold.value" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d%%"
+          }
+        }
+      }
+    },
+    "behavior.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープとディスプレイ"
+          }
+        }
+      }
+    },
     "display.help" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一定時間操作がないときの画面の消灯とスクリーンセーバーを防ぎます。オフにすると、システム設定どおりに画面が消えます。"
+            "value" : "Capsaicinがオンの間、操作がない場合でもスクリーンセーバーの起動やディスプレイの消灯を防ぎます。この設定をオフにしてディスプレイが消灯しても、Mac本体はスリープしません。"
           }
         }
       }
@@ -18,18 +73,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "画面の自動消灯とスクリーンセーバー"
-          }
-        }
-      }
-    },
-    "group.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スリープの種類"
+            "value" : "ディスプレイを自動でオフにしない"
           }
         }
       }
@@ -40,7 +84,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーが正しくインストールされていないため、スリープを防止できません。設定の「ヘルパー」で修復してください。"
+            "value" : "ヘルパーが正しくインストールされていないため、この設定を適用できません。設定の「ヘルパー」で修復してください。"
           }
         }
       }
@@ -56,46 +100,68 @@
         }
       }
     },
-    "lidDisplay.help" : {
+    "hours" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動スリープとディスプレイを閉じたときのスリープを防止しているときだけ使えます。「消灯」にすると、Macを動かしたまま画面を消して消費電力を抑えます。"
+            "value" : "時間"
           }
         }
       }
     },
-    "lidDisplay.keepOn" : {
+    "lidClose.help" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "つけたまま"
+            "value" : "「スリープ」以外を選ぶと、Capsaicinがオンの間は、ディスプレイを閉じても、アップルメニューの「スリープ」などを選んでも、Macはスリープしません。使うには、管理者パスワードでヘルパーをインストールする必要があります。"
           }
         }
       }
     },
-    "lidDisplay.label" : {
+    "lidClose.keepOn" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "閉じたときの画面"
+            "value" : "オンのまま"
           }
         }
       }
     },
-    "lidDisplay.turnOff" : {
+    "lidClose.label" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "消灯"
+            "value" : "ディスプレイを閉じたとき"
+          }
+        }
+      }
+    },
+    "lidClose.sleep" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ（標準）"
+          }
+        }
+      }
+    },
+    "lidClose.turnOff" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディスプレイをオフ"
           }
         }
       }
@@ -106,7 +172,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップルメニューなどの手動スリープを防ぎます。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
+            "value" : "Capsaicinがオンの間は、アップルメニューの「スリープ」などを選んでもMacはスリープしません。使うには、管理者パスワードでヘルパーをインストールする必要があります。"
           }
         }
       }
@@ -117,29 +183,95 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動スリープ"
+            "value" : "メニューから選んでもスリープさせない"
           }
         }
       }
     },
-    "manualAndLid.help" : {
+    "minutes" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップルメニューなどの手動スリープと、ディスプレイを閉じたときのスリープを防ぎます。macOSの仕様上、2つは個別に防止できません。利用には管理者のパスワードによるヘルパーのインストールが必要です。"
+            "value" : "分"
           }
         }
       }
     },
-    "manualAndLid.label" : {
+    "release.group.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動スリープとディスプレイを閉じたときのスリープ"
+            "value" : "自動でオフにする"
+          }
+        }
+      }
+    },
+    "time.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この時刻になると自動でオフにします。オンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻にオフにします。"
+          }
+        }
+      }
+    },
+    "time.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "指定時刻"
+          }
+        }
+      }
+    },
+    "time.value.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻"
+          }
+        }
+      }
+    },
+    "timer.duration.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の数値"
+          }
+        }
+      }
+    },
+    "timer.duration.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "継続時間"
+          }
+        }
+      }
+    },
+    "timer.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイマー"
           }
         }
       }
@@ -150,7 +282,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "防止するスリープ"
+            "value" : "スリープ"
           }
         }
       }

@@ -24,7 +24,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-001"]
 depends_on = []
-sources = ["EVID-UI-003"]
+sources = ["EVID-UI-003", "DEC-UI-010"]
 
 [[requirements]]
 id = "REQ-SET-003"
@@ -48,19 +48,19 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-004"]
 depends_on = []
-sources = []
+sources = ["DEC-UI-010"]
 
 [[requirements]]
 id = "REQ-SET-005"
 title = "設定の値と止まる範囲が分かる"
 kind = "functional"
-statement = "設定画面の「防止するスリープ」は、各行の値がそのまま追加で止まる範囲を表し、使えない行はその理由を示す。"
+statement = "設定画面の「スリープ」の「スリープとディスプレイ」は、各行の値がそのまま追加で止まる範囲を表し、設定を適用できない場合はその理由を示す。"
 reason = "利用者が設定した値から、止まる範囲と使えない理由を読み取れるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-005"]
 depends_on = []
-sources = ["DEC-BLK-006"]
+sources = ["DEC-BLK-006", "DEC-SET-005"]
 
 [[requirements]]
 id = "REQ-SET-006"

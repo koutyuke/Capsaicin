@@ -3,7 +3,7 @@ import CapsaicinPlatform
 import Foundation
 
 enum SettingsSection: String, CaseIterable, Identifiable {
-    case general, sleep, release, led, controls, helper, about
+    case general, sleep, led, controls, helper, about
     var id: Self {
         self
     }
@@ -16,8 +16,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .sleep: "moon.zzz"
-        case .release: "timer"
-        case .led: "capslock"
+        case .led: "custom.capsaicin.led"
         case .controls: "keyboard"
         case .helper: "lock.shield"
         case .about: "info.circle"
@@ -32,8 +31,17 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 
 private final class SettingsResources: NSObject {}
 
+enum SettingsLidCloseChoice: String, CaseIterable {
+    case sleep, turnOff, keepOn
+
+    init(settings: Settings) {
+        self = settings.blocksManualSleep ? (settings.lidCloseDisplay == .turnOff ? .turnOff : .keepOn) : .sleep
+    }
+}
+
 struct SettingsSleepRow: Identifiable {
     let key: String
+    let symbol: String?
     let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
@@ -43,43 +51,22 @@ struct SettingsSleepRow: Identifiable {
 
     var isOn: Bool {
         switch state {
-        case let .editable(value), let .prerequisiteUnmet(value): value
+        case let .editable(value): value
         case .onWithoutHelper: true
-        case .hidden: false
         }
-    }
-
-    var isEnabled: Bool {
-        switch state {
-        case .editable, .onWithoutHelper: true
-        default: false
-        }
-    }
-
-    var dimsLabel: Bool {
-        if case .prerequisiteUnmet = state {
-            return true
-        }
-        return false
     }
 
     static func rows(settings: Settings, capabilities: MachineCapabilities,
                      helper: HelperInstallationState) -> [Self]
     {
-        let presentation = SleepSettingsPresentation(settings: settings, capabilities: capabilities,
-                                                     isHelperInstalled: helper == .installed)
-        let manual = capabilities.hasLid ? "manualAndLid" : "manual"
+        let presentation = SleepSettingsPresentation(settings: settings, isHelperInstalled: helper == .installed)
+        let manual = capabilities.hasLid ? "lidClose" : "manual"
         let definitions: [Self] = [
-            Self(key: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep),
-            Self(key: manual, setting: \.blocksManualSleep, state: presentation.manualSleep),
-            Self(
-                key: "lidDisplay",
-                setting: nil,
-                state: presentation.lidCloseDisplay,
-            ),
+            Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep),
+            Self(key: manual, symbol: capabilities.hasLid ? "laptopcomputer" : "powersleep",
+                 setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep),
         ]
-        return definitions.compactMap { row in
-            guard row.state != .hidden else { return nil }
+        return definitions.map { row in
             var row = row
             row.help = (row.state == .onWithoutHelper ? SettingsSection.sleep.text("helperNotReady") : "")
                 + SettingsSection.sleep.text(row.key + ".help")

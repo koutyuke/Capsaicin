@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-UI-008
 title: 設定画面の「終了」ボタンはサイドバーの下端に、色を付けずに置く
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-UI-010"]
 requirements: ["REQ-MENU-005", "REQ-SET-002"]
 based_on: []
 ---

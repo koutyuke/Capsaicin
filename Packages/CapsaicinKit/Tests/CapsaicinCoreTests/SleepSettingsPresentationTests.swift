@@ -4,10 +4,9 @@ import Testing
 struct SleepSettingsPresentationTests {
     private func present(
         _ settings: Settings,
-        _ capabilities: MachineCapabilities = .laptop,
         helper: Bool = true,
     ) -> SleepSettingsPresentation {
-        SleepSettingsPresentation(settings: settings, capabilities: capabilities, isHelperInstalled: helper)
+        SleepSettingsPresentation(settings: settings, isHelperInstalled: helper)
     }
 
     @Test("SPEC-SET-005 画面の行は保存値のまま常に操作できる", arguments: [false, true], [false, true])
@@ -23,26 +22,16 @@ struct SleepSettingsPresentationTests {
         #expect(present(.premise { $0.blocksManualSleep = true }).manualSleep == .editable(isOn: true))
     }
 
-    @Test("SPEC-SET-005 閉じたときの画面は親がオンでヘルパーがあるときだけ操作でき、保存値は保つ",
+    @Test("SPEC-SET-005 閉じたときのディスプレイの保存値で操作可否は変わらない",
           arguments: [false, true], [false, true])
-    func lidDisplayPrerequisites(manual: Bool, helper: Bool) {
+    func lidDisplayDoesNotDisableRow(manual: Bool, helper: Bool) {
         for display in LidCloseDisplay.allCases {
             let settings = Settings.premise {
                 $0.blocksManualSleep = manual
                 $0.lidCloseDisplay = display
             }
             let rows = present(settings, helper: helper)
-            let selected = display == .turnOff
-            #expect(rows.lidCloseDisplay == (manual && helper
-                    ? .editable(isOn: selected) : .prerequisiteUnmet(isOn: selected)))
+            #expect(rows.manualSleep == (manual && !helper ? .onWithoutHelper : .editable(isOn: manual)))
         }
-    }
-
-    @Test("SPEC-SET-006 蓋のない Mac では閉じたときの画面を表示しない")
-    func noLid() {
-        let rows = present(.premise { $0.blocksManualSleep = true }, .desktop)
-        #expect(rows.displaySleep == .editable(isOn: false))
-        #expect(rows.manualSleep == .editable(isOn: true))
-        #expect(rows.lidCloseDisplay == .hidden)
     }
 }

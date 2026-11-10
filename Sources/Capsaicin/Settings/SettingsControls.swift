@@ -28,16 +28,21 @@ struct SettingsInfo: View {
 struct SettingsRow<Content: View>: View {
     let title: String
     var help = ""
+    var symbol: String?
     var child = false
     var enabled = true
     var warning = false
     @ViewBuilder var content: () -> Content
     var body: some View {
         HStack {
-            HStack {
-                if warning {
-                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            HStack(spacing: 8) {
+                if let symbol = warning ? "exclamationmark.triangle.fill" : symbol {
+                    Image(symbol: symbol, bundle: Bundle(for: SettingsWindowController.self))
+                        .foregroundStyle(warning || symbol == "exclamationmark.triangle.fill"
+                            ? Color.orange : Color.secondary)
+                        .frame(width: 20)
                         .accessibilityLabel(SettingsSection.sleep.text("helperNotReady.a11y"))
+                        .accessibilityHidden(!warning)
                 }
                 Text(title).foregroundStyle(enabled ? .primary : .secondary)
                     .disabled(!enabled)
@@ -45,7 +50,7 @@ struct SettingsRow<Content: View>: View {
                     SettingsInfo(title: title, help: help)
                 }
             }
-            .padding(.leading, child ? 20 : 0)
+            .padding(.leading, child ? 28 : 0)
             Spacer()
             content().disabled(!enabled)
                 .accessibilityLabel(title).accessibilityHint(help)
@@ -59,7 +64,7 @@ struct SettingsDurationField: View {
         HStack(spacing: 8) {
             number("hours", get: { value.minutes / 60 }, set: { setMinutes($0 * 60 + value.minutes % 60) })
             number("minutes", get: { value.minutes % 60 }, set: { setMinutes(value.minutes / 60 * 60 + $0) })
-            Stepper(SettingsSection.release.text("timer.duration.label"), onIncrement: {
+            Stepper(SettingsSection.sleep.text("timer.duration.label"), onIncrement: {
                 setMinutes(min(1440, value.minutes + 5))
             }, onDecrement: { setMinutes(max(1, value.minutes - 5)) }).labelsHidden()
         }.monospacedDigit()
@@ -69,9 +74,9 @@ struct SettingsDurationField: View {
                         set: @escaping @MainActor @Sendable (Int) -> Void) -> some View
     {
         HStack(spacing: 4) {
-            TextField(SettingsSection.release.text(unit), value: Binding(get: get, set: set), format: .number)
+            TextField(SettingsSection.sleep.text(unit), value: Binding(get: get, set: set), format: .number)
                 .labelsHidden().frame(width: 40).multilineTextAlignment(.trailing)
-            Text(SettingsSection.release.text(unit)).foregroundStyle(.secondary)
+            Text(SettingsSection.sleep.text(unit)).foregroundStyle(.secondary)
         }
     }
 
@@ -104,5 +109,53 @@ struct SettingsCopyButton: View {
             .help(SettingsSection.controls.text("cli.path.copy.a11y"))
             .accessibilityLabel(SettingsSection.controls.text("cli.path.copy.a11y"))
             .onDisappear { reset?.cancel() }
+    }
+}
+
+struct SettingsSidebarSpacer: NSViewRepresentable {
+    let availableHeight: CGFloat
+
+    func makeNSView(context _: Context) -> SpacerView {
+        SpacerView()
+    }
+
+    func updateNSView(_ view: SpacerView, context _: Context) {
+        view.availableHeight = availableHeight
+        view.updateHeight()
+    }
+
+    final class SpacerView: NSView {
+        var availableHeight: CGFloat = 0
+        private var height: CGFloat = 0
+        private var padding: CGFloat = 0
+
+        override var intrinsicContentSize: NSSize {
+            NSSize(width: NSView.noIntrinsicMetric, height: height)
+        }
+
+        override func layout() {
+            super.layout()
+            updateHeight()
+        }
+
+        func updateHeight() {
+            guard let scroll = enclosingScrollView, let table = scroll.documentView as? NSTableView,
+                  table.numberOfRows == SettingsSection.allCases.count + 1
+            else { return }
+            // SwiftUI の contentSize にはツールバー由来の余白も混ざるため、システム設定に従う実際の行の高さを読む。
+            let rowsHeight = (0 ..< table.numberOfRows).filter { $0 != 4 }
+                .reduce(CGFloat.zero) { $0 + table.rect(ofRow: $1).height }
+            // 表は行のほかにサイドバー既定の余白を持ち、これも引かないとはみ出してスクロールする。
+            // 内容が見える高さより短いと表は見える高さまで伸びて余白を測れないので、はみ出しているときに測って覚える。
+            let visibleHeight =
+                scroll.contentView.bounds.height - scroll.contentInsets.top - scroll.contentInsets.bottom
+            if table.bounds.height > visibleHeight + 0.5 {
+                padding = table.bounds.height - rowsHeight - table.rect(ofRow: 4).height
+            }
+            let next = max(0, availableHeight - rowsHeight - padding)
+            guard next != height else { return }
+            height = next
+            invalidateIntrinsicContentSize()
+        }
     }
 }

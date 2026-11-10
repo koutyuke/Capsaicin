@@ -32,6 +32,7 @@ final class SettingsModel {
     let app: AppModel
     private(set) var helperState: HelperInstallationState
     private(set) var pendingManual = false
+    private var pendingLidClose: SettingsLidCloseChoice?
     private(set) var isBusy = false
     @ObservationIgnored var confirm: (HelperManagementOperation, Bool) async -> Bool = { _, _ in false }
     @ObservationIgnored var showError: (String, String) -> Void = { _, _ in }
@@ -47,6 +48,10 @@ final class SettingsModel {
         SettingsSleepRow.rows(settings: app.settings, capabilities: app.capabilities, helper: helperState)
     }
 
+    var lidCloseChoice: SettingsLidCloseChoice {
+        pendingLidClose ?? SettingsLidCloseChoice(settings: app.settings)
+    }
+
     func refreshHelper() {
         helperState = helper.state()
     }
@@ -54,6 +59,10 @@ final class SettingsModel {
     func change<Value>(_ key: WritableKeyPath<Settings, Value>, to value: Value) {
         var settings = app.settings
         settings[keyPath: key] = value
+        change(settings)
+    }
+
+    private func change(_ settings: Settings) {
         if case .reverted = app.changeSettings(settings) {
             showSettingsReverted()
         }
@@ -65,7 +74,7 @@ final class SettingsModel {
     }
 
     func changeSleep(_ row: SettingsSleepRow, to value: Bool) async {
-        guard let setting = row.setting, row.isEnabled, !isBusy else { return }
+        guard let setting = row.setting, !isBusy else { return }
         refreshHelper()
         if setting == \.blocksManualSleep, value, helperState != .installed {
             await manage(helperState == .partial ? .repair : .install, fromSetting: true)
@@ -74,12 +83,37 @@ final class SettingsModel {
         }
     }
 
-    func manage(_ operation: HelperManagementOperation, fromSetting: Bool = false) async {
+    func changeLidClose(to choice: SettingsLidCloseChoice) async {
+        guard !isBusy else { return }
+        refreshHelper()
+        if choice != .sleep, helperState != .installed {
+            await manage(helperState == .partial ? .repair : .install, fromSetting: true, lidClose: choice)
+        } else {
+            saveLidClose(choice)
+        }
+    }
+
+    private func saveLidClose(_ choice: SettingsLidCloseChoice) {
+        var settings = app.settings
+        settings.blocksManualSleep = choice != .sleep
+        switch choice {
+        case .sleep: break
+        case .turnOff: settings.lidCloseDisplay = .turnOff
+        case .keepOn: settings.lidCloseDisplay = .keepOn
+        }
+        change(settings)
+    }
+
+    func manage(_ operation: HelperManagementOperation, fromSetting: Bool = false,
+                lidClose: SettingsLidCloseChoice? = nil) async
+    {
         guard !isBusy else { return }
         isBusy = true
         pendingManual = fromSetting
+        pendingLidClose = lidClose
         defer {
             pendingManual = false
+            pendingLidClose = nil
             isBusy = false
             refreshHelper()
         }
@@ -90,7 +124,11 @@ final class SettingsModel {
         case .success:
             refreshHelper()
             if fromSetting {
-                change(\.blocksManualSleep, to: true)
+                if let lidClose {
+                    saveLidClose(lidClose)
+                } else {
+                    change(\.blocksManualSleep, to: true)
+                }
             }
         case .cancelled: break
         case let .failure(failedOperation, details, _):

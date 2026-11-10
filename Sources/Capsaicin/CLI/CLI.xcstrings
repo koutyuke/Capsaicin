@@ -370,7 +370,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動スリープ防止の設定"
+            "value" : "メニューやディスプレイを閉じたときのスリープを防ぐ設定"
           }
         }
       }
@@ -381,7 +381,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自動スリープ防止の設定"
+            "value" : "自動でスリープさせない設定"
           }
         }
       }
@@ -392,7 +392,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "画面の自動消灯を防ぐ設定"
+            "value" : "ディスプレイを自動でオフにしない設定"
           }
         }
       }

@@ -23,8 +23,8 @@ final class SettingsWindowController: NSWindowController {
             let key = SettingsModel.operationKey(operation)
             var title = key + ".title"
             if fromSetting, operation == .install {
-                title = self.model.sleepRows.contains { $0.key == "manualAndLid" }
-                    ? "helperInstall.manualAndLid.title" : "helperInstall.setting.title"
+                title = self.model.app.capabilities.hasLid
+                    ? "helperInstall.lidClose.title" : "helperInstall.setting.title"
             }
             let alert = alert(title: SettingsSection.helper.text(title),
                               message: SettingsSection.helper.text(key + ".message"))

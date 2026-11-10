@@ -8,42 +8,52 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct SettingsTests {
-    @Test("SPEC-SET-005 画面・手動・閉じたときの画面を保存値で表示し、前提とヘルパー不足を区別する")
+    @Test("SPEC-SET-005 閉じたときの動作を子の行なしの1行で表示する")
+    func unifiedLidRow() {
+        let rows = SettingsSleepRow.rows(settings: CapsaicinCore.Settings(),
+                                         capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true),
+                                         helper: .installed)
+        #expect(rows.map(\.key) == ["display", "lidClose"])
+    }
+
+    @Test("SPEC-SET-005 保存値を表示し、ヘルパー不足でも操作でき、説明の先頭に注意を出す")
     func sleepRows() throws {
         var settings = CapsaicinCore.Settings()
         settings.blocksDisplaySleep = false
         settings.blocksManualSleep = true
         let capabilities = MachineCapabilities(hasLid: true, hasInternalBattery: true)
         let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed)
-        #expect(rows.map(\.key) == ["display", "manualAndLid", "lidDisplay"])
+        #expect(rows.map(\.key) == ["display", "lidClose"])
+        #expect(rows.map(\.symbol) == ["display", "laptopcomputer"])
         let display = try #require(rows.first)
         #expect(display.state == .editable(isOn: false))
-        #expect(!display.isOn && display.isEnabled && !display.dimsLabel)
-        #expect(rows[2].state == .editable(isOn: true))
+        #expect(!display.isOn)
         settings.lidCloseDisplay = .keepOn
         let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .partial)
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
-        #expect(missing[1].isEnabled)
-        #expect(missing.last?.dimsLabel == true)
-        #expect(missing.last?.isOn == false)
-        #expect(missing.last?.help == SettingsSection.sleep.text("lidDisplay.help"))
+        #expect(missing[1].isOn)
+        #expect(missing[1].help == SettingsSection.sleep.text("helperNotReady")
+            + SettingsSection.sleep.text("lidClose.help"))
     }
 
-    @Test("SPEC-SET-005 SPEC-SET-006 蓋のある Mac だけ子の行を表示する", arguments: [true, false])
+    @Test("SPEC-SET-005 SPEC-SET-006 蓋のある Mac はポップアップ、ない Mac はスイッチの行になる", arguments: [true, false])
     func hardware(laptop: Bool) {
         let settings = CapsaicinCore.Settings()
         let capabilities = MachineCapabilities(hasLid: laptop, hasInternalBattery: laptop)
         let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .notInstalled)
-        #expect(rows.map(\.key) == (laptop ? ["display", "manualAndLid", "lidDisplay"] : ["display", "manual"]))
+        #expect(rows.map(\.key) == ["display", laptop ? "lidClose" : "manual"])
+        #expect(rows[1].symbol == (laptop ? "laptopcomputer" : "powersleep"))
+        #expect(rows[1].setting == (laptop ? nil : \.blocksManualSleep))
+        #expect(rows[1].help == SettingsSection.sleep.text(laptop ? "lidClose.help" : "manual.help"))
         let release = SettingsReleasePresentation(settings: settings, capabilities: capabilities)
         #expect(release.showsBattery == laptop)
         #expect(!release.timerEnabled && !release.timeEnabled && release.batteryEnabled)
     }
 
-    @Test("SPEC-HLP-001 設置中は保存値を変えず、成功後だけ手動をオンにする",
-          arguments: [HelperInstallationState.notInstalled, .partial])
-    func installation(state: HelperInstallationState) async throws {
+    @Test("SPEC-SET-005 SPEC-HLP-001 設置中は選択を表示して保存せず、成功後だけ2値を1回で保存する",
+          arguments: [HelperInstallationState.notInstalled, .partial], [SettingsLidCloseChoice.turnOff, .keepOn])
+    func installation(state: HelperInstallationState, choice: SettingsLidCloseChoice) async {
         let fixture = AppFixture()
         var installed = state
         var completed = false
@@ -52,34 +62,45 @@ struct SettingsTests {
             helper: SettingsHelperActions(state: { installed }, perform: { operation in
                 #expect(operation == (state == .partial ? .repair : .install))
                 #expect(!fixture.model.settings.blocksManualSleep)
+                #expect(fixture.savedSettings.isEmpty)
                 installed = .installed
                 return .success
             }, completed: { _, _ in completed = true }),
         )
         model.confirm = { _, fromSetting in
             #expect(fromSetting && model.pendingManual && model.isBusy)
+            #expect(model.lidCloseChoice == choice)
             #expect(!fixture.model.settings.blocksManualSleep)
             #expect(model.sleepRows[0].state == .editable(isOn: true))
+            await model.changeLidClose(to: .sleep)
+            #expect(model.lidCloseChoice == choice)
+            model.change(\.timerEnabled, to: true)
+            fixture.savedSettings.removeAll()
             return true
         }
-        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manualAndLid" }), to: true)
+        await model.changeLidClose(to: choice)
         #expect(completed && fixture.model.settings.blocksManualSleep)
         #expect(model.sleepRows[1].state == .editable(isOn: true))
-        #expect(model.sleepRows[2].state == .editable(isOn: true))
+        #expect(model.lidCloseChoice == choice)
+        #expect(fixture.model.settings.lidCloseDisplay == (choice == .turnOff ? .turnOff : .keepOn))
+        #expect(fixture.model.settings.timerEnabled)
+        #expect(fixture.savedSettings == [fixture.model.settings])
         #expect(!model.pendingManual && !model.isBusy)
     }
 
-    @Test("SPEC-HLP-001 確認取り消し・認証取り消し・失敗は保存しない", arguments: [0, 1, 2])
-    func installationCancellation(outcome: Int) async throws {
+    @Test("SPEC-SET-005 SPEC-HLP-001 確認取り消し・認証取り消し・失敗は2値を保存せずスリープに戻す",
+          arguments: [0, 1, 2], [HelperInstallationState.notInstalled, .partial])
+    func installationCancellation(outcome: Int, state: HelperInstallationState) async {
         let fixture = AppFixture()
         var errors = 0
         var performed = false
         let model = SettingsModel(
             app: fixture.model,
-            helper: SettingsHelperActions(state: { .notInstalled }, perform: { _ in
+            helper: SettingsHelperActions(state: { state }, perform: { operation in
+                #expect(operation == (state == .partial ? .repair : .install))
                 performed = true
                 return outcome == 1 ? .cancelled : .failure(
-                    operation: .install,
+                    operation: operation,
                     details: "test",
                     needsSleepDisabledReadback: false,
                 )
@@ -87,8 +108,11 @@ struct SettingsTests {
         )
         model.confirm = { _, _ in outcome != 0 }
         model.showError = { _, _ in errors += 1 }
-        try await model.changeSleep(#require(model.sleepRows.first { $0.key == "manualAndLid" }), to: true)
+        let before = fixture.model.settings
+        await model.changeLidClose(to: .keepOn)
         #expect(!fixture.model.settings.blocksManualSleep && fixture.savedSettings.isEmpty)
+        #expect(fixture.model.settings == before)
+        #expect(model.lidCloseChoice == .sleep)
         #expect(!model.pendingManual && !model.isBusy)
         #expect(performed == (outcome != 0))
         #expect(errors == (outcome == 2 ? 1 : 0))
@@ -137,6 +161,10 @@ struct SettingsTests {
         #expect(selection.section == .general)
         selection.section = .led
         #expect(SettingsSelection(defaults: defaults).section == .led)
+        defaults.set("sleep", forKey: "settingsSection")
+        #expect(SettingsSelection(defaults: defaults).section == .sleep)
+        defaults.set("release", forKey: "settingsSection")
+        #expect(SettingsSelection(defaults: defaults).section == .general)
         defaults.removeObject(forKey: "settingsSection")
         let model = makeModel()
         let controller = SettingsWindowController(
@@ -174,6 +202,7 @@ struct SettingsTests {
         let selection = SettingsSelection(defaults: defaults)
         defer { defaults.removeObject(forKey: "settingsSection") }
         var quits = 0
+        #expect(SettingsSection.allCases.map(\.rawValue) == ["general", "sleep", "led", "controls", "helper", "about"])
         for section in SettingsSection.allCases {
             #expect(section.title != "title")
             selection.section = section
@@ -189,52 +218,18 @@ struct SettingsTests {
                     .environment(\.controlActiveState, .key), selection: selection)
                 defer { window.close() }
                 window.appearance = NSAppearance(named: appearance)
-                let view = try #require(window.contentView)
                 await layout(window)
                 try saveRendering(window, to: output.appendingPathComponent("\(section.rawValue)-\(name).png"))
-                #expect(window.frame.size == NSSize(width: 720, height: 500))
-                #expect(window.title == section.title)
-                try checkToolbarTitle(window)
-                // 見出しのあるセクション（解除の条件、操作）は、見出しが先に来るので除く。
-                if [.general, .sleep, .led, .helper].contains(section) {
-                    try checkFormTop(window)
-                }
-                #expect(try checkSidebarBottom(window).accessibilityPerformPress?() == true)
+                try checkRendering(window, section: section, app: app)
                 if section == .general, name == "light" {
                     try await checkSidebar(window, selection: selection)
                 }
-                if section == .release {
-                    for scroll in descendants(NSScrollView.self, in: view) where scroll.frame.width > 200 {
-                        let document = try #require(scroll.documentView)
-                        #expect(document.bounds.height + scroll.contentInsets.top + scroll.contentInsets.bottom
-                            <= scroll.contentSize.height + 1)
-                    }
+                if section == .sleep {
+                    try await saveBottom(window, to: output.appendingPathComponent("sleep-\(name)-bottom.png"))
                 }
             }
         }
-        #expect(quits == SettingsSection.allCases.count * 2)
-    }
-
-    @Test("SPEC-SET-001 空き行は終了ボタンを除く領域と実測した7行の高さに追従し、小さい領域ではゼロにする")
-    func sidebarSpacing() {
-        let rows = SidebarRows()
-        let table = NSTableView(frame: NSRect(x: 0, y: 0, width: 200, height: 500))
-        table.dataSource = rows
-        table.intercellSpacing = .zero
-        table.reloadData()
-        let scroll = NSScrollView(frame: table.frame)
-        scroll.documentView = table
-        let spacer = SettingsSidebarSpacer.SpacerView()
-        table.addSubview(spacer)
-        spacer.availableHeight = 390
-        for height: CGFloat in [24, 32, 40] {
-            table.rowHeight = height
-            spacer.updateHeight()
-            #expect(spacer.intrinsicContentSize.height == 390 - 7 * height)
-        }
-        spacer.availableHeight = 100
-        spacer.updateHeight()
-        #expect(spacer.intrinsicContentSize.height == 0)
+        #expect(quits == 2)
     }
 
     @Test("SPEC-UI-011 DEC-KEY-002 セクションのカタログと依存ライセンスを配布物に含める")
@@ -248,132 +243,47 @@ struct SettingsTests {
         let license = try #require(app.url(forResource: "KeyboardShortcuts-LICENSE", withExtension: "txt"))
         #expect(try String(contentsOf: license, encoding: .utf8).contains("MIT License"))
     }
+
+    @Test("SPEC-SET-002 SPEC-SYS-004 統合した条件の文言を同じテーブルから引き、ディスプレイの表記をそろえる")
+    func sleepResources() throws {
+        #expect(SettingsSection.sleep.title == "スリープ")
+        for key in ["behavior.group.title", "release.group.title", "timer.label", "timer.duration.label",
+                    "timer.duration.a11y", "hours", "minutes", "time.label", "time.help", "time.value.label",
+                    "battery.label", "battery.threshold.label", "battery.threshold.value",
+                    "battery.ignoreOnAdapter.label",
+                    "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.keepOn", "lidClose.help"]
+        {
+            #expect(SettingsSection.sleep.text(key) != key)
+        }
+        for key in ["manualAndLid.label", "manualAndLid.help", "lidDisplay.label", "lidDisplay.help",
+                    "lidDisplay.turnOff", "lidDisplay.keepOn", "timer.duration.help", "time.value.help",
+                    "battery.help", "battery.threshold.help", "battery.ignoreOnAdapter.help"]
+        {
+            #expect(SettingsSection.sleep.text(key) == key)
+        }
+        #expect(SettingsSection.helper.text("helperInstall.lidClose.title")
+            == "ディスプレイを閉じてもスリープさせないには、ヘルパーのインストールが必要です")
+        #expect(SettingsSection.helper.text("helperInstall.manualAndLid.title") == "helperInstall.manualAndLid.title")
+        let app = try appBundle()
+        #expect(app.localizedString(forKey: "mechanism.systemSleepDisabled", value: nil, table: "CLI")
+            == "メニューやディスプレイを閉じたときのスリープを防ぐ設定")
+        #expect(app.localizedString(forKey: "mechanism.displaySleepAssertion", value: nil, table: "CLI")
+            == "ディスプレイを自動でオフにしない設定")
+    }
 }
 
-private extension SettingsTests {
-    private func saveRendering(_ window: NSWindow, to url: URL) throws {
-        let frame = try #require(window.contentView?.superview)
-        let bitmap = try #require(frame.bitmapImageRepForCachingDisplay(in: frame.bounds))
-        window.appearance?.performAsCurrentDrawingAppearance {
-            frame.cacheDisplay(in: frame.bounds, to: bitmap)
-        }
-        let data = try #require(bitmap.representation(using: .png, properties: [:]))
-        try data.write(to: url)
-        #expect(bitmap.pixelsWide >= 720 && bitmap.pixelsHigh >= 500)
-    }
-
-    private func checkSidebar(_ window: NSWindow, selection: SettingsSelection) async throws {
-        let content = try #require(window.contentView)
-        let lists = descendants(NSOutlineView.self, in: content)
-        #expect(lists.count == 1)
-        let list = try #require(lists.first)
-        #expect(list.numberOfRows == SettingsSection.allCases.count + 1)
-        #expect(list.bounds.width == 200)
-        try checkSidebarBottom(window)
-        #expect(list.rect(ofRow: 5).height > list.rect(ofRow: 0).height)
-        #expect(window.makeFirstResponder(list))
-        for section in SettingsSection.allCases.dropFirst() {
-            list.keyDown(with: arrow(NSDownArrowFunctionKey, keyCode: 125, window: window))
-            await layout(window)
-            #expect(selection.section == section)
-            #expect(window.title == section.title)
-            try checkToolbarTitle(window)
-        }
-        for section in SettingsSection.allCases.reversed().dropFirst() {
-            list.keyDown(with: arrow(NSUpArrowFunctionKey, keyCode: 126, window: window))
-            await layout(window)
-            #expect(selection.section == section)
-            #expect(window.title == section.title)
-            try checkToolbarTitle(window)
-        }
-        #expect(window.toolbar?.items.isEmpty == true)
-        #expect(content.bounds.size == NSSize(width: 720, height: 500))
-        let originalFrame = window.frame
-        window.setFrame(NSRect(origin: originalFrame.origin, size: NSSize(width: 720, height: 560)), display: false)
-        await layout(window)
-        try checkSidebarBottom(window)
-        window.setFrame(originalFrame, display: false)
-        await layout(window)
-        try checkSidebarBottom(window)
-    }
-
-    private func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
-        [element] + (element.accessibilityChildren?() as? [AnyObject] ?? [])
-            .flatMap { accessibilityDescendants($0) }
-    }
-
-    /// 最後の行とボタンの間、ボタンと下端の間をどちらも 10 pt にし、ボタンをサイドバーの中央に置く。
-    @discardableResult
-    private func checkSidebarBottom(_ window: NSWindow) throws -> AnyObject {
-        let content = try #require(window.contentView)
-        let list = try #require(descendants(NSOutlineView.self, in: content).first)
-        let title = try MenuContent.text("menu.quit", bundle: appBundle())
-        #expect(title != "menu.quit")
-        let quit = try #require(accessibilityDescendants(content).first {
-            $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == title
-        })
-        let row = window.convertToScreen(list.convert(list.rect(ofRow: list.numberOfRows - 1), to: nil))
-        let frame = try #require(quit.accessibilityFrame?())
-        #expect(abs(row.minY - frame.maxY - 10) <= 1)
-        let local = window.convertFromScreen(frame)
-        #expect(abs(local.midX - 100) <= 1 && abs(local.minY - 10) <= 1)
-        return quit
-    }
-
-    private func checkToolbarTitle(_ window: NSWindow) throws {
-        let frame = try #require(window.contentView?.superview)
-        let close = try #require(window.standardWindowButton(.closeButton))
-        let title = try #require(descendants(NSTextField.self, in: frame).first { $0.stringValue == window.title })
-        let closeFrame = close.convert(close.bounds, to: frame)
-        let titleFrame = title.convert(title.bounds, to: frame)
-        #expect(abs(closeFrame.midY - titleFrame.midY) <= 1)
-        #expect(titleFrame.minX > 200)
-        #expect(title.font?.pointSize == 15)
-        #expect(abs(frame.bounds.maxY - closeFrame.midY - 26) <= 1)
-    }
-
-    private func checkFormTop(_ window: NSWindow) throws {
-        let content = try #require(window.contentView)
-        let scroll = try #require(descendants(NSScrollView.self, in: content).first { $0.frame.width > 200 })
-        func frames(_ view: NSView) -> [NSRect] {
-            [view.convert(view.bounds, to: nil)] + view.subviews.flatMap(frames)
-        }
-        let document = try #require(scroll.documentView)
-        let groupTop = try #require(frames(document).filter { abs($0.minX - 220) <= 1 }.map(\.maxY).max())
-        #expect(abs(window.contentLayoutRect.maxY - groupTop - 12) <= 1)
-    }
-
-    private func appBundle() throws -> Bundle {
-        let product = Bundle(for: SettingsTestResources.self).bundleURL.deletingLastPathComponent()
-        return try #require(Bundle(url: product.appendingPathComponent("Capsaicin.app")))
-    }
-
-    private func layout(_ window: NSWindow) async {
-        for _ in 0 ..< 3 {
-            window.contentView?.layoutSubtreeIfNeeded()
-            await withCheckedContinuation { continuation in
-                DispatchQueue.main.async { continuation.resume() }
-            }
-        }
-        window.display()
-    }
-
-    private func descendants<T: NSView>(_ type: T.Type, in view: NSView) -> [T] {
-        (view as? T).map { [$0] } ?? view.subviews.flatMap { descendants(type, in: $0) }
-    }
-
-    private func arrow(_ code: Int, keyCode: UInt16, window: NSWindow) -> NSEvent {
-        let character = String(UnicodeScalar(code)!)
-        return NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
-                                windowNumber: window.windowNumber, context: nil, characters: String(character),
-                                charactersIgnoringModifiers: String(character), isARepeat: false, keyCode: keyCode)!
-    }
-
-    private func makeModel() -> SettingsModel {
+extension SettingsTests {
+    func makeModel(hasLid: Bool = true, conditionsEnabled: Bool? = nil) -> SettingsModel {
         let system = FakeSystem()
-        let app = AppModel(controller: BlockingController(settings: CapsaicinCore.Settings(),
+        var settings = CapsaicinCore.Settings()
+        if let conditionsEnabled {
+            settings.timerEnabled = conditionsEnabled
+            settings.specifiedTimeEnabled = conditionsEnabled
+            settings.batteryConditionEnabled = conditionsEnabled
+        }
+        let app = AppModel(controller: BlockingController(settings: settings,
                                                           capabilities: MachineCapabilities(
-                                                              hasLid: true,
+                                                              hasLid: hasLid,
                                                               hasInternalBattery: true,
                                                           ),
                                                           ports: system.ports), saveSettings: { _ in })
@@ -382,13 +292,5 @@ private extension SettingsTests {
             app: app,
             helper: SettingsHelperActions(state: { .installed }, perform: { _ in .cancelled }, completed: { _, _ in }),
         )
-    }
-}
-
-private final class SettingsTestResources: NSObject {}
-
-private final class SidebarRows: NSObject, NSTableViewDataSource {
-    func numberOfRows(in _: NSTableView) -> Int {
-        SettingsSection.allCases.count + 1
     }
 }

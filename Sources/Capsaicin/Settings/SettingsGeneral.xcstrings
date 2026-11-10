@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "appearance.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "表示"
+          }
+        }
+      }
+    },
     "backgroundDisabled.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -106,7 +117,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オフにしてもCapsaicinは動き続けます。設定を開くにはFinderやSpotlightからCapsaicinをもう一度開き、終了するには設定画面の左下にある「Capsaicinを終了」を押します。"
+            "value" : "オフにしてもCapsaicinは動き続けます。設定を開くにはFinderやSpotlightからCapsaicinをもう一度開き、終了するには設定の「このアプリについて」にある「Capsaicinを終了」を押します。"
           }
         }
       }
@@ -195,6 +206,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再開しない"
+          }
+        }
+      }
+    },
+    "startup.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "起動"
           }
         }
       }

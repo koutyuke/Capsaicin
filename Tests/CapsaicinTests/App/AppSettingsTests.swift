@@ -100,7 +100,7 @@ struct AppSettingsTests {
     }
 
     @Test("SPEC-HLP-001 設定からの設置は成功後に保存して抑止に反映する")
-    func installationFromSetting() async throws {
+    func installationFromSetting() async {
         let fixture = AppFixture()
         fixture.model.launch()
         fixture.model.requestStart(from: .menu)
@@ -111,9 +111,9 @@ struct AppSettingsTests {
             fixture.system.isHelperInstalled = true
             return .success
         }
-        let row = try #require(model.sleepRows.first { $0.key == "manualAndLid" })
-        await model.changeSleep(row, to: true)
+        await model.changeLidClose(to: .keepOn)
         #expect(fixture.model.settings.blocksManualSleep)
+        #expect(fixture.model.settings.lidCloseDisplay == .keepOn)
         #expect(fixture.savedSettings == [fixture.model.settings])
         #expect(fixture.system.sleepDisabled)
     }
