@@ -51,7 +51,7 @@ final class LEDTestFixture {
                         throw CapsLockLEDError.servicesUnavailable
                     }
                     return self.devices.map { device in
-                        LEDService(isKeyboard: { device.keyboard }, setMode: { mode in
+                        LEDService(registryID: nil, isKeyboard: { device.keyboard }, setMode: { mode in
                             self.writes.append(Write(device: device.name, mode: mode))
                             return !self.failedDevices.contains(device.name)
                         })

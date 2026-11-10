@@ -78,7 +78,11 @@ snap() {
 }
 # T0 以降に LED を書いたプロセスとサービスのログ
 ledlog() { /usr/bin/log show --start "$T0" --info --style compact --predicate 'eventMessage CONTAINS "updateCapslockLED"'; }
+# T0 以降に Capsaicin が書き込んだサービスと、失敗したサービスの登録 ID
+applog() { /usr/bin/log show --start "$T0" --style compact --predicate 'subsystem == "io.github.koutyuke.capsaicin" AND category == "LED"'; }
 ```
+
+`ledlog` には成功した書き込みしか残らない。`applog` は、Capsaicin が書こうとしたサービスと失敗したサービスを示すので、「一覧に入っていなかった」と「書き込みに失敗した」を見分けられる。
 
 続けて、開始前の状態を残す。
 
@@ -137,9 +141,9 @@ Lofree-BT で LED が点かない場合は、点かなかった事実を記録�
   5. Apple メニューから Mac をスリープさせ、30秒後に復帰させる。復帰後に LED を目視し、`snap B2-2-woke` を実行する。
   6. 抑止を解除し、HUD の文言を見る。`snap B2-2-off` を実行する。
   7. 対照として、Capsaicin を終了して起動し直し、抑止を始めて `snap B2-3-restarted` を実行する。解除する。
-  8. `ledlog > "$LC/B2-ledlog.txt"` を実行する。
-- **期待（仮説どおりなら）**: 2 で、接続した機器のサービスは `leds` で `Auto` のまま、または LED が点かない。5 で仮想キーボードの登録 ID が変わり、新しい ID は `Auto` のまま、6 で「一部を戻せません」が出る。7 ではすべてのサービスが `On` になる。仮説が外れていれば、2 と 5 でも新しいサービスが `On` になる。
-- **記録**: 各時点の登録 ID とモード、LED の目視、HUD の文言、`record.json` の `misalignments`。
+  8. `ledlog > "$LC/B2-ledlog.txt"` と `applog > "$LC/B2-applog.txt"` を実行する。
+- **期待（仮説どおりなら）**: 2 で、接続した機器のサービスは `leds` で `Auto` のまま、または LED が点かない。5 で仮想キーボードの登録 ID が変わり、新しい ID は `Auto` のまま、6 で「一部を戻せません」が出る。7 ではすべてのサービスが `On` になる。`applog` では、2 と 5 の後の書き込みの対象に新しい登録 ID がなく、6 で古い仮想キーボードの登録 ID が失敗に出る。仮説が外れていれば、2 と 5 でも新しいサービスが `On` になる。
+- **記録**: 各時点の登録 ID とモード、LED の目視、HUD の文言、`record.json` の `misalignments`、`applog` の書き込みの対象と失敗。
 
 ### B3 キーボードを占有するアプリ（KE）との干渉
 
@@ -187,7 +191,7 @@ Lofree-BT で LED が点かない場合は、点かなかった事実を記録�
 3. KE の各機器の設定を開始前に戻し、`diff "$LC/karabiner.json.before" "$HOME/.config/karabiner/karabiner.json"` で差がないことを確かめる。KE の起動・終了の状態を開始前に戻す。
 4. システム設定の修飾キーと Raycast の設定を開始前に戻す。
 5. 内蔵と接続した各キーボードで Caps Lock を手でオン・オフし、LED が連動し、入力が切り替わることを確かめる。
-6. `ledlog > "$LC/session-ledlog.txt"` を実行する。
+6. `ledlog > "$LC/session-ledlog.txt"` と `applog > "$LC/session-applog.txt"` を実行する。
 
 `LC` のディレクトリは、PM が結果を取り込むまで消さない。
 

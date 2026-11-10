@@ -2,6 +2,7 @@ import CapsaicinCore
 import CapsaicinLEDShim
 import Foundation
 import IOKit.hidsystem
+import os
 
 public enum CapsLockLEDError: Error, Equatable, Sendable {
     case clientCreationFailed
@@ -23,6 +24,7 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
     private let symbolAvailable: () -> Bool
     private let makeClient: () throws -> LEDClient
     private let monitor: HIDKeyboardMonitor
+    private let logger = Logger(subsystem: "io.github.koutyuke.capsaicin", category: "LED")
     private var client: LEDClient?
     private var desiredLit = false
     /// 初回の false でも前プロセスの設定を復旧する。成功するまでは不明として残す。
@@ -86,14 +88,22 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
         let client = try client ?? makeClient()
         self.client = client
         let services = try client.services()
-        var failures = 0
+        var targets: [String] = []
+        var failedTargets: [String] = []
         for service in services where service.isKeyboard() {
+            let registryID = service.registryID.map { String($0) } ?? "nil"
+            targets.append(registryID)
             if !service.setMode(mode) {
-                failures += 1
+                failedTargets.append(registryID)
             }
         }
-        if failures > 0 {
-            throw CapsLockLEDError.writeFailed(failedTargets: failures)
+        // WindowServer のログには成功した書き込みしか残らないため、対象と失敗をここで残す。
+        logger.log(
+            level: failedTargets.isEmpty ? .default : .error,
+            "LED 書き込み: mode=\(mode, privacy: .public) targets=\(targets.description, privacy: .public) failedTargets=\(failedTargets.description, privacy: .public)",
+        )
+        if !failedTargets.isEmpty {
+            throw CapsLockLEDError.writeFailed(failedTargets: failedTargets.count)
         }
     }
 }
@@ -101,6 +111,7 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
 /// 配列から取り出したサービスは、書き込みが終わるまで各クロージャーが保持する。
 @MainActor
 struct LEDService {
+    var registryID: UInt64?
     var isKeyboard: () -> Bool
     var setMode: (String) -> Bool
 }
@@ -119,6 +130,7 @@ struct LEDClient {
             }
             return services.map { service in
                 LEDService(
+                    registryID: (IOHIDServiceClientGetRegistryID(service) as? NSNumber)?.uint64Value,
                     isKeyboard: { IOHIDServiceClientConformsTo(service, 1, 6) != 0 },
                     setMode: { IOHIDServiceClientSetProperty(service, "HIDCapsLockLED" as CFString, $0 as CFString) },
                 )
