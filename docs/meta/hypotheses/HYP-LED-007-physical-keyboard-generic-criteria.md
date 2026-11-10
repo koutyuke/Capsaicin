@@ -4,7 +4,7 @@ id: HYP-LED-007
 title: アプリ名やベンダーに頼らず、IORegistry の属性だけで実機のキーボードのサービスを選べる
 status: open
 affects: ["REQ-LED-004", "SPEC-LED-002"]
-evidence: ["EVID-LED-006"]
+evidence: ["EVID-LED-006", "EVID-LED-007"]
 ---
 
 # HYP-LED-007 アプリ名やベンダーに頼らず、IORegistry の属性だけで実機のキーボードのサービスを選べる
@@ -38,4 +38,6 @@ evidence: ["EVID-LED-006"]
 
 ## 結果
 
-未確認。
+実機の部分だけ確かめた。調査（確かめ方の 1）は `TASK-049` に残っている。
+
+2026-11-11 の実機の記録では、内蔵（`FIFO`）、Lofree の USB（`USB`）、Bluetooth（`Bluetooth Low Energy`）、2.4 GHz（`USB`）、Viper V2 Pro（`USB`）のサービスはすべて `Transport` を持ち、Karabiner-Elements の仮想キーボードのサービスだけが持たなかった（`EVID-LED-006`、`EVID-LED-007`）。この範囲では「`Transport` を持つ」だけで見分けられる。ほかのアプリの仮想キーボードは未確認である。

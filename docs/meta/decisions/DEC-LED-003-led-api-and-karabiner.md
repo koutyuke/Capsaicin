@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-LED-003
 title: LED の API は公開ヘッダーの関数を優先して呼び、Karabiner-Elements とは取り合わない
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-LED-005"]
 requirements: ["REQ-LED-001", "REQ-LED-004", "REQ-LED-007"]
 based_on: ["DEC-LED-001", "HYP-LED-002"]
 ---

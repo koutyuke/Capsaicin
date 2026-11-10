@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-005
 title: Capsaicin が持ち続ける LED のクライアントは、作成後に追加・削除されたキーボードのサービスを一覧に反映しない
-status: open
+status: supported
 affects: ["REQ-LED-004", "SPEC-LED-002", "SPEC-BLK-007"]
-evidence: ["EVID-LED-005"]
+evidence: ["EVID-LED-005", "EVID-LED-008"]
 ---
 
 # HYP-LED-005 Capsaicin が持ち続ける LED のクライアントは、作成後に追加・削除されたキーボードのサービスを一覧に反映しない
@@ -35,4 +35,10 @@ evidence: ["EVID-LED-005"]
 
 ## 結果
 
-未確認。
+当たった。2026-11-11 に確かめた（`EVID-LED-008`）。
+
+- 抑止中に接続したキーボード（2.4 GHz、Bluetooth）は書き込み先に入らず、点灯しなかった。
+- スリープと復帰で作り直された仮想キーボードは、古い登録 ID への書き込みが失敗し続け、解除時に「一部を戻せません」が出た。
+- Capsaicin を起動し直すと、その時点のサービスすべてに書けた。
+
+一覧の取り方は `TASK-053` で直す。

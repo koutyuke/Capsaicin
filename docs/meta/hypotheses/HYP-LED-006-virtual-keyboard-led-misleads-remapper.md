@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-006
 title: キー配列を変えるアプリの仮想キーボードの LED に書くと、そのアプリは Caps Lock がオンだと誤認する
-status: open
+status: supported
 affects: ["REQ-LED-003", "SPEC-LED-002", "SPEC-LED-005"]
-evidence: []
+evidence: ["EVID-LED-009"]
 ---
 
 # HYP-LED-006 キー配列を変えるアプリの仮想キーボードの LED に書くと、そのアプリは Caps Lock がオンだと誤認する
@@ -34,4 +34,9 @@ evidence: []
 
 ## 結果
 
-未確認。
+当たった。2026-11-11 に確かめた（`EVID-LED-009`）。
+
+- Capsaicin の抑止中だけ、修飾キーを厳密に照合するルールが、内蔵と Lofree の両方で成立しなかった。
+- 仮想キーボードだけに `"On"` を書いても同じで、`"Auto"` に戻すと Caps Lock に触れずにルールが成立した。
+
+`hidutil` での書き込みは届いたと言えなかったので、確かめ方の 4 は Capsaicin と同じ Passive のクライアントで行った。仮想キーボードは書き込みの対象から外す（`DEC-LED-005`、`TASK-054`）。

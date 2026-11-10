@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-003
 title: 外付けキーボードでも HIDCapsLockLED で LED が光る
-status: open
+status: supported
 affects: ["REQ-LED-004", "SPEC-LED-002"]
-evidence: []
+evidence: ["EVID-LED-007"]
 ---
 
 # HYP-LED-003 外付けキーボードでも HIDCapsLockLED で LED が光る
@@ -30,4 +30,4 @@ LED への最初の書き込み前に、対象へ `"Auto"` を書ける独立し
 
 ## 結果
 
-未確認。
+当たった。2026-11-11 に、Lofree Flow Lite の USB、Bluetooth Low Energy、2.4 GHz のレシーバーの3つで、書き込みが成功し、LED が点灯した（`EVID-LED-007`）。確かめた機種は1つである。

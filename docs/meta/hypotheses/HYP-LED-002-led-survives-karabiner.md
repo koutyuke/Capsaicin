@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-002
 title: Karabiner-Elements が有効なままでも HIDCapsLockLED の点灯が保たれる
-status: open
+status: refuted
 affects: ["REQ-LED-007", "SPEC-LED-005"]
-evidence: []
+evidence: ["EVID-LED-009"]
 ---
 
 # HYP-LED-002 Karabiner-Elements が有効なままでも HIDCapsLockLED の点灯が保たれる
@@ -29,4 +29,10 @@ LED への最初の書き込み前に、対象へ `"Auto"` を書ける独立し
 
 ## 結果
 
-未確認。
+外れた。2026-11-11 に確かめた（`EVID-LED-009`）。
+
+- Karabiner-Elements 16.3.0 が既定の設定（「Modify events」と「Manipulate caps lock LED」がオン）で占有するキーボードでは、実機だけに書いた `"On"` は一瞬点いてすぐ消えた。
+- Capsaicin は仮想キーボードにも書いていたので、Capsaicin での点灯は10分間保たれた。ただしこれは、Karabiner-Elements が Caps Lock をオンとみなして実機を点けた結果で、抑止中はルールが成立しなくなった（`HYP-LED-006`）。
+- 「Manipulate caps lock LED」か「Modify events」をオフにしたキーボードでは、実機への `"On"` が10秒後も保たれた。
+
+仮想キーボードには書かないことにし、Karabiner-Elements が LED を管理するキーボードでは点かないことを案内する（`DEC-LED-005`）。

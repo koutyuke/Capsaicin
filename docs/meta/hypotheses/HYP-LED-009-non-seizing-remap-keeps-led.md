@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-009
 title: キーボードを占有しないキーの割り当ては、HIDCapsLockLED の点灯を妨げない
-status: open
+status: supported
 affects: ["REQ-LED-001", "REQ-LED-007"]
-evidence: []
+evidence: ["EVID-LED-010"]
 ---
 
 # HYP-LED-009 キーボードを占有しないキーの割り当ては、HIDCapsLockLED の点灯を妨げない
@@ -30,4 +30,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+当たった。2026-11-11 に、システム設定の修飾キーの割り当て（内蔵、Lofree の USB）と Raycast の Hyper Key で、割り当てたキーを押した後も10分後も LED が点いたままだった（`EVID-LED-010`）。`hidutil` の `UserKeyMapping` と、ほかのアプリは確かめていない。調査（確かめ方の 1）は `TASK-049` に残っている。

@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-008
 title: キーボードを別のプロセスが占有していることは、アプリ名に頼らず、権限なしで検出できる
-status: open
-affects: ["REQ-LED-007", "SPEC-LED-005", "DEC-LED-003"]
-evidence: ["EVID-LED-006"]
+status: supported
+affects: ["REQ-LED-007", "SPEC-LED-005", "DEC-LED-005"]
+evidence: ["EVID-LED-006", "EVID-LED-009", "EVID-LED-010"]
 ---
 
 # HYP-LED-008 キーボードを別のプロセスが占有していることは、アプリ名に頼らず、権限なしで検出できる
@@ -27,4 +27,10 @@ evidence: ["EVID-LED-006"]
 
 ## 結果
 
-未確認。
+当たった。2026-11-11 に確かめた（`EVID-LED-009`、`EVID-LED-010`）。
+
+- Karabiner-Elements の起動中は、内蔵と Lofree の usage 6 のデバイスに `ClientOptions = 1`、`ClientOpened = Yes` のクライアントがあり、アプリの終了で消え、起動し直すと戻った。
+- 内蔵の「Modify events」をオフにすると、内蔵の印だけが消えた。
+- システム設定の修飾キーの割り当てと Raycast の Hyper Key では、印は1つもなかった。
+
+調査（確かめ方の 1）は `TASK-049` に残っている。`DebugState` を製品の判定に使うかは `TASK-055` で決める。

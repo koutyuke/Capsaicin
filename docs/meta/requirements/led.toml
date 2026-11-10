@@ -12,7 +12,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-001", "SPEC-LED-006"]
 depends_on = []
-sources = ["DEC-LED-001", "DEC-LED-002", "DEC-LED-003"]
+sources = ["DEC-LED-001", "DEC-LED-002", "DEC-LED-005"]
 
 [[requirements]]
 id = "REQ-LED-002"
@@ -42,13 +42,13 @@ sources = ["DEC-LED-001", "DEC-KEY-001"]
 id = "REQ-LED-004"
 title = "内蔵と外付けのキーボードの LED を点灯する"
 kind = "functional"
-statement = "抑止中は、内蔵キーボードと、接続している外付けキーボードの Caps Lock の LED が点灯する。"
+statement = "抑止中は、内蔵キーボードと、接続している外付けキーボードの Caps Lock の LED が点灯する。キー配列を変えるアプリの仮想キーボードは対象にしない。"
 reason = "外付けキーボードを使っているときにも、抑止中であることが分かるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-002"]
 depends_on = ["REQ-LED-001"]
-sources = ["EVID-LED-001", "EVID-LED-002", "HYP-LED-003"]
+sources = ["EVID-LED-001", "EVID-LED-002", "EVID-LED-007", "DEC-LED-005"]
 
 [[requirements]]
 id = "REQ-LED-005"
@@ -64,15 +64,15 @@ sources = ["DEC-SET-001"]
 
 [[requirements]]
 id = "REQ-LED-007"
-title = "Karabiner-Elements による上書きの可能性を知らせる"
+title = "Karabiner-Elements が管理するキーボードでは LED が点かないことを知らせる"
 kind = "functional"
-statement = "Karabiner-Elements の起動を検出したら、LED が上書きされる場合があることを、メニューと設定の「LED」セクションに表示する。"
-reason = "LED が点かない、または消えるときに、利用者が原因を推測できるようにするため。"
+statement = "Karabiner-Elements の起動を検出したら、Karabiner-Elements が LED を管理するキーボードでは LED が点かないことと、その避け方を、メニューと設定の「LED」セクションに表示する。"
+reason = "LED が点かないときに、利用者が原因と直し方を知れるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-005"]
 depends_on = []
-sources = ["DEC-LED-003", "HYP-LED-002"]
+sources = ["DEC-LED-005", "EVID-LED-009"]
 
 [[requirements]]
 id = "REQ-LED-008"

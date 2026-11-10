@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LED-010
 title: キーボードとして名乗るが Caps Lock の LED を持たない機器への書き込みは、LED 全体の失敗として扱われる
-status: open
+status: refuted
 affects: ["SPEC-LED-002", "SPEC-BLK-007"]
-evidence: []
+evidence: ["EVID-LED-007"]
 ---
 
 # HYP-LED-010 キーボードとして名乗るが Caps Lock の LED を持たない機器への書き込みは、LED 全体の失敗として扱われる
@@ -31,4 +31,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+外れた。2026-11-11 に、Viper V2 Pro（USB、2.4 GHz）はキーボードとして名乗るサービスを2つ持っていたが、`"On"` と `"Auto"` の書き込みは成功を返し、警告も「一部を戻せません」も出なかった（`EVID-LED-007`）。こうしたサービスを対象から外す必要はなく、`SPEC-LED-002` と `SPEC-BLK-007` は変えない。
