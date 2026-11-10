@@ -11,7 +11,7 @@ enum HUDPhase {
 
 @MainActor @Observable
 final class HUDPresentation {
-    var content = HUDContent(symbol: "capslock", state: "")
+    var content = HUDContent(symbol: "custom.capsaicin.led", state: "")
     var phase = HUDPhase.hidden
     var width: CGFloat = 200
     var entryDuration = 0.20
@@ -76,10 +76,19 @@ struct HUDLabel: View {
     var reduceMotion = false
     var increasedContrast = false
 
+    private var symbolColor: NSColor {
+        switch content.tone {
+        case .normal: .labelColor
+        case .error: .systemRed
+        case .warning: .systemOrange
+        }
+    }
+
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: content.symbol)
+            Image(symbol: content.symbol, bundle: content.bundle)
                 .symbolRenderingMode(.monochrome)
+                .foregroundStyle(Color(nsColor: symbolColor))
                 .contentTransition(reduceMotion ? .opacity : .symbolEffect(.replace))
                 .accessibilityHidden(true)
             HStack(spacing: 0) {
@@ -104,8 +113,8 @@ struct HUDLabel: View {
         .font(.title3)
         .foregroundStyle(Color(nsColor: .labelColor))
         .lineLimit(1)
-        // SF Symbols は形の外側に約 3 pt の空白を持つため、左だけ減らして見える余白を右と揃える。
-        .padding(.leading, 17)
+        // 独自シンボルは形の外側に約 2 pt の空白を持つため、左だけ減らして見える余白を右と揃える。
+        .padding(.leading, 18)
         .padding(.trailing, 20)
     }
 }

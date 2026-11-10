@@ -166,6 +166,45 @@ struct MenuBarTests {
         #expect(controller.menu.items.suffix(2).map(\.keyEquivalent) == [",", "q"])
     }
 
+    @Test("SPEC-MENU-005 SPEC-UI-006 状態が変わるときだけ画像を替え、15 pt Regular のテンプレートを保つ")
+    func statusIcon() throws {
+        _ = NSApplication.shared
+        let fixture = makeFixture()
+        fixture.model.launch()
+        let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
+        controller.configureShortcut = { _ in }
+        controller.refresh()
+        let imageView = controller.imageView
+        let symbolBundle = Bundle(for: MenuBarController.self)
+        func image(_ name: String) throws -> Data {
+            let image = try #require(NSImage(symbolName: name, bundle: symbolBundle, variableValue: 0)?
+                .withSymbolConfiguration(.init(pointSize: 15, weight: .regular)))
+            return try #require(image.tiffRepresentation)
+        }
+        let idle = try image("custom.capsaicin.led")
+        let active = try image("custom.capsaicin.led.fill")
+        #expect(idle != active)
+        #expect(imageView.image?.tiffRepresentation == idle)
+        #expect(imageView.image?.isTemplate == true)
+        let initialImage = try #require(imageView.image)
+        controller.refresh()
+        #expect(imageView.image === initialImage)
+        fixture.model.requestStart(from: .menu)
+        #expect(fixture.model.status.isBlocking)
+        controller.refresh()
+        #expect(imageView.image?.tiffRepresentation == active)
+        #expect(imageView.image?.isTemplate == true)
+        let activeImage = try #require(imageView.image)
+        controller.refresh()
+        #expect(imageView.image === activeImage)
+        fixture.model.requestStop(from: .menu)
+        #expect(!fixture.model.status.isBlocking)
+        controller.refresh()
+        #expect(imageView.image?.tiffRepresentation == idle)
+        #expect(imageView.image?.isTemplate == true)
+        #expect(controller.statusItem == nil)
+    }
+
     @Test("SPEC-MENU-006 起動時と設定変更時に、同じアイコンの表示だけを切り替える", arguments: [true, false])
     func visibility(initiallyVisible: Bool) throws {
         _ = NSApplication.shared

@@ -29,7 +29,7 @@ assignee: OpenCode / GPT-6.1 Sol
 
 仕様は `docs/specs/menu.md` のすべて、`docs/specs/hud.md` の `SPEC-HUD-001`、`docs/specs/ui.md`（`SPEC-UI-001`〜`SPEC-UI-007`、`SPEC-UI-010`）に従う。方式は `DEC-UI-001`（`NSMenu`）、`DEC-UI-002` にある。デザインの補足は `.t3-code/drafts/design/design-spec.md` の「4. メニューバー」と `.t3-code/drafts/design/mockups/menu.html` にある。食い違うときは仕様を正とする。
 
-1. ステータスアイコン（`SPEC-MENU-005`、`SPEC-UI-010`）。仮のテンプレート画像でよい（正式な意匠は `Q-MENU-001` で決める）。
+1. ステータスアイコン（`SPEC-MENU-005`、`SPEC-UI-010`）。仮のテンプレート画像でよい（正式な意匠はのちに `DEC-MENU-001` で決めた）。
 2. メニュー（`SPEC-MENU-001`〜`SPEC-MENU-004`）。
    - 開始・解除。
    - 時間を決めた開始。

@@ -34,9 +34,12 @@ targets:
           - Resources/capsaicin.icon
       # Icon Composer の .icon はディレクトリのまま追加すると中身が個別のリソースに
       # なり actool が走らない。1 ファイルとして Resources に入れる。
+      # createIntermediateGroups がないと中間の Resources グループが接続されず、
+      # パスがリポジトリ直下に解決されて actool が失敗する。
       - path: Sources/Capsaicin/Resources/capsaicin.icon
         type: file
         buildPhase: resources
+        createIntermediateGroups: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin
@@ -118,6 +121,8 @@ targets:
         type: group
         excludes:
           - MenuBar/CapsaicinApp.swift
+          # テストバンドルへ .icon の中身をコピーさせない。
+          - Resources/capsaicin.icon
     dependencies:
       - package: KeyboardShortcuts
       - target: Capsaicin
@@ -131,6 +136,8 @@ targets:
         product: CapsaicinPlatform
     settings:
       base:
+        # テストバンドルの Asset Catalog から独自シンボルを読むには bundle ID が要る。
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.tests
         # ホストアプリを起動せず、生成したバンドルを検査する。
         TEST_HOST: ""
         BUNDLE_LOADER: ""

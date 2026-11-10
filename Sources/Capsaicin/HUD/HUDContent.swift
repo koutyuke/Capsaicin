@@ -2,9 +2,14 @@ import CapsaicinCore
 import Foundation
 
 struct HUDContent: Equatable {
+    enum Tone {
+        case normal, error, warning
+    }
+
     var symbol: String
     var state: String
     var detail: String?
+    var tone = Tone.normal
     var bundle: Bundle = .main
 
     var announcement: String {
@@ -23,7 +28,7 @@ struct HUDContent: Equatable {
         func text(_ key: String) -> String {
             bundle.localizedString(forKey: key, value: nil, table: "HUD")
         }
-        let off = Self(symbol: "capslock", state: text("hud.state.off"), bundle: bundle)
+        let off = Self(symbol: "custom.capsaicin.led", state: text("hud.state.off"), bundle: bundle)
         switch event {
         case .started:
             let detail = status.session?.timeLimit.map { limit in
@@ -38,14 +43,15 @@ struct HUDContent: Equatable {
                 let minutes = max(1, (limit.date.timeIntervalSince(now) / 60).rounded())
                 return String(format: text("hud.condition.for"), formatter.string(from: minutes * 60) ?? "")
             }
-            return Self(symbol: "capslock.fill", state: text("hud.state.on"), detail: detail, bundle: bundle)
-        case let .startRejected(_, reason):
             return Self(
-                symbol: "capslock",
-                state: text("hud.state.notStarted"),
-                detail: text(rejectionKey(reason)),
+                symbol: "custom.capsaicin.led.fill",
+                state: text("hud.state.on"),
+                detail: detail,
                 bundle: bundle,
             )
+        case let .startRejected(_, reason):
+            return Self(symbol: "xmark.octagon.fill", state: text("hud.state.notStarted"),
+                        detail: text(rejectionKey(reason)), tone: .error, bundle: bundle)
         case let .released(reason):
             var result = off
             switch reason {
@@ -61,6 +67,8 @@ struct HUDContent: Equatable {
             case .user, .quit: break
             }
             if !status.misalignments.isEmpty {
+                result.symbol = "exclamationmark.triangle.fill"
+                result.tone = .warning
                 result.detail = text("hud.reason.unalignedRemaining")
             }
             return result

@@ -2,6 +2,12 @@ import AppKit
 import CapsaicinCore
 import SwiftUI
 
+extension Image {
+    init(symbol name: String, bundle: Bundle) {
+        self = name.hasPrefix("custom.") ? Image(name, bundle: bundle) : Image(systemName: name)
+    }
+}
+
 struct SettingsInfo: View {
     let title: String
     let help: String

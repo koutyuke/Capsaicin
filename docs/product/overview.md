@@ -28,7 +28,7 @@ v1 では次のものを扱わない。
 - Caps Lock キーによる抑止の切り替え（`DEC-KEY-001`）
 - 手動スリープと蓋閉じスリープの片方だけを止めること（`DEC-BLK-006`）
 - 温度による自動解除
-- 将来に回す機能（`PLAN-BLK-001`、`PLAN-BLK-002`、`PLAN-BLK-003`、`PLAN-MENU-001`）
+- 将来に回す機能（`PLAN-BLK-001`、`PLAN-BLK-002`、`PLAN-BLK-003`）
 
 既存の類似アプリ Capsomnia との関係は `REQ-SYS-007` にある。
 

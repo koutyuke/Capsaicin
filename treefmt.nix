@@ -23,6 +23,8 @@
       ".agents/skills/**"
       # Icon Composer が書き出すバンドルは生成物なので、整形せずそのまま残す。
       "**/*.icon/**"
+      # Asset Catalog は Xcode が書く形を正とするので、整形せずそのまま残す。
+      "**/*.xcassets/**"
       # String Catalog は Xcode が開くたびに独自の形で書き直すので、その形を正とする。
       "*.xcstrings"
     ];
