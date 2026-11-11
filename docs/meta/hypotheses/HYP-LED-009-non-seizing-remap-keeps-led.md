@@ -24,8 +24,8 @@ evidence: ["EVID-LED-010"]
 
 ## 確かめ方
 
-1. 調査: 主なアプリが占有と仮想キーボード、イベントタップ、`UserKeyMapping` のどれを使うかを、公式の資料とソースで確かめる（`docs/manual/led-remapper-verification.md` の A1）。
-2. 実機: `docs/manual/led-remapper-verification.md` の B4 で、Karabiner-Elements を止めた状態で、システム設定で Caps Lock を別のキーに割り当てる。Capsaicin で抑止を始め、10分間 LED を見る。途中で割り当てたキーを押す。Raycast の Hyper Key でも同じことをする。
+1. 調査: 主なアプリが占有と仮想キーボード、イベントタップ、`UserKeyMapping` のどれを使うかを、公式の資料とソースで確かめる（`TASK-049` の A1）。
+2. 実機: `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B4 で、Karabiner-Elements を止めた状態で、システム設定で Caps Lock を別のキーに割り当てる。Capsaicin で抑止を始め、10分間 LED を見る。途中で割り当てたキーを押す。Raycast の Hyper Key でも同じことをする。
 3. 成功: どの割り当てでも LED が点いたままで、解除で通常の動作に戻る。失敗: 割り当ての操作や時間の経過で LED が消える。
 
 ## 結果

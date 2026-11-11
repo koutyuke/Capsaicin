@@ -16,7 +16,7 @@ evidence: ["EVID-LED-006", "EVID-LED-007"]
 - `HIDVirtualDevice` が `true` でない。
 - `Transport` を持ち、デバイスが DriverKit で作られた仮想デバイス（`AppleUserHIDDevice` で、上位に実際のバスを持たないもの）ではない。
 
-選び方の候補はこれに限らない。調査（`docs/manual/led-remapper-verification.md` の A2）で、OS が実機と仮想をどう区別しているかを確かめ、もっと確かな属性があれば置き換える。
+選び方の候補はこれに限らない。調査（`TASK-049` の A2）で、OS が実機と仮想をどう区別しているかを確かめ、もっと確かな属性があれば置き換える。
 
 `EVID-LED-006` から、`HIDVirtualDevice` だけでは足りないことは分かっている。Karabiner-Elements の仮想キーボードはこの印を持たず、Apple の VendorID を名乗る。Apple 自身の仮想デバイスも `Transport = "USB"` を名乗る。
 
@@ -33,7 +33,7 @@ evidence: ["EVID-LED-006", "EVID-LED-007"]
 ## 確かめ方
 
 1. 調査: IOHIDFamily のソースと SDK のヘッダーで、仮想デバイスの印と、実機のバスの種類を確かめる。Karabiner-Elements 以外の仮想キーボードの作り方（`IOHIDUserDevice`、DriverKit）ごとに、付く属性を調べる。
-2. 実機: `docs/manual/led-remapper-verification.md` の B1 の記録で、内蔵と Lofree Flow Lite（USB、Bluetooth、2.4 GHz）、Viper V2 Pro（USB、2.4 GHz）、Karabiner-Elements の仮想キーボードの属性を並べる。
+2. 実機: `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B1 の記録で、内蔵と Lofree Flow Lite（USB、Bluetooth、2.4 GHz）、Viper V2 Pro（USB、2.4 GHz）、Karabiner-Elements の仮想キーボードの属性を並べる。
 3. 成功: 主張の条件（または調査で置き換えた条件）で、実機のキーボードがすべて入り、仮想キーボードが入らない。失敗: どちらかに反例がある。
 
 ## 結果

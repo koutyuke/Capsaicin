@@ -51,11 +51,11 @@ assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 
 - PM が差分を読み、書き込みの振る舞いが変わっていないことと、ログの内容とレベルを確かめる。
 - PM が `just check` と `just build` を流す。
-- 実機でのログの確認は、オーナーが `docs/manual/led-remapper-verification.md` の B2 で行う。
+- 実機でのログの確認は、オーナーが `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B2 で行う。
 
 ## レビュー
 
 - Codex が実装し、`just check` と `just build` を通した。書き込みの対象、順番、失敗の判定、`throw` するエラーは変わっていない。
 - PM が直したこと: ログを `defer` で出していたため、クライアントの作成や一覧の取得に失敗したときにも `targets=[]` を通常のレベルで出し、キーボードがなかった成功と読めた。ログは一覧を回した後に出すようにし、作成と取得の失敗はこれまでどおり `throw` だけにした。失敗の数は `failedTargets.count` から取り、重複していたカウンターを消した。
 - PM が `just check` と `just build` を流し直し、どちらも通った。
-- 実機でのログの出方は未確認。`docs/manual/led-remapper-verification.md` の `applog` で、B2 のときに確かめる。
+- 実機でのログの出方は未確認。`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の `applog` で、B2 のときに確かめる。

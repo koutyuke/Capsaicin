@@ -48,10 +48,10 @@ Capsaicin は、最初の書き込みで作った LED のクライアントを�
 ## 検証
 
 - PM が差分を読み、`just check` と `just build` を流す。
-- 実機はオーナーが `docs/manual/led-remapper-verification.md` の B2 で確かめる。アプリのログの `targets` に新しい登録 ID が入り、`failedTargets` が空であることを見る。
+- 実機はオーナーが `docs/manual/led-fix-verification.md` の手順2で確かめる。アプリのログの `targets` に新しい登録 ID が入り、`failedTargets` が空であることを見る。
 
 ## レビュー
 
 - Codex が実装し、`just check` と `just build` を通した。クライアントを持ち続けるのをやめ、書き込みのたびに作り直す。書く値、失敗の判定、`throw` するエラー、ログの書式は変わっていない。
 - PM が差分を読み、`just check` と `just build` を流し直して、どちらも通った。
-- 同じプロセスで作り直したクライアントに新しいサービスが見えるかは、実機で未確認。オーナーが `docs/manual/led-remapper-verification.md` の B2 で確かめるまで、`in_review` のままにする。
+- 同じプロセスで作り直したクライアントに新しいサービスが見えるかは、実機で未確認。オーナーが `docs/manual/led-fix-verification.md` の手順2で確かめるまで、`in_review` のままにする。

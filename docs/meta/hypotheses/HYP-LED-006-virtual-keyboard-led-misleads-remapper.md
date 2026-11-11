@@ -23,7 +23,7 @@ evidence: ["EVID-LED-009"]
 
 ## 確かめ方
 
-`docs/manual/led-remapper-verification.md` の B3 の 4・5 で確かめる。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B3 の 4・5 で確かめる。
 
 1. Karabiner-Elements が内蔵キーボードを占有している。修飾キーを厳密に照合するルールを1つ選び、抑止していない状態で成立することを確かめる。
 2. Capsaicin で抑止を始め（LED で知らせるをオン）、仮想キーボードの `HIDCapsLockLED` が `"On"` であることを `ioreg` で確かめてから、同じキーを押す。

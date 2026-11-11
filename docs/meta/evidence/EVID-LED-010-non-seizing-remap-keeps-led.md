@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010
 
 ## 確かめた事実
 
-`docs/manual/led-remapper-verification.md` の B4 を行った。それぞれの割り当てをした状態で Capsaicin の抑止を始め、割り当てたキーを押し、10分後まで LED を目視した。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B4 を行った。それぞれの割り当てをした状態で Capsaicin の抑止を始め、割り当てたキーを押し、10分後まで LED を目視した。
 
 | 割り当て | 対象 | キーを押した後 | 10分後 | 占有の印 |
 | --- | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md` の B0 と B4。記録は `~/capsaicin-led-check/20261111-010115/` の `B4-*` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B4。記録は `~/capsaicin-led-check/20261111-010115/` の `B4-*` にある。
 
 ## 適用範囲
 

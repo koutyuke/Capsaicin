@@ -52,7 +52,7 @@ Capsaicin は、Karabiner-Elements の仮想キーボードにも `HIDCapsLockLE
 ## 検証
 
 - PM が差分を読み、`just check` と `just build` を流す。
-- 実機はオーナーが `docs/manual/led-remapper-verification.md` の B1 と B3 で確かめる。アプリのログの `targets` に仮想キーボードの登録 ID がないこと、抑止中もルールが成立することを見る。
+- 実機はオーナーが `docs/manual/led-fix-verification.md` の手順1と手順3で確かめる。アプリのログの `targets` に仮想キーボードの登録 ID がないこと、抑止中もルールが成立することを見る。
 - Karabiner-Elements が既定の設定で占有するキーボードでは、LED が点かなくなる。これは `DEC-LED-005` で受け入れた振る舞いである。
 
 ## レビュー
@@ -60,4 +60,4 @@ Capsaicin は、Karabiner-Elements の仮想キーボードにも `HIDCapsLockLE
 - Codex が実装し、`just check` と `just build` を通した。キーボードのうち `Transport` を持つサービスだけに書き、ログの `targets` にも書いたサービスだけが出る。設定の案内の本文を置き換えた。
 - PM が直したこと: テストのフィクスチャが `Transport` の値を文字列で持ち、値を変えて同じテストを5回流していた。本番の判定は値の有無だけを見るので、フィクスチャは有無だけを持つ形にし、繰り返しをやめた。
 - PM が `just check` と `just build` を流し直し、どちらも通った。
-- 実機では未確認。オーナーが `docs/manual/led-remapper-verification.md` の B1 と B3 で確かめるまで、`in_review` のままにする。
+- 実機では未確認。オーナーが `docs/manual/led-fix-verification.md` の手順1と手順3で確かめるまで、`in_review` のままにする。

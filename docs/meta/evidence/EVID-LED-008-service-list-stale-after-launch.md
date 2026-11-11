@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめた事実
 
-`docs/manual/led-remapper-verification.md` の B2 を行った。書き込みの対象と失敗は、アプリのログ（`LED 書き込み: mode=… targets=… failedTargets=…`）で読んだ。登録 ID は、同じ時点の `hidutil list` と照合した。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B2 を行った。書き込みの対象と失敗は、アプリのログ（`LED 書き込み: mode=… targets=… failedTargets=…`）で読んだ。登録 ID は、同じ時点の `hidutil list` と照合した。
 
 | 場面 | Capsaicin の pid | OS が認識したサービス | ログの `targets` | ログの `failedTargets` | 目視と HUD |
 | --- | --- | --- | --- | --- | --- |
@@ -28,7 +28,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md` の B0 と B2。記録は `~/capsaicin-led-check/20261111-010115/` の `B2-*`、`B1-lofree-2.4g-*`、`session-applog.txt` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B2。記録は `~/capsaicin-led-check/20261111-010115/` の `B2-*`、`B1-lofree-2.4g-*`、`session-applog.txt` にある。
 
 ```sh
 /usr/bin/hidutil list --matching '{"PrimaryUsagePage":1,"PrimaryUsage":6}'

@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめた事実
 
-`docs/manual/led-remapper-verification.md` の B1 を行った。機器を替えるたびに Capsaicin を起動し直し、抑止の開始、手動の Caps Lock 操作、解除を行った。LED と入力はオーナーの目視、書き込みの対象と失敗はアプリのログ（`LED 書き込み: mode=… targets=… failedTargets=…`）による。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B1 を行った。機器を替えるたびに Capsaicin を起動し直し、抑止の開始、手動の Caps Lock 操作、解除を行った。LED と入力はオーナーの目視、書き込みの対象と失敗はアプリのログ（`LED 書き込み: mode=… targets=… failedTargets=…`）による。
 
 | 機器 | 接続 | 製品名 | Transport | キーボードのサービス数 | 書き込みの失敗 | LED |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md` の B0 と B1。記録は `~/capsaicin-led-check/20261111-010115/` の `B1-*` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B1。記録は `~/capsaicin-led-check/20261111-010115/` の `B1-*` にある。
 
 ```sh
 /usr/bin/hidutil list --matching '{"PrimaryUsagePage":1,"PrimaryUsage":6}'

@@ -22,7 +22,7 @@ evidence: ["EVID-LED-006", "EVID-LED-009", "EVID-LED-010"]
 ## 確かめ方
 
 1. 調査: IOHIDFamily のソースで、`DebugState` の各値の意味と、占有の状態を示す公開のキーや API がほかにないかを確かめる。
-2. 実機: `docs/manual/led-remapper-verification.md` の B3 で、Karabiner-Elements の停止、デバイスの「Modify events」のオフ・オン、Karabiner-Elements の起動のそれぞれで、内蔵と外付けキーボードのクライアントの `ClientOpened` と `ClientOptions` を記録する。
+2. 実機: `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B3 で、Karabiner-Elements の停止、デバイスの「Modify events」のオフ・オン、Karabiner-Elements の起動のそれぞれで、内蔵と外付けキーボードのクライアントの `ClientOpened` と `ClientOptions` を記録する。
 3. 成功: 占有しているときだけ、そのキーボードに `ClientOpened = Yes` かつ `ClientOptions` が奇数のクライアントがある。失敗: 占有していないのに印がある、または占有しているのに印がない。
 
 ## 結果

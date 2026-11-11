@@ -24,7 +24,7 @@ evidence: ["EVID-LED-005", "EVID-LED-008"]
 
 ## 確かめ方
 
-`docs/manual/led-remapper-verification.md` の B2 で確かめる。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B2 で確かめる。
 
 1. 外付けキーボードを外し、Capsaicin を起動して抑止を始める（LED で知らせるをオン）。
 2. 外付けキーボードを接続する。`ioreg` でそのサービスの `HIDCapsLockLED` を読み、LED を目視する。

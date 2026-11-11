@@ -64,7 +64,7 @@ assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 ## 検証
 
 - PM が差分を読み、`just check` と `just build` を流す。
-- 実機はオーナーが確かめる。Karabiner-Elements を起動するとメニューと設定に案内が出て、メニューバーから終了すると数秒のうちに消えること、Karabiner-Elements を使わない状態では出ないことを見る。
+- 実機はオーナーが `docs/manual/led-fix-verification.md` の手順4と手順5で確かめる。Karabiner-Elements を起動するとメニューと設定に案内が出て、メニューバーから終了すると数秒のうちに消えること、Karabiner-Elements を使わない状態では出ないことを見る。
 
 ## レビュー
 

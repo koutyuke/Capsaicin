@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめた事実
 
-`docs/manual/led-remapper-verification.md` の B3 を行った。Karabiner-Elements は内蔵と Lofree（USB）の両方で「Modify events」と「Manipulate caps lock LED」がオン（既定）だった。LED とルールの成否はオーナーの目視、書き込みが届いたことは WindowServer の `updateCapslockLED` のログによる。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B3 を行った。Karabiner-Elements は内蔵と Lofree（USB）の両方で「Modify events」と「Manipulate caps lock LED」がオン（既定）だった。LED とルールの成否はオーナーの目視、書き込みが届いたことは WindowServer の `updateCapslockLED` のログによる。
 
 ルールは「左 Shift＋左 Option＋3 を、左 Shift＋左 Command＋左 Control＋4 に変える」で、`from.modifiers` に `optional` がない。成立すると画面の範囲選択の十字が出る。Caps Lock は、どの試行でもオフのままだった。
 
@@ -57,7 +57,7 @@ IORegistry の usage 6 のデバイスの下にある Karabiner-Core-Service の
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md` の B0 と B3。記録は `~/capsaicin-led-check/20261111-010115/` の `B3-*` にある。1つのサービスだけに書くツールのソースは、同じ場所の `led-service-check.c` である。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B3。記録は `~/capsaicin-led-check/20261111-010115/` の `B3-*` にある。1つのサービスだけに書くツールのソースは、同じ場所の `led-service-check.c` である。
 
 ```sh
 /usr/bin/log show --start "$T0" --info --style compact \

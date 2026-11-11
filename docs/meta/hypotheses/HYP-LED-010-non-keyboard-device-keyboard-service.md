@@ -21,7 +21,7 @@ evidence: ["EVID-LED-007"]
 
 ## 確かめ方
 
-`docs/manual/led-remapper-verification.md` の B1 で確かめる。
+`docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B1 で確かめる。
 
 1. 外付けキーボードを外し、Viper V2 Pro だけを USB で接続する。`hidutil list` で、Viper V2 Pro がキーボードとして名乗るサービスを持つかを記録する。
 2. Capsaicin で抑止を始め、メニューの警告と `resume-record.json` の `misalignments` を見る。解除して HUD を見る。
