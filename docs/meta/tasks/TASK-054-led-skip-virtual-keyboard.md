@@ -2,10 +2,10 @@
 schema: task
 id: TASK-054
 title: 仮想キーボードを LED の書き込み先から外し、Karabiner-Elements の案内を直す
-status: todo
+status: in_review
 requirements: ["REQ-LED-003", "REQ-LED-004", "REQ-LED-007"]
 depends_on: ["TASK-053"]
-assignee: 未定
+assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 ---
 
 # TASK-054 仮想キーボードを LED の書き込み先から外し、Karabiner-Elements の案内を直す
@@ -57,4 +57,7 @@ Capsaicin は、Karabiner-Elements の仮想キーボードにも `HIDCapsLockLE
 
 ## レビュー
 
-未着手。
+- Codex が実装し、`just check` と `just build` を通した。キーボードのうち `Transport` を持つサービスだけに書き、ログの `targets` にも書いたサービスだけが出る。設定の案内の本文を置き換えた。
+- PM が直したこと: テストのフィクスチャが `Transport` の値を文字列で持ち、値を変えて同じテストを5回流していた。本番の判定は値の有無だけを見るので、フィクスチャは有無だけを持つ形にし、繰り返しをやめた。
+- PM が `just check` と `just build` を流し直し、どちらも通った。
+- 実機では未確認。オーナーが `docs/manual/led-remapper-verification.md` の B1 と B3 で確かめるまで、`in_review` のままにする。

@@ -2,10 +2,10 @@
 schema: task
 id: TASK-053
 title: LED の書き込み先を、書き込みのたびに調べ直す
-status: todo
+status: in_review
 requirements: ["REQ-LED-002", "REQ-LED-004"]
 depends_on: ["TASK-050"]
-assignee: 未定
+assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 ---
 
 # TASK-053 LED の書き込み先を、書き込みのたびに調べ直す
@@ -52,4 +52,6 @@ Capsaicin は、最初の書き込みで作った LED のクライアントを�
 
 ## レビュー
 
-未着手。
+- Codex が実装し、`just check` と `just build` を通した。クライアントを持ち続けるのをやめ、書き込みのたびに作り直す。書く値、失敗の判定、`throw` するエラー、ログの書式は変わっていない。
+- PM が差分を読み、`just check` と `just build` を流し直して、どちらも通った。
+- 同じプロセスで作り直したクライアントに新しいサービスが見えるかは、実機で未確認。オーナーが `docs/manual/led-remapper-verification.md` の B2 で確かめるまで、`in_review` のままにする。

@@ -25,7 +25,6 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
     private let makeClient: () throws -> LEDClient
     private let monitor: HIDKeyboardMonitor
     private let logger = Logger(subsystem: "io.github.koutyuke.capsaicin", category: "LED")
-    private var client: LEDClient?
     private var desiredLit = false
     /// 初回の false でも前プロセスの設定を復旧する。成功するまでは不明として残す。
     private var needsAutomaticRestore = true
@@ -85,12 +84,11 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
     }
 
     private func apply(mode: String) throws {
-        let client = try client ?? makeClient()
-        self.client = client
+        let client = try makeClient()
         let services = try client.services()
         var targets: [String] = []
         var failedTargets: [String] = []
-        for service in services where service.isKeyboard() {
+        for service in services where service.isKeyboard() && service.hasTransport() {
             let registryID = service.registryID.map { String($0) } ?? "nil"
             targets.append(registryID)
             if !service.setMode(mode) {
@@ -113,6 +111,7 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
 struct LEDService {
     var registryID: UInt64?
     var isKeyboard: () -> Bool
+    var hasTransport: () -> Bool
     var setMode: (String) -> Bool
 }
 
@@ -132,6 +131,7 @@ struct LEDClient {
                 LEDService(
                     registryID: (IOHIDServiceClientGetRegistryID(service) as? NSNumber)?.uint64Value,
                     isKeyboard: { IOHIDServiceClientConformsTo(service, 1, 6) != 0 },
+                    hasTransport: { IOHIDServiceClientCopyProperty(service, kIOHIDTransportKey as CFString) != nil },
                     setMode: { IOHIDServiceClientSetProperty(service, "HIDCapsLockLED" as CFString, $0 as CFString) },
                 )
             }

@@ -4,17 +4,32 @@ import Testing
 
 @MainActor
 struct LEDControllerTests {
-    @Test("SPEC-LED-001 SPEC-LED-002 内蔵・外付け・仮想のキーボードだけに On と Auto を書く")
+    @Test("SPEC-LED-001 SPEC-LED-002 Transport のある内蔵・外付けキーボードだけに On と Auto を書き、仮想キーボードには書かない")
     func allKeyboards() throws {
         let fake = LEDTestFixture()
-        fake.devices += [.init(name: "virtual"), .init(name: "mouse", keyboard: false)]
+        fake.devices += [.init(name: "virtual", hasTransport: false), .init(name: "mouse", keyboard: false)]
         let controller: any CapsLockLEDControlling = fake.makeController()
         try controller.setLit(true)
         try controller.setLit(false)
         #expect(fake.writes == ["On", "Auto"].flatMap { mode in
-            ["internal", "external", "virtual"].map { .init(device: $0, mode: mode) }
+            ["internal", "external"].map { .init(device: $0, mode: mode) }
         })
-        #expect(fake.creations == 1)
+        #expect(fake.creations == 2)
+    }
+
+    @Test("SPEC-LED-001 SPEC-LED-002 仮想キーボードだけなら初回の復旧・点灯・再適用・解除でも書かない")
+    func virtualKeyboardsOnly() throws {
+        let fake = LEDTestFixture()
+        fake.devices = [.init(name: "virtual", hasTransport: false)]
+        fake.failedDevices = ["virtual"]
+        let controller = fake.makeController()
+        try controller.setLit(false)
+        try controller.setLit(true)
+        try controller.reapply()
+        try controller.setLit(false)
+        #expect(fake.writes.isEmpty)
+        #expect(fake.creations == 4)
+        #expect(fake.enumerations == 4)
     }
 
     @Test("SPEC-LED-006 関数がないときは生成・列挙・監視も書き込みも行わない")
@@ -107,19 +122,36 @@ struct LEDControllerTests {
         #expect(fake.enumerations == 3)
     }
 
-    @Test("SPEC-LED-002 接続・切断・復帰時に、その時点のサービスを再列挙する")
+    @Test("SPEC-LED-002 接続・切断・復帰・解除時にクライアントを作り直し、その時点のサービスを再列挙する")
     func connectionRemovalAndWake() throws {
         let fake = LEDTestFixture()
         let controller = fake.makeController()
         try controller.setLit(true)
         fake.devices.append(.init(name: "new"))
         fake.changes[0]()
-        #expect(fake.writes.suffix(3).map(\.device) == ["internal", "external", "new"])
         fake.devices.removeFirst()
+        fake.failedDevices = ["internal"]
         fake.changes[0]()
+        fake.devices = [.init(name: "resumed"), .init(name: "new")]
+        fake.failedDevices.insert("external")
         try controller.reapply()
-        #expect(fake.writes.suffix(4).map(\.device) == ["external", "new", "external", "new"])
-        #expect(fake.enumerations == 4)
+        try controller.setLit(false)
+        #expect(fake.writes == [
+            .init(device: "internal", mode: "On"),
+            .init(device: "external", mode: "On"),
+            .init(device: "internal", mode: "On"),
+            .init(device: "external", mode: "On"),
+            .init(device: "new", mode: "On"),
+            .init(device: "external", mode: "On"),
+            .init(device: "new", mode: "On"),
+            .init(device: "resumed", mode: "On"),
+            .init(device: "new", mode: "On"),
+            .init(device: "resumed", mode: "Auto"),
+            .init(device: "new", mode: "Auto"),
+        ])
+        #expect(fake.errors.isEmpty)
+        #expect(fake.creations == 5)
+        #expect(fake.enumerations == 5)
         #expect(fake.registrations == 1)
     }
 

@@ -5,6 +5,7 @@ final class LEDTestFixture {
     struct Device {
         var name: String
         var keyboard = true
+        var hasTransport = true
     }
 
     struct Write: Equatable {
@@ -45,16 +46,22 @@ final class LEDTestFixture {
                 if self.creationFails {
                     throw CapsLockLEDError.clientCreationFailed
                 }
+                let devices = self.devices
                 return LEDClient {
                     self.enumerations += 1
                     if self.enumerationFails {
                         throw CapsLockLEDError.servicesUnavailable
                     }
-                    return self.devices.map { device in
-                        LEDService(registryID: nil, isKeyboard: { device.keyboard }, setMode: { mode in
-                            self.writes.append(Write(device: device.name, mode: mode))
-                            return !self.failedDevices.contains(device.name)
-                        })
+                    return devices.map { device in
+                        LEDService(
+                            registryID: nil,
+                            isKeyboard: { device.keyboard },
+                            hasTransport: { device.hasTransport },
+                            setMode: { mode in
+                                self.writes.append(Write(device: device.name, mode: mode))
+                                return !self.failedDevices.contains(device.name)
+                            },
+                        )
                     }
                 }
             },

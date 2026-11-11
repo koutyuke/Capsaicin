@@ -18,7 +18,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Karabiner-ElementsがLEDの状態を上書きするため、スリープ防止中であってもLEDが消灯することがあります。入力機能には影響ありません。"
+            "value" : "Karabiner-ElementsがLEDを制御しているキーボードでは、スリープ防止中でもLEDが点灯しません。Karabiner-Elementsのデバイス設定で「Manipulate caps lock LED」をオフにすると点灯します。入力機能には影響ありません。"
           }
         }
       }
