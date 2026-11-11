@@ -221,11 +221,11 @@ extension SettingsView {
 
     @ViewBuilder
     private var led: some View {
-        if model.app.isKarabinerRunning {
+        if model.app.hasVirtualKeyboard {
             Section {
                 SettingsRow(
-                    title: SettingsSection.led.text("karabiner.label"),
-                    help: SettingsSection.led.text("karabiner.help"),
+                    title: SettingsSection.led.text("virtualKeyboard.label"),
+                    help: SettingsSection.led.text("virtualKeyboard.help"),
                     symbol: "exclamationmark.triangle.fill",
                 ) {}
             }

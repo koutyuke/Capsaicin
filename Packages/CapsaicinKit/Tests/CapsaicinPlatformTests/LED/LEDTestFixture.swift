@@ -38,33 +38,35 @@ final class LEDTestFixture {
         }
     }
 
+    func makeClient() throws -> LEDClient {
+        creations += 1
+        if creationFails {
+            throw CapsLockLEDError.clientCreationFailed
+        }
+        let devices = devices
+        return LEDClient {
+            self.enumerations += 1
+            if self.enumerationFails {
+                throw CapsLockLEDError.servicesUnavailable
+            }
+            return devices.map { device in
+                LEDService(
+                    registryID: nil,
+                    isKeyboard: { device.keyboard },
+                    hasTransport: { device.hasTransport },
+                    setMode: { mode in
+                        self.writes.append(Write(device: device.name, mode: mode))
+                        return !self.failedDevices.contains(device.name)
+                    },
+                )
+            }
+        }
+    }
+
     func makeController() -> CapsLockLEDController {
         let controller = CapsLockLEDController(
             symbolAvailable: { self.available },
-            makeClient: {
-                self.creations += 1
-                if self.creationFails {
-                    throw CapsLockLEDError.clientCreationFailed
-                }
-                let devices = self.devices
-                return LEDClient {
-                    self.enumerations += 1
-                    if self.enumerationFails {
-                        throw CapsLockLEDError.servicesUnavailable
-                    }
-                    return devices.map { device in
-                        LEDService(
-                            registryID: nil,
-                            isKeyboard: { device.keyboard },
-                            hasTransport: { device.hasTransport },
-                            setMode: { mode in
-                                self.writes.append(Write(device: device.name, mode: mode))
-                                return !self.failedDevices.contains(device.name)
-                            },
-                        )
-                    }
-                }
-            },
+            makeClient: makeClient,
             monitor: makeMonitor(),
         )
         controller.onReapplyFailure = { error in

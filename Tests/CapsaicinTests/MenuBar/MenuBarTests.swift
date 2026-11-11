@@ -44,37 +44,11 @@ struct MenuBarTests {
         #expect(initial[2].title == "バッテリー残量20%未満でオフ")
     }
 
-    @Test("SPEC-MENU-001 SPEC-MENU-004 警告は状態の先頭、Karabiner の案内は末尾に置く")
-    func warnings() {
-        let fixture = makeFixture()
-        fixture.model.launch()
-        fixture.model.requestStart(from: .menu)
-        fixture.system.failing = [.setLEDLit(false), .saveRecord]
-        fixture.model.requestStop(from: .menu)
-        fixture.model.isKarabinerRunning = true
-        let rows = rows(fixture)
-        #expect(rows.prefix(3).map(\.id) == [
-            "menu.header.idle",
-            "menu.warning.unalignedLed.title",
-            "menu.warning.stateSaveFailed.title",
-        ])
-        #expect(rows.suffix(5).map(\.id) == [
-            "separator.karabiner",
-            "menu.karabiner.title",
-            "separator.footer",
-            "menu.settings",
-            "menu.quit",
-        ])
-        #expect(rows[1].isWarning)
-        #expect(rows[1].command == nil)
-        #expect(rows[rows.count - 4].subtitle == "LEDが消灯する場合があります")
-    }
-
     @Test("SPEC-MENU-004 制御の向きとヘルパーの修復を区別する", arguments: [MisalignmentDirection.leftApplied, .notApplied])
     func helperWarning(direction: MisalignmentDirection) {
         let status = BlockingStatus(session: nil, batteryCondition: nil,
                                     misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
-        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, karabiner: false,
+        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, virtualKeyboard: false,
                                     now: Date(timeIntervalSince1970: 0), calendar: calendar, bundle: bundle())
         #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
         #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
@@ -253,7 +227,7 @@ struct MenuBarTests {
     private func rows(_ fixture: AppFixture, now: Date = Date(timeIntervalSince1970: 0)) -> [MenuEntry] {
         MenuContent.make(status: fixture.model.status, settings: fixture.model.settings,
                          isOnACPower: fixture.system.powerState.isOnACPower,
-                         karabiner: fixture.model.isKarabinerRunning,
+                         virtualKeyboard: fixture.model.hasVirtualKeyboard,
                          now: now, calendar: calendar, bundle: bundle())
     }
 
@@ -267,6 +241,49 @@ struct MenuBarTests {
     private func bundle() -> Bundle {
         let products = Bundle(for: MenuCatalogLocator.self).bundleURL.deletingLastPathComponent()
         return Bundle(url: products.appending(path: "Capsaicin.app"))!
+    }
+}
+
+extension MenuBarTests {
+    @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 警告は状態の先頭、仮想キーボードの案内は末尾に置く")
+    func warnings() {
+        let fixture = makeFixture()
+        fixture.model.launch()
+        fixture.model.requestStart(from: .menu)
+        fixture.system.failing = [.setLEDLit(false), .saveRecord]
+        fixture.model.requestStop(from: .menu)
+        fixture.model.hasVirtualKeyboard = true
+        let rows = rows(fixture)
+        #expect(rows.prefix(3).map(\.id) == [
+            "menu.header.idle",
+            "menu.warning.unalignedLed.title",
+            "menu.warning.stateSaveFailed.title",
+        ])
+        #expect(rows.suffix(5).map(\.id) == [
+            "separator.virtualKeyboard",
+            "menu.virtualKeyboard.title",
+            "separator.footer",
+            "menu.settings",
+            "menu.quit",
+        ])
+        #expect(rows[1].isWarning)
+        #expect(rows[1].command == nil)
+        let notice = rows[rows.count - 4]
+        #expect(notice.title == "キー配列を変更するアプリが動作中")
+        #expect(notice.subtitle == "LEDが点灯しないことがあります")
+        #expect(notice.isWarning)
+        #expect(notice.command == nil)
+        fixture.model.hasVirtualKeyboard = false
+        #expect(!self.rows(fixture).contains { $0.id == "menu.virtualKeyboard.title" })
+    }
+
+    @Test("SPEC-LED-005 設定の案内もキー配列を変更するアプリと LED への影響を示す")
+    func virtualKeyboardSettingsNotice() {
+        let bundle = bundle()
+        #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsLed")
+            == "キー配列を変更するアプリが動作中")
+        #expect(bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsLed")
+            == "そのアプリがCaps LockのLEDを制御している場合、スリープ防止中もLEDが点灯しないことがあります。")
     }
 }
 

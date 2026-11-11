@@ -90,7 +90,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             inputPanel?.close()
         }
         let rows = MenuContent.make(status: model.status, settings: model.settings,
-                                    isOnACPower: isOnACPower(), karabiner: model.isKarabinerRunning)
+                                    isOnACPower: isOnACPower(), virtualKeyboard: model.hasVirtualKeyboard)
         update(menu, rows: rows)
     }
 

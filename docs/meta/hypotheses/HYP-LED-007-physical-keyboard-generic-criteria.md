@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-LED-007
 title: アプリ名やベンダーに頼らず、IORegistry の属性だけで実機のキーボードのサービスを選べる
 status: open
-affects: ["REQ-LED-004", "SPEC-LED-002"]
+affects: ["REQ-LED-004", "REQ-LED-007", "SPEC-LED-002", "SPEC-LED-005"]
 evidence: ["EVID-LED-006", "EVID-LED-007"]
 ---
 
@@ -28,7 +28,7 @@ evidence: ["EVID-LED-006", "EVID-LED-007"]
 - LED の出力要素を持つかなど、別の観点で選ぶ。
 - 仮想キーボードに書く害（`HYP-LED-006`）を、別の方法で避ける。
 
-`SPEC-LED-002` の対象の決め方が変わる。
+`SPEC-LED-002` の対象の決め方と、`SPEC-LED-005` の案内の条件が変わる。
 
 ## 確かめ方
 

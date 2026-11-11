@@ -37,7 +37,7 @@ enum AppComposition {
         let agent = try LaunchAgent(executableURL: executableURL(in: bundle), isDebug: isDebug)
         let services = AppServices(
             model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
-            karabiner: KarabinerElementsMonitor(), display: DisplaySleep(),
+            virtualKeyboard: VirtualKeyboardMonitor(), display: DisplaySleep(),
             server: IPCServer(endpoint: IPCEndpoint(namespace: isDebug ? .debug : .release)) { model.handle($0) },
             quit: quit,
         )
@@ -86,7 +86,7 @@ private final class AppServices {
     let power: PowerStateMonitor
     let led: CapsLockLEDController
     let lid: LidStateMonitor
-    let karabiner: KarabinerElementsMonitor
+    let virtualKeyboard: VirtualKeyboardMonitor
     let display: DisplaySleep
     let server: IPCServer
     private let menuBar: MenuBarController
@@ -98,7 +98,7 @@ private final class AppServices {
     private var screenLock: ScreenLockObserver?
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
-         lid: LidStateMonitor, karabiner: KarabinerElementsMonitor, display: DisplaySleep, server: IPCServer,
+         lid: LidStateMonitor, virtualKeyboard: VirtualKeyboardMonitor, display: DisplaySleep, server: IPCServer,
          quit: @escaping () -> Void)
     {
         self.model = model
@@ -106,7 +106,7 @@ private final class AppServices {
         self.power = power
         self.led = led
         self.lid = lid
-        self.karabiner = karabiner
+        self.virtualKeyboard = virtualKeyboard
         self.display = display
         self.server = server
         menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
@@ -157,12 +157,12 @@ private final class AppServices {
             self?.systemStateChanged()
         }
         screenLock?.start()
-        karabiner.onStateChange = { [weak self] in
-            self?.model.isKarabinerRunning = $0
+        virtualKeyboard.onStateChange = { [weak self] in
+            self?.model.hasVirtualKeyboard = $0
             self?.menuBar.refresh()
         }
-        karabiner.start()
-        model.isKarabinerRunning = karabiner.state
+        virtualKeyboard.start()
+        model.hasVirtualKeyboard = virtualKeyboard.state
         menuBar.refresh()
         do { try await server.start() }
         catch { AppRuntime.log(error) }
@@ -183,7 +183,7 @@ private final class AppServices {
         screenLock = nil
         power.stop()
         lid.stop()
-        karabiner.stop()
+        virtualKeyboard.stop()
         led.stopMonitoring()
         await server.stop()
     }

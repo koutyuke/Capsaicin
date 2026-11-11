@@ -1,9 +1,10 @@
+import CapsaicinLEDShim
 import Foundation
 import OSLog
 
-/// 既知の実行ファイルの起動だけを検出する。LED の上書きや設定の有効性を断定しない。
+/// Transport のない仮想キーボードを検出する。LED が上書きされているかは判定しない。
 @MainActor
-public final class KarabinerElementsMonitor {
+public final class VirtualKeyboardMonitor {
     public private(set) var state = false
     public var onStateChange: (@MainActor @Sendable (Bool) -> Void)?
     public var onDetectionFailure: (@MainActor @Sendable (any Error) -> Void)?
@@ -17,7 +18,23 @@ public final class KarabinerElementsMonitor {
     private var cancel: Cancel?
 
     public convenience init() {
-        self.init(detect: { try KarabinerProcessSource.native.isRunning() }, schedule: Self.scheduleNative)
+        self.init(
+            symbolAvailable: { CapsaicinLEDClientSymbolAvailable() },
+            makeClient: { try LEDClient.native() },
+            schedule: Self.scheduleNative,
+        )
+    }
+
+    convenience init(
+        symbolAvailable: @escaping () -> Bool,
+        makeClient: @escaping () throws -> LEDClient,
+        schedule: @escaping Schedule,
+    ) {
+        self.init(detect: {
+            guard symbolAvailable() else { return false }
+            let client = try makeClient()
+            return try client.services().contains { $0.isKeyboard() && !$0.hasTransport() }
+        }, schedule: schedule)
     }
 
     init(detect: @escaping () throws -> Bool, schedule: @escaping Schedule) {
@@ -47,8 +64,8 @@ public final class KarabinerElementsMonitor {
             next = try detect()
         } catch {
             next = false
-            Logger(subsystem: "io.github.koutyuke.capsaicin", category: "KarabinerElements")
-                .error("プロセスの検出に失敗: \(String(describing: error), privacy: .public)")
+            Logger(subsystem: "io.github.koutyuke.capsaicin", category: "VirtualKeyboard")
+                .error("仮想キーボードの検出に失敗: \(String(describing: error), privacy: .public)")
             onDetectionFailure?(error)
         }
         guard state != next else { return }

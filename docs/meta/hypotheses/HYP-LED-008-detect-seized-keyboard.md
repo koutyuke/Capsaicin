@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-LED-008
 title: キーボードを別のプロセスが占有していることは、アプリ名に頼らず、権限なしで検出できる
 status: supported
-affects: ["REQ-LED-007", "SPEC-LED-005", "DEC-LED-005"]
+affects: ["REQ-LED-007", "SPEC-LED-005", "DEC-LED-006"]
 evidence: ["EVID-LED-006", "EVID-LED-009", "EVID-LED-010"]
 ---
 
@@ -33,4 +33,4 @@ evidence: ["EVID-LED-006", "EVID-LED-009", "EVID-LED-010"]
 - 内蔵の「Modify events」をオフにすると、内蔵の印だけが消えた。
 - システム設定の修飾キーの割り当てと Raycast の Hyper Key では、印は1つもなかった。
 
-調査（確かめ方の 1）は `TASK-049` に残っている。`DebugState` を製品の判定に使うかは `TASK-055` で決める。
+調査（確かめ方の 1）は `TASK-049` に残っている。`DebugState` は、案内の判定に使わないことにした（`DEC-LED-006`）。

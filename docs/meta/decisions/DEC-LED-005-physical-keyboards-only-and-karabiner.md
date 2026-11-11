@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-LED-005
 title: LED は実機のキーボードだけに書き、Karabiner-Elements が管理するキーボードでは点かないことを案内する
-status: accepted
+status: superseded
 supersedes: ["DEC-LED-003"]
-superseded_by: []
+superseded_by: ["DEC-LED-006"]
 requirements: ["REQ-LED-001", "REQ-LED-003", "REQ-LED-004", "REQ-LED-007"]
 based_on: ["DEC-LED-001", "EVID-LED-008", "EVID-LED-009", "EVID-LED-010"]
 ---

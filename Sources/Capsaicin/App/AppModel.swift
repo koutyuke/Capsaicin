@@ -14,7 +14,7 @@ final class AppModel {
     private(set) var status: BlockingStatus
     private(set) var settings: Settings
     let capabilities: MachineCapabilities
-    var isKarabinerRunning = false
+    var hasVirtualKeyboard = false
     var launchAgentStatus = LaunchAgentStatus.unavailable
     var willRestartAfterCrash: Bool {
         launchAgentStatus == .ready

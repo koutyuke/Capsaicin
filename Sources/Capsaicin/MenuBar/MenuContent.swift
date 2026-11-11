@@ -16,7 +16,7 @@ struct MenuEntry {
 
 enum MenuContent {
     static func make(
-        status: BlockingStatus, settings: Settings, isOnACPower: Bool, karabiner: Bool,
+        status: BlockingStatus, settings: Settings, isOnACPower: Bool, virtualKeyboard: Bool,
         now: Date = Date(), calendar: Calendar = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
@@ -57,11 +57,11 @@ enum MenuContent {
             rows.append(row("menu.startFor", children: presets(calendar: calendar, bundle: bundle)))
             rows.append(row("menu.startUntil", command: .timePanel))
         }
-        if karabiner {
-            rows += [MenuEntry(id: "separator.karabiner"),
+        if virtualKeyboard {
+            rows += [MenuEntry(id: "separator.virtualKeyboard"),
                      row(
-                         "menu.karabiner.title",
-                         subtitle: text("menu.karabiner.subtitle", bundle: bundle),
+                         "menu.virtualKeyboard.title",
+                         subtitle: text("menu.virtualKeyboard.subtitle", bundle: bundle),
                          warning: true,
                      )]
         }

@@ -12,7 +12,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-001", "SPEC-LED-006"]
 depends_on = []
-sources = ["DEC-LED-001", "DEC-LED-002", "DEC-LED-005"]
+sources = ["DEC-LED-001", "DEC-LED-002", "DEC-LED-006"]
 
 [[requirements]]
 id = "REQ-LED-002"
@@ -48,7 +48,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-002"]
 depends_on = ["REQ-LED-001"]
-sources = ["EVID-LED-001", "EVID-LED-002", "EVID-LED-007", "DEC-LED-005"]
+sources = ["EVID-LED-001", "EVID-LED-002", "EVID-LED-007", "DEC-LED-006"]
 
 [[requirements]]
 id = "REQ-LED-005"
@@ -64,15 +64,15 @@ sources = ["DEC-SET-001"]
 
 [[requirements]]
 id = "REQ-LED-007"
-title = "Karabiner-Elements が管理するキーボードでは LED が点かないことを知らせる"
+title = "キー配列を変更するアプリが LED を妨げうることを知らせる"
 kind = "functional"
-statement = "Karabiner-Elements の起動を検出したら、Karabiner-Elements が LED を管理するキーボードでは LED が点かないことと、その避け方を、メニューと設定の「LED」セクションに表示する。"
-reason = "LED が点かないときに、利用者が原因と直し方を知れるようにするため。"
+statement = "キー配列を変更するアプリの仮想キーボードがあるとき、そのアプリが LED を制御している場合は抑止中も LED が点灯しないことがあると、メニューと設定の「LED」セクションに表示する。"
+reason = "LED が点かないときに、利用者が原因の見当をつけられるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-005"]
 depends_on = []
-sources = ["DEC-LED-005", "EVID-LED-009"]
+sources = ["DEC-LED-006", "EVID-LED-009"]
 
 [[requirements]]
 id = "REQ-LED-008"

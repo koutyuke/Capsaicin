@@ -34,28 +34,6 @@
         }
       }
     },
-    "menu.karabiner.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LEDが消灯する場合があります"
-          }
-        }
-      }
-    },
-    "menu.karabiner.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karabiner-Elementsが動作中"
-          }
-        }
-      }
-    },
     "menu.quit" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -195,6 +173,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スリープ防止をオフにする"
+          }
+        }
+      }
+    },
+    "menu.virtualKeyboard.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LEDが点灯しないことがあります"
+          }
+        }
+      }
+    },
+    "menu.virtualKeyboard.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キー配列を変更するアプリが動作中"
           }
         }
       }
