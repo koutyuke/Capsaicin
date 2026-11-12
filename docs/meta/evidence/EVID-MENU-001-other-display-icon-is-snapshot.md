@@ -3,7 +3,7 @@ schema: evidence
 id: EVID-MENU-001
 title: ほかのディスプレイのメニューバーのアイコンは AppKit が描いた画像の複製で、NSImageView の置き換えの動きでは前の状態の画像のまま残る
 observed_on: 2026-11-12
-environment: macOS 27.2.1（26B131）、Mac16,8、Xcode 27.2 の MacOSX27.2.sdk、ディスプレイ1枚（実験）。不具合はオーナーが2枚のディスプレイで観測した
+environment: macOS 27.2.1（26B131）、Mac16,8、Xcode 27.2 の MacOSX27.2.sdk、ディスプレイ1枚（実験）。不具合と修正後の見え方はオーナーが2枚のディスプレイで観測した
 sources: ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk/System/Library/Frameworks/AppKit.framework/Headers/NSImageView.h", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.2.sdk/System/Library/Frameworks/AppKit.framework/Headers/NSStatusItem.h"]
 ---
 
@@ -14,6 +14,8 @@ sources: ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/
 ### オーナーの観測
 
 ディスプレイを2枚つなぎ、メニューバーのアイコンのメニューで抑止を切り替えると、フォーカスのあるディスプレイのアイコンは切り替わるが、もう一方のディスプレイのアイコンは前の状態のまま残った。このときの実装は、ボタンに重ねた `NSImageView` に `setSymbolImage(_:contentTransition: .replace)` で画像を渡していた（`TASK-048`）。
+
+`NSStatusBarButton.image` に直接入れる実装（`TASK-060`、b558a89）に替えた後、オーナーが同じ2枚のディスプレイで確かめた。両方のディスプレイのアイコンが切り替わり、メニューバーの明暗での色とメニューを開いたときの強調にも問題はなかった。
 
 ### AppKit の仕組み
 
@@ -48,5 +50,5 @@ sources: ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/
 
 ## 未確認のこと
 
-- 実験はディスプレイ1枚で行った。ディスプレイが1枚でも複製は8つあり、表の結果はそれらに渡った画像である。2枚のディスプレイで `button.image` に入れたときに、もう一方のメニューバーの見た目が切り替わることは、実機では見ていない。
+- 表の実験はディスプレイ1枚で行った。ディスプレイが1枚でも複製は8つあり、表の結果はそれらに渡った画像である。2枚のディスプレイでの見え方は、オーナーの目視（上記）だけで確かめた。
 - 複製がいつ作られ、どのメニューバーに対応するかは調べていない。
