@@ -10,8 +10,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     var quit: () -> Void = {}
     var configureShortcut: (NSMenuItem) -> Void = { $0.setShortcut(for: HotkeyController.name) }
     private(set) var statusItem: NSStatusItem?
-    let imageView = NSImageView()
-    private var displayedSymbol: String?
     let menu = NSMenu()
     private var inputPanel: NSPanel?
     private var commands: [String: MenuCommand] = [:]
@@ -30,19 +28,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         item.isVisible = model.settings.showsMenuBarIcon
         item.menu = menu
         statusItem = item
-        displayedSymbol = nil
         refresh()
-        if let button = item.button {
-            // 標準の画像付きボタンで幅を測ってから、置き換えを描ける画像ビューに任せる。
-            button.image = imageView.image
-            item.length = button.intrinsicContentSize.width
-            button.image = nil
-            imageView.frame = button.bounds
-            imageView.autoresizingMask = [.width, .height]
-            imageView.imageScaling = .scaleNone
-            imageView.setAccessibilityElement(false)
-            button.addSubview(imageView)
-        }
     }
 
     func stop() {
@@ -72,18 +58,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     func refresh() {
         statusItem?.isVisible = model.settings.showsMenuBarIcon
         let symbol = model.status.isBlocking ? "custom.capsaicin.led.fill" : "custom.capsaicin.led"
-        if displayedSymbol != symbol {
-            // シンボルは設定画面の文字に合わせて描いてあり、既定の 13 pt ではメニューバーで小さく見えるため、ここだけ大きくする。
-            let image = NSImage(symbolName: symbol, bundle: Bundle(for: Self.self), variableValue: 0)?
-                .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 15, weight: .regular))
-            image?.isTemplate = true
-            if let image, displayedSymbol != nil, !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion {
-                imageView.setSymbolImage(image, contentTransition: .replace)
-            } else {
-                imageView.image = image
-            }
-            displayedSymbol = symbol
-        }
+        // シンボルは設定画面の文字に合わせて描いてあり、既定の 13 pt ではメニューバーで小さく見えるため、ここだけ大きくする。
+        let image = NSImage(symbolName: symbol, bundle: Bundle(for: Self.self), variableValue: 0)?
+            .withSymbolConfiguration(NSImage.SymbolConfiguration(pointSize: 15, weight: .regular))
+        image?.isTemplate = true
+        // 置き換えの動きは付けない。ほかのディスプレイのメニューバーに前の状態が残るため（DEC-MENU-003）。
+        statusItem?.button?.image = image
         statusItem?.button?.setAccessibilityLabel(MenuContent.text(model.status.isBlocking
                 ? "statusItem.active.a11y" : "statusItem.idle.a11y"))
         if model.status.isBlocking {

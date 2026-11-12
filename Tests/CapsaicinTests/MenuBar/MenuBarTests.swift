@@ -140,15 +140,16 @@ struct MenuBarTests {
         #expect(controller.menu.items.suffix(2).map(\.keyEquivalent) == [",", "q"])
     }
 
-    @Test("SPEC-MENU-005 SPEC-UI-006 状態が変わるときだけ画像を替え、15 pt Regular のテンプレートを保つ")
+    @Test("SPEC-MENU-005 抑止の状態に合わせてボタンの画像を替え、15 pt Regular のテンプレートを保つ")
     func statusIcon() throws {
         _ = NSApplication.shared
         let fixture = makeFixture()
         fixture.model.launch()
         let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
         controller.configureShortcut = { _ in }
-        controller.refresh()
-        let imageView = controller.imageView
+        defer { controller.stop() }
+        controller.start()
+        let button = try #require(controller.statusItem?.button)
         let symbolBundle = Bundle(for: MenuBarController.self)
         func image(_ name: String) throws -> Data {
             let image = try #require(NSImage(symbolName: name, bundle: symbolBundle, variableValue: 0)?
@@ -158,25 +159,18 @@ struct MenuBarTests {
         let idle = try image("custom.capsaicin.led")
         let active = try image("custom.capsaicin.led.fill")
         #expect(idle != active)
-        #expect(imageView.image?.tiffRepresentation == idle)
-        #expect(imageView.image?.isTemplate == true)
-        let initialImage = try #require(imageView.image)
-        controller.refresh()
-        #expect(imageView.image === initialImage)
+        #expect(button.image?.tiffRepresentation == idle)
+        #expect(button.image?.isTemplate == true)
         fixture.model.requestStart(from: .menu)
         #expect(fixture.model.status.isBlocking)
         controller.refresh()
-        #expect(imageView.image?.tiffRepresentation == active)
-        #expect(imageView.image?.isTemplate == true)
-        let activeImage = try #require(imageView.image)
-        controller.refresh()
-        #expect(imageView.image === activeImage)
+        #expect(button.image?.tiffRepresentation == active)
+        #expect(button.image?.isTemplate == true)
         fixture.model.requestStop(from: .menu)
         #expect(!fixture.model.status.isBlocking)
         controller.refresh()
-        #expect(imageView.image?.tiffRepresentation == idle)
-        #expect(imageView.image?.isTemplate == true)
-        #expect(controller.statusItem == nil)
+        #expect(button.image?.tiffRepresentation == idle)
+        #expect(button.image?.isTemplate == true)
     }
 
     @Test("SPEC-MENU-006 起動時と設定変更時に、同じアイコンの表示だけを切り替える", arguments: [true, false])
