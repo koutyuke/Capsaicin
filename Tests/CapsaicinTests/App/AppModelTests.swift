@@ -2,6 +2,7 @@ import CapsaicinCore
 import CapsaicinCoreTesting
 import CapsaicinIPC
 import CapsaicinPlatform
+import Foundation
 import Testing
 
 @MainActor
@@ -85,7 +86,7 @@ struct AppModelTests {
         let start = try IPCRequest(command: .start(.timer(#require(TimerDuration(minutes: 5)))))
         #expect(fixture.model.handle(start).outcome == .started)
         let session = fixture.model.status.session
-        #expect(fixture.model.handle(start).outcome == .alreadyBlocking)
+        #expect(fixture.model.handle(IPCRequest(command: .start(nil))).outcome == .alreadyBlocking)
         #expect(fixture.model.status.session == session)
         #expect(fixture.model.handle(IPCRequest(command: .status)).status.isBlocking)
         #expect(fixture.model.handle(IPCRequest(command: .stop)).outcome == .released)
@@ -110,6 +111,52 @@ struct AppModelTests {
         fixture.system.powerState = PowerState(batteryLevel: 1, isOnACPower: false)
         fixture.model.powerStateChanged()
         #expect(!fixture.model.status.isBlocking)
+    }
+
+    @Test("SPEC-CLI-001 SPEC-BLK-011 抑止中の on --for と on --until は期限を置き換え、終了コード0と新しい時刻を返す",
+          arguments: ["--for", "--until"])
+    func cliReplacesTime(option: String) throws {
+        let fixture = AppFixture()
+        fixture.system.now = Date(timeIntervalSince1970: 0)
+        fixture.system.calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
+        fixture.model.launch()
+        try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 60))))
+        fixture.system.advance(by: 600)
+        let command = try CLIArguments.parse(["on", option, option == "--for" ? "30m" : "4:00"])
+        var events: [BlockingEvent] = []
+        fixture.model.onEvent = { event, _ in events.append(event) }
+        fixture.system.clearHistory()
+        let response = fixture.model.handle(IPCRequest(command: command))
+        #expect(response.outcome == .timeLimitReplaced)
+        #expect(response.exitCode == .success)
+        #expect(response.status.session?.timeLimit == TimeLimit(
+            date: Date(timeIntervalSince1970: option == "--for" ? 2400 : 14400),
+            source: option == "--for" ? .timer : .specifiedTime,
+        ))
+        #expect(response.status == fixture.model.status)
+        #expect(fixture.system.operations == [.saveRecord])
+        #expect(events == [.timeLimitReplaced(.cli)])
+        #expect(!MenuHUDRouting.shouldPresent(.timeLimitReplaced(.cli)))
+        let output = CLIOutput.response(response, text: .keys)
+        #expect(output.exitCode == .success)
+        #expect(output.standardError.isEmpty)
+        #expect(output.standardOutput.contains("outcome.timeLimitReplaced"))
+        #expect(output.standardOutput.contains(option == "--for" ? "1970-01-01T00:40:00Z" : "1970-01-01T04:00:00Z"))
+    }
+
+    @Test("SPEC-BLK-011 SPEC-CLI-001 期限到達後の on --for は自動解除を返し、置き換えや再開をしない")
+    func cliReplacementAfterExpiry() throws {
+        let fixture = AppFixture()
+        fixture.model.launch()
+        try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 1))))
+        fixture.system.advance(by: 60)
+        var events: [BlockingEvent] = []
+        fixture.model.onEvent = { event, _ in events.append(event) }
+        let response = try fixture.model.handle(IPCRequest(command: CLIArguments.parse(["on", "--for", "30m"])))
+        #expect(response.outcome == .released)
+        #expect(response.exitCode == .success)
+        #expect(!response.status.isBlocking)
+        #expect(events == [.released(.timeLimit(.timer))])
     }
 
     @Test("SPEC-BLK-002 蓋閉じの消灯は抑止中かつ実効設定が有効なときだけ要求する")

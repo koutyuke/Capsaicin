@@ -55,7 +55,8 @@ public actor IPCConnection {
             try IPCSocket.write(descriptor, IPCCoding.encode(request), until: deadline)
             let response = try IPCCoding.decodeResponse(IPCSocket.read(descriptor, until: deadline))
             switch (request.command, response.outcome) {
-            case (.start, .started), (.start, .alreadyBlocking), (.start, .startRejected),
+            case (.start, .started), (.start, .timeLimitReplaced), (.start, .alreadyBlocking),
+                 (.start, .startRejected), (.start, .released),
                  (.stop, .released), (.stop, .alreadyStopped), (.status, .status),
                  (_, .cliRequestsDisabled), (_, .unsupportedVersion): return response
             default: throw IPCCoding.DecodingFailure.malformed

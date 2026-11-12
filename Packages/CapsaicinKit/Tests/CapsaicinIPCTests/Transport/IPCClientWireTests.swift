@@ -12,7 +12,8 @@ struct IPCClientWireTests {
 
     static let responseExpectations: [ResponseExpectation] = [
         ResponseExpectation(command: .start(nil), allowed: [
-            .started, .alreadyBlocking, .startRejected(.helperNotInstalled), .cliRequestsDisabled, .unsupportedVersion,
+            .started, .timeLimitReplaced, .alreadyBlocking, .startRejected(.helperNotInstalled), .released,
+            .cliRequestsDisabled, .unsupportedVersion,
         ]),
         ResponseExpectation(command: .stop, allowed: [
             .released, .alreadyStopped, .cliRequestsDisabled, .unsupportedVersion,
@@ -20,7 +21,7 @@ struct IPCClientWireTests {
         ResponseExpectation(command: .status, allowed: [.status, .cliRequestsDisabled, .unsupportedVersion]),
     ]
     static let responseOutcomes: [IPCOutcome] = [
-        .started, .alreadyBlocking, .startRejected(.helperNotInstalled), .released, .alreadyStopped,
+        .started, .timeLimitReplaced, .alreadyBlocking, .startRejected(.helperNotInstalled), .released, .alreadyStopped,
         .status, .cliRequestsDisabled, .unsupportedVersion,
     ]
 

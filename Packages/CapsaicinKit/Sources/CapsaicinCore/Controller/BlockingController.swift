@@ -90,14 +90,28 @@ public final class BlockingController {
 
     // MARK: 要求
 
-    /// 開始を要求する。抑止中なら何も変えない。
+    /// 開始を要求する。抑止中は、時間の指定があるときだけ解除の時刻を置き換える。
     @discardableResult
     public func requestStart(from origin: RequestOrigin, override: StartTimeOverride? = nil) -> StartResult {
-        guard !isBlocking else { return .alreadyBlocking }
-        let limit = TimeLimitRule.timeLimit(
-            override: override, settings: settings, now: ports.time.now, calendar: ports.time.calendar,
-        )
-        return notifyingWarnings { start(BlockingSession(timeLimit: limit), trigger: .user(origin)) }
+        notifyingWarnings {
+            let now = ports.time.now
+            if let session {
+                guard override != nil else { return .alreadyBlocking }
+                if let limit = session.timeLimit, TimeLimitRule.isReached(limit, now: now) {
+                    release(.timeLimit(limit.source))
+                    return .released
+                }
+            }
+            let newSession = BlockingSession(timeLimit: TimeLimitRule.timeLimit(
+                override: override, settings: settings, now: now, calendar: ports.time.calendar,
+            ))
+            guard isBlocking else { return start(newSession, trigger: .user(origin)) }
+            session = newSession
+            record.session = newSession
+            saveRecord()
+            onEvent?(.timeLimitReplaced(origin))
+            return .timeLimitReplaced
+        }
     }
 
     /// 解除を要求する。停止中なら、合わせられていない制御か保存できていない記録があるときだけ合わせ直す。

@@ -2,7 +2,7 @@ import CapsaicinCore
 
 /// CLI とアプリの間の要求と応答の形式のバージョン。形式を変えたら上げる。
 public enum IPCProtocol {
-    public static let version = 1
+    public static let version = 2
 }
 
 /// CLI の要求。
@@ -28,7 +28,8 @@ public struct IPCRequest: Hashable, Sendable, Codable {
 /// 要求に対する結果。
 public enum IPCOutcome: Hashable, Sendable, Codable {
     case started
-    /// すでに抑止中なので、指定した条件は適用していない。
+    case timeLimitReplaced
+    /// すでに抑止中で、時間の指定がないので何も変えなかった。
     case alreadyBlocking
     case startRejected(StartRejection)
     case released

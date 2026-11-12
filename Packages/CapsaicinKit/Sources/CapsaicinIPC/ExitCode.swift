@@ -13,7 +13,7 @@ public extension IPCResponse {
     /// 応答から CLI の終了コードを決める。
     var exitCode: ExitCode {
         switch outcome {
-        case .started, .alreadyBlocking:
+        case .started, .timeLimitReplaced, .alreadyBlocking:
             .success
         case .released, .alreadyStopped:
             // 解除の要求は、合わせられていない制御が残るか記録を保存できなければ完了していない。

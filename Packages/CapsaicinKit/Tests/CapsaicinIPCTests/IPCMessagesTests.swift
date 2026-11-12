@@ -19,7 +19,8 @@ struct IPCMessagesTests {
     @Test("SPEC-CLI-001 要求はバージョン付きで読み書きでき、時間の指定を保つ")
     func requestRoundTrip() throws {
         for command in try [IPCCommand.start(nil), .start(.timer(#require(TimerDuration(minutes: 90)))),
-                            .start(.specifiedTime(#require(TimeOfDay(hour: 4, minute: 0)))), .stop, .status]
+                            .start(.specifiedTime(#require(TimeOfDay(hour: 4, minute: 0)))),
+                            .start(.noTimeLimit), .stop, .status]
         {
             let request = IPCRequest(command: command)
             #expect(try IPCCoding.decodeRequest(IPCCoding.encode(request)) == request)
@@ -34,14 +35,16 @@ struct IPCMessagesTests {
             threshold: #require(BatteryThreshold(percent: 20)),
             ignoresOnACPower: true,
         )
-        let response = IPCResponse(outcome: .startRejected(.mechanismsFailed([.displaySleepAssertion])), status: status)
-        #expect(try IPCCoding.decodeResponse(IPCCoding.encode(response)) == response)
+        for outcome: IPCOutcome in [.timeLimitReplaced, .startRejected(.mechanismsFailed([.displaySleepAssertion]))] {
+            let response = IPCResponse(outcome: outcome, status: status)
+            #expect(try IPCCoding.decodeResponse(IPCCoding.encode(response)) == response)
+        }
     }
 
     @Test("SPEC-CLI-007 バージョンの違う要求は中身を読まずに拒む")
     func versionMismatch() {
-        let data = Data(#"{"version": 2, "command": {"unknown": {}}}"#.utf8)
-        #expect(throws: IPCCoding.DecodingFailure.unsupportedVersion(2)) { try IPCCoding.decodeRequest(data) }
+        let data = Data(#"{"version": 1, "command": {"unknown": {}}}"#.utf8)
+        #expect(throws: IPCCoding.DecodingFailure.unsupportedVersion(1)) { try IPCCoding.decodeRequest(data) }
     }
 
     @Test("SPEC-CLI-001 範囲外の時間や壊れた要求は境界で拒む")
@@ -51,7 +54,7 @@ struct IPCMessagesTests {
         let outOfRange = valid.replacingOccurrences(of: "30", with: "0")
         #expect(throws: IPCCoding.DecodingFailure.malformed) { try IPCCoding.decodeRequest(Data(outOfRange.utf8)) }
         #expect(throws: IPCCoding.DecodingFailure.malformed) { try IPCCoding.decodeRequest(Data("not json".utf8)) }
-        let missing = Data(#"{"version": 1}"#.utf8)
+        let missing = Data("{\"version\":\(IPCProtocol.version)}".utf8)
         #expect(throws: IPCCoding.DecodingFailure.malformed) { try IPCCoding.decodeRequest(missing) }
     }
 
@@ -60,6 +63,8 @@ struct IPCMessagesTests {
         var leftover = blocking
         leftover.misalignments = [.led: .notApplied]
         #expect(IPCResponse(outcome: .started, status: leftover).exitCode == .success)
+        leftover.isRecordUnsaved = true
+        #expect(IPCResponse(outcome: .timeLimitReplaced, status: leftover).exitCode == .success)
         #expect(IPCResponse(outcome: .alreadyBlocking, status: blocking).exitCode == .success)
         #expect(IPCResponse(outcome: .startRejected(.recordNotSaved), status: stopped).exitCode == .unavailable)
         #expect(IPCResponse(outcome: .cliRequestsDisabled, status: blocking).exitCode == .unavailable)

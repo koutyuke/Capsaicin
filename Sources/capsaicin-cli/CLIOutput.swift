@@ -4,6 +4,7 @@ import Foundation
 
 enum CLITextKey: String, CaseIterable {
     case started = "outcome.started"
+    case timeLimitReplaced = "outcome.timeLimitReplaced"
     case alreadyBlocking = "outcome.alreadyBlocking"
     case released = "outcome.released"
     case alreadyStopped = "outcome.alreadyStopped"
@@ -74,18 +75,17 @@ struct CLIOutput {
 
     static func response(_ response: IPCResponse, text: CLIText) -> CLIOutput {
         let status = statusLine(response.status, text: text)
-        if response.outcome == .status {
-            return CLIOutput(exitCode: response.exitCode, standardOutput: status + "\n")
-        }
-        let message: String = switch response.outcome {
-        case .started: text(.started)
-        case .alreadyBlocking: text(.alreadyBlocking)
-        case .released: text(.released)
-        case .alreadyStopped: text(.alreadyStopped)
-        case let .startRejected(reason): text(.rejected, rejection(reason, text: text))
-        case .cliRequestsDisabled: text(.disabled)
-        case .unsupportedVersion: text(.version)
-        case .status: status
+        let message: String
+        switch response.outcome {
+        case .started: message = text(.started)
+        case .timeLimitReplaced: message = text(.timeLimitReplaced)
+        case .alreadyBlocking: message = text(.alreadyBlocking)
+        case .released: message = text(.released)
+        case .alreadyStopped: message = text(.alreadyStopped)
+        case let .startRejected(reason): message = text(.rejected, rejection(reason, text: text))
+        case .cliRequestsDisabled: message = text(.disabled)
+        case .unsupportedVersion: message = text(.version)
+        case .status: return CLIOutput(exitCode: response.exitCode, standardOutput: status + "\n")
         }
         let line = [message, status].joined(separator: text(.separator)) + "\n"
         if response.exitCode == .unavailable {

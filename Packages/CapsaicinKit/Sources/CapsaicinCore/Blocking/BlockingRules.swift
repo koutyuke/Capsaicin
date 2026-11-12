@@ -2,7 +2,7 @@ import Foundation
 
 /// 抑止のセッション。抑止中だけある。
 public struct BlockingSession: Hashable, Sendable, Codable {
-    /// 開始時に決めた解除の時刻。時間の条件を使わないときは nil。
+    /// 現在の解除の時刻。時間の条件を使わないときは nil。
     public var timeLimit: TimeLimit?
 
     public init(timeLimit: TimeLimit?) {

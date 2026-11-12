@@ -76,6 +76,21 @@ struct HUDContentTests {
         #expect(value.announcement == value.state)
     }
 
+    @Test("SPEC-HUD-001 SPEC-HUD-002 SPEC-HUD-008 置き換えは開始と同じ新しい条件と読み上げを使う",
+          arguments: [TimeLimitSource.timer, .specifiedTime])
+    func replacementContent(source: TimeLimitSource) throws {
+        var status = status
+        status.session = BlockingSession(timeLimit: TimeLimit(date: Date(timeIntervalSince1970: 5400), source: source))
+        let replaced = try content(.timeLimitReplaced(.menu), status: status)
+        #expect(try replaced == content(.started(.user(.menu)), status: status))
+        #expect(replaced.detail == (source == .timer ? "1時間30分" : "1:30まで"))
+        #expect(try replaced.announcement == "スリープ防止 オン、\(#require(replaced.detail))")
+        status.session = BlockingSession(timeLimit: nil)
+        let noTime = try content(.timeLimitReplaced(.menu), status: status)
+        #expect(noTime.detail == nil)
+        #expect(noTime.announcement == "スリープ防止 オン")
+    }
+
     @Test("SPEC-HUD-002 タイマーの解除理由は由来から決める")
     func timerRelease() throws {
         let value = try content(.released(.timeLimit(.timer)))

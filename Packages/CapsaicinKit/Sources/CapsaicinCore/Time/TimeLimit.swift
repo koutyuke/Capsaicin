@@ -6,7 +6,7 @@ public enum TimeLimitSource: String, Hashable, Sendable, Codable {
     case specifiedTime
 }
 
-/// 開始時に決める解除の時刻（壁時計の時刻）とその由来。
+/// 解除の時刻（壁時計の時刻）とその由来。
 public struct TimeLimit: Hashable, Sendable, Codable {
     public var date: Date
     public var source: TimeLimitSource
@@ -21,9 +21,10 @@ public struct TimeLimit: Hashable, Sendable, Codable {
 public enum StartTimeOverride: Hashable, Sendable, Codable {
     case timer(TimerDuration)
     case specifiedTime(TimeOfDay)
+    case noTimeLimit
 }
 
-/// 開始するときの解除の時刻を決める規則。
+/// 開始または置き換えの要求から、解除の時刻を決める規則。
 public enum TimeLimitRule {
     /// 使う条件から解除の時刻を1つ決める。早い方を使い、同じ時刻なら由来は指定時刻にする。どちらも使わなければ nil。
     public static func timeLimit(
@@ -44,6 +45,9 @@ public enum TimeLimitRule {
         case let .specifiedTime(time):
             timer = nil
             specifiedTime = time
+        case .noTimeLimit:
+            timer = nil
+            specifiedTime = nil
         }
 
         let timerLimit = timer.map { TimeLimit(date: now.addingTimeInterval($0.timeInterval), source: .timer) }

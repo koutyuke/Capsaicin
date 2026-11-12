@@ -154,6 +154,8 @@ final class AppModel {
         case let .start(override):
             switch requestStart(from: .cli, override: override) {
             case .started: .started
+            case .timeLimitReplaced: .timeLimitReplaced
+            case .released: .released
             case .alreadyBlocking: .alreadyBlocking
             case let .rejected(reason): .startRejected(reason)
             }

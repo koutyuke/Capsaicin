@@ -5,6 +5,7 @@ enum MenuHUDRouting {
     static func shouldPresent(_ event: BlockingEvent) -> Bool {
         switch event {
         case .started(.user(.menu)), .started(.user(.hotkey)),
+             .timeLimitReplaced(.menu),
              .startRejected(.user(.menu), _), .startRejected(.user(.hotkey), _),
              .released(.user(.menu)), .released(.user(.hotkey)),
              .released(.timeLimit), .released(.batteryBelowThreshold): true

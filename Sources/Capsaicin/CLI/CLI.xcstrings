@@ -12,6 +12,17 @@
         }
       }
     },
+    "outcome.timeLimitReplaced" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止をオフにする時刻を変更しました。"
+          }
+        }
+      }
+    },
     "outcome.alreadyBlocking" : {
       "extractionState" : "manual",
       "localizations" : {

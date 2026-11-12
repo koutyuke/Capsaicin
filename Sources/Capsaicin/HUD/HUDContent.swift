@@ -30,7 +30,7 @@ struct HUDContent: Equatable {
         }
         let off = Self(symbol: "custom.capsaicin.led", state: text("hud.state.off"), bundle: bundle)
         switch event {
-        case .started:
+        case .started, .timeLimitReplaced:
             let detail = status.session?.timeLimit.map { limit in
                 if limit.source == .specifiedTime {
                     return String(format: text("hud.condition.until"), time(limit.date, calendar: calendar))

@@ -3,6 +3,7 @@
 /// HUD を出すかは画面の側が、きっかけと理由から決める。
 public enum BlockingEvent: Hashable, Sendable {
     case started(StartTrigger)
+    case timeLimitReplaced(RequestOrigin)
     case startRejected(StartTrigger, StartRejection)
     case released(ReleaseReason)
     /// 合わせられていない制御か、記録を保存できていないことが変わった。
@@ -12,6 +13,9 @@ public enum BlockingEvent: Hashable, Sendable {
 /// 開始の要求の結果。
 public enum StartResult: Hashable, Sendable {
     case started
+    case timeLimitReplaced
+    /// 置き換えより先に、時刻による自動の解除を行った。
+    case released
     /// すでに抑止中なので何も変えなかった。
     case alreadyBlocking
     case rejected(StartRejection)

@@ -24,7 +24,7 @@ struct CLIOutputTests {
         #expect(output.standardOutput.contains("direction.leftApplied"))
     }
 
-    @Test("SPEC-BLK-011 すでに抑止中なら指定した条件を適用していないことを伝える")
+    @Test("SPEC-BLK-011 指定のない開始では、すでに抑止中であることを伝える")
     func alreadyBlocking() {
         let output = CLIOutput.response(IPCResponse(outcome: .alreadyBlocking, status: stopped), text: .keys)
         #expect(output.exitCode == .success)
@@ -34,7 +34,7 @@ struct CLIOutputTests {
     @Test("SPEC-CLI-007 SPEC-BLK-011 全結果の終了コードとエラーのストリームは応答をそのまま使う")
     func allOutcomes() {
         let outcomes: [IPCOutcome] = [
-            .started, .alreadyBlocking, .released, .alreadyStopped, .status,
+            .started, .timeLimitReplaced, .alreadyBlocking, .released, .alreadyStopped, .status,
             .cliRequestsDisabled, .unsupportedVersion,
             .startRejected(.batteryBelowThreshold), .startRejected(.helperNotInstalled),
             .startRejected(.recordNotSaved), .startRejected(.mechanismsFailed([.idleSleepAssertion])),

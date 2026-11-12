@@ -102,6 +102,7 @@ struct MenuBarTests {
           arguments: [RequestOrigin.menu, .hotkey, .cli])
     func hudOrigins(origin: RequestOrigin) {
         #expect(MenuHUDRouting.shouldPresent(.started(.user(origin))) == (origin != .cli))
+        #expect(MenuHUDRouting.shouldPresent(.timeLimitReplaced(origin)) == (origin == .menu))
         #expect(MenuHUDRouting.shouldPresent(.startRejected(.user(origin), .recordNotSaved)) == (origin != .cli))
         #expect(MenuHUDRouting.shouldPresent(.released(.user(origin))) == (origin != .cli))
         #expect(MenuHUDRouting.shouldPresent(.released(.timeLimit(.timer))))

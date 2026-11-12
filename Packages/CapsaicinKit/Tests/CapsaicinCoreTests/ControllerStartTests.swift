@@ -157,14 +157,14 @@ struct ControllerStartTests {
         #expect(!system.operations.contains(.helperOn))
     }
 
-    @Test("SPEC-BLK-011 抑止中の開始は何も変えず、解除の時刻もそのまま")
+    @Test("SPEC-BLK-011 抑止中の指定のない開始は何も変えず、解除の時刻もそのまま")
     func startWhileBlocking() {
         let system = FakeSystem()
         let controller = makeController(system, settings: .premise { $0.timerEnabled = true })
         controller.requestStart(from: .menu)
         let session = controller.session
         system.clearHistory()
-        #expect(controller.requestStart(from: .cli, override: .timer(minutes(120))) == .alreadyBlocking)
+        #expect(controller.requestStart(from: .cli) == .alreadyBlocking)
         #expect(controller.session == session)
         #expect(system.operations.isEmpty)
     }
