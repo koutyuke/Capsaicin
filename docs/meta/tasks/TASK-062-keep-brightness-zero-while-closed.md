@@ -2,7 +2,7 @@
 schema: task
 id: TASK-062
 title: 「明るさを0」で閉じている間は1分ごとに輝度を 0 に戻し、開けたら閉じる前の輝度に戻す
-status: in_review
+status: done
 requirements: ["REQ-BLK-014"]
 depends_on: ["TASK-061"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -77,4 +77,4 @@ PM が直したこと: 手順書 4.7 の目的に、置き換え前の「利用�
 
 PM が worktree で `nix develop --command just check`（SwiftPM 304件、アプリ88件）と `nix develop --command just build` を実行し、通ることを確かめた。
 
-未確認: 実機で、閉じたまま明るくした輝度が1分以内に 0 に戻ること。オーナーが 4.7 の操作3で確かめる。
+2026-11-12、オーナーが `cf6fb9f` の Debug ビルドで 4.7 の操作3を行い、完了条件を満たした。蓋を閉じたまま外付けキーボードで明るくすると、隙間の光は約30秒で消えた。開けると閉じる前の明るさに戻り、再開用の記録に `savedBrightness` は残らなかった。
