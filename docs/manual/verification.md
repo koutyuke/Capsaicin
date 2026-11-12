@@ -717,7 +717,7 @@ scripts/manual/verify.sh status
 - **目的**: `SPEC-LED-002`、`SPEC-LED-005`。
 - **前提**: Karabiner-Elements を既に使える検証環境である。新たなインストールや設定変更はこの手順に含めない。修飾キーを厳密に照合する Karabiner-Elements のルール（`from.modifiers` に `optional` がないもの）を1つ用意している。
 - **操作**: Karabiner-Elements が動作中にメニューと「LED」を開く。案内を撮る。LED の通知をオンにして開始し、用意したルールを試す。解除してから Karabiner-Elements をメニューバーから終了し（「Quit Karabiner-Elements」）、案内が消えるか見る。
-- **期待**: 動作中だけ両方に案内がある。抑止中もルールが成立する。Karabiner-Elements が既定の設定で占有するキーボードでは、抑止中も LED が点かない（`DEC-LED-006` で受け入れた振る舞い）。終了後、10秒以内に案内が消える。
+- **期待**: 動作中だけ両方に案内がある。抑止中もルールが成立する。Karabiner-Elements が既定の設定で占有するキーボードでは、抑止中に Caps Lock をオンにしてオフにすると LED が消える（`DEC-LED-006` で受け入れた振る舞い、`EVID-LED-012`）。Caps Lock に触れない間は点いていてよい。終了後、10秒以内に案内が消える。
 - **中止**: ルールが抑止中だけ成立しない、通常連動へ復元できない場合。
 - **復元**: 抑止を解除し、承認済みの LED 復旧手順を実行する。Karabiner-Elements の稼働状態を開始前へ戻す。
 - **記録**: 案内が出た画面（メニューと「LED」）、ルールの成否、LED の目視、案内が消えるまでの秒数、Karabiner-Elements の稼働状態。

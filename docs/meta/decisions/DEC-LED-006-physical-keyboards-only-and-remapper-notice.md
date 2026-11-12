@@ -6,7 +6,7 @@ status: accepted
 supersedes: ["DEC-LED-005"]
 superseded_by: []
 requirements: ["REQ-LED-001", "REQ-LED-003", "REQ-LED-004", "REQ-LED-007"]
-based_on: ["DEC-LED-001", "EVID-LED-006", "EVID-LED-007", "EVID-LED-008", "EVID-LED-009", "EVID-LED-010"]
+based_on: ["DEC-LED-001", "EVID-LED-006", "EVID-LED-007", "EVID-LED-008", "EVID-LED-009", "EVID-LED-010", "EVID-LED-012"]
 ---
 
 # DEC-LED-006 LED は実機のキーボードだけに書き、仮想キーボードがあるときは LED が点かないことがあると案内する
@@ -31,12 +31,16 @@ based_on: ["DEC-LED-001", "EVID-LED-006", "EVID-LED-007", "EVID-LED-008", "EVID-
 
 オーナーは、案内を「点かないことがある」という可能性の提示にとどめ、Karabiner-Elements に限らない形にすると決めた。
 
+仮想キーボードに書かない版を実機で確かめ、Karabiner-Elements が LED を消す仕組みが分かった（`EVID-LED-012`）。Karabiner-Elements は、把握している Caps Lock の状態を、3秒ごとに実機の LED へ書き直す。状態を把握するまでは書かない。そのため、抑止中の LED は Caps Lock を切り替えるまで点いていて、切り替えた後は Caps Lock の状態に合わせて消される。「Manipulate caps lock LED」をオフにしたキーボードでは書き直されず、点灯が保たれる。オーナーは、この振る舞いを受け入れ、アプリ内の案内は変えず、アプリごとの対処は Web ページで案内すると決めた（`PLAN-LED-001`）。
+
 ## 選択肢
 
 - Karabiner-Elements のプロセスの検出を続け、文面だけを「点かないことがある」に寄せる。最も安いが、アプリを終了しても案内が出続け、Karabiner-Elements にしか効かない（不採用）。
 - 占有の印で判定する。デバッグ用の値に頼り、LED の管理をオフにしても案内が残る（不採用）。
 - 占有の印と Karabiner-Elements の設定ファイルで判定する。ほかのアプリの設定の形式、既定値、保存先に追従し続ける必要がある（不採用）。
 - 仮想キーボードの有無で判定し、可能性だけを伝える（採用）。
+- Caps Lock の状態が変わったら、または数秒ごとに、`"On"` を書き直す。Karabiner-Elements が3秒ごとに消し直すので、点灯を保てず、ちらつく。数秒ごとの書き込みは、無線のキーボードへの通信も増やす（不採用）。
+- 利用者に「Manipulate caps lock LED」をオフにしてもらい、抑止していない間の Caps Lock の表示を Capsaicin が肩代わりする。抑止と関係のない常時の監視と書き込みが増え、Capsaicin が Caps Lock の変化を見逃すと LED が実際の状態と食い違う（不採用）。
 - 光らせるキーボードを「すべて」「内蔵のみ」「外付けのみ」から選べるようにする。Karabiner-Elements は既定で内蔵と外付けの両方を管理するので、この問題を避けられない。案内とは別の機能なので、要望が出るまで作らない（不採用）。
 
 ## 理由
@@ -48,7 +52,8 @@ based_on: ["DEC-LED-001", "EVID-LED-006", "EVID-LED-007", "EVID-LED-008", "EVID-
 
 ## 影響
 
-- Karabiner-Elements が既定の設定で占有するキーボードでは、抑止中も LED が点かない。Karabiner-Elements の利用者は、避け方を自分で探す必要がある。
+- Karabiner-Elements が既定の設定で占有するキーボードでは、抑止中の LED は、Caps Lock を切り替えるまで点いている。切り替えた後は Caps Lock の状態に合わせて消され、Capsaicin が書き直しても3秒以内にまた消される（`EVID-LED-012`）。
+- Karabiner-Elements の利用者が点灯を保つには、キーボードごとに「Manipulate caps lock LED」をオフにする。オフにしたキーボードでは、抑止していない間も LED が Caps Lock を示さなくなる。この対処はアプリ内では案内せず、Web ページで案内する（`PLAN-LED-001`）。
 - 案内は、Karabiner-Elements 以外のアプリの仮想キーボードでも出る。仮想キーボードが残っている間は、「Manipulate caps lock LED」をオフにした後も出る。
 - `SPEC-LED-002` の対象から仮想キーボードを外す。実機と仮想の見分け方は `HYP-LED-007` で確かめる。案内の条件も同じ見分け方に頼る。
 - 案内の判定に `DebugState` と Karabiner-Elements の設定ファイルは使わない。

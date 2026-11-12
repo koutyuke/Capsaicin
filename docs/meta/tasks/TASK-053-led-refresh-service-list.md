@@ -2,7 +2,7 @@
 schema: task
 id: TASK-053
 title: LED の書き込み先を、書き込みのたびに調べ直す
-status: in_review
+status: done
 requirements: ["REQ-LED-002", "REQ-LED-004"]
 depends_on: ["TASK-050"]
 assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
@@ -54,4 +54,8 @@ Capsaicin は、最初の書き込みで作った LED のクライアントを�
 
 - Codex が実装し、`just check` と `just build` を通した。クライアントを持ち続けるのをやめ、書き込みのたびに作り直す。書く値、失敗の判定、`throw` するエラー、ログの書式は変わっていない。
 - PM が差分を読み、`just check` と `just build` を流し直して、どちらも通った。
-- 同じプロセスで作り直したクライアントに新しいサービスが見えるかは、実機で未確認。オーナーが `docs/manual/led-fix-verification.md` の手順2で確かめるまで、`in_review` のままにする。
+- オーナーが 2026-11-11 に `docs/manual/led-fix-verification.md` の手順2を行った（`EVID-LED-011`）。
+  - 同じプロセスで作り直したクライアントに、新しいサービスが見えた。接続の後の書き込みの対象に、新しい登録 ID が入った。
+  - 「スリープから復帰した後も解除で戻せる」は満たした。復帰の後の対象は一覧と一致し、失敗はなく、「一部を戻せません」は出なかった。
+  - 「抑止中に接続したキーボードも点灯する」は満たしていない。2.4 GHz と Bluetooth のどちらでも点灯しなかった。接続の通知が、キーボードのサービスが一覧に入るより先に届くためである。
+- 結論: この作業で変えた、書き込みのたびの調べ直しは期待どおりに動いた。残る原因は、この作業の範囲外の接続の通知（`HIDKeyboardMonitor.swift`）にある。満たしていない完了条件を `TASK-057` に引き継ぎ、この作業は `done` にする。

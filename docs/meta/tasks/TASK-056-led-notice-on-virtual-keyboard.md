@@ -2,7 +2,7 @@
 schema: task
 id: TASK-056
 title: キー配列を変更するアプリの案内を、仮想キーボードがあるときに出す
-status: in_review
+status: done
 requirements: ["REQ-LED-007"]
 depends_on: ["TASK-054", "TASK-055"]
 assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
@@ -71,4 +71,7 @@ assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 - Codex が実装し、`just check` と `just build` を通した。監視の型を `VirtualKeyboardMonitor`、状態を `hasVirtualKeyboard`、String Catalog のキーを `virtualKeyboard.*` と `menu.virtualKeyboard.*` に揃えた。検出は `LEDClient` を作り、`isKeyboard` かつ `hasTransport` でないサービスがあるかを見る。関数がないときは、クライアントを作らずに「なし」を返し、検出の失敗にも数えない。
 - テストのフィクスチャの `makeClient` を、LED の書き込みと検出のテストで共有する形にした。メニューの案内のテストは、型の本体が長くなりすぎないよう、同じファイルの `extension` に移した。
 - PM が差分を読み、`just check` と `just build` を流し直して、どちらも通った。
-- 実機では未確認。オーナーが `SPEC-LED-005` の受け入れ例を確かめるまで、`in_review` のままにする。
+- オーナーが 2026-11-11 に `docs/manual/led-fix-verification.md` の手順1、手順4、手順5を行い、`SPEC-LED-005` の受け入れ例を満たした。記録は `~/capsaicin-led-check/20261111-221214/` にある。
+  - Karabiner-Elements を止めた状態では、メニューにも設定にも案内が出なかった。
+  - 設定の案内は、Karabiner-Elements の終了から約3.3秒で消え、起動から約4.8秒で戻った。メニューも10秒以内に切り替わった。見出し、副題、説明は指定どおりだった。
+  - 検出の失敗のログはなかった。何も操作していない約10分間（22:31〜22:40）、RSS は 153 MB 前後で横ばいで、CPU は 0〜1.3% だった。

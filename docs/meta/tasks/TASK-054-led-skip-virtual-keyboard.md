@@ -2,7 +2,7 @@
 schema: task
 id: TASK-054
 title: 仮想キーボードを LED の書き込み先から外し、Karabiner-Elements の案内を直す
-status: in_review
+status: done
 requirements: ["REQ-LED-003", "REQ-LED-004", "REQ-LED-007"]
 depends_on: ["TASK-053"]
 assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
@@ -60,4 +60,7 @@ Capsaicin は、Karabiner-Elements の仮想キーボードにも `HIDCapsLockLE
 - Codex が実装し、`just check` と `just build` を通した。キーボードのうち `Transport` を持つサービスだけに書き、ログの `targets` にも書いたサービスだけが出る。設定の案内の本文を置き換えた。
 - PM が直したこと: テストのフィクスチャが `Transport` の値を文字列で持ち、値を変えて同じテストを5回流していた。本番の判定は値の有無だけを見るので、フィクスチャは有無だけを持つ形にし、繰り返しをやめた。
 - PM が `just check` と `just build` を流し直し、どちらも通った。
-- 実機では未確認。オーナーが `docs/manual/led-fix-verification.md` の手順1と手順3で確かめるまで、`in_review` のままにする。
+- オーナーが 2026-11-11 に `docs/manual/led-fix-verification.md` の手順1と手順3を行い、完了条件を満たした。
+  - 手順1: Karabiner-Elements を止めた状態で、内蔵と、Lofree の USB、Bluetooth、2.4 GHz が点灯した。入力は小文字のままで、解除で通常の動作に戻った。
+  - 手順3: Karabiner-Elements の動作中、抑止の前・中・後のどれでも、内蔵と Lofree（USB）でルールが成立した。仮想キーボードの `HIDCapsLockLED` は `"Auto"` のままで、書き込みの対象に入らなかった。
+- 手順3で、内蔵と Lofree の LED は期待と違って点いたままだった。Karabiner-Elements は、Caps Lock を切り替えるまで LED を消さないためである（`EVID-LED-012`）。この作業の完了条件には関わらない。案内の扱いは `DEC-LED-006` にある。
