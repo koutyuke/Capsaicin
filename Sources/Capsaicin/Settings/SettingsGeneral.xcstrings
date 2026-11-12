@@ -29,7 +29,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "macOSのシステム設定でCapsaicinのバックグラウンド項目が無効になっているため、クラッシュ時に自動で再起動されません。「ログイン項目と機能拡張」で許可してください。"
+            "value" : "macOSのシステム設定でCapsaicinのバックグラウンド項目が無効になっているため、クラッシュ時に自動で再起動することができません。「ログイン項目と機能拡張」で許可してください。"
           }
         }
       }
@@ -41,17 +41,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "バックグラウンド項目が無効です"
-          }
-        }
-      }
-    },
-    "dockIcon.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オンにすると、DockとCommand-Tabのアプリの切り替えにCapsaicinが表示されます。Dockのアイコンをクリックすると設定画面が開きます。"
           }
         }
       }
@@ -84,7 +73,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メニューやホットキーで切り替えたときや、自動でオフになったときに画面下部に表示します。CLIで操作したときは表示しません。"
+            "value" : "切り替え結果や警告などを1行で知らせる小さな表示を、画面の下部に短時間出します。メニューやホットキーでの操作時や、タイマー・指定時刻・バッテリー残量で自動オフになったときにも表示されます。CLIでは表示されません。"
           }
         }
       }
@@ -107,17 +96,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ログイン時に起動"
-          }
-        }
-      }
-    },
-    "menuBarIcon.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "オフにしてもCapsaicinは動き続けます。設定を開くにはFinderやSpotlightからCapsaicinをもう一度開き、終了するには設定の「このアプリについて」にある「Capsaicinを終了」を押します。"
           }
         }
       }
@@ -150,7 +128,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "クラッシュ時に自動再起動できません"
+            "value" : "クラッシュ時に自動再起動できませんでした"
           }
         }
       }
@@ -161,7 +139,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「アプリ再起動時のみ」はクラッシュ後の自動再起動を指します。「アプリとMacの再起動時」では、Macの再起動やログアウト後のログイン時にもスリープ防止を再開します。"
+            "value" : "アプリの終了前にスリープ防止中だった場合のみ、タイマーや指定時刻を引き継いでスリープ防止が再開されます。"
           }
         }
       }
@@ -172,7 +150,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再起動後のスリープ防止"
+            "value" : "スリープ防止の再開"
           }
         }
       }
@@ -183,7 +161,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリ再起動時のみ"
+            "value" : "クラッシュ後のみ"
           }
         }
       }
@@ -194,7 +172,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アプリとMacの再起動時"
+            "value" : "クラッシュおよびMacの再起動後"
           }
         }
       }

@@ -18,7 +18,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ターミナルからcapsaicin on [--for 1h | --until 4:00]、capsaicin off、capsaicin statusで操作できます。オフにするとコマンドはエラーを表示し、何も変えません。"
+            "value" : "ターミナルからスリープ防止の切り替え操作や現在の状態を取得することできます。オフにするとコマンドはエラーを表示し、コマンドラインからの操作ができなくなります。"
           }
         }
       }
@@ -62,7 +62,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ターミナルでcapsaicinコマンドを使うには、このパスへのシンボリックリンクやエイリアスを作成してください（例：ln -s \"パス\" ~/.local/bin/capsaicin）。アプリはリンクを作成せず、管理者権限も求めません。"
+            "value" : "ターミナルでcapsaicinコマンドを使うには、このパスを通すか、このパスへのシンボリックリンクやエイリアスを作成してください（例：ln -s \"パス\" ~/.local/bin/capsaicin）。"
           }
         }
       }

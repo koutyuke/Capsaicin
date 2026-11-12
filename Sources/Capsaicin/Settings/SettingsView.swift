@@ -97,8 +97,8 @@ struct SettingsView: View {
             }
         }
         Section(SettingsSection.general.text("appearance.group.title")) {
-            toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle", help: true)
-            toggle(.general, "dockIcon", \.showsDockIcon, symbol: "dock.rectangle", help: true)
+            toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle")
+            toggle(.general, "dockIcon", \.showsDockIcon, symbol: "dock.rectangle")
         }
         toggle(.general, "hud", \.showsHUD, symbol: "capsule.bottomhalf.filled", help: true)
     }
