@@ -2,7 +2,7 @@
 schema: task
 id: TASK-061
 title: 蓋を閉じたときの「明るさを0」を実装する
-status: in_review
+status: done
 requirements: ["REQ-BLK-014", "REQ-SET-005", "REQ-LCY-002", "REQ-LCY-003"]
 depends_on: ["TASK-059"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -124,4 +124,12 @@ PM が直したこと:
 
 PM が worktree で `nix develop --command just check`（SwiftPM 297件、アプリ88件）と `nix develop --command just build` を実行し、通ることを確かめた。
 
-未確認: 実機での暗転と復元。オーナーが `docs/manual/verification.md` の 4.7 と 6.1 で確かめる。
+2026-11-12、オーナーが `43543b2` の Debug ビルドで `docs/manual/verification.md` の 4.7 と 6.1 を行い、完了条件をすべて満たした。収録は `~/Capsaicin-dimming.B7nQAG/画面収録 2026-11-12 16.46.45.mov` にある。
+
+- 閉じて開ける: 閉じている間は隙間から光が漏れず、収録では時計が進み続けた。開けると元の明るさに戻り、ロック画面は出なかった。
+- 閉じたままタイマーで解除する: 解除のときに一瞬点き、Mac がスリープして消えた。`disablesleep` を下ろす前に戻す順序（`SPEC-BLK-013`）のとおりである。開けるとスリープからの復帰でロック画面が出たが、暗い画面は残らず、停止中で `SleepDisabled` は `0` だった。
+- 閉じている間に外付けキーボードで明るさを変える: 開けた後も変えた明るさのままだった。閉じている間は、変えた明るさで点いたままになった。
+- 暗くしたままクラッシュさせる: 自動で再起動し、元の解除の時刻のまま抑止を再開した。開けたときの明るさは元とほぼ同じだった。
+- どの回の後も、再開用の記録に `savedBrightness` は残らなかった。
+
+閉じている間に明るさを変えると点いたままになることは、`DEC-BLK-007` の「閉じている間に変えられた輝度は書き戻さない」による。見直すかはオーナーに諮る。
