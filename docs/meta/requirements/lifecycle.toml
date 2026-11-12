@@ -24,7 +24,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LCY-002"]
 depends_on = []
-sources = ["DEC-BLK-007"]
+sources = ["DEC-BLK-008"]
 
 [[requirements]]
 id = "REQ-LCY-003"
@@ -36,7 +36,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-LCY-003", "SPEC-LCY-006", "SPEC-LCY-007"]
 depends_on = []
-sources = ["DEC-LCY-001", "HYP-LCY-001", "DEC-BLK-007"]
+sources = ["DEC-LCY-001", "HYP-LCY-001", "DEC-BLK-008"]
 
 [[requirements]]
 id = "REQ-LCY-004"

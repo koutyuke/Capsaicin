@@ -168,4 +168,4 @@ priority = "should"
 status = "accepted"
 specs = ["SPEC-BLK-013"]
 depends_on = ["REQ-BLK-004"]
-sources = ["DEC-BLK-007"]
+sources = ["DEC-BLK-008"]

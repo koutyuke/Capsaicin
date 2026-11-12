@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-BLK-007
 title: 蓋を閉じたときの動作に「明るさを0」を加え、DisplayServices で内蔵ディスプレイの輝度を 0 にする
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-BLK-008"]
 requirements: ["REQ-BLK-014"]
 based_on: ["DEC-SET-005", "DEC-BLK-006", "EVID-BLK-007", "EVID-BLK-009", "EVID-BLK-010", "EVID-BLK-011", "EVID-BLK-012", "EVID-BLK-013"]
 ---

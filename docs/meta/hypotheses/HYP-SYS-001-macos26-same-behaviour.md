@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-SYS-001
 title: macOS 26 でも LED、disablesleep、蓋を閉じたときの輝度 0 が同じように動く
 status: open
-affects: ["REQ-SYS-001", "DEC-SYS-003", "DEC-BLK-001", "DEC-LED-001", "DEC-BLK-007"]
+affects: ["REQ-SYS-001", "DEC-SYS-003", "DEC-BLK-001", "DEC-LED-001", "DEC-BLK-008"]
 evidence: []
 ---
 
@@ -15,7 +15,7 @@ macOS 26 の Apple Silicon の Mac で、`HIDCapsLockLED`、`disablesleep`、蓋
 
 ## 外れたときに起きること
 
-macOS 26 では一部の機能が動かないか、`pmset displaysleepnow` に root が要る。`REQ-SYS-001` の下限を上げるか、`DEC-BLK-001`、`DEC-LED-001`、`DEC-BLK-007` の方式を macOS のバージョンで分ける。`DEC-SYS-003` を見直す。
+macOS 26 では一部の機能が動かないか、`pmset displaysleepnow` に root が要る。`REQ-SYS-001` の下限を上げるか、`DEC-BLK-001`、`DEC-LED-001`、`DEC-BLK-008` の方式を macOS のバージョンで分ける。`DEC-SYS-003` を見直す。
 
 ## 確かめ方
 
