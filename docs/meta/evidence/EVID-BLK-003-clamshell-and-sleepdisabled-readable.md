@@ -3,7 +3,7 @@ schema: evidence
 id: EVID-BLK-003
 title: 一般ユーザーの権限で AppleClamshellState と SleepDisabled を読める
 observed_on: 2026-11-06
-environment: macOS 27.0.1（ビルド 26A434）、Mac16,8（Apple M4 Pro）、蓋は開いた状態
+environment: macOS 27.0.1（ビルド 26A434）、Mac16,8（Apple M4 Pro）、ディスプレイは開いた状態
 sources: []
 ---
 
@@ -23,9 +23,9 @@ pmset -g
 
 ## 適用範囲
 
-蓋の開閉状態と `disablesleep` の状態を、root なしで読めることの根拠に使ってよい。試験の手順で `SleepDisabled` を確かめる方法として使ってよい。
+ディスプレイの開閉状態と `disablesleep` の状態を、root なしで読めることの根拠に使ってよい。試験の手順で `SleepDisabled` を確かめる方法として使ってよい。
 
 ## 未確認のこと
 
-- 蓋の開閉の変化を通知で検知できるか（`HYP-BLK-008`）。
+- ディスプレイの開閉の変化を通知で検知できるか（`HYP-BLK-008`）。
 - `AppleClamshellCausesSleep` が `No` だった理由（`SleepDisabled 1` によるものかは確かめていない）。

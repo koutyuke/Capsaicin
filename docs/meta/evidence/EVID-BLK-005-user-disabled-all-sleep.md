@@ -22,7 +22,7 @@ sources: ["https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/io
 
 ## 適用範囲
 
-- `disablesleep` が、手動・蓋閉じ・自動を区別しない1つの値としてスリープの要求を止めることの根拠に使ってよい（`HYP-BLK-006` の主張2）。
+- `disablesleep` が、手動・ディスプレイを閉じたとき・自動を区別しない1つの値としてスリープの要求を止めることの根拠に使ってよい（`HYP-BLK-006` の主張2）。
 - カーネルの `checkSystemSleepAllowed` では、低バッテリーや熱によるスリープの許可より `SleepDisabled` が優先されることの根拠に使ってよい。
 
 ## 未確認のこと

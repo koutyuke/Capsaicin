@@ -19,7 +19,7 @@ evidence: []
 
 ## 確かめ方
 
-1. 環境: 対応環境の MacBook、蓋のない Mac、可能なら UPS をつないだ蓋のない Mac。
+1. 環境: 対応環境の MacBook、MacBook 以外の Mac、可能なら UPS をつないだ MacBook 以外の Mac。
 2. 試作プログラムで電源の一覧と各電源の型を出力する。
 3. 成功: MacBook だけが `kIOPSInternalBatteryType` を持ち、UPS は別の型になる。失敗: どれかが合わない。
 

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-064
 title: 文書から「蓋」をなくし、「MacBook」「ディスプレイを閉じる」に書き換える
-status: todo
+status: done
 requirements: []
 depends_on: ["TASK-063"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -55,4 +55,7 @@ assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
 
 ## レビュー
 
-（PM が記入する）
+- 44 ファイルを言い換え、ID、結論、事実は変わっていない。
+- チケットが Front Matter を変えないとしていたため、記録のタイトルに「蓋」が残り、本文の見出しと食い違っていた。タイトルは ID と違って書き換えてよいので、PM が見出しに合わせて直した。根拠の `environment` の「蓋」も PM が直した。
+- 以前の設定の項目名を引用した3か所（`DEC-BLK-002`、`DEC-BLK-003`、`EVID-LED-004`）は、当時の名前の引用なので残した。
+- PM が `just lint-docs` を流し、通った。

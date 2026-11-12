@@ -29,4 +29,4 @@ grep -n ClamshellSleepState "$(xcrun --sdk macosx --show-sdk-path)/System/Librar
 ## 未確認のこと
 
 - `displaysleepnow` に root が要るか（`HYP-BLK-001`）。man ページに権限の記載はない。
-- `disablesleep` と `kPMSetClamshellSleepState` の実際の挙動。`disablesleep` の手動・蓋閉じスリープへの効果は `HYP-BLK-006` で確かめる。
+- `disablesleep` と `kPMSetClamshellSleepState` の実際の挙動。`disablesleep` の手動・ディスプレイを閉じたときのスリープへの効果は `HYP-BLK-006` で確かめる。

@@ -17,7 +17,7 @@ Capsomnia と同じく、アプリ本体は一般ユーザーの権限で動か�
 
 ## 背景
 
-手動スリープと蓋閉じスリープを止める `disablesleep` には root が要る（`DEC-BLK-001`）。Apple Developer Program に加入しないので、Apple が発行した証明書で署名できない（`DEC-SYS-004`）。また、`disablesleep` は再起動後も残ると見込んでいる（`HYP-BLK-007`）ので、アプリが動いていない状態で起動してもスリープできない状態を残さない仕組みが要る。
+手動スリープとディスプレイを閉じたときのスリープを止める `disablesleep` には root が要る（`DEC-BLK-001`）。Apple Developer Program に加入しないので、Apple が発行した証明書で署名できない（`DEC-SYS-004`）。また、`disablesleep` は再起動後も残ると見込んでいる（`HYP-BLK-007`）ので、アプリが動いていない状態で起動してもスリープできない状態を残さない仕組みが要る。
 
 ## 選択肢
 
