@@ -29,6 +29,23 @@ struct ControllerBrightnessTests {
         #expect(system.storedRecord?.savedBrightness == (blocking && choice == .zeroBrightness ? 0.5 : nil))
     }
 
+    @Test("SPEC-BLK-013 蓋の状態は起動時に開いており、抑止や設定によらず開閉の通知で更新する",
+          arguments: [false, true], LidCloseDisplay.allCases)
+    func lidStateTracksNotifications(blocking: Bool, choice: LidCloseDisplay) {
+        let system = FakeSystem()
+        var settings = settings
+        settings.lidCloseDisplay = choice
+        let controller = makeController(system, settings: settings)
+        #expect(!controller.isLidClosed)
+        if blocking {
+            controller.requestStart(from: .menu)
+        }
+        controller.lidClosed()
+        #expect(controller.isLidClosed)
+        controller.lidOpened()
+        #expect(!controller.isLidClosed)
+    }
+
     @Test("SPEC-BLK-013 元の輝度を保存してから暗くし、二度目は記録を上書きしない")
     func savesBeforeDimmingAndKeepsOriginal() {
         let system = FakeSystem()
@@ -83,44 +100,168 @@ struct ControllerBrightnessTests {
         #expect(system.storedRecord?.savedBrightness == 0.5)
         #expect(controller.isBlocking && !controller.status.hasWarnings)
     }
+}
 
-    @Test("SPEC-BLK-013 開いたとき0なら復元し、変更済みなら書かずに記録を消す。設定変更によらない",
+extension ControllerBrightnessTests {
+    @Test("SPEC-BLK-013 閉じている間に上がった輝度を時刻の経過で0に戻し、元の記録を保つ",
           arguments: [Float(0), 0.3])
-    func openRestoresOnlyZero(current: Float) {
+    func timePassedKeepsBrightnessZero(current: Float) {
+        let system = FakeSystem()
+        let controller = makeController(system, settings: settings)
+        controller.requestStart(from: .menu)
+        controller.lidClosed()
+        system.brightness = current
+        system.advance(by: 60)
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations == (current > 0 ? [.readBrightness, .setBrightness(0)] : [.readBrightness]))
+        #expect(system.brightness == 0)
+        #expect(controller.record.savedBrightness == 0.5)
+        #expect(system.storedRecord?.savedBrightness == 0.5)
+        controller.lidOpened()
+        #expect(system.brightness == 0.5)
+    }
+
+    @Test("SPEC-BLK-013 時刻の経過で暗くし直すのは抑止中の明るさを0だけ",
+          arguments: [false, true], LidCloseDisplay.allCases)
+    func timePassedNeedsBlockingAndChoice(blocking: Bool, choice: LidCloseDisplay) {
+        let system = FakeSystem()
+        let controller = makeController(system, settings: settings)
+        controller.requestStart(from: .menu)
+        controller.lidClosed()
+        if !blocking {
+            system.failing = [.setBrightness(0.5)]
+            controller.requestStop(from: .menu)
+            system.failing = []
+        }
+        var settings = settings
+        settings.lidCloseDisplay = choice
+        controller.changeSettings(settings)
+        system.brightness = 0.3
+        system.advance(by: 60)
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations == (blocking && choice == .zeroBrightness
+                ? [.readBrightness, .setBrightness(0)] : []))
+        #expect(controller.record.savedBrightness == 0.5)
+    }
+
+    @Test("SPEC-BLK-013 蓋が閉じていても輝度の記録がなければ時刻の経過で暗くしない")
+    func timePassedNeedsSavedBrightness() {
+        let system = FakeSystem()
+        let controller = makeController(system, settings: settings)
+        controller.requestStart(from: .menu)
+        system.failing = [.readBrightness]
+        controller.lidClosed()
+        system.failing = []
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations.isEmpty)
+    }
+
+    @Test("SPEC-BLK-013 起動時に復元が失敗しても閉じた通知なしでは暗くしない")
+    func timePassedNeedsClosedNotification() {
+        let system = FakeSystem()
+        var record = ResumeRecord(lastUpdated: system.now)
+        record.savedBrightness = 0.5
+        record.isRunning = true
+        record.session = BlockingSession(timeLimit: nil)
+        system.storedRecord = record
+        system.failing = [.setBrightness(0.5)]
+        var settings = settings
+        settings.resumePolicy = .afterAppRestart
+        let controller = makeController(system, settings: settings)
+        #expect(controller.isBlocking)
+        #expect(controller.record.savedBrightness == 0.5)
+        system.failing = []
+        system.brightness = 0.3
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations.isEmpty)
+    }
+
+    @Test("SPEC-BLK-013 暗くし直す読み取り・書き込み失敗と対象なしは記録を保ち、次回に再試行する",
+          arguments: [0, 1, 2])
+    func periodicFailureRetries(failure: Int) {
+        let system = FakeSystem()
+        let controller = makeController(system, settings: settings)
+        controller.requestStart(from: .menu)
+        controller.lidClosed()
+        system.brightness = failure == 2 ? nil : 0.3
+        system.failing = failure == 0 ? [.readBrightness] : failure == 1 ? [.setBrightness(0)] : []
+        system.clearHistory()
+        let events = EventRecorder(controller)
+        controller.timePassed()
+        #expect(system.operations == (failure == 1 ? [.readBrightness, .setBrightness(0)] : [.readBrightness]))
+        #expect(controller.record.savedBrightness == 0.5)
+        #expect(system.storedRecord?.savedBrightness == 0.5)
+        #expect(controller.isBlocking && !controller.status.hasWarnings)
+        #expect(events.events.isEmpty)
+        system.failing = []
+        system.brightness = 0.3
+        system.advance(by: 60)
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations == [.readBrightness, .setBrightness(0)])
+        #expect(system.brightness == 0)
+    }
+
+    @Test("SPEC-BLK-013 解除の条件が成り立つ時刻の経過では暗くし直さずに復元する")
+    func timePassedReleasesBeforeDimming() {
+        let system = FakeSystem()
+        let controller = makeController(system, settings: settings)
+        controller.requestStart(from: .menu, override: .timer(minutes(1)))
+        controller.lidClosed()
+        system.brightness = 0.3
+        system.advance(by: 60)
+        system.clearHistory()
+        controller.timePassed()
+        #expect(!controller.isBlocking)
+        #expect(!system.operations.contains(.readBrightness))
+        #expect(!system.operations.contains(.setBrightness(0)))
+        #expect(system.operations.contains(.setBrightness(0.5)))
+        #expect(system.brightness == 0.5)
+        #expect(system.storedRecord?.savedBrightness == nil)
+    }
+}
+
+extension ControllerBrightnessTests {
+    @Test("SPEC-BLK-013 開いたときは現在の輝度を読まず元に戻す。設定変更によらない",
+          arguments: [Float(0), 0.3])
+    func openRestoresSavedBrightness(current: Float) {
         let system = FakeSystem()
         let controller = makeController(system, settings: settings)
         controller.requestStart(from: .menu)
         controller.lidClosed()
         controller.changeSettings(.premise())
         system.brightness = current
+        system.failing = [.readBrightness]
         system.clearHistory()
         controller.lidOpened()
-        #expect(system.operations == (current == 0
-                ? [.readBrightness, .setBrightness(0.5), .saveRecord] : [.readBrightness, .saveRecord]))
-        #expect(system.brightness == (current == 0 ? 0.5 : current))
+        #expect(system.operations == [.setBrightness(0.5), .saveRecord])
+        #expect(system.brightness == 0.5)
         #expect(system.storedRecord?.savedBrightness == nil)
         system.clearHistory()
         controller.lidOpened()
         #expect(system.operations.isEmpty)
     }
 
-    @Test("SPEC-BLK-013 復元の読み取り・書き込み失敗と対象なしは記録を残し、次の開いた通知で再試行する",
-          arguments: [0, 1, 2])
-    func restoreFailureRetries(failure: Int) {
+    @Test("SPEC-BLK-013 復元の書き込み失敗は記録を残し、開いた後は暗くし直さず次の開いた通知で再試行する")
+    func restoreFailureRetries() {
         let system = FakeSystem()
         let controller = makeController(system, settings: settings)
         controller.requestStart(from: .menu)
         controller.lidClosed()
-        system.failing = failure == 0 ? [.readBrightness] : failure == 1 ? [.setBrightness(0.5)] : []
-        if failure == 2 {
-            system.brightness = nil
-        }
+        system.failing = [.setBrightness(0.5)]
         controller.lidOpened()
         #expect(system.storedRecord?.savedBrightness == 0.5)
         #expect(controller.record.savedBrightness == 0.5)
         #expect(!controller.status.hasWarnings)
         system.failing = []
-        system.brightness = 0
+        system.brightness = 0.3
+        system.clearHistory()
+        controller.timePassed()
+        #expect(system.operations.isEmpty)
         controller.lidOpened()
         #expect(system.brightness == 0.5)
         #expect(system.storedRecord?.savedBrightness == nil)
@@ -140,7 +281,7 @@ struct ControllerBrightnessTests {
         system.failing = []
         system.clearHistory()
         controller.lidOpened()
-        #expect(system.operations == [.readBrightness, .saveRecord])
+        #expect(system.operations == [.setBrightness(0.5), .saveRecord])
         #expect(system.storedRecord?.savedBrightness == nil)
     }
 

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-062
 title: 「明るさを0」で閉じている間は1分ごとに輝度を 0 に戻し、開けたら閉じる前の輝度に戻す
-status: in_progress
+status: in_review
 requirements: ["REQ-BLK-014"]
 depends_on: ["TASK-061"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -71,4 +71,10 @@ assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
 
 ## レビュー
 
-未レビュー。
+PM が差分を読んだ。変更は `DEC-BLK-008` のとおりで、コントローラーが蓋の状態を覚え、解除しなかった `timePassed()` で、抑止中・「明るさを0」・記録あり・蓋が閉じているときだけ 0 に戻す。戻す処理は、いまの輝度を読まずに記録した値を書く。新しいタイマーはない。テストは、暗くし直す条件、開いた後や起動直後に暗くし直さないこと、失敗後の再試行、解除を優先することを確かめている。
+
+PM が直したこと: 手順書 4.7 の目的に、置き換え前の「利用者が変えた輝度は上書きしない」が残っていたので、`DEC-BLK-008` に合わせた（担当が範囲外として報告した）。
+
+PM が worktree で `nix develop --command just check`（SwiftPM 304件、アプリ88件）と `nix develop --command just build` を実行し、通ることを確かめた。
+
+未確認: 実機で、閉じたまま明るくした輝度が1分以内に 0 に戻ること。オーナーが 4.7 の操作3で確かめる。

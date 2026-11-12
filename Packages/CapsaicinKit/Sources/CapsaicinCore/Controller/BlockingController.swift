@@ -52,6 +52,7 @@ public final class BlockingController {
     /// 仕組みごとの、適用していると見込める状態。キーがなければ分からない。
     var observed: [Mechanism: Bool]
     var lastAlignment: Date?
+    var isLidClosed = false
 
     public init(settings: Settings, capabilities: MachineCapabilities, ports: Ports) {
         self.settings = settings
@@ -131,12 +132,13 @@ public final class BlockingController {
 
     // MARK: 時刻と電源
 
-    /// 解除の条件を確かめ、合わせ直しの間隔が過ぎていれば合わせ直す。
+    /// 解除の条件を確かめ、閉じた間の輝度を保ち、合わせ直しの間隔が過ぎていれば合わせ直す。
     public func timePassed() {
         notifyingWarnings {
             if releaseIfConditionMet() {
                 return
             }
+            keepBrightnessZeroWhileClosed()
             let isDue = lastAlignment.map { ports.time.now.timeIntervalSince($0) >= Self.reconcileInterval } ?? true
             if status.hasWarnings, isDue {
                 reconcileListed()
