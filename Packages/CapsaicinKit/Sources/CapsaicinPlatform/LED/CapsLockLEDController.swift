@@ -51,6 +51,9 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
     /// 途中まで失敗したときも、false は先に点灯の意図を取り消す。
     public func setLit(_ lit: Bool) throws {
         desiredLit = lit
+        if !lit {
+            monitor.stop()
+        }
         guard isAvailable else { return }
         if lit {
             needsAutomaticRestore = true
@@ -64,7 +67,6 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
             }
             try apply(mode: "On")
         } else {
-            monitor.stop()
             guard needsAutomaticRestore else { return }
             try apply(mode: "Auto")
             needsAutomaticRestore = false

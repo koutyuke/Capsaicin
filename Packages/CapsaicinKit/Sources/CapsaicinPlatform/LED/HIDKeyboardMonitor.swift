@@ -7,14 +7,23 @@ final class HIDKeyboardMonitor {
     typealias Change = @MainActor @Sendable () -> Void
     typealias Cancel = @MainActor () -> Void
     typealias Register = @MainActor (@escaping Change) throws -> Cancel
+    typealias Schedule = @MainActor (@escaping Change) -> Cancel
 
     private let register: Register
+    private let schedule: Schedule
     private var cancel: Cancel?
+    private var cancelFollowUp: Cancel?
     private var generation: UInt64 = 0
+    private var followUpGeneration: UInt64 = 0
+    private var remainingFollowUps = 0
     private var isMonitoring = false
 
-    init(register: @escaping Register = HIDKeyboardMonitor.registerNative) {
+    init(
+        register: @escaping Register = HIDKeyboardMonitor.registerNative,
+        schedule: @escaping Schedule = HIDKeyboardMonitor.scheduleNative,
+    ) {
         self.register = register
+        self.schedule = schedule
     }
 
     func start(onChange: @escaping Change) throws {
@@ -25,6 +34,8 @@ final class HIDKeyboardMonitor {
         do {
             cancel = try register { [weak self] in
                 guard let self, isMonitoring, generation == current else { return }
+                // 接続通知よりサービスの列挙が遅れるため、通知後だけ追いかける。
+                startFollowUp(onChange: onChange)
                 onChange()
             }
         } catch {
@@ -36,12 +47,42 @@ final class HIDKeyboardMonitor {
     func stop() {
         isMonitoring = false
         generation &+= 1
+        stopFollowUp()
         cancel?()
         cancel = nil
     }
 
     isolated deinit {
         stop()
+    }
+
+    private func startFollowUp(onChange: @escaping Change) {
+        stopFollowUp()
+        let current = followUpGeneration
+        remainingFollowUps = 5
+        cancelFollowUp = schedule { [weak self] in
+            // 解除済みでも MainActor に届くことがあるため、古い追いかけは無視する。
+            guard let self, followUpGeneration == current else { return }
+            remainingFollowUps -= 1
+            if remainingFollowUps == 0 {
+                stopFollowUp()
+            }
+            onChange()
+        }
+    }
+
+    private func stopFollowUp() {
+        followUpGeneration &+= 1
+        cancelFollowUp?()
+        cancelFollowUp = nil
+    }
+
+    private static func scheduleNative(tick: @escaping Change) -> Cancel {
+        let timer = Timer(timeInterval: 1, repeats: true) { _ in
+            Task { @MainActor in tick() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        return { timer.invalidate() }
     }
 
     private static func registerNative(onChange: @escaping Change) throws -> Cancel {

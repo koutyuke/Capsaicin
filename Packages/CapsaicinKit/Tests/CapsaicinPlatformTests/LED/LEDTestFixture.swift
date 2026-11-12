@@ -25,17 +25,28 @@ final class LEDTestFixture {
     var registrations = 0
     var cancellations = 0
     var changes: [HIDKeyboardMonitor.Change] = []
+    var ticks: [HIDKeyboardMonitor.Change] = []
+    var activeSchedules: Set<Int> = []
+    var scheduleCancellations = 0
     var errors: [CapsLockLEDError] = []
 
     func makeMonitor() -> HIDKeyboardMonitor {
-        HIDKeyboardMonitor { callback in
+        HIDKeyboardMonitor(register: { callback in
             self.registrations += 1
             if self.monitorFails {
                 throw CapsLockLEDError.keyboardMonitorCreationFailed
             }
             self.changes.append(callback)
             return { self.cancellations += 1 }
-        }
+        }, schedule: { tick in
+            let index = self.ticks.count
+            self.ticks.append(tick)
+            self.activeSchedules.insert(index)
+            return {
+                self.activeSchedules.remove(index)
+                self.scheduleCancellations += 1
+            }
+        })
     }
 
     func makeClient() throws -> LEDClient {

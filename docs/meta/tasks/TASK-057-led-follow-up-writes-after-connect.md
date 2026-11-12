@@ -2,7 +2,7 @@
 schema: task
 id: TASK-057
 title: 抑止中に接続したキーボードを点灯させる
-status: in_progress
+status: in_review
 requirements: ["REQ-LED-004"]
 depends_on: ["TASK-053"]
 assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
@@ -67,4 +67,12 @@ assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
 
 ## レビュー
 
-実装中。
+2026-11-12、PM が差分を読んだ。実機の確認が残っている。
+
+- 追いかけは `HIDKeyboardMonitor` が持つ。通知のたびにタイマーを作り直し、1秒ごとに5回書いて止まる。止めた後に届いた呼び出しは、世代の番号で捨てる。
+- `setLit(false)` は、関数が使えるかを見る前に監視を止めるようにした。点灯の意図を取り消したら、どの経路でも追いかけが残らない。
+- 監視の登録に失敗したときに追いかけを止める1行は、PM が削った。登録に失敗した時点では、追いかけは始まっていない。
+- 追いかけの書き込みの失敗は `onReapplyFailure` に届く。アプリはログに残すだけなので、失敗が続いても表示は増えない。
+- テストは `LEDFollowUpTests.swift` に10本ある。「作るもの」の4項目のほか、失敗の通知、失敗の通知の中からの停止、解放時の停止を確かめる。
+- `just check` と `just build` は通った。
+- 未確認: 実機での点灯。オーナーが「検証」の手順で確かめる。
