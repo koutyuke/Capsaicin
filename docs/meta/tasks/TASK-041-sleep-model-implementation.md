@@ -34,7 +34,7 @@ assignee: Codex（OpenCode の openai/gpt-6-sol）
    - `blocksIdleSleep`、`blocksLidSleep`、`turnsOffDisplayOnLidClose` を削除する。
    - `blocksDisplaySleep` の既定値を `true` にする。保存のキーは変えない。
    - `blocksManualSleep` は「手動スリープと蓋閉じスリープ」を表す。保存のキーは変えない。コメントを直す。
-   - 閉じたときの画面を `lidCloseDisplay: LidCloseDisplay`（`keepOn`、`turnOff` の2つ。既定値 `turnOff`）として足す。保存のキーは新しく `lidCloseDisplay` にする。古いキーから変換する処理は作らない（`DEC-BLK-006`）。「明るさを 0 にする」は足さない（`Q-BLK-001`）。
+   - 閉じたときの画面を `lidCloseDisplay: LidCloseDisplay`（`keepOn`、`turnOff` の2つ。既定値 `turnOff`）として足す。保存のキーは新しく `lidCloseDisplay` にする。古いキーから変換する処理は作らない（`DEC-BLK-006`）。この作業では「明るさを 0 にする」は足さない（追加の判断は `DEC-BLK-007`）。
 2. `EffectiveSettings` と仕組み
    - 自動スリープのアサーション（`idleSleepAssertion`）は常に適用する。
    - `displaySleepAssertion` は `blocksDisplaySleep` のとき、`systemSleepDisabled` は `blocksManualSleep` のとき適用する。

@@ -157,3 +157,15 @@ status = "accepted"
 specs = ["SPEC-BLK-010"]
 depends_on = []
 sources = []
+
+[[requirements]]
+id = "REQ-BLK-014"
+title = "閉じたときにディスプレイスリープさせずに輝度を 0 にできる"
+kind = "functional"
+statement = "抑止中に「ディスプレイを閉じたとき」を「明るさを0」にしていれば、蓋を閉じると、ディスプレイスリープさせずに内蔵ディスプレイの輝度を 0 にし、蓋を開けたときや抑止を解除したときに元の輝度に戻す。"
+reason = "閉じた蓋の中の光漏れを抑えながら、画面をロックさせずに画面収録や Computer Use を続けるため。"
+priority = "should"
+status = "accepted"
+specs = ["SPEC-BLK-013"]
+depends_on = ["REQ-BLK-004"]
+sources = ["DEC-BLK-007"]

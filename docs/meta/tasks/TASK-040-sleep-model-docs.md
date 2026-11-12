@@ -28,7 +28,7 @@ assignee: Codex（OpenCode の openai/gpt-6-sol）
 
 触らない:
 
-- `DEC-BLK-006`、`Q-BLK-001`、`HYP-BLK-009`、`DEC-BLK-004`（PM が書いた）。`DEC-BLK-003` と `DEC-BLK-004` は置き換えられた判断なので、本文を書き換えない。
+- `DEC-BLK-006`、のちに `DEC-BLK-007` で解決した論点、`HYP-BLK-009`、`DEC-BLK-004`（PM が書いた）。`DEC-BLK-003` と `DEC-BLK-004` は置き換えられた判断なので、本文を書き換えない。
 - `docs/meta/tasks/` の既存のチケット（過去の記録）。
 - `docs/` 以外のすべて（コード、xcstrings）。別のエージェントが `TASK-041` で同時にコードを直している。
 - 作業ツリーにある別の作業の変更（`project.yml`、`TASK-033`、`TASK-036` とヘルパー関連のステージ済みの変更）。

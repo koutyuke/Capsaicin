@@ -21,7 +21,7 @@ assignee: Codex（OpenCode の openai/gpt-6.1-sol）
 - `docs/specs/settings.md`（中心）、`docs/specs/blocking.md`、`docs/specs/helper.md`、`docs/specs/led.md`、`docs/specs/lifecycle.md`、`docs/specs/menu.md`、`docs/specs/ui.md`（設定画面の項目名・セクション名・(i) に触れている箇所と、`DEC-SET-004`・`DEC-UI-009` への参照だけ）
 - `docs/manual/verification.md`（設定画面の項目名・セクション名・(i) に触れている箇所だけ）
 - `docs/meta/requirements/settings.toml`、`docs/meta/requirements/blocking.toml`（`sources` の `DEC-SET-004`・`DEC-UI-009` を新しい判断に替えることと、項目名に触れている箇所だけ）
-- `docs/meta/hypotheses/*.md`、`docs/meta/questions/Q-BLK-001-lid-close-dim-to-zero.md`（`DEC-SET-004`・`DEC-UI-009` への参照と、閉じたときの行の形に触れている箇所だけ）
+- `docs/meta/hypotheses/*.md`、のちに `DEC-BLK-007` で解決した論点の文書（`DEC-SET-004`・`DEC-UI-009` への参照と、閉じたときの行の形に触れている箇所だけ）
 
 触らない:
 
@@ -53,7 +53,7 @@ assignee: Codex（OpenCode の openai/gpt-6.1-sol）
 - ヘルパーが要る設定が保存されているのにヘルパーが正しく設置されていないときは、行のアイコンを注意の記号に替え、保存した選択肢（またはオンのスイッチ）を表示したまま、(i) の先頭に、ヘルパーが正しく設置されていないためこの設定を適用できないことと、「ヘルパー」で修復できることを示す（今の `SPEC-SET-005` の規則をポップアップにも当てはめる）。
 - 親がオフで子が無効になる行（継続時間、時刻、しきい値、電源アダプタの行）は、字下げとグレーで示し、(i) を置かない。前提による無効の「閉じたときのディスプレイ」の行はなくなる。
 - `SPEC-SET-003` の (i) を置く規則を、`DEC-SET-005` の基準（項目名から分からない連動や制約がある行だけ）に改める。
-- 「明るさを0」は `Q-BLK-001` を決めるまで選択肢に入れない。
+- この作業では「明るさを0」を選択肢に入れない（追加の判断は `DEC-BLK-007`）。
 - 仕様の本文で使う項目名とセクション名は、新しい呼び名（「スリープ」「ディスプレイを自動でオフにしない」「ディスプレイを閉じたとき」など）にそろえる。受け入れ例も新しい形に直す（例: ポップアップで「オンのまま」を選ぶ、ヘルパーの設置を断ると「スリープ」のまま）。
 
 ## 完了条件

@@ -1,21 +1,21 @@
 ---
 schema: hypothesis
 id: HYP-SYS-001
-title: macOS 26 でも LED と disablesleep が同じように動く
+title: macOS 26 でも LED、disablesleep、蓋を閉じたときの輝度 0 が同じように動く
 status: open
-affects: ["REQ-SYS-001", "DEC-SYS-003", "DEC-BLK-001", "DEC-LED-001"]
+affects: ["REQ-SYS-001", "DEC-SYS-003", "DEC-BLK-001", "DEC-LED-001", "DEC-BLK-007"]
 evidence: []
 ---
 
-# HYP-SYS-001 macOS 26 でも LED と disablesleep が同じように動く
+# HYP-SYS-001 macOS 26 でも LED、disablesleep、蓋を閉じたときの輝度 0 が同じように動く
 
 ## 主張
 
-macOS 26 の Apple Silicon の Mac で、`HIDCapsLockLED` と `disablesleep` に関する仮説（`HYP-BLK-001`、`HYP-BLK-002`〜`HYP-BLK-007`、`HYP-LED-001`、`HYP-LED-002`、`HYP-LED-003`、`HYP-LCY-001`）を確かめると、試作に使った Mac と同じ結果になる。
+macOS 26 の Apple Silicon の Mac で、`HIDCapsLockLED`、`disablesleep`、蓋を閉じたときの輝度 0 に関する仮説（`HYP-BLK-001`、`HYP-BLK-002`〜`HYP-BLK-007`、`HYP-BLK-010`〜`HYP-BLK-012`、`HYP-LED-001`、`HYP-LED-002`、`HYP-LED-003`、`HYP-LCY-001`）を確かめると、試作に使った Mac と同じ結果になる。
 
 ## 外れたときに起きること
 
-macOS 26 では一部の機能が動かないか、`pmset displaysleepnow` に root が要る。`REQ-SYS-001` の下限を上げるか、`DEC-BLK-001` か `DEC-LED-001` の方式を macOS のバージョンで分ける。`DEC-SYS-003` を見直す。
+macOS 26 では一部の機能が動かないか、`pmset displaysleepnow` に root が要る。`REQ-SYS-001` の下限を上げるか、`DEC-BLK-001`、`DEC-LED-001`、`DEC-BLK-007` の方式を macOS のバージョンで分ける。`DEC-SYS-003` を見直す。
 
 ## 確かめ方
 

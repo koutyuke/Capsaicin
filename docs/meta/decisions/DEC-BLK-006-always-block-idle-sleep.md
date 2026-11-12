@@ -49,7 +49,7 @@ based_on: ["EVID-BLK-001", "EVID-BLK-005", "HYP-BLK-006", "HYP-BLK-009"]
 
 - `REQ-BLK-001`〜`REQ-BLK-005`、`REQ-SET-005`、`SPEC-BLK-001`、`SPEC-BLK-002`、`SPEC-BLK-012`、`SPEC-SET-002`、`SPEC-SET-005`、`SPEC-SET-006` を直す。
 - 蓋閉じスリープの制御（`lidSleepControl`）とその実装を取り除く。
-- 「明るさを 0 にする」を閉じたときの画面の選択肢に足すかは、`Q-BLK-001` で決める。
+- 「明るさを 0 にする」は、のちに `DEC-BLK-007` で閉じたときの画面の選択肢に加えた。
 
 ## 覆す条件
 
