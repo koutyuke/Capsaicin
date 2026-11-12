@@ -4,10 +4,14 @@ import Testing
 
 @MainActor
 struct LEDControllerTests {
-    @Test("SPEC-LED-001 SPEC-LED-002 Transport のある内蔵・外付けキーボードだけに On と Auto を書き、仮想キーボードには書かない")
+    @Test("SPEC-LED-001 SPEC-LED-002 Transport が Virtual でも欠如でも書かず、同じ一覧の内蔵・外付けに On と Auto を書く")
     func allKeyboards() throws {
         let fake = LEDTestFixture()
-        fake.devices += [.init(name: "virtual", hasTransport: false), .init(name: "mouse", keyboard: false)]
+        fake.devices += [
+            .init(name: "virtual", transport: nil),
+            .init(name: "osVirtual", transport: "Virtual"),
+            .init(name: "mouse", keyboard: false),
+        ]
         let controller: any CapsLockLEDControlling = fake.makeController()
         try controller.setLit(true)
         try controller.setLit(false)
@@ -17,10 +21,11 @@ struct LEDControllerTests {
         #expect(fake.creations == 2)
     }
 
-    @Test("SPEC-LED-001 SPEC-LED-002 仮想キーボードだけなら初回の復旧・点灯・再適用・解除でも書かない")
-    func virtualKeyboardsOnly() throws {
+    @Test("SPEC-LED-001 SPEC-LED-002 仮想キーボードだけなら初回の復旧・点灯・再適用・解除でも書かない",
+          arguments: [nil, "Virtual"] as [String?])
+    func virtualKeyboardsOnly(transport: String?) throws {
         let fake = LEDTestFixture()
-        fake.devices = [.init(name: "virtual", hasTransport: false)]
+        fake.devices = [.init(name: "virtual", transport: transport)]
         fake.failedDevices = ["virtual"]
         let controller = fake.makeController()
         try controller.setLit(false)

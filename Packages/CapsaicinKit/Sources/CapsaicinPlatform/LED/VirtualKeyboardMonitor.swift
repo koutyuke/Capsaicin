@@ -33,7 +33,7 @@ public final class VirtualKeyboardMonitor {
         self.init(detect: {
             guard symbolAvailable() else { return false }
             let client = try makeClient()
-            return try client.services().contains { $0.isKeyboard() && !$0.hasTransport() }
+            return try client.services().contains { $0.isKeyboard() && $0.transport() == nil }
         }, schedule: schedule)
     }
 

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-058
 title: Transport が "Virtual" のキーボードに書かない
-status: in_progress
+status: in_review
 requirements: ["REQ-LED-004"]
 depends_on: ["TASK-054"]
 assignee: Codex（Codex のハーネス、gpt-6.1-sol、推論 high）
@@ -63,4 +63,10 @@ Capsaicin は、`Transport` を持つキーボードのサービスを実機と�
 
 ## レビュー
 
-実装中。
+2026-11-12、PM が差分を読んだ。実機の確認が残っている。
+
+- サービスの `hasTransport` を、`Transport` の値をそのまま返す `transport` に置き換えた。書き込みの対象は、値があり、`"Virtual"` ではないもの。案内の条件は、値がないもの。
+- 判定の理由を伝えるコメントを、PM が1行足した。
+- テストは既存の3本の引数を広げた。`"Virtual"` のキーボードに書かないこと、`"Virtual"` だけでは案内を出さないこと、`Transport` を持たないキーボードの扱いが変わらないことを確かめる。
+- `just check` と `just build` は通った。
+- 未確認: 実機で、Sidecar の仮想キーボードが対象から外れること。オーナーが「検証」の手順で確かめる。

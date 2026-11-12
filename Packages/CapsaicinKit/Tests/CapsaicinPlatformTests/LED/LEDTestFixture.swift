@@ -1,11 +1,12 @@
 @testable import CapsaicinPlatform
+import Foundation
 
 @MainActor
 final class LEDTestFixture {
     struct Device {
         var name: String
         var keyboard = true
-        var hasTransport = true
+        var transport: String? = "USB"
     }
 
     struct Write: Equatable {
@@ -64,7 +65,7 @@ final class LEDTestFixture {
                 LEDService(
                     registryID: nil,
                     isKeyboard: { device.keyboard },
-                    hasTransport: { device.hasTransport },
+                    transport: { device.transport as CFString? },
                     setMode: { mode in
                         self.writes.append(Write(device: device.name, mode: mode))
                         return !self.failedDevices.contains(device.name)

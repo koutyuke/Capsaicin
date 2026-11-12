@@ -4,25 +4,27 @@ import Testing
 @MainActor
 struct VirtualKeyboardMonitorTests {
     @Test("SPEC-LED-005 Transport のないキーボードだけを検出し、LED には書かない",
-          arguments: [true, false], [true, false])
-    func keyboardServices(keyboard: Bool, hasTransport: Bool) {
+          arguments: [true, false], [nil, "USB", "Virtual"] as [String?])
+    func keyboardServices(keyboard: Bool, transport: String?) {
         let fake = LEDTestFixture()
-        fake.devices.append(.init(name: "candidate", keyboard: keyboard, hasTransport: hasTransport))
+        fake.devices.append(.init(name: "candidate", keyboard: keyboard, transport: transport))
         let monitor = makeMonitor(fake)
         #expect(fake.creations == 0)
         monitor.start()
-        #expect(monitor.state == (keyboard && !hasTransport))
+        #expect(monitor.state == (keyboard && transport == nil))
         #expect(fake.creations == 1)
         #expect(fake.enumerations == 1)
         #expect(fake.writes.isEmpty)
         #expect(fake.registrations == 0)
     }
 
-    @Test("SPEC-LED-005 実機だけ、または空の一覧では仮想キーボードなしとする", arguments: [true, false])
-    func noVirtualKeyboard(empty: Bool) {
+    @Test("SPEC-LED-005 実機だけ、Transport が Virtual のキーボードだけ、空の一覧では案内しない",
+          arguments: [nil, "USB", "Virtual"] as [String?])
+    func noVirtualKeyboard(transport: String?) {
         let fake = LEDTestFixture()
-        if empty {
-            fake.devices = []
+        fake.devices = []
+        if let transport {
+            fake.devices.append(.init(name: "candidate", transport: transport))
         }
         let monitor = makeMonitor(fake)
         monitor.start()
@@ -41,7 +43,7 @@ struct VirtualKeyboardMonitorTests {
         var states: [Bool] = []
         monitor.onStateChange = { states.append($0) }
         monitor.start()
-        fake.devices.append(.init(name: "virtual", hasTransport: false))
+        fake.devices.append(.init(name: "virtual", transport: nil))
         tick?()
         fake.devices.removeLast()
         tick?()
@@ -69,7 +71,7 @@ struct VirtualKeyboardMonitorTests {
           arguments: [CapsLockLEDError.clientCreationFailed, .servicesUnavailable])
     func clientFailure(error: CapsLockLEDError) {
         let fake = LEDTestFixture()
-        fake.devices.append(.init(name: "virtual", hasTransport: false))
+        fake.devices.append(.init(name: "virtual", transport: nil))
         var tick: VirtualKeyboardMonitor.Tick?
         let monitor = makeMonitor(fake, schedule: {
             tick = $0

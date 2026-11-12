@@ -90,7 +90,9 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
         let services = try client.services()
         var targets: [String] = []
         var failedTargets: [String] = []
-        for service in services where service.isKeyboard() && service.hasTransport() {
+        for service in services where service.isKeyboard() {
+            // Transport がないのはキー配列を変えるアプリの、"Virtual" は OS の仮想キーボードである。
+            guard let transport = service.transport(), transport as? String != "Virtual" else { continue }
             let registryID = service.registryID.map { String($0) } ?? "nil"
             targets.append(registryID)
             if !service.setMode(mode) {
@@ -113,7 +115,7 @@ public final class CapsLockLEDController: CapsLockLEDControlling {
 struct LEDService {
     var registryID: UInt64?
     var isKeyboard: () -> Bool
-    var hasTransport: () -> Bool
+    var transport: () -> CFTypeRef?
     var setMode: (String) -> Bool
 }
 
@@ -133,7 +135,7 @@ struct LEDClient {
                 LEDService(
                     registryID: (IOHIDServiceClientGetRegistryID(service) as? NSNumber)?.uint64Value,
                     isKeyboard: { IOHIDServiceClientConformsTo(service, 1, 6) != 0 },
-                    hasTransport: { IOHIDServiceClientCopyProperty(service, kIOHIDTransportKey as CFString) != nil },
+                    transport: { IOHIDServiceClientCopyProperty(service, kIOHIDTransportKey as CFString) },
                     setMode: { IOHIDServiceClientSetProperty(service, "HIDCapsLockLED" as CFString, $0 as CFString) },
                 )
             }
