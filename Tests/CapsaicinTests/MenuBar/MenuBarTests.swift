@@ -1,6 +1,7 @@
 import AppKit
 import CapsaicinCore
 import CapsaicinCoreTesting
+import CapsaicinPlatform
 import Testing
 
 @MainActor
@@ -12,31 +13,32 @@ struct MenuBarTests {
         return value
     }
 
-    @Test("SPEC-MENU-001 SPEC-MENU-002 停止中は開始・時間・時刻・設定・終了を並べる")
+    @Test("SPEC-MENU-001 SPEC-MENU-002 停止中は開始・時間指定・スリープ設定・設定・終了を並べる")
     func stopped() {
         let fixture = makeFixture()
         fixture.model.launch()
         let rows = rows(fixture)
-        #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "menu.startFor", "menu.startUntil",
-                                   "separator.footer", "menu.settings", "menu.quit"])
+        #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "menu.startFor",
+                                   "separator.sleep", "menu.sleep", "separator.footer", "menu.settings", "menu.quit"])
         #expect(rows[1].subtitle == nil)
         #expect(rows[2].children.map(\.command) == [15, 30, 60, 120, 240, 480]
             .map { .start(.timer(TimerDuration(minutes: $0)!)) }
-            + [nil, .durationPanel])
+            + [.durationPanel, nil, .timePanel, nil, .start(.noTimeLimit)])
         var settings = fixture.model.settings
         settings.batteryConditionEnabled = false
         fixture.model.changeSettings(settings)
         #expect(self.rows(fixture)[1].subtitle == "手動でオフにするまで")
     }
 
-    @Test("SPEC-MENU-004 抑止中は時刻と残り分を示し、電源の変化を反映する")
+    @Test("SPEC-MENU-001 SPEC-MENU-004 抑止中は状態・オフ・時間変更・スリープ設定を並べ、電源の変化を反映する")
     func active() throws {
         let fixture = makeFixture()
         fixture.model.launch()
         try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 90))))
         let initial = rows(fixture)
         #expect(initial.map(\.id) == ["menu.header.active", "menu.status.until", "menu.status.battery",
-                                      "menu.stop", "separator.footer", "menu.settings", "menu.quit"])
+                                      "menu.stop", "menu.changeTime", "separator.sleep", "menu.sleep",
+                                      "separator.footer", "menu.settings", "menu.quit"])
         #expect(initial[1].title == "1:30まで（残り1時間30分）")
         #expect(rows(fixture, now: Date(timeIntervalSince1970: 120))[1].title == "1:30まで（残り1時間28分）")
         fixture.system.powerState = PowerState(batteryLevel: 80, isOnACPower: true)
@@ -48,7 +50,7 @@ struct MenuBarTests {
     func helperWarning(direction: MisalignmentDirection) {
         let status = BlockingStatus(session: nil, batteryCondition: nil,
                                     misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
-        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, virtualKeyboard: false,
+        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, sleepRows: [],
                                     now: Date(timeIntervalSince1970: 0), calendar: calendar, bundle: bundle())
         #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
         #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
@@ -59,30 +61,17 @@ struct MenuBarTests {
         var settings = Settings()
         settings.timerDuration = try #require(TimerDuration(minutes: 125))
         var input = StartPanelInput(mode: .duration, settings: settings, now: .distantPast, calendar: calendar)
-        #expect(input.hours == "1" && input.minutes == "0")
+        #expect(input.duration.hours == "1" && input.duration.minutes == "0")
         settings.timerEnabled = true
         input = StartPanelInput(mode: .duration, settings: settings, now: .distantPast, calendar: calendar)
-        #expect(input.hours == "2" && input.minutes == "5")
+        #expect(input.duration.hours == "2" && input.duration.minutes == "5")
         for (hours, minutes, valid) in [("0", "0", false), ("24", "1", false), ("0", "1", true),
                                         ("24", "0", true), ("1", "60", false), ("abc", "0", false)]
         {
-            input.hours = hours
-            input.minutes = minutes
+            input.duration.hours = hours
+            input.duration.minutes = minutes
             #expect((input.startOverride(calendar: calendar) != nil) == valid)
         }
-        input.hours = "1"
-        input.minutes = "0"
-        input.stepMinutes(5)
-        #expect(input.hours == "1" && input.minutes == "5")
-        input.stepMinutes(-5)
-        #expect(input.hours == "1" && input.minutes == "0")
-        input.hours = "24"
-        input.stepMinutes(5)
-        #expect(input.hours == "24" && input.minutes == "0")
-        input.hours = "0"
-        input.minutes = "1"
-        input.stepMinutes(-5)
-        #expect(input.hours == "0" && input.minutes == "1")
     }
 
     @Test("SPEC-MENU-003 指定時刻の初期値と翌日判定は Core と同じ規則を使う")
@@ -118,7 +107,7 @@ struct MenuBarTests {
     func nativeMenu() throws {
         let fixture = makeFixture()
         fixture.model.launch()
-        let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
+        let controller = MenuBarController(settings: settingsModel(fixture), isOnACPower: { false })
         controller.configureShortcut = { item in
             item.keyEquivalent = "c"
             item.keyEquivalentModifierMask = [.control, .option, .command]
@@ -146,7 +135,7 @@ struct MenuBarTests {
         _ = NSApplication.shared
         let fixture = makeFixture()
         fixture.model.launch()
-        let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
+        let controller = MenuBarController(settings: settingsModel(fixture), isOnACPower: { false })
         controller.configureShortcut = { _ in }
         defer { controller.stop() }
         controller.start()
@@ -182,7 +171,7 @@ struct MenuBarTests {
         var settings = fixture.model.settings
         settings.showsMenuBarIcon = initiallyVisible
         fixture.model.changeSettings(settings)
-        let controller = MenuBarController(model: fixture.model, isOnACPower: { false })
+        let controller = MenuBarController(settings: settingsModel(fixture), isOnACPower: { false })
         controller.configureShortcut = { _ in }
         fixture.model.onStatusChange = { _ in controller.refresh() }
         defer {
@@ -222,7 +211,7 @@ struct MenuBarTests {
     private func rows(_ fixture: AppFixture, now: Date = Date(timeIntervalSince1970: 0)) -> [MenuEntry] {
         MenuContent.make(status: fixture.model.status, settings: fixture.model.settings,
                          isOnACPower: fixture.system.powerState.isOnACPower,
-                         virtualKeyboard: fixture.model.hasVirtualKeyboard,
+                         sleepRows: settingsModel(fixture).sleepRows,
                          now: now, calendar: calendar, bundle: bundle())
     }
 
@@ -233,6 +222,12 @@ struct MenuBarTests {
         return fixture
     }
 
+    private func settingsModel(_ fixture: AppFixture) -> SettingsModel {
+        SettingsModel(app: fixture.model, helper: SettingsHelperActions(
+            state: { .installed }, perform: { _ in .cancelled }, completed: { _, _ in },
+        ))
+    }
+
     private func bundle() -> Bundle {
         let products = Bundle(for: MenuCatalogLocator.self).bundleURL.deletingLastPathComponent()
         return Bundle(url: products.appending(path: "Capsaicin.app"))!
@@ -240,7 +235,28 @@ struct MenuBarTests {
 }
 
 extension MenuBarTests {
-    @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 警告は状態の先頭、仮想キーボードの案内は末尾に置く")
+    @Test("SPEC-UI-011 SPEC-MENU-002 SPEC-MENU-003 メニューとパネルの文言をString Catalogから読む")
+    func redesignResources() {
+        let expected = [
+            "menu.startFor": "時間を指定してオン",
+            "menu.changeTime": "オフにする時刻を変更",
+            "menu.header.fromNow": "今から",
+            "menu.startFor.custom": "時間を入力…",
+            "menu.startUntil": "時刻を指定…",
+            "menu.noTimeLimit": "時間指定なし",
+            "panel.duration.title": "時間を指定してオン",
+            "panel.time.title": "時刻を指定してオン",
+            "panel.changeTime.title": "オフにする時刻を変更",
+            "panel.start": "オンにする",
+            "panel.change": "変更",
+            "panel.duration.until": "%@にオフ",
+        ]
+        for (key, value) in expected {
+            #expect(MenuContent.text(key, bundle: bundle()) == value)
+        }
+    }
+
+    @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 警告は状態の先頭に残し、キー配列の案内は表示しない")
     func warnings() {
         let fixture = makeFixture()
         fixture.model.launch()
@@ -254,20 +270,9 @@ extension MenuBarTests {
             "menu.warning.unalignedLed.title",
             "menu.warning.stateSaveFailed.title",
         ])
-        #expect(rows.suffix(5).map(\.id) == [
-            "separator.virtualKeyboard",
-            "menu.virtualKeyboard.title",
-            "separator.footer",
-            "menu.settings",
-            "menu.quit",
-        ])
+        #expect(!rows.contains { $0.id.contains("virtualKeyboard") })
         #expect(rows[1].isWarning)
         #expect(rows[1].command == nil)
-        let notice = rows[rows.count - 4]
-        #expect(notice.title == "キー配列を変更するアプリが動作中")
-        #expect(notice.subtitle == "LEDが点灯しないことがあります")
-        #expect(notice.isWarning)
-        #expect(notice.command == nil)
         fixture.model.hasVirtualKeyboard = false
         #expect(!self.rows(fixture).contains { $0.id == "menu.virtualKeyboard.title" })
     }

@@ -5,18 +5,22 @@ import KeyboardShortcuts
 @MainActor
 final class MenuBarController: NSObject, NSMenuDelegate {
     private let model: AppModel
+    private let settings: SettingsModel
     private let isOnACPower: () -> Bool
     var openSettings: () -> Void = {}
     var quit: () -> Void = {}
     var configureShortcut: (NSMenuItem) -> Void = { $0.setShortcut(for: HotkeyController.name) }
+    var makeInputPanel: (StartPanelInput.Mode, AppModel) -> NSPanel = { StartPanel.make(mode: $0, model: $1) }
     private(set) var statusItem: NSStatusItem?
     let menu = NSMenu()
-    private var inputPanel: NSPanel?
+    private(set) var inputPanel: NSPanel?
+    private var panelWasBlocking = false
     private var commands: [String: MenuCommand] = [:]
     private var restoresHotkey = false
 
-    init(model: AppModel, isOnACPower: @escaping () -> Bool) {
-        self.model = model
+    init(settings: SettingsModel, isOnACPower: @escaping () -> Bool) {
+        self.settings = settings
+        model = settings.app
         self.isOnACPower = isOnACPower
         super.init()
         menu.delegate = self
@@ -45,6 +49,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         if restoresHotkey {
             KeyboardShortcuts.disable(HotkeyController.name)
         }
+        settings.refreshHelper()
         refresh()
     }
 
@@ -66,11 +71,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         statusItem?.button?.image = image
         statusItem?.button?.setAccessibilityLabel(MenuContent.text(model.status.isBlocking
                 ? "statusItem.active.a11y" : "statusItem.idle.a11y"))
-        if model.status.isBlocking {
+        if model.status.isBlocking != panelWasBlocking {
             inputPanel?.close()
+            inputPanel = nil
         }
         let rows = MenuContent.make(status: model.status, settings: model.settings,
-                                    isOnACPower: isOnACPower(), virtualKeyboard: model.hasVirtualKeyboard)
+                                    isOnACPower: isOnACPower(), sleepRows: settings.sleepRows)
         update(menu, rows: rows)
     }
 
@@ -91,7 +97,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.isEnabled = row.command != nil || !row.children.isEmpty
             item.target = self
             item.action = row.command == nil ? nil : #selector(performCommand(_:))
+            item.state = row.isChecked ? .on : .off
             commands[row.id] = row.command
+            item.image = nil
+            item.setAccessibilityLabel(nil)
             if row.isWarning {
                 item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
                     .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
@@ -132,7 +141,13 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .stop: model.requestStop(from: .menu)
         case .durationPanel, .timePanel:
             inputPanel?.close()
-            inputPanel = StartPanel.make(mode: command == .durationPanel ? .duration : .time, model: model)
+            panelWasBlocking = model.status.isBlocking
+            inputPanel = makeInputPanel(command == .durationPanel ? .duration : .time, model)
+        case let .toggleSleep(key):
+            guard let row = settings.sleepRows.first(where: { $0.key == key }) else { return }
+            Task { await settings.changeSleep(row, to: !row.isOn); refresh() }
+        case let .lidClose(choice):
+            Task { await settings.changeLidClose(to: choice); refresh() }
         case .settings: openSettings()
         case .quit: quit()
         }

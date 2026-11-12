@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "menu.changeTime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフにする時刻を変更"
+          }
+        }
+      }
+    },
     "menu.duration.lessThanMinute" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23,6 +34,17 @@
         }
       }
     },
+    "menu.header.fromNow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今から"
+          }
+        }
+      }
+    },
     "menu.header.idle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30,6 +52,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Capsaicin"
+          }
+        }
+      }
+    },
+    "menu.noTimeLimit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間指定なし"
           }
         }
       }
@@ -106,7 +139,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "カスタム…"
+            "value" : "時間を入力…"
           }
         }
       }
@@ -117,7 +150,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時刻を指定してオン…"
+            "value" : "時刻を指定…"
           }
         }
       }
@@ -173,28 +206,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スリープ防止をオフにする"
-          }
-        }
-      }
-    },
-    "menu.virtualKeyboard.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LEDが点灯しないことがあります"
-          }
-        }
-      }
-    },
-    "menu.virtualKeyboard.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キー配列を変更するアプリが動作中"
           }
         }
       }
@@ -286,27 +297,30 @@
         }
       }
     },
-    "panel.duration.hours.label" : {
+    "panel.change" : {
+      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時間"
+            "value" : "変更"
           }
         }
       }
     },
-    "panel.duration.minutes.label" : {
+    "panel.changeTime.title" : {
+      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "分"
+            "value" : "オフにする時刻を変更"
           }
         }
       }
     },
     "panel.duration.title" : {
+      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -316,7 +330,19 @@
         }
       }
     },
+    "panel.duration.until" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@にオフ"
+          }
+        }
+      }
+    },
     "panel.start" : {
+      "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
@@ -352,7 +378,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指定時刻までオン"
+            "value" : "時刻を指定してオン"
           }
         }
       }

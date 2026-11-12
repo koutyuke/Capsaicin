@@ -2,7 +2,7 @@
 schema: task
 id: TASK-066
 title: メニューの構成、入力パネル、時間の長さの入力欄を作り直す
-status: todo
+status: done
 requirements: ["REQ-MENU-002", "REQ-MENU-007", "REQ-LED-007", "REQ-SET-001", "REQ-UI-003"]
 depends_on: ["TASK-063", "TASK-065"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -76,4 +76,7 @@ assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
 
 ## レビュー
 
-（PM が記入する）
+- メニューの構成、時間のサブメニュー、スリープとディスプレイのサブメニュー、入力パネル、共通の `DurationField` が仕様どおりで、標準の部品だけを使っている。
+- ヘルパーの確認とエラーの出し方は、作業中の質問に PM が答え、確認・エラーが要るときだけ設定画面を前面に出して既存のシートを使う形にした。仕様（`SPEC-MENU-008`）には PM が追記した。
+- スリープとディスプレイの項目の注意の副題に、(i) の説明文がまるごと入っていた。PM が `SettingsSleepRow` に注意の文だけを持たせ、副題はそれだけにした。テストの期待も合わせた。
+- PM が `just check` と `just build` を流し、通った。実機での見た目と操作は、手順書の 5.2、8.1、8.5、8.6 でオーナーが確かめる。

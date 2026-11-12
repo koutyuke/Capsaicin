@@ -60,30 +60,25 @@ struct SettingsRow<Content: View>: View {
 
 struct SettingsDurationField: View {
     @Binding var value: TimerDuration
+    @State private var input: DurationInput
+
+    init(value: Binding<TimerDuration>) {
+        _value = value
+        _input = State(initialValue: DurationInput(value.wrappedValue))
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
-            number("hours", get: { value.minutes / 60 }, set: { setMinutes($0 * 60 + value.minutes % 60) })
-            number("minutes", get: { value.minutes % 60 }, set: { setMinutes(value.minutes / 60 * 60 + $0) })
-            Stepper(SettingsSection.sleep.text("timer.duration.label"), onIncrement: {
-                setMinutes(min(1440, value.minutes + 5))
-            }, onDecrement: { setMinutes(max(1, value.minutes - 5)) }).labelsHidden()
-        }.monospacedDigit()
-    }
-
-    private func number(_ unit: String, get: @escaping @MainActor @Sendable () -> Int,
-                        set: @escaping @MainActor @Sendable (Int) -> Void) -> some View
-    {
-        HStack(spacing: 4) {
-            TextField(SettingsSection.sleep.text(unit), value: Binding(get: get, set: set), format: .number)
-                .labelsHidden().frame(width: 40).multilineTextAlignment(.trailing)
-            Text(SettingsSection.sleep.text(unit)).foregroundStyle(.secondary)
-        }
-    }
-
-    private func setMinutes(_ minutes: Int) {
-        if let duration = TimerDuration(minutes: minutes) {
-            value = duration
-        }
+        DurationField(input: $input)
+            .onChange(of: input) { _, input in
+                if let duration = input.value, duration != value {
+                    value = duration
+                }
+            }
+            .onChange(of: value) { _, value in
+                if input.value != value {
+                    input = DurationInput(value)
+                }
+            }
     }
 }
 

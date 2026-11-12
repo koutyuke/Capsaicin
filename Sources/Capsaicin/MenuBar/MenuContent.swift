@@ -3,6 +3,7 @@ import Foundation
 
 enum MenuCommand: Equatable {
     case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit
+    case toggleSleep(String), lidClose(SettingsLidCloseChoice)
 }
 
 struct MenuEntry {
@@ -12,18 +13,19 @@ struct MenuEntry {
     var command: MenuCommand?
     var children: [MenuEntry] = []
     var isWarning = false
+    var isChecked = false
 }
 
 enum MenuContent {
     static func make(
-        status: BlockingStatus, settings: Settings, isOnACPower: Bool, virtualKeyboard: Bool,
+        status: BlockingStatus, settings: Settings, isOnACPower: Bool, sleepRows: [SettingsSleepRow],
         now: Date = Date(), calendar: Calendar = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
-                 children: [MenuEntry] = [], warning: Bool = false) -> MenuEntry
+                 children: [MenuEntry] = []) -> MenuEntry
         {
             MenuEntry(id: key, title: text(key, bundle: bundle), subtitle: subtitle, command: command,
-                      children: children, isWarning: warning)
+                      children: children)
         }
         var rows = [row(status.isBlocking ? "menu.header.active" : "menu.header.idle")]
         rows += warnings(status: status, bundle: bundle)
@@ -44,6 +46,8 @@ enum MenuContent {
                 rows.append(entry)
             }
             rows.append(row("menu.stop", command: .stop))
+            rows.append(row("menu.changeTime", children:
+                [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle)))
         } else {
             let limit = TimeLimitRule.timeLimit(override: nil, settings: settings, now: now, calendar: calendar)
             let subtitle = limit.map {
@@ -55,17 +59,11 @@ enum MenuContent {
             } ?? (status.batteryCondition == nil ? text("menu.start.subtitle.none", bundle: bundle) : nil)
             rows.append(row("menu.start", subtitle: subtitle, command: .start(nil)))
             rows.append(row("menu.startFor", children: presets(calendar: calendar, bundle: bundle)))
-            rows.append(row("menu.startUntil", command: .timePanel))
         }
-        if virtualKeyboard {
-            rows += [MenuEntry(id: "separator.virtualKeyboard"),
-                     row(
-                         "menu.virtualKeyboard.title",
-                         subtitle: text("menu.virtualKeyboard.subtitle", bundle: bundle),
-                         warning: true,
-                     )]
-        }
-        return rows + [MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
+        return rows + [MenuEntry(id: "separator.sleep"),
+                       MenuEntry(id: "menu.sleep", title: SettingsSection.sleep.text("behavior.group.title"),
+                                 children: sleepEntries(sleepRows, settings: settings)),
+                       MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
                        row("menu.quit", command: .quit)]
     }
 
@@ -100,15 +98,33 @@ enum MenuContent {
             MenuEntry(id: "preset.\(minutes)",
                       title: duration(Double(minutes * 60), calendar: calendar, bundle: bundle),
                       command: .start(.timer(TimerDuration(minutes: minutes)!)))
-        } + [MenuEntry(id: "separator.presets"),
-             MenuEntry(
-                 id: "menu.startFor.custom",
-                 title: text("menu.startFor.custom", bundle: bundle),
-                 command: .durationPanel,
-             )]
+        } + [MenuEntry(
+            id: "menu.startFor.custom",
+            title: text("menu.startFor.custom", bundle: bundle),
+            command: .durationPanel,
+        ),
+        MenuEntry(id: "separator.time"),
+        MenuEntry(id: "menu.startUntil", title: text("menu.startUntil", bundle: bundle), command: .timePanel),
+        MenuEntry(id: "separator.noTimeLimit"),
+        MenuEntry(id: "menu.noTimeLimit", title: text("menu.noTimeLimit", bundle: bundle),
+                  command: .start(.noTimeLimit))]
     }
 
-    private static func time(_ date: Date, calendar: Calendar) -> String {
+    private static func sleepEntries(_ rows: [SettingsSleepRow], settings: Settings) -> [MenuEntry] {
+        rows.map { row in
+            let choices: [MenuEntry] = row.key == "lidClose" ? SettingsLidCloseChoice.allCases.map { choice in
+                MenuEntry(id: "menu.sleep.lidClose." + choice.rawValue,
+                          title: SettingsSection.sleep.text("lidClose." + choice.rawValue), command: .lidClose(choice),
+                          isChecked: choice == SettingsLidCloseChoice(settings: settings))
+            } : []
+            return MenuEntry(id: "menu.sleep." + row.key, title: SettingsSection.sleep.text(row.key + ".label"),
+                             subtitle: row.warning.isEmpty ? nil : row.warning,
+                             command: row.setting == nil ? nil : .toggleSleep(row.key), children: choices,
+                             isWarning: !row.warningLabel.isEmpty, isChecked: row.setting != nil && row.isOn)
+        }
+    }
+
+    static func time(_ date: Date, calendar: Calendar) -> String {
         let formatter = DateFormatter()
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone

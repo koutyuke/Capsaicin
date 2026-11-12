@@ -50,6 +50,8 @@ struct SettingsSleepRow: Identifiable {
     let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
+    /// 注意の文。(i) の先頭とメニューの副題で使う。
+    var warning = ""
     var warningLabel = ""
     var id: String {
         key
@@ -84,8 +86,8 @@ struct SettingsSleepRow: Identifiable {
                 warnings.append("brightnessUnavailable")
             }
             row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.joined(separator: "、")
-            row.help = warnings.map { SettingsSection.sleep.text($0) }.joined()
-                + SettingsSection.sleep.text(row.key + ".help")
+            row.warning = warnings.map { SettingsSection.sleep.text($0) }.joined()
+            row.help = row.warning + SettingsSection.sleep.text(row.key + ".help")
             return row
         }
     }

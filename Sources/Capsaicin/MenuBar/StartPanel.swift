@@ -5,17 +5,32 @@ import SwiftUI
 struct StartPanelInput {
     enum Mode { case duration, time }
     var mode: Mode
-    var hours: String
-    var minutes: String
+    var duration: DurationInput
     var date: Date
+    let isReplacing: Bool
 
-    init(mode: Mode, settings: CapsaicinCore.Settings, now: Date, calendar: Calendar) {
+    init(mode: Mode, settings: CapsaicinCore.Settings, session: BlockingSession? = nil,
+         now: Date, calendar: Calendar)
+    {
         self.mode = mode
-        let duration = (settings.timerEnabled ? settings : CapsaicinCore.Settings()).timerDuration.minutes
-        hours = String(duration / 60)
-        minutes = String(duration % 60)
+        isReplacing = session != nil
+        let savedDuration = (settings.timerEnabled ? settings : CapsaicinCore.Settings()).timerDuration
+        duration = DurationInput(savedDuration)
+        if let limit = session?.timeLimit {
+            let remaining = Int(ceil(limit.date.timeIntervalSince(now) / 60))
+            duration.hours = String(remaining / 60)
+            duration.minutes = String(remaining % 60)
+        }
         let time = (settings.specifiedTimeEnabled ? settings : CapsaicinCore.Settings()).specifiedTime
-        date = SpecifiedTimeRule.releaseDate(for: time, after: now, calendar: calendar)
+        date = session?.timeLimit?.date ?? SpecifiedTimeRule.releaseDate(for: time, after: now, calendar: calendar)
+    }
+
+    var titleKey: String {
+        isReplacing ? "panel.changeTime.title" : (mode == .duration ? "panel.duration.title" : "panel.time.title")
+    }
+
+    var confirmKey: String {
+        isReplacing ? "panel.change" : "panel.start"
     }
 
     func startOverride(calendar: Calendar) -> StartTimeOverride? {
@@ -26,10 +41,7 @@ struct StartPanelInput {
             )
             .map { .specifiedTime($0) }
         }
-        guard let hours = Int(hours), (0 ... 24).contains(hours),
-              let minutes = Int(minutes), (0 ... 59).contains(minutes),
-              let duration = TimerDuration(minutes: hours * 60 + minutes) else { return nil }
-        return .timer(duration)
+        return duration.value.map { .timer($0) }
     }
 
     func isNextDay(now: Date, calendar: Calendar) -> Bool {
@@ -40,30 +52,21 @@ struct StartPanelInput {
         )
     }
 
-    mutating func stepMinutes(_ delta: Int) {
-        let current: Int = if case let .timer(duration) = startOverride(calendar: .current) {
-            duration.minutes
-        } else {
-            0
+    func releaseDate(now: Date, calendar: Calendar) -> Date? {
+        switch startOverride(calendar: calendar) {
+        case let .timer(duration): now.addingTimeInterval(Double(duration.minutes * 60))
+        case let .specifiedTime(time): SpecifiedTimeRule.releaseDate(for: time, after: now, calendar: calendar)
+        case .noTimeLimit, nil: nil
         }
-        let value = min(1440, max(1, current + delta))
-        hours = String(value / 60)
-        minutes = String(value % 60)
     }
 }
 
 @MainActor
 enum StartPanel {
     static func make(mode: StartPanelInput.Mode, model: AppModel) -> NSPanel {
-        let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 300, height: 160),
-                            styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        panel.title = MenuContent.text(mode == .duration ? "panel.duration.title" : "panel.time.title")
-        panel.isReleasedWhenClosed = false
-        panel.contentView = NSHostingView(rootView: StartPanelView(
-            input: StartPanelInput(mode: mode, settings: model.settings, now: Date(), calendar: .current),
-            cancel: { [weak panel] in panel?.close() },
-            start: { [weak panel] value in panel?.close(); model.requestStart(from: .menu, override: value) },
-        ))
+        let input = StartPanelInput(mode: mode, settings: model.settings, session: model.status.session,
+                                    now: Date(), calendar: .current)
+        let panel = makePanel(input: input, start: { model.requestStart(from: .menu, override: $0) })
         let frame = (NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main)?.visibleFrame
         if let frame {
             panel.setFrameOrigin(NSPoint(
@@ -75,9 +78,22 @@ enum StartPanel {
         panel.makeKeyAndOrderFront(nil)
         return panel
     }
+
+    static func makePanel(input: StartPanelInput, start: @escaping (StartTimeOverride) -> Void) -> NSPanel {
+        let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 300, height: 160),
+                            styleMask: [.titled, .closable], backing: .buffered, defer: false)
+        panel.title = MenuContent.text(input.titleKey)
+        panel.isReleasedWhenClosed = false
+        panel.contentView = NSHostingView(rootView: StartPanelView(
+            input: input,
+            cancel: { [weak panel] in panel?.close() },
+            start: { [weak panel] value in panel?.close(); start(value) },
+        ))
+        return panel
+    }
 }
 
-private struct StartPanelView: View {
+struct StartPanelView: View {
     @State var input: StartPanelInput
     var cancel: () -> Void
     var start: (StartTimeOverride) -> Void
@@ -85,25 +101,24 @@ private struct StartPanelView: View {
     var body: some View {
         VStack(spacing: 16) {
             if input.mode == .duration {
-                HStack(spacing: 8) {
-                    TextField(text: $input.hours) { Text("panel.duration.hours.label", tableName: "MenuBar") }
-                    Text("panel.duration.hours.label", tableName: "MenuBar")
-                    TextField(text: $input.minutes) { Text("panel.duration.minutes.label", tableName: "MenuBar") }
-                    Text("panel.duration.minutes.label", tableName: "MenuBar")
-                    Stepper {
-                        Text("panel.duration.title", tableName: "MenuBar")
-                    } onIncrement: { input.stepMinutes(5) } onDecrement: { input.stepMinutes(-5) }
-                        .labelsHidden()
-                }
-                .textFieldStyle(.roundedBorder)
-                .monospacedDigit()
+                DurationField(input: $input.duration)
             } else {
                 DatePicker(selection: $input.date, displayedComponents: .hourAndMinute) {
                     Text("panel.time.label", tableName: "MenuBar")
                 }
                 .datePickerStyle(.stepperField)
                 .monospacedDigit()
-                TimelineView(.periodic(from: .now, by: 60)) { context in
+            }
+            TimelineView(.periodic(from: .now, by: 60)) { context in
+                if input.mode == .duration {
+                    Text(input.releaseDate(now: context.date, calendar: .current).map {
+                        String(
+                            format: MenuContent.text("panel.duration.until"),
+                            MenuContent.time($0, calendar: .current),
+                        )
+                    } ?? "")
+                        .foregroundStyle(.secondary).monospacedDigit()
+                } else {
                     Text("panel.time.nextDay", tableName: "MenuBar")
                         .foregroundStyle(.secondary)
                         .opacity(input.isNextDay(now: context.date, calendar: .current) ? 1 : 0)
@@ -116,7 +131,7 @@ private struct StartPanelView: View {
                     if let value = input.startOverride(calendar: .current) {
                         start(value)
                     }
-                } label: { Text("panel.start", tableName: "MenuBar") }
+                } label: { Text(MenuContent.text(input.confirmKey)) }
                     .keyboardShortcut(.defaultAction)
                     .disabled(input.startOverride(calendar: .current) == nil)
             }

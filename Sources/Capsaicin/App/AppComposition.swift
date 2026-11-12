@@ -110,16 +110,31 @@ private final class AppServices {
         self.virtualKeyboard = virtualKeyboard
         self.display = display
         self.server = server
-        menuBar = MenuBarController(model: model, isOnACPower: { power.powerState.isOnACPower })
+        menuBar = MenuBarController(settings: settings, isOnACPower: { power.powerState.isOnACPower })
         hud = HUDPresenter(isEnabled: { model.settings.showsHUD })
         menuBar.openSettings = { [weak self] in self?.openSettings() }
         menuBar.quit = quit
     }
 
-    func start() async {
+    private func prepareSettingsWindow() {
         settingsWindow = SettingsWindowController(
             model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }), quit: menuBar.quit,
         )
+        // メニューからの変更でも、確認・エラーが必要なときだけ既存のシートの親を前面に出す。
+        let confirm = settings.confirm
+        settings.confirm = { [weak self] operation, fromSetting in
+            self?.openSettings()
+            return await confirm(operation, fromSetting)
+        }
+        let showError = settings.showError
+        settings.showError = { [weak self] title, message in
+            self?.openSettings()
+            showError(title, message)
+        }
+    }
+
+    func start() async {
+        prepareSettingsWindow()
         model.onStatusChange = { [weak self] in self?.refresh($0) }
         model.onEvent = { [weak self] event, previous in
             guard let self else { return }
