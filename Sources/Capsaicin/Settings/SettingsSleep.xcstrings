@@ -56,6 +56,28 @@
         }
       }
     },
+    "brightnessUnavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このMacでは画面の明るさを変更できないため、ディスプレイを閉じても画面はオンのままになります。"
+          }
+        }
+      }
+    },
+    "brightnessUnavailable.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告、画面の明るさを変更できません"
+          }
+        }
+      }
+    },
     "display.help" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -117,7 +139,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「スリープ」以外を選ぶと、Capsaicinがオンの間は、ディスプレイを閉じても、アップルメニューの「スリープ」などを選んでも、Macはスリープしません。使うには、管理者パスワードでヘルパーをインストールする必要があります。"
+            "value" : "「スリープ」以外を選ぶと、Capsaicinがオンの間は、ディスプレイを閉じても、アップルメニューの「スリープ」などを選んでも、Macはスリープしません。使うには、管理者パスワードでヘルパーをインストールする必要があります。「明るさを0」では、閉じている間は画面を暗くするだけでロックしないため、ディスプレイを開くとすぐに操作できます。「ディスプレイを自動でオフにしない」をオフにしていると、時間が経ってディスプレイがオフになり、ロックされることがあります。"
           }
         }
       }
@@ -162,6 +184,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ディスプレイをオフ"
+          }
+        }
+      }
+    },
+    "lidClose.zeroBrightness" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明るさを0"
           }
         }
       }

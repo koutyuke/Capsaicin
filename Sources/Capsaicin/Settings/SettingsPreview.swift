@@ -6,10 +6,11 @@
     /// OS に触れないポート。抑止の操作はすべて成功したことにする。
     @MainActor
     private final class PreviewSystem: PowerAssertionControlling, HelperSleepControlling, CapsLockLEDControlling,
-        PowerStateProviding, BootTimeProviding, ResumeRecordStoring, TimeProviding
+        PowerStateProviding, BootTimeProviding, ResumeRecordStoring, TimeProviding, BuiltInDisplayBrightnessControlling
     {
         let isHelperInstalled: Bool
         let isAvailable = true
+        let isKnownUnavailable = false
         let powerState = PowerState(batteryLevel: 80, isOnACPower: true)
         let bootTime = Date.distantPast
         var now: Date {
@@ -31,6 +32,11 @@
         func turnOn() {}
         func turnOff() {}
         func setLit(_: Bool) {}
+        func readBrightness() -> Float? {
+            nil
+        }
+
+        func setBrightness(_: Float) {}
         func load() -> ResumeRecord? {
             nil
         }
@@ -50,7 +56,7 @@
             controller: BlockingController(
                 settings: Settings(),
                 capabilities: capabilities,
-                ports: .init(assertions: system, helper: system, led: system, power: system,
+                ports: .init(assertions: system, helper: system, led: system, brightness: system, power: system,
                              bootTime: system, records: system, time: system),
             ),
             saveSettings: { _ in },

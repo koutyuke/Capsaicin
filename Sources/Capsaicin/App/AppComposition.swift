@@ -17,11 +17,12 @@ enum AppComposition {
         let power = PowerStateMonitor()
         let led = CapsLockLEDController()
         let helper = HelperSleepController()
+        let brightness = DisplayServicesBrightness()
         let controller = try BlockingController(
             settings: store.load(), capabilities: PowerMachineCapabilities.detect(),
             ports: .init(
                 assertions: PowerAssertions(), helper: helper,
-                led: led, power: power, bootTime: BootTimeProvider(),
+                led: led, brightness: brightness, power: power, bootTime: BootTimeProvider(),
                 records: FileResumeRecordStore(bundleID: isDebug
                     ? "io.github.koutyuke.capsaicin.debug" : "io.github.koutyuke.capsaicin"),
                 time: SystemTime(),
@@ -135,13 +136,15 @@ private final class AppServices {
         do { try power.start { [weak model] _ in model?.powerStateChanged() } }
         catch { AppRuntime.log(error) }
         do {
-            try lid.start { [weak self] in
-                guard let self, model.shouldSleepDisplayOnLidClose else { return }
+            try lid.start(onClose: { [weak self] in
+                guard let self else { return }
+                model.lidClosed()
+                guard model.shouldSleepDisplayOnLidClose else { return }
                 Task {
                     do { try await self.display.sleepDisplay() }
                     catch { AppRuntime.log(error) }
                 }
-            }
+            }, onOpen: { [weak model] in model?.lidOpened() })
         } catch { AppRuntime.log(error) }
         led.onReapplyFailure = { AppRuntime.log($0) }
         // 画面のスリープ、スクリーンセーバー、画面のロックでも OS が LED を "Auto" に戻すので、それぞれで書き直す。

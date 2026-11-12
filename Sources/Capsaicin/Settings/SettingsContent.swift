@@ -32,10 +32,15 @@ enum SettingsSection: String, CaseIterable, Identifiable {
 private final class SettingsResources: NSObject {}
 
 enum SettingsLidCloseChoice: String, CaseIterable {
-    case sleep, turnOff, keepOn
+    case sleep, turnOff, zeroBrightness, keepOn
 
     init(settings: Settings) {
-        self = settings.blocksManualSleep ? (settings.lidCloseDisplay == .turnOff ? .turnOff : .keepOn) : .sleep
+        guard settings.blocksManualSleep else { self = .sleep; return }
+        switch settings.lidCloseDisplay {
+        case .turnOff: self = .turnOff
+        case .zeroBrightness: self = .zeroBrightness
+        case .keepOn: self = .keepOn
+        }
     }
 }
 
@@ -45,6 +50,7 @@ struct SettingsSleepRow: Identifiable {
     let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
+    var warningLabel = ""
     var id: String {
         key
     }
@@ -57,7 +63,7 @@ struct SettingsSleepRow: Identifiable {
     }
 
     static func rows(settings: Settings, capabilities: MachineCapabilities,
-                     helper: HelperInstallationState) -> [Self]
+                     helper: HelperInstallationState, brightnessUnavailable: Bool) -> [Self]
     {
         let presentation = SleepSettingsPresentation(settings: settings, isHelperInstalled: helper == .installed)
         let manual = capabilities.hasLid ? "lidClose" : "manual"
@@ -68,7 +74,17 @@ struct SettingsSleepRow: Identifiable {
         ]
         return definitions.map { row in
             var row = row
-            row.help = (row.state == .onWithoutHelper ? SettingsSection.sleep.text("helperNotReady") : "")
+            var warnings: [String] = []
+            if row.state == .onWithoutHelper {
+                warnings.append("helperNotReady")
+            }
+            if row.key == "lidClose", SettingsLidCloseChoice(settings: settings) == .zeroBrightness,
+               brightnessUnavailable
+            {
+                warnings.append("brightnessUnavailable")
+            }
+            row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.joined(separator: "、")
+            row.help = warnings.map { SettingsSection.sleep.text($0) }.joined()
                 + SettingsSection.sleep.text(row.key + ".help")
             return row
         }

@@ -9,6 +9,7 @@ public final class BlockingController {
         public var assertions: any PowerAssertionControlling
         public var helper: any HelperSleepControlling
         public var led: any CapsLockLEDControlling
+        public var brightness: any BuiltInDisplayBrightnessControlling
         public var power: any PowerStateProviding
         public var bootTime: any BootTimeProviding
         public var records: any ResumeRecordStoring
@@ -18,6 +19,7 @@ public final class BlockingController {
             assertions: any PowerAssertionControlling,
             helper: any HelperSleepControlling,
             led: any CapsLockLEDControlling,
+            brightness: any BuiltInDisplayBrightnessControlling,
             power: any PowerStateProviding,
             bootTime: any BootTimeProviding,
             records: any ResumeRecordStoring,
@@ -26,6 +28,7 @@ public final class BlockingController {
             self.assertions = assertions
             self.helper = helper
             self.led = led
+            self.brightness = brightness
             self.power = power
             self.bootTime = bootTime
             self.records = records
@@ -65,6 +68,10 @@ public final class BlockingController {
 
     public var effectiveSettings: EffectiveSettings {
         EffectiveSettings(settings: settings, capabilities: capabilities)
+    }
+
+    public var isBrightnessKnownUnavailable: Bool {
+        ports.brightness.isKnownUnavailable
     }
 
     public var misalignments: Misalignments {

@@ -1,7 +1,7 @@
 import Foundation
 import IOKit
 
-/// 開いていると分かっている状態から閉じたときだけ通知する。初期状態不明は開いたとみなさない。
+/// 状態が分かっているときの開閉を通知する。初期状態不明からの変化は通知しない。
 @MainActor
 public final class LidStateMonitor {
     public private(set) var isClosed: Bool?
@@ -9,6 +9,7 @@ public final class LidStateMonitor {
     private let observe: (@escaping @MainActor (UInt32, UInt) -> Void) throws -> @MainActor () -> Void
     private var cancelObservation: (@MainActor () -> Void)?
     private var onClose: (@MainActor () -> Void)?
+    private var onOpen: (@MainActor () -> Void)?
     private var generation = 0
 
     /// IOPM.h の iokit_family_msg(sub_iokit_powermanagement, 0x100)。Swift にマクロが取り込まれない。
@@ -27,11 +28,14 @@ public final class LidStateMonitor {
         isClosed = read()
     }
 
-    public func start(onClose: @escaping @MainActor () -> Void) throws {
+    public func start(onClose: @escaping @MainActor () -> Void,
+                      onOpen: @escaping @MainActor () -> Void) throws
+    {
         guard cancelObservation == nil else { return }
         generation &+= 1
         let currentGeneration = generation
         self.onClose = onClose
+        self.onOpen = onOpen
         do {
             cancelObservation = try observe { [weak self] message, argument in
                 guard let self, generation == currentGeneration, message == Self.clamshellMessage else { return }
@@ -39,6 +43,7 @@ public final class LidStateMonitor {
             }
         } catch {
             self.onClose = nil
+            self.onOpen = nil
             generation &+= 1
             throw error
         }
@@ -49,6 +54,7 @@ public final class LidStateMonitor {
     public func stop() {
         generation &+= 1
         onClose = nil
+        onOpen = nil
         let cancel = cancelObservation
         cancelObservation = nil
         cancel?()
@@ -56,9 +62,12 @@ public final class LidStateMonitor {
 
     private func receive(closed: Bool) {
         let wasOpen = isClosed == false
+        let wasClosed = isClosed == true
         isClosed = closed
         if wasOpen, closed {
             onClose?()
+        } else if wasClosed, !closed {
+            onOpen?()
         }
     }
 

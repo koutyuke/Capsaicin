@@ -2,6 +2,17 @@ import Foundation
 
 // コントローラーが OS に作用するためのポート。すべてメインスレッドから同期で呼ぶ。
 // 失敗する操作は throw で伝える。コントローラーは失敗を合わせられていない制御か開始の拒否にする。
+// 輝度は抑止の仕組みではないので、その失敗はログに残すだけにする。
+
+/// オンラインの内蔵ディスプレイの輝度。外部ディスプレイは操作しない。
+@MainActor
+public protocol BuiltInDisplayBrightnessControlling {
+    /// 関数がないか、内蔵ディスプレイの輝度を変更できないと分かっているか。対象がなく判定不能なら false。
+    var isKnownUnavailable: Bool { get }
+    /// 対象がなければ nil。読み取り失敗は throw する。
+    func readBrightness() throws -> Float?
+    func setBrightness(_ value: Float) throws
+}
 
 /// 電源管理アサーション。
 @MainActor

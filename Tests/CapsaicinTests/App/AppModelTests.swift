@@ -6,6 +6,23 @@ import Testing
 
 @MainActor
 struct AppModelTests {
+    @Test("SPEC-BLK-013 蓋の開閉をコントローラーへ渡し、開始時には暗くしない")
+    func lidBrightness() {
+        let fixture = AppFixture()
+        var settings = fixture.model.settings
+        settings.blocksManualSleep = true
+        settings.lidCloseDisplay = .zeroBrightness
+        fixture.model.changeSettings(settings)
+        fixture.model.launch()
+        fixture.model.requestStart(from: .menu)
+        #expect(fixture.system.brightness == 0.5)
+        fixture.model.lidClosed()
+        #expect(fixture.system.brightness == 0)
+        #expect(!fixture.model.shouldSleepDisplayOnLidClose)
+        fixture.model.lidOpened()
+        #expect(fixture.system.brightness == 0.5)
+    }
+
     @Test("SPEC-BLK-011 開始・解除・ホットキーは状態と出来事を画面に渡す")
     func requests() {
         let fixture = AppFixture()

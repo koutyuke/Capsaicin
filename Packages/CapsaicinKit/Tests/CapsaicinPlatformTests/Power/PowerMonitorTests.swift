@@ -72,8 +72,8 @@ struct PowerPlatformMonitorTests {
             callbacks.append(callback)
             return { cancels += 1 }
         })
-        try monitor.start { closes += 1 }
-        try monitor.start { Issue.record("二重開始でハンドラーが置き換わった") }
+        try monitor.start(onClose: { closes += 1 }, onOpen: {})
+        try monitor.start(onClose: { Issue.record("二重開始でハンドラーが置き換わった") }, onOpen: {})
         #expect(callbacks.count == 1)
         let message = LidStateMonitor.clamshellMessage
         callbacks[0](message &+ 1, 1)
@@ -92,7 +92,7 @@ struct PowerPlatformMonitorTests {
         callbacks[0](message, 0)
         #expect(monitor.isClosed == true)
         initial = false
-        try monitor.start { closes += 1 }
+        try monitor.start(onClose: { closes += 1 }, onOpen: {})
         callbacks[0](message, 1)
         #expect(closes == 2)
         callbacks[1](message, 1)
@@ -110,7 +110,7 @@ struct PowerPlatformMonitorTests {
                 callback = $0
                 return {}
             })
-            try monitor.start { closes += 1 }
+            try monitor.start(onClose: { closes += 1 }, onOpen: {})
             callback?(LidStateMonitor.clamshellMessage, 1)
             #expect(closes == 0)
             callback?(LidStateMonitor.clamshellMessage, 0)
@@ -130,10 +130,48 @@ struct PowerPlatformMonitorTests {
             }
             return { cancelled += 1 }
         })
-        #expect(throws: PowerPlatformError.unavailable("fake")) { try monitor?.start {} }
+        #expect(throws: PowerPlatformError.unavailable("fake")) { try monitor?.start(onClose: {}, onOpen: {}) }
         fails = false
-        try monitor?.start {}
+        try monitor?.start(onClose: {}, onOpen: {})
         monitor = nil
         #expect(cancelled == 1)
+    }
+
+    @Test("SPEC-BLK-013 閉じたと分かっている状態から開いたときだけ通知する",
+          arguments: [Bool?.none, false, true])
+    func lidOpenTransitions(initial: Bool?) throws {
+        var callbacks: [@MainActor (UInt32, UInt) -> Void] = []
+        var opens = 0
+        var closes = 0
+        let monitor = LidStateMonitor(read: { initial }, observe: {
+            callbacks.append($0)
+            return {}
+        })
+        try monitor.start(onClose: { closes += 1 }, onOpen: { opens += 1 })
+        try monitor.start(onClose: { Issue.record("ハンドラーの上書き") },
+                          onOpen: { Issue.record("ハンドラーの上書き") })
+        #expect(opens == 0 && closes == 0)
+        let message = LidStateMonitor.clamshellMessage
+        callbacks[0](message &+ 1, 0)
+        callbacks[0](message, 0)
+        callbacks[0](message, 2)
+        #expect(opens == (initial == true ? 1 : 0))
+        callbacks[0](message, 1)
+        callbacks[0](message, 3)
+        callbacks[0](message, 0)
+        #expect(opens == (initial == true ? 2 : 1))
+        #expect(closes == 1)
+        monitor.stop()
+        callbacks[0](message, 1)
+        callbacks[0](message, 0)
+        #expect(opens == (initial == true ? 2 : 1))
+        try monitor.start(onClose: {}, onOpen: { opens += 1 })
+        callbacks[0](message, 1)
+        callbacks[0](message, 0)
+        #expect(opens == (initial == true ? 2 : 1))
+        callbacks[1](message, 1)
+        callbacks[1](message, 0)
+        #expect(opens == (initial == true ? 3 : 2))
+        monitor.stop()
     }
 }

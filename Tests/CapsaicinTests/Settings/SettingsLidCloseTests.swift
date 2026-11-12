@@ -4,20 +4,19 @@ import CapsaicinPlatform
 import Testing
 
 extension SettingsTests {
-    @Test("SPEC-SET-005 ポップアップは保存値の3通りを表示し、オフの間はディスプレイの保存値を隠す",
+    @Test("SPEC-SET-005 ポップアップは保存値の4通りを表示し、オフの間はディスプレイの保存値を隠す",
           arguments: [false, true], LidCloseDisplay.allCases)
     func lidCloseSelection(manual: Bool, display: LidCloseDisplay) {
         var settings = CapsaicinCore.Settings()
         settings.blocksManualSleep = manual
         settings.lidCloseDisplay = display
-        #expect(SettingsLidCloseChoice(settings: settings) == (manual
-                ? (display == .turnOff ? .turnOff : .keepOn) : .sleep))
-        #expect(SettingsLidCloseChoice.allCases == [.sleep, .turnOff, .keepOn])
+        #expect(SettingsLidCloseChoice(settings: settings).rawValue == (manual ? display.rawValue : "sleep"))
+        #expect(SettingsLidCloseChoice.allCases == [.sleep, .turnOff, .zeroBrightness, .keepOn])
     }
 
     @Test("SPEC-SET-005 ヘルパー設置済みなら2値を1回で保存し、スリープを選ぶとディスプレイの保存値を保つ",
-          arguments: [SettingsLidCloseChoice.turnOff, .keepOn])
-    func installedLidClose(choice: SettingsLidCloseChoice) async {
+          arguments: [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
+    func installedLidClose(choice: SettingsLidCloseChoice) async throws {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
             state: { .installed }, perform: { _ in Issue.record("設置済みなのに設置を要求した"); return .cancelled },
@@ -26,7 +25,7 @@ extension SettingsTests {
         await model.changeLidClose(to: choice)
         #expect(model.lidCloseChoice == choice)
         #expect(fixture.model.settings.blocksManualSleep)
-        let savedDisplay: LidCloseDisplay = choice == .turnOff ? .turnOff : .keepOn
+        let savedDisplay = try #require(LidCloseDisplay(rawValue: choice.rawValue))
         #expect(fixture.model.settings.lidCloseDisplay == savedDisplay)
         #expect(fixture.savedSettings == [fixture.model.settings])
         await model.changeLidClose(to: .sleep)
@@ -49,7 +48,7 @@ extension SettingsTests {
             state: { .partial }, perform: { _ in Issue.record("スリープへ戻すのに設置を要求した"); return .cancelled },
             completed: { _, _ in },
         ))
-        #expect(model.lidCloseChoice == (display == .turnOff ? .turnOff : .keepOn))
+        #expect(model.lidCloseChoice.rawValue == display.rawValue)
         #expect(model.sleepRows[1].state == .onWithoutHelper)
         #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperNotReady")))
         await model.changeLidClose(to: .sleep)
@@ -102,5 +101,35 @@ extension SettingsTests {
         #expect(app.settings.blocksManualSleep == accepts)
         #expect(installed == accepts)
         #expect(!model.pendingManual && !model.isBusy)
+    }
+
+    @Test("SPEC-SET-005 明るさを0を選んだときだけ輝度の注意を出し、ヘルパーの注意を先頭に置く",
+          arguments: SettingsLidCloseChoice.allCases, [HelperInstallationState.installed, .partial, .notInstalled])
+    func brightnessWarning(choice: SettingsLidCloseChoice, helper: HelperInstallationState) async {
+        let fixture = AppFixture()
+        let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
+            state: { .installed }, perform: { _ in .cancelled }, completed: { _, _ in },
+        ))
+        await model.changeLidClose(to: choice)
+        #expect(model.sleepRows[1].warningLabel.isEmpty)
+        fixture.system.isKnownUnavailable = true
+        let unavailable = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
+            state: { helper }, perform: { _ in .cancelled }, completed: { _, _ in },
+        ))
+        let row = unavailable.sleepRows[1]
+        var keys: [String] = []
+        if choice != .sleep, helper != .installed {
+            keys.append("helperNotReady")
+        }
+        if choice == .zeroBrightness {
+            keys.append("brightnessUnavailable")
+        }
+        #expect(row.help == keys.map { SettingsSection.sleep.text($0) }.joined()
+            + SettingsSection.sleep.text("lidClose.help"))
+        #expect(row.warningLabel == keys.map { SettingsSection.sleep.text($0 + ".a11y") }.joined(separator: "、"))
+        #expect(unavailable.lidCloseChoice == choice)
+        #expect(!unavailable.isBusy)
+        #expect(SettingsSection.sleep.text("brightnessUnavailable.a11y") == "警告、画面の明るさを変更できません")
+        #expect(SettingsSection.sleep.text("lidClose.zeroBrightness") == "明るさを0")
     }
 }

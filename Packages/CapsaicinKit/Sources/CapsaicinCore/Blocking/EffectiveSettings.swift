@@ -5,6 +5,8 @@ public struct EffectiveSettings: Hashable, Sendable {
     public var blocksManualSleep: Bool
     /// 蓋を閉じたら画面を消すか。蓋のある Mac で、手動スリープと蓋閉じスリープを止め、閉じたときの画面が「消灯」のときだけ true。
     public var shouldSleepDisplayOnLidClose: Bool
+    /// 蓋を閉じたら内蔵ディスプレイの輝度を 0 にするか。
+    public var shouldZeroBrightnessOnLidClose: Bool
     /// 内蔵バッテリーのある Mac で条件がオンのときだけある。
     public var batteryCondition: BatteryCondition?
     public var notifiesWithLED: Bool
@@ -13,6 +15,8 @@ public struct EffectiveSettings: Hashable, Sendable {
         blocksDisplaySleep = settings.blocksDisplaySleep
         blocksManualSleep = settings.blocksManualSleep
         shouldSleepDisplayOnLidClose = capabilities.hasLid && blocksManualSleep && settings.lidCloseDisplay == .turnOff
+        shouldZeroBrightnessOnLidClose = capabilities.hasLid && blocksManualSleep
+            && settings.lidCloseDisplay == .zeroBrightness
         batteryCondition = capabilities.hasInternalBattery && settings.batteryConditionEnabled
             ? BatteryCondition(threshold: settings.batteryThreshold, ignoresOnACPower: settings.ignoresBatteryOnACPower)
             : nil

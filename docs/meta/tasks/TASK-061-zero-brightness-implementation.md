@@ -2,7 +2,7 @@
 schema: task
 id: TASK-061
 title: 蓋を閉じたときの「明るさを0」を実装する
-status: in_progress
+status: in_review
 requirements: ["REQ-BLK-014", "REQ-SET-005", "REQ-LCY-002", "REQ-LCY-003"]
 depends_on: ["TASK-059"]
 assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
@@ -112,4 +112,16 @@ assignee: Codex（OpenCode、openai/gpt-6.1-sol、variant high）
 
 ## レビュー
 
-未レビュー。
+PM が差分を読んだ。設計はチケットのとおりで、輝度は抑止の仕組みに入れず、戻す手順は1つの関数にまとまっている。解除・利用者の終了・理由不明の終了は `restoreStopped` の先頭、セッションの終了は `endSession` の先頭で戻し、どれも `disablesleep` を下ろすより前になる。DisplayServices の実装は関数の読み込みと内蔵ディスプレイへの読み書きだけで、余計な仕組みはない。
+
+PM が直したこと:
+
+- 起動時の復元が、記録を整える前（前回の起動の所有のまま）に記録を保存していた。整えた記録を保存した後、再開と後片付けの前に移した。
+- `LidStateMonitor.start` の `onOpen` と、設定の行の `brightnessUnavailable` に、テストのためだけの既定値があった。開いた通知のつなぎ忘れに気づけなくなるので、既定値をなくし、テストで明示した。
+- `SettingsRow` の `warning` と `warningLabel` が同じことを表していたので、`warningLabel` だけにした。
+- ポートの説明から、既存の失敗の扱いの1文が消えていたので戻し、輝度だけが例外だと書いた。ロガーを呼ぶたびに作っていたので、ファイルの定数にした。
+- 手順書の中止条件にあった「記録保存失敗の警告」は画面に出ないので消した。
+
+PM が worktree で `nix develop --command just check`（SwiftPM 297件、アプリ88件）と `nix develop --command just build` を実行し、通ることを確かめた。
+
+未確認: 実機での暗転と復元。オーナーが `docs/manual/verification.md` の 4.7 と 6.1 で確かめる。

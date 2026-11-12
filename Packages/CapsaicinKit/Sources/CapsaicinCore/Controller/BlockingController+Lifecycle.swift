@@ -24,6 +24,8 @@ public extension BlockingController {
             record.isRunning = true
             record.exitReason = nil
             saveRecord()
+            // 再開でも後片付けでも、仕組みを操作する前に戻す。
+            restoreBrightness()
 
             let resumes = LaunchRules.shouldResume(
                 reason: reason,
@@ -60,6 +62,7 @@ public extension BlockingController {
     /// セッションの終了による終了（ログアウト、再起動、システム終了）。仕組みは戻し、抑止のセッションは次の起動のために記録に残す。
     func endSession() {
         notifyingWarnings {
+            restoreBrightness()
             session = nil
             align(Mechanism.allCases, to: [])
             reevaluateMisalignments(targets: [])

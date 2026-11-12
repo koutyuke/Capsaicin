@@ -111,6 +111,17 @@ struct SettingsTests {
         #expect(object["lidCloseDisplay"] as? String == "keepOn")
     }
 
+    @Test("SPEC-SET-005 SPEC-BLK-013 明るさを0をzeroBrightnessとして保存して読み戻す")
+    func zeroBrightnessCoding() throws {
+        let json = #"{"blocksManualSleep":true,"lidCloseDisplay":"zeroBrightness"}"#
+        let settings = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+        #expect(settings.blocksManualSleep && settings.lidCloseDisplay == .zeroBrightness)
+        let data = try JSONEncoder().encode(settings)
+        let object = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(object["lidCloseDisplay"] as? String == "zeroBrightness")
+        #expect(try JSONDecoder().decode(Settings.self, from: data) == settings)
+    }
+
     @Test("SPEC-SET-002 欠けた閉じたときの画面は消灯にし、古い保存値は読み飛ばす")
     func oldSleepKeysIgnored() throws {
         let oldValues: [String: Bool] = [

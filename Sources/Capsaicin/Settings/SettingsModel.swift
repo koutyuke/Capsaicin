@@ -45,7 +45,8 @@ final class SettingsModel {
     }
 
     var sleepRows: [SettingsSleepRow] {
-        SettingsSleepRow.rows(settings: app.settings, capabilities: app.capabilities, helper: helperState)
+        SettingsSleepRow.rows(settings: app.settings, capabilities: app.capabilities, helper: helperState,
+                              brightnessUnavailable: app.isBrightnessKnownUnavailable)
     }
 
     var lidCloseChoice: SettingsLidCloseChoice {
@@ -99,6 +100,7 @@ final class SettingsModel {
         switch choice {
         case .sleep: break
         case .turnOff: settings.lidCloseDisplay = .turnOff
+        case .zeroBrightness: settings.lidCloseDisplay = .zeroBrightness
         case .keepOn: settings.lidCloseDisplay = .keepOn
         }
         change(settings)

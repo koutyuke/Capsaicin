@@ -31,18 +31,18 @@ struct SettingsRow<Content: View>: View {
     var symbol: String?
     var child = false
     var enabled = true
-    var warning = false
+    /// 空でなければ、アイコンを注意の記号にし、この文を読み上げる。
+    var warningLabel = ""
     @ViewBuilder var content: () -> Content
     var body: some View {
         HStack {
             HStack(spacing: 8) {
-                if let symbol = warning ? "exclamationmark.triangle.fill" : symbol {
+                if let symbol = warningLabel.isEmpty ? symbol : "exclamationmark.triangle.fill" {
                     Image(symbol: symbol, bundle: Bundle(for: SettingsWindowController.self))
-                        .foregroundStyle(warning || symbol == "exclamationmark.triangle.fill"
-                            ? Color.orange : Color.secondary)
+                        .foregroundStyle(symbol == "exclamationmark.triangle.fill" ? Color.orange : Color.secondary)
                         .frame(width: 20)
-                        .accessibilityLabel(SettingsSection.sleep.text("helperNotReady.a11y"))
-                        .accessibilityHidden(!warning)
+                        .accessibilityLabel(warningLabel)
+                        .accessibilityHidden(warningLabel.isEmpty)
                 }
                 Text(title).foregroundStyle(enabled ? .primary : .secondary)
                     .disabled(!enabled)

@@ -8,6 +8,7 @@ struct ResumeRecordDecodingTests {
     private var runningRecord: ResumeRecord {
         var record = ResumeRecord(lastUpdated: now)
         record.session = BlockingSession(timeLimit: TimeLimit(date: now.addingTimeInterval(60), source: .timer))
+        record.savedBrightness = 0.45
         record.ownsSleepDisabled = true
         record.isRunning = true
         record.exitReason = .sessionEnd
@@ -38,6 +39,15 @@ struct ResumeRecordDecodingTests {
         let encoded = Data(#"{"lastUpdated":0}"#.utf8)
         let expected = ResumeRecord(lastUpdated: Date(timeIntervalSinceReferenceDate: 0))
         #expect(try JSONDecoder().decode(ResumeRecord.self, from: encoded) == expected)
+        #expect(try JSONDecoder().decode(ResumeRecord.self, from: encoded).savedBrightness == nil)
+    }
+
+    @Test("SPEC-BLK-013 輝度のキーがない古い記録もセッションと所有を保って読む")
+    func oldRecordWithoutBrightness() throws {
+        let encoded = try data(replacing: "savedBrightness", with: nil)
+        var expected = runningRecord
+        expected.savedBrightness = nil
+        #expect(try JSONDecoder().decode(ResumeRecord.self, from: encoded) == expected)
     }
 
     @Test("SPEC-LCY-007 未知のキーを無視し、既知の値を保つ")
@@ -52,14 +62,17 @@ struct ResumeRecordDecodingTests {
         #expect(throws: DecodingError.self) { try JSONDecoder().decode(ResumeRecord.self, from: encoded) }
     }
 
-    @Test("SPEC-LCY-007 任意のセッションと終了理由は null を許す", arguments: ["session", "exitReason"])
+    @Test("SPEC-LCY-007 SPEC-BLK-013 任意のセッション・終了理由・輝度は null を許す",
+          arguments: ["session", "exitReason", "savedBrightness"])
     func optionalNullsAreAccepted(key: String) throws {
         let encoded = try data(replacing: key, with: NSNull())
         var expected = runningRecord
         if key == "session" {
             expected.session = nil
-        } else {
+        } else if key == "exitReason" {
             expected.exitReason = nil
+        } else {
+            expected.savedBrightness = nil
         }
         #expect(try JSONDecoder().decode(ResumeRecord.self, from: encoded) == expected)
     }
@@ -68,6 +81,7 @@ struct ResumeRecordDecodingTests {
         "SPEC-LCY-007 実行中の記録の既知の値が不正なら記録全体を拒否する",
         arguments: [
             "session",
+            "savedBrightness",
             "ownsSleepDisabled",
             "isRunning",
             "exitReason",

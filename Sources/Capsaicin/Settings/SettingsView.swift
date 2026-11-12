@@ -119,7 +119,7 @@ extension SettingsView {
     private func sleepRow(_ row: SettingsSleepRow) -> some View {
         SettingsRow(
             title: SettingsSection.sleep.text(row.key + ".label"), help: row.help, symbol: row.symbol,
-            warning: row.state == .onWithoutHelper,
+            warningLabel: row.warningLabel,
         ) {
             if row.key == "lidClose" {
                 Picker(

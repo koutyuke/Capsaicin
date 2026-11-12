@@ -12,7 +12,7 @@ struct SettingsTests {
     func unifiedLidRow() {
         let rows = SettingsSleepRow.rows(settings: CapsaicinCore.Settings(),
                                          capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true),
-                                         helper: .installed)
+                                         helper: .installed, brightnessUnavailable: false)
         #expect(rows.map(\.key) == ["display", "lidClose"])
     }
 
@@ -22,14 +22,16 @@ struct SettingsTests {
         settings.blocksDisplaySleep = false
         settings.blocksManualSleep = true
         let capabilities = MachineCapabilities(hasLid: true, hasInternalBattery: true)
-        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed)
+        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed,
+                                         brightnessUnavailable: false)
         #expect(rows.map(\.key) == ["display", "lidClose"])
         #expect(rows.map(\.symbol) == ["display", "laptopcomputer"])
         let display = try #require(rows.first)
         #expect(display.state == .editable(isOn: false))
         #expect(!display.isOn)
         settings.lidCloseDisplay = .keepOn
-        let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .partial)
+        let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .partial,
+                                            brightnessUnavailable: false)
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
@@ -41,7 +43,8 @@ struct SettingsTests {
     func hardware(laptop: Bool) {
         let settings = CapsaicinCore.Settings()
         let capabilities = MachineCapabilities(hasLid: laptop, hasInternalBattery: laptop)
-        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .notInstalled)
+        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .notInstalled,
+                                         brightnessUnavailable: false)
         #expect(rows.map(\.key) == ["display", laptop ? "lidClose" : "manual"])
         #expect(rows[1].symbol == (laptop ? "laptopcomputer" : "powersleep"))
         #expect(rows[1].setting == (laptop ? nil : \.blocksManualSleep))
@@ -52,7 +55,8 @@ struct SettingsTests {
     }
 
     @Test("SPEC-SET-005 SPEC-HLP-001 設置中は選択を表示して保存せず、成功後だけ2値を1回で保存する",
-          arguments: [HelperInstallationState.notInstalled, .partial], [SettingsLidCloseChoice.turnOff, .keepOn])
+          arguments: [HelperInstallationState.notInstalled, .partial],
+          [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
     func installation(state: HelperInstallationState, choice: SettingsLidCloseChoice) async {
         let fixture = AppFixture()
         var installed = state
@@ -82,7 +86,7 @@ struct SettingsTests {
         #expect(completed && fixture.model.settings.blocksManualSleep)
         #expect(model.sleepRows[1].state == .editable(isOn: true))
         #expect(model.lidCloseChoice == choice)
-        #expect(fixture.model.settings.lidCloseDisplay == (choice == .turnOff ? .turnOff : .keepOn))
+        #expect(fixture.model.settings.lidCloseDisplay.rawValue == choice.rawValue)
         #expect(fixture.model.settings.timerEnabled)
         #expect(fixture.savedSettings == [fixture.model.settings])
         #expect(!model.pendingManual && !model.isBusy)
@@ -243,7 +247,9 @@ struct SettingsTests {
         let license = try #require(app.url(forResource: "KeyboardShortcuts-LICENSE", withExtension: "txt"))
         #expect(try String(contentsOf: license, encoding: .utf8).contains("MIT License"))
     }
+}
 
+extension SettingsTests {
     @Test("SPEC-SET-002 SPEC-SYS-004 統合した条件の文言を同じテーブルから引き、ディスプレイの表記をそろえる")
     func sleepResources() throws {
         #expect(SettingsSection.sleep.title == "スリープ")
@@ -251,7 +257,9 @@ struct SettingsTests {
                     "timer.duration.a11y", "hours", "minutes", "time.label", "time.help", "time.value.label",
                     "battery.label", "battery.threshold.label", "battery.threshold.value",
                     "battery.ignoreOnAdapter.label",
-                    "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.keepOn", "lidClose.help"]
+                    "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.zeroBrightness",
+                    "lidClose.keepOn",
+                    "lidClose.help", "brightnessUnavailable", "brightnessUnavailable.a11y"]
         {
             #expect(SettingsSection.sleep.text(key) != key)
         }

@@ -56,6 +56,7 @@ extension BlockingController {
     /// 抑止のセッションを先に消してから、前のプロセスから残ったものを含むすべての仕組みを停止中のあるべき状態に合わせる。
     /// 合わせられなくても途中で止めない。
     func restoreStopped(clearingCrashLaunches: Bool) {
+        restoreBrightness()
         session = nil
         if record.session != nil {
             record.session = nil

@@ -38,7 +38,7 @@ struct EffectiveSettingsTests {
     }
 
     @Test("SPEC-BLK-002 蓋のある Mac で手動スリープを止めて消灯を選んだときだけ画面を消す",
-          arguments: [false, true], [LidCloseDisplay.keepOn, .turnOff])
+          arguments: [false, true], LidCloseDisplay.allCases)
     func lidCloseDisplayNeedsManualAndTurnOff(manual: Bool, display: LidCloseDisplay) {
         let settings = Settings.premise {
             $0.blocksManualSleep = manual
@@ -47,5 +47,20 @@ struct EffectiveSettingsTests {
         #expect(EffectiveSettings(settings: settings, capabilities: .laptop).shouldSleepDisplayOnLidClose
             == (manual && display == .turnOff))
         #expect(!EffectiveSettings(settings: settings, capabilities: .desktop).shouldSleepDisplayOnLidClose)
+    }
+
+    @Test("SPEC-BLK-013 蓋のあるMacで手動スリープを止めて明るさを0を選ぶときだけ暗くする",
+          arguments: [false, true], LidCloseDisplay.allCases)
+    func brightnessNeedsLidManualAndChoice(manual: Bool, display: LidCloseDisplay) {
+        let settings = Settings.premise {
+            $0.blocksManualSleep = manual
+            $0.lidCloseDisplay = display
+        }
+        let effective = EffectiveSettings(settings: settings, capabilities: .laptop)
+        #expect(effective.shouldZeroBrightnessOnLidClose == (manual && display == .zeroBrightness))
+        #expect(!EffectiveSettings(settings: settings, capabilities: .desktop).shouldZeroBrightnessOnLidClose)
+        var other = settings
+        other.lidCloseDisplay = .keepOn
+        #expect(effective.mechanisms == EffectiveSettings(settings: other, capabilities: .laptop).mechanisms)
     }
 }

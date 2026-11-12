@@ -12,6 +12,8 @@ public final class FakeSystem {
         case helperOn
         case helperOff
         case setLEDLit(Bool)
+        case readBrightness
+        case setBrightness(Float)
         case saveRecord
     }
 
@@ -29,6 +31,8 @@ public final class FakeSystem {
     public var isHelperInstalled = true
     public var isLEDAvailable = true
     public var sleepDisabled = false
+    public var brightness: Float? = 0.5
+    public var isKnownUnavailable = false
     public private(set) var heldAssertions: Set<AssertionKind> = []
     /// 冪等の約束により何もしなかったアサーションの操作（作ってある種類の作成、作っていない種類の解放）の数。
     public private(set) var redundantAssertionCalls = 0
@@ -53,7 +57,7 @@ public final class FakeSystem {
 
     public var ports: BlockingController.Ports {
         BlockingController.Ports(
-            assertions: self, helper: self, led: self,
+            assertions: self, helper: self, led: self, brightness: self,
             power: self, bootTime: self, records: self, time: self,
         )
     }
@@ -121,6 +125,18 @@ extension FakeSystem: CapsLockLEDControlling {
 }
 
 extension FakeSystem: PowerStateProviding, BootTimeProviding, TimeProviding {}
+
+extension FakeSystem: BuiltInDisplayBrightnessControlling {
+    public func readBrightness() throws -> Float? {
+        try perform(.readBrightness)
+        return brightness
+    }
+
+    public func setBrightness(_ value: Float) throws {
+        try perform(.setBrightness(value))
+        brightness = value
+    }
+}
 
 extension FakeSystem: ResumeRecordStoring {
     public func load() -> ResumeRecord? {

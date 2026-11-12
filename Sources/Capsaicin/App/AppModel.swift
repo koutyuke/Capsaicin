@@ -46,6 +46,18 @@ final class AppModel {
         status.isBlocking && controller.effectiveSettings.shouldSleepDisplayOnLidClose
     }
 
+    var isBrightnessKnownUnavailable: Bool {
+        controller.isBrightnessKnownUnavailable
+    }
+
+    func lidClosed() {
+        controller.lidClosed()
+    }
+
+    func lidOpened() {
+        controller.lidOpened()
+    }
+
     func launch() {
         controller.launch()
         refresh()
