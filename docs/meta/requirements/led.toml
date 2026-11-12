@@ -66,13 +66,13 @@ sources = ["DEC-SET-001"]
 id = "REQ-LED-007"
 title = "キー配列を変更するアプリが LED を妨げうることを知らせる"
 kind = "functional"
-statement = "キー配列を変更するアプリの仮想キーボードがあるとき、そのアプリが LED を制御している場合は抑止中も LED が点灯しないことがあると、メニューと設定の「LED」セクションに表示する。"
+statement = "キー配列を変更するアプリの仮想キーボードがあるとき、そのアプリが LED を制御している場合は抑止中も LED が点灯しないことがあると、設定の「LED」セクションだけに表示する。"
 reason = "LED が点かないときに、利用者が原因の見当をつけられるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LED-005"]
 depends_on = []
-sources = ["DEC-LED-006", "EVID-LED-009", "EVID-LED-012"]
+sources = ["DEC-LED-006", "DEC-LED-007", "EVID-LED-009", "EVID-LED-012"]
 
 [[requirements]]
 id = "REQ-LED-008"

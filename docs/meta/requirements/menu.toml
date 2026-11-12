@@ -18,13 +18,13 @@ sources = ["DEC-UI-001"]
 id = "REQ-MENU-002"
 title = "メニューで今回の解除条件を選べる"
 kind = "functional"
-statement = "利用者は、メニューから抑止を開始するときに、今回の解除条件としてタイマーまたは指定時刻を選べる。"
+statement = "利用者は、メニューから抑止を開始するときと抑止中に、今回の時間の解除条件としてタイマー、指定時刻、時間の条件を持たないことを選べる。抑止中は、選んだ条件で時間の解除条件を置き換えられる。"
 reason = "設定を変えずに、その場だけの時間で止められるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-MENU-002", "SPEC-MENU-003"]
 depends_on = ["REQ-BLK-006"]
-sources = []
+sources = ["DEC-BLK-009", "DEC-MENU-004"]
 
 [[requirements]]
 id = "REQ-MENU-003"
@@ -73,3 +73,15 @@ status = "accepted"
 specs = ["SPEC-MENU-007"]
 depends_on = ["REQ-SET-002"]
 sources = []
+
+[[requirements]]
+id = "REQ-MENU-007"
+title = "メニューからスリープとディスプレイの設定を切り替えられる"
+kind = "functional"
+statement = "利用者は、メニューから設定の「スリープとディスプレイ」の項目を切り替えられる。"
+reason = "抑止中に設定画面を開かずに切り替えるため。"
+priority = "should"
+status = "accepted"
+specs = ["SPEC-MENU-008"]
+depends_on = ["REQ-SET-001"]
+sources = ["DEC-MENU-004"]

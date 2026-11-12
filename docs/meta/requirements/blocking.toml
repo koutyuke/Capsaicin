@@ -66,13 +66,13 @@ sources = ["DEC-BLK-002", "DEC-BLK-006"]
 id = "REQ-BLK-006"
 title = "時間の解除条件を開始時に指定できる"
 kind = "functional"
-statement = "抑止を開始するとき、時間の解除条件（タイマーと指定時刻）は設定の既定値を使い、メニューと CLI では開始ごとに指定した条件に置き換えられる。"
+statement = "抑止を開始するとき、時間の解除条件（タイマーと指定時刻）は設定の既定値を使い、メニューと CLI では開始ごとに指定した条件に置き換えられる。開始の要求では、時間の条件を持たないことも指定できる。"
 reason = "普段の使い方は設定で決めておき、その場だけ違う時間で止めたいときに設定を変えずに済ませるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-BLK-003"]
 depends_on = []
-sources = ["DEC-BLK-005"]
+sources = ["DEC-BLK-005", "DEC-BLK-009"]
 
 [[requirements]]
 id = "REQ-BLK-007"
@@ -169,3 +169,15 @@ status = "accepted"
 specs = ["SPEC-BLK-013"]
 depends_on = ["REQ-BLK-004"]
 sources = ["DEC-BLK-008"]
+
+[[requirements]]
+id = "REQ-BLK-015"
+title = "抑止を続けたまま時間の解除条件を変えられる"
+kind = "functional"
+statement = "利用者は、抑止中にメニューと CLI で時間の解除条件を置き換えられる。置き換えで抑止は途切れない。"
+reason = "オンにした後に時間を変えたいとき、一度オフにしてスリープ防止を外さずに済ませるため。"
+priority = "should"
+status = "accepted"
+specs = ["SPEC-BLK-003", "SPEC-BLK-011", "SPEC-CLI-001", "SPEC-CLI-007", "SPEC-HUD-001", "SPEC-HUD-002", "SPEC-LCY-007"]
+depends_on = ["REQ-BLK-006"]
+sources = ["DEC-BLK-009"]
