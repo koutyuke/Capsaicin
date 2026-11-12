@@ -4,7 +4,7 @@ id: HYP-LED-007
 title: アプリ名やベンダーに頼らず、IORegistry の属性だけで実機のキーボードのサービスを選べる
 status: open
 affects: ["REQ-LED-004", "REQ-LED-007", "SPEC-LED-002", "SPEC-LED-005"]
-evidence: ["EVID-LED-006", "EVID-LED-007"]
+evidence: ["EVID-LED-006", "EVID-LED-007", "EVID-LED-014"]
 ---
 
 # HYP-LED-007 アプリ名やベンダーに頼らず、IORegistry の属性だけで実機のキーボードのサービスを選べる
@@ -41,3 +41,5 @@ evidence: ["EVID-LED-006", "EVID-LED-007"]
 実機の部分だけ確かめた。調査（確かめ方の 1）は `TASK-049` に残っている。
 
 2026-11-11 の実機の記録では、内蔵（`FIFO`）、Lofree の USB（`USB`）、Bluetooth（`Bluetooth Low Energy`）、2.4 GHz（`USB`）、Viper V2 Pro（`USB`）のサービスはすべて `Transport` を持ち、Karabiner-Elements の仮想キーボードのサービスだけが持たなかった（`EVID-LED-006`、`EVID-LED-007`）。この範囲では「`Transport` を持つ」だけで見分けられる。ほかのアプリの仮想キーボードは未確認である。
+
+2026-11-12 に反例が1つ見つかった。Sidecar の仮想キーボードは `Transport` に `"Virtual"` を持ち、いまの実装の書き込みの対象に入った（`EVID-LED-014`）。「`Transport` を持つ」だけでは足りない。主張の2つ目の条件（DriverKit の仮想デバイスではない）にも当たらない。このデバイスは `IOHIDUserDevice` である。書いたときの害は確かめていない。
