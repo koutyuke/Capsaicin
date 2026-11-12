@@ -4,7 +4,7 @@ id: HYP-BLK-012
 title: 蓋を閉じている間も DisplayServices の輝度の変更が効き、開けたときに元の輝度へ戻せる
 status: open
 affects: []
-evidence: []
+evidence: ["EVID-BLK-010"]
 ---
 
 # HYP-BLK-012 蓋を閉じている間も DisplayServices の輝度の変更が効き、開けたときに元の輝度へ戻せる
@@ -34,4 +34,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+未確認。自動輝度調節がオフのときは、閉じている間は輝度 0 のまま、開けた後は閉じる前の値のままだった（`EVID-BLK-010`）。自動輝度調節がオンの回は行っていない。
