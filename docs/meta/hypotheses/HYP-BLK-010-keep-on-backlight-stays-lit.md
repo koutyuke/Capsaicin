@@ -19,7 +19,7 @@ evidence: ["EVID-BLK-009", "EVID-BLK-012", "EVID-BLK-013"]
 
 ## 確かめ方
 
-`docs/manual/lid-close-dimming-verification.md` の C2 で確かめる。レジストリの値は蓋の開閉で変わらないので、判定に使わない（`EVID-BLK-008`）。
+`e9e7e3d:docs/manual/lid-close-dimming-verification.md` の C2 で確かめる。レジストリの値は蓋の開閉で変わらないので、判定に使わない（`EVID-BLK-008`）。
 
 1. 環境: 対応環境の MacBook。外部ディスプレイなし、電池駆動。Capsaicin で抑止し、「ディスプレイを閉じたとき」を「オンのまま」、「ディスプレイを自動でオフにしない」をオンにする。
 2. 輝度を最大にしてから蓋を閉じ、暗い部屋で蓋の隙間から光が漏れるかを見る。同じ負荷のまま、閉じている間の電池の電流を記録する。

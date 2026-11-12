@@ -23,7 +23,7 @@ DisplayServices の輝度では `DEC-BLK-007` の目的（ロックさせずに�
 
 ## 確かめ方
 
-`docs/manual/lid-close-dimming-verification.md` の C1、C3、C4 で確かめる。
+`e9e7e3d:docs/manual/lid-close-dimming-verification.md` の C1、C3、C4 で確かめる。
 
 1. 環境: 対応環境の MacBook。外部ディスプレイなし。Capsaicin で抑止し、「ディスプレイを自動でオフにしない」をオンにする。
 2. 蓋を開けたまま、動く時計を画面収録しながら輝度を 0 にする。暗い部屋で画面を見て、`CGDisplayIsAsleep` を読む。

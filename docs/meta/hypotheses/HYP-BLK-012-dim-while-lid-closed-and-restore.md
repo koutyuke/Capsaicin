@@ -22,7 +22,7 @@ evidence: ["EVID-BLK-010", "EVID-BLK-012"]
 
 ## 確かめ方
 
-`docs/manual/lid-close-dimming-verification.md` の C3 で確かめる。開いたことの検知は `HYP-BLK-008` と同じ試験で確かめる。
+`e9e7e3d:docs/manual/lid-close-dimming-verification.md` の C3 で確かめる。開いたことの検知は `HYP-BLK-008` と同じ試験で確かめる。
 
 1. 環境: 対応環境の MacBook。外部ディスプレイなし。Capsaicin で抑止し、「ディスプレイを閉じたとき」を「オンのまま」、「ディスプレイを自動でオフにしない」をオンにする。自動輝度調節は、オンとオフの両方で試す。
 2. 蓋の開閉に合わせて輝度を 0 にし、元に戻す試験用の補助を動かす。

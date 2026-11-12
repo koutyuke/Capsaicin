@@ -4,14 +4,14 @@ id: EVID-BLK-011
 title: 輝度 0 で蓋を閉じたまま11分置いても、ディスプレイはスリープせず、ロックされず、画面収録に時計が写り続けた
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8（Apple M4 Pro）、外部ディスプレイなし、電池駆動、Capsaicin の Debug ビルド 0.1.0（1）で抑止中（SleepDisabled 1、「ディスプレイを閉じたとき」は「オンのまま」、「ディスプレイを自動でオフにしない」はオン）、自動輝度調節と True Tone はオフ、パスワードの要求は「すぐに」、スクリーンセーバーは5分後、ディスプレイの消灯は10分後
-sources: ["scripts/manual/display-brightness.swift", "~/Capsaicin-dimming.B7nQAG/C4-dim.log", "~/Capsaicin-dimming.B7nQAG/C4-observation.txt", "~/Capsaicin-dimming.B7nQAG/C4-clock-samples.png", "~/Capsaicin-dimming.B7nQAG/画面収録 2026-11-12 14.59.43.mov", "~/Capsaicin-dimming.B7nQAG/initial-settings.txt"]
+sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md", "~/Capsaicin-dimming.B7nQAG/C4-dim.log", "~/Capsaicin-dimming.B7nQAG/C4-observation.txt", "~/Capsaicin-dimming.B7nQAG/C4-clock-samples.png", "~/Capsaicin-dimming.B7nQAG/画面収録 2026-11-12 14.59.43.mov", "~/Capsaicin-dimming.B7nQAG/initial-settings.txt"]
 ---
 
 # EVID-BLK-011 輝度 0 で蓋を閉じたまま11分置いても、ディスプレイはスリープせず、ロックされず、画面収録に時計が写り続けた
 
 ## 確かめた事実
 
-`docs/manual/lid-close-dimming-verification.md` の C4 のうち、輝度 0 の回を行った。ロック画面の有無はオーナーの目視による。
+`e9e7e3d:docs/manual/lid-close-dimming-verification.md` の C4 のうち、輝度 0 の回を行った。ロック画面の有無はオーナーの目視による。
 
 - 補助（`watch --dim`）が閉じた通知で輝度を 0 にし、15:00:32 から 15:11:46 まで（11分14秒）蓋を閉じた。パスワードの要求（すぐに）、スクリーンセーバー（5分）、ディスプレイの消灯（10分）の時間をすべて過ぎた。
 - 閉じている間の10秒ごとの読み取り67回は、すべて `CGDisplayIsActive=1`、`CGDisplayIsAsleep=0`、`brightness=0.0` だった。
@@ -25,7 +25,7 @@ sources: ["scripts/manual/display-brightness.swift", "~/Capsaicin-dimming.B7nQAG
 
 ## 確かめ方
 
-手順は `docs/manual/lid-close-dimming-verification.md` の準備と C4 の操作1〜3。記録は `~/Capsaicin-dimming.B7nQAG/` にある。収録は次で解析した。
+手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C4 の操作1〜3。記録は `~/Capsaicin-dimming.B7nQAG/` にある。収録は次で解析した。
 
 ```sh
 ffmpeg -hide_banner -nostats -i "<収録>" -vf "blackdetect=d=0.5:pix_th=0.10,freezedetect=n=0.001:d=1" -an -f null -

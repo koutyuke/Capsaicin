@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-le
 
 ## 確かめた事実
 
-`docs/manual/led-fix-verification.md` の手順2-1を行った。抑止中に Lofree を接続し、10秒後に LED を目視した。2.4 GHz と Bluetooth のどちらでも、Lofree は点灯しなかった。書き込みの失敗はなかった。
+`fa6cae8:docs/manual/led-fix-verification.md` の手順2-1を行った。抑止中に Lofree を接続し、10秒後に LED を目視した。2.4 GHz と Bluetooth のどちらでも、Lofree は点灯しなかった。書き込みの失敗はなかった。
 
 Capsaicin は、`IOHIDManager` の機器の接続の通知を受けると、その場で一覧を取り直して書く。システムのログで、機器、サービス、書き込みの順を比べた。
 
@@ -34,7 +34,7 @@ Capsaicin は、`IOHIDManager` の機器の接続の通知を受けると、そ�
 
 ## 確かめ方
 
-手順は `docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261111-221214/` の `2-*` にある。機器とサービスの時刻は、`log show --info` で、登録 ID と `Service added` を含む行を絞って読んだ。
+手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261111-221214/` の `2-*` にある。機器とサービスの時刻は、`log show --info` で、登録 ID と `Service added` を含む行を絞って読んだ。
 
 ## 適用範囲
 

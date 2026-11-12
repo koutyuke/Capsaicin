@@ -11,7 +11,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-le
 
 ## 確かめた事実
 
-`docs/manual/led-fix-verification.md` の手順0と、手順2の操作1〜3を行った。Capsaicin は、接続・切断の通知でその場で書き、その後1秒ごとに5回書き直す版である。LED はオーナーの目視による。
+`fa6cae8:docs/manual/led-fix-verification.md` の手順0と、手順2の操作1〜3を行った。Capsaicin は、接続・切断の通知でその場で書き、その後1秒ごとに5回書き直す版である。LED はオーナーの目視による。
 
 抑止中に Lofree を接続すると、2.4 GHz と Bluetooth のどちらでも、Lofree の LED が10秒以内に点灯した。書き込みの失敗はなかった。
 
@@ -30,7 +30,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261112-141149/` にある。書き込みの時刻と対象は `2-applog.txt` の `LED 書き込み` の行を読み、登録 ID は `2-1-2.4g-leds.txt` と `2-1-bt-leds.txt` と照らした。
+手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261112-141149/` にある。書き込みの時刻と対象は `2-applog.txt` の `LED 書き込み` の行を読み、登録 ID は `2-1-2.4g-leds.txt` と `2-1-bt-leds.txt` と照らした。
 
 ## 適用範囲
 

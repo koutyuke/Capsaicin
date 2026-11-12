@@ -24,7 +24,7 @@ Capsaicin は実機のキーボードだけに `"On"` を書き、仮想キー�
 | 使っているキーボードの「Manipulate caps lock LED」をオフ | 抑止中に Caps Lock をオンにし、オフにする | 点灯したままだった |
 | 使っているキーボードの「Manipulate caps lock LED」をオフ | 抑止せずに Caps Lock をオン・オフする | 消灯したままだった |
 
-- 1行目は `docs/manual/led-fix-verification.md` の手順3で、2026-11-11 に行った。抑止の前・中・後のどれでも、修飾キーを厳密に照合するルールは内蔵と Lofree の両方で成立した。仮想キーボードの `HIDCapsLockLED` は `"Auto"` のままで、書き込みの対象に入らなかった。
+- 1行目は `fa6cae8:docs/manual/led-fix-verification.md` の手順3で、2026-11-11 に行った。抑止の前・中・後のどれでも、修飾キーを厳密に照合するルールは内蔵と Lofree の両方で成立した。仮想キーボードの `HIDCapsLockLED` は `"Auto"` のままで、書き込みの対象に入らなかった。
 - 2行目の操作の間（2026-11-11 23:54〜23:56）、WindowServer のログで LED の状態が変わったのは、仮想キーボードのサービスだけだった。モードは `"Auto"` のままで、Caps Lock の状態が 0 と 1 の間で切り替わった。内蔵のサービスは Capsaicin が書いた `"On"` のままで、`"Auto"` へ戻す書き込みは、どのプロセスからもなかった。
 
 ### Karabiner-Elements のソース
@@ -39,7 +39,7 @@ Capsaicin は実機のキーボードだけに `"On"` を書き、仮想キー�
 
 ## 確かめ方
 
-- 手順3は `docs/manual/led-fix-verification.md`。記録は `~/capsaicin-led-check/20261111-221214/` の `3-*` にある。
+- 手順3は `fa6cae8:docs/manual/led-fix-verification.md`。記録は `~/capsaicin-led-check/20261111-221214/` の `3-*` にある。
 - 2行目以降は、オーナーが手順書によらずに行った。2行目のログは、`log show --info` で `updateCapslockLED` を含む行を読んだ。
 - ソースは、`sources` の URL を読んだ。
 

@@ -4,14 +4,14 @@ id: EVID-BLK-010
 title: 蓋が閉じた通知で輝度を 0 にすると、閉じている間は 0 のままで、開いた通知で元の輝度に戻せた
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8（Apple M4 Pro）、外部ディスプレイなし、電池駆動、Capsaicin の Debug ビルド 0.1.0（1）で抑止中（SleepDisabled 1、「ディスプレイを閉じたとき」は「オンのまま」、「ディスプレイを自動でオフにしない」はオン）、自動輝度調節と True Tone はオフ
-sources: ["scripts/manual/display-brightness.swift", "~/Capsaicin-dimming.B7nQAG/C2-max.log", "~/Capsaicin-dimming.B7nQAG/C3-auto-off.log", "~/Capsaicin-dimming.B7nQAG/C3-observation.txt", "~/Capsaicin-dimming.B7nQAG/C4-dim.log"]
+sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md", "~/Capsaicin-dimming.B7nQAG/C2-max.log", "~/Capsaicin-dimming.B7nQAG/C3-auto-off.log", "~/Capsaicin-dimming.B7nQAG/C3-observation.txt", "~/Capsaicin-dimming.B7nQAG/C4-dim.log"]
 ---
 
 # EVID-BLK-010 蓋が閉じた通知で輝度を 0 にすると、閉じている間は 0 のままで、開いた通知で元の輝度に戻せた
 
 ## 確かめた事実
 
-`docs/manual/lid-close-dimming-verification.md` の C3 のうち、自動輝度調節がオフの回を行った。C4 も同じ補助（`watch --dim`）で行ったので、その記録も合わせて読んだ。補助は一般ユーザーの権限で動き、蓋が閉じた通知で輝度を覚えてから 0 にし、開いた通知で覚えた輝度に戻す。
+`e9e7e3d:docs/manual/lid-close-dimming-verification.md` の C3 のうち、自動輝度調節がオフの回を行った。C4 も同じ補助（`watch --dim`）で行ったので、その記録も合わせて読んだ。補助は一般ユーザーの権限で動き、蓋が閉じた通知で輝度を覚えてから 0 にし、開いた通知で覚えた輝度に戻す。
 
 | 回 | 閉じていた区間 | 閉じている間の読み取り | 開けた後 |
 | --- | --- | --- | --- |
@@ -27,7 +27,7 @@ sources: ["scripts/manual/display-brightness.swift", "~/Capsaicin-dimming.B7nQAG
 
 ## 確かめ方
 
-手順は `docs/manual/lid-close-dimming-verification.md` の準備、C3 の操作1〜3、C4 の操作1〜3。記録は `~/Capsaicin-dimming.B7nQAG/` にある。各ログの `event=close` と `event=open` の行と、その間の `timer` の行を読んだ。開閉の操作を別の時計で秒まで控えていないので、蓋を動かしてから通知が届くまでの遅れは測っていない。
+手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備、C3 の操作1〜3、C4 の操作1〜3。記録は `~/Capsaicin-dimming.B7nQAG/` にある。各ログの `event=close` と `event=open` の行と、その間の `timer` の行を読んだ。開閉の操作を別の時計で秒まで控えていないので、蓋を動かしてから通知が届くまでの遅れは測っていない。
 
 ## 適用範囲
 
