@@ -118,7 +118,7 @@ DisplayServices から輝度を読めることは `EVID-BLK-007`、抑止中に�
   3. 光源が内蔵ディスプレイかを、1回の閉じ方の中で切り分ける。蓋を開けて次を実行し、20秒以内に蓋を閉じる。補助が30秒ごとに輝度を最大、0、最大と切り替え、最後に開始値へ戻す。それぞれの間に隙間から光が漏れるかを見て、`C2-switch.log` の最後の行が出てから開ける。
 
      ```sh
-     sleep 20; for v in 1 0 1; do "$DB" set "$v" >> "$LC/C2-switch.log" 2>&1; sleep 30; done; "$DB" set "$ORIGINAL" >> "$LC/C2-switch.log" 2>&1
+     { sleep 20; for v in 1 0 1; do "$DB" set "$v"; sleep 30; done; "$DB" set "$ORIGINAL"; } > "$LC/C2-switch.log" 2>&1
      ```
 
 - **期待（仮説どおりなら）**: 1〜2 で光漏れが見え、3 では最大の間だけ見えて 0 の間は見えない。見えないことだけでは消灯と断定しない。内蔵画面が `CGDisplayIsAsleep=0` で残るかも照合する。電流の比較は C5 で行う。
