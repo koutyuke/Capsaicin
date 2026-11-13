@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-MENU-005
 title: 開始の方法をトップレベルに分け、設定の項目をサブメニューにせずに並べ、バッテリー残量の条件をメニューで切り替えられるようにする
-status: accepted
+status: superseded
 supersedes: ["DEC-MENU-004"]
-superseded_by: []
+superseded_by: ["DEC-MENU-006"]
 requirements: ["REQ-MENU-002", "REQ-MENU-007", "REQ-BLK-009"]
 based_on: ["DEC-UI-001", "DEC-UI-012", "DEC-BLK-009"]
 ---

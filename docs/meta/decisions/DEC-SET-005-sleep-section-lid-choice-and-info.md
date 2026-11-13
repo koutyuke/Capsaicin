@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SET-005
 title: セクション名を「スリープ」にし、ディスプレイを閉じたときの動作を1つのポップアップにまとめ、(i) は項目名から分からない制約にだけ置く
-status: accepted
+status: superseded
 supersedes: ["DEC-SET-004"]
-superseded_by: []
+superseded_by: ["DEC-SET-006"]
 requirements: ["REQ-SET-002", "REQ-SET-003", "REQ-SET-005"]
 based_on: ["DEC-BLK-006", "DEC-UI-011"]
 ---
