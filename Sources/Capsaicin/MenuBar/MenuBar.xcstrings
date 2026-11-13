@@ -7,7 +7,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "残量%d%%未満でオフにする"
+            "value" : "バッテリー残量%d%%未満でオフにする"
           }
         }
       }

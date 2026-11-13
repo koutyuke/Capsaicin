@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-MENU-006
 title: 設定の項目を「クイック設定」のサブメニュー1つにまとめ、時間と時刻の指定を1つのサブメニューにする
-status: accepted
+status: superseded
 supersedes: ["DEC-MENU-005"]
-superseded_by: []
+superseded_by: ["DEC-MENU-007"]
 requirements: ["REQ-MENU-002", "REQ-MENU-007", "REQ-BLK-009"]
 based_on: ["DEC-UI-001", "DEC-UI-012", "DEC-BLK-009", "DEC-SET-006"]
 ---

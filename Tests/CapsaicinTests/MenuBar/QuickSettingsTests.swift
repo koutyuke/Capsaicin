@@ -46,14 +46,16 @@ struct QuickSettingsTests {
         let choices = try #require(rows.first { $0.id == "menu.quickSettings" }?.children)
         #expect(choices.first { $0.id == "menu.sleep.display" }?.command == .toggleSleep("display"))
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
-        let expected = ["menu.header.sleep", "menu.sleep.display"] + (hasLid ? [
-            "menu.header.lidClose", "menu.sleep.lidClose.sleep", "menu.sleep.lidClose.turnOff",
+        let expected = ["menu.sleep.display"] + (hasLid ? [
+            "separator.lidClose", "menu.header.lidClose", "menu.sleep.lidClose.sleep", "menu.sleep.lidClose.turnOff",
             "menu.sleep.lidClose.zeroBrightness", "menu.sleep.lidClose.keepOn",
-        ] : ["menu.sleep.manual"]) + (hasBattery ? ["menu.header.battery", "menu.battery"] : [])
+        ] : ["menu.sleep.manual"]) + (hasBattery ? ["separator.battery", "menu.battery"] : [])
         #expect(quick.items.map { $0.identifier?.rawValue } == expected)
         #expect(quick.items.allSatisfy { $0.submenu == nil && $0.view == nil })
-        #expect(try item("menu.header.sleep", in: quick).isSectionHeader)
-        #expect(try item("menu.header.sleep", in: quick).title == SettingsSection.sleep.text("behavior.group.title"))
+        #expect(quick.items.filter(\.isSectionHeader).map { $0.identifier?.rawValue }
+            == (hasLid ? ["menu.header.lidClose"] : []))
+        #expect(quick.items.map(\.indentationLevel)
+            == quick.items.map { $0.identifier?.rawValue.hasPrefix("menu.sleep.lidClose.") == true ? 1 : 0 })
         if hasLid {
             let header = try item("menu.header.lidClose", in: quick)
             #expect(header.isSectionHeader && header.title == SettingsSection.sleep.text("lidClose.label"))
@@ -65,11 +67,6 @@ struct QuickSettingsTests {
             }
         } else {
             #expect(choices.first { $0.id == "menu.sleep.manual" }?.command == .toggleSleep("manual"))
-        }
-        if hasBattery {
-            let header = try item("menu.header.battery", in: quick)
-            #expect(header.isSectionHeader && header.title == SettingsSection.sleep.text("battery.group.title"))
-            #expect(header.title == "バッテリー")
         }
     }
 

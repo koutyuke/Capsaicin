@@ -77,9 +77,7 @@ struct MenuRedesignTests {
         model.change(\.blocksDisplaySleep, to: false)
         let controller = menu(model)
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
-        let header = try item("menu.header.sleep", in: quick)
-        #expect(header.isSectionHeader && header.submenu == nil)
-        #expect(header.title == SettingsSection.sleep.text("behavior.group.title"))
+        #expect(quick.items.first?.identifier?.rawValue == "menu.sleep.display")
         let entries = quick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
         #expect(entries.first?.title == SettingsSection.sleep.text("display.label"))
         #expect(entries.first?.state == .off)

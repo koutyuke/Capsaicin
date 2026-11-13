@@ -69,7 +69,7 @@ struct SplitStartMenuTests {
         #expect(rows[2].id == (batteryEnabled ? "menu.status.battery" : "menu.stop"))
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-006 内蔵バッテリーの有無だけで見出しと項目を出し分ける",
+    @Test("SPEC-MENU-008 SPEC-SET-006 内蔵バッテリーの有無だけで区切りと項目を出し分ける",
           arguments: [false, true], [false, true])
     func batteryHardware(hasLid: Bool, hasBattery: Bool) throws {
         let system = FakeSystem()
@@ -79,13 +79,8 @@ struct SplitStartMenuTests {
         ), saveSettings: { _ in })
         let controller = menu(settings(app))
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
-        #expect(quick.items.contains { $0.identifier?.rawValue == "menu.header.battery" } == hasBattery)
+        #expect(quick.items.contains { $0.identifier?.rawValue == "separator.battery" } == hasBattery)
         #expect(quick.items.contains { $0.identifier?.rawValue == "menu.battery" } == hasBattery)
-        if hasBattery {
-            let header = try item("menu.header.battery", in: quick)
-            #expect(header.isSectionHeader && header.submenu == nil)
-            #expect(header.title == SettingsSection.sleep.text("battery.group.title"))
-        }
     }
 
     @Test("SPEC-MENU-008 バッテリー項目は保存値のしきい値・チェック・電源を除く副題を示す",
@@ -105,7 +100,7 @@ struct SplitStartMenuTests {
             ).first { $0.id == "menu.quickSettings" }?.children.first { $0.id == "menu.battery" })
         }
         let battery = try batteryRow()
-        #expect(battery.title == "残量35%未満でオフにする")
+        #expect(battery.title == "バッテリー残量35%未満でオフにする")
         #expect(battery.isChecked == enabled)
         #expect(battery.subtitle == (ignoresAdapter ? "電源アダプタ接続中は除く" : nil))
         #expect(battery.command == .toggleBattery && battery.children.isEmpty)

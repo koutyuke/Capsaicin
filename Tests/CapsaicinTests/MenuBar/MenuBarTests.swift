@@ -262,7 +262,7 @@ extension MenuBarTests {
             "menu.start.subtitle.until": "%@にオフ",
             "menu.start.subtitle.nextDay": "明日%@にオフ",
             "menu.start.subtitle.none": "オフにするまで",
-            "menu.battery": "残量%d%%未満でオフにする",
+            "menu.battery": "バッテリー残量%d%%未満でオフにする",
             "menu.battery.subtitle": "電源アダプタ接続中は除く",
             "panel.duration.title": "時間を指定してオン",
             "panel.time.title": "時刻を指定してオン",

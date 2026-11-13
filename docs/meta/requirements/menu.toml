@@ -24,7 +24,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-MENU-002", "SPEC-MENU-003"]
 depends_on = ["REQ-BLK-006"]
-sources = ["DEC-BLK-009", "DEC-MENU-006"]
+sources = ["DEC-BLK-009", "DEC-MENU-007"]
 
 [[requirements]]
 id = "REQ-MENU-003"
@@ -84,4 +84,4 @@ priority = "should"
 status = "accepted"
 specs = ["SPEC-MENU-008"]
 depends_on = ["REQ-SET-001"]
-sources = ["DEC-MENU-006"]
+sources = ["DEC-MENU-007"]
