@@ -1,10 +1,13 @@
-# 検査の方針は docs/meta/decisions/DEC-SYS-011-github-actions-ci-and-release.md にある。
+# 検査の方針は docs/meta/decisions/DEC-SYS-011-github-actions-ci-and-release.md、
+# ジョブの分け方は DEC-SYS-012 にある。
 name: CI
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  # リリース（release.yml）も同じ検査を通してから配布物を作る。
+  workflow_call:
 
 permissions:
   contents: read
@@ -16,8 +19,22 @@ concurrency:
 
 jobs:
   check:
+    name: ${{ matrix.name }}
     runs-on: xcode-27
-    timeout-minutes: 60
+    timeout-minutes: 30
+    strategy:
+      # 1つが落ちても残りを最後まで走らせ、失敗をまとめて見られるようにする。
+      fail-fast: false
+      matrix:
+        include:
+          - name: Format and lint
+            recipes: fmt-check lint test-scripts
+          - name: Package tests
+            recipes: test-package
+          - name: App tests
+            recipes: test-app
+          - name: Build
+            recipes: build
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -26,7 +43,18 @@ jobs:
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
-      - name: Check
-        run: nix develop --command just check
-      - name: Build
-        run: nix develop --command just build
+      - name: Run ${{ matrix.recipes }}
+        run: nix develop --command just ${{ matrix.recipes }}
+
+  # CI の合否はこのジョブだけで判断する。どれかが失敗・取り消し・スキップなら失敗にする。
+  passed:
+    name: All checks passed
+    if: always()
+    needs: [check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every check to succeed
+        env:
+          RESULT: ${{ needs.check.result }}
+        run: test "$RESULT" = success
