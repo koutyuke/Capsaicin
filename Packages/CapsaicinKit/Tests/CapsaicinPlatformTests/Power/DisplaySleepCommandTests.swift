@@ -23,9 +23,10 @@ struct DisplaySleepCommandTests {
 
     @Test("SPEC-BLK-002 2 秒の期限後は失敗し、終了前の次の消灯は起動しない")
     func deadline() async throws {
-        let display = DisplaySleep(runner: CommandRunner(executable: "/bin/sleep", arguments: ["2.3"]))
+        let gate = ProcessGate()
+        let display = DisplaySleep(runner: CommandRunner(executable: "/bin/sh", arguments: gate.arguments))
         await #expect(throws: CommandRunnerError.timedOut) { try await display.sleepDisplay() }
         await #expect(throws: CommandRunnerError.alreadyRunning) { try await display.sleepDisplay() }
-        try await Task.sleep(for: .milliseconds(400))
+        gate.open()
     }
 }

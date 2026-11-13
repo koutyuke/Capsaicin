@@ -8,15 +8,16 @@ struct CommandRunnerTests {
     func differentCommandsShareObservation() async throws {
         let runner = CommandRunner(executable: "/bin/echo", arguments: ["default"], outputLimit: 1024)
         #expect(try runner.run(executable: "/bin/echo", arguments: ["$HOME"], timeout: 2) == Data("$HOME\n".utf8))
+        let gate = ProcessGate()
         #expect(throws: CommandRunnerError.timedOut) {
-            try runner.run(executable: "/bin/sleep", arguments: ["0.4"], timeout: 0.02)
+            try runner.run(executable: "/bin/sh", arguments: gate.arguments, timeout: 0.02)
         }
         #expect(throws: CommandRunnerError.alreadyRunning) { try runner.run(timeout: 1) }
         #expect(throws: CommandRunnerError.alreadyRunning) {
             try runner.run(executable: "/usr/bin/false", arguments: [], timeout: 1)
         }
-        try await Task.sleep(for: .milliseconds(500))
-        #expect(try runner.run(timeout: 2) == Data("default\n".utf8))
+        gate.open()
+        #expect(try await runner.runWhenIdle() == Data("default\n".utf8))
     }
 
     @Test("SPEC-HLP-005 標準出力を上限まで返す。引数はシェルを通さない")
@@ -66,32 +67,32 @@ struct CommandRunnerTests {
 
     @Test("SPEC-HLP-005 期限を過ぎても止めず、終了までは次の起動を断る")
     func timeoutAndObservation() async throws {
-        let runner = CommandRunner(executable: "/bin/sleep", arguments: ["0.4"])
-        let start = ContinuousClock.now
+        let gate = ProcessGate()
+        let runner = CommandRunner(executable: "/bin/sh", arguments: gate.arguments)
+        // 子は開くまで終わらないので、戻ってくれば期限で戻ったことになる。
         #expect(throws: CommandRunnerError.timedOut) { try runner.run(timeout: 0.02) }
-        #expect(start.duration(to: .now) < .milliseconds(300))
         #expect(throws: CommandRunnerError.alreadyRunning) { try runner.run(timeout: 1) }
-        try await Task.sleep(for: .milliseconds(100))
-        #expect(throws: CommandRunnerError.alreadyRunning) { try runner.run(timeout: 1) }
-        try await Task.sleep(for: .milliseconds(400))
-        #expect(try runner.run(timeout: 2).isEmpty)
+        gate.open()
+        #expect(try await runner.runWhenIdle(executable: "/usr/bin/true", arguments: []).isEmpty)
     }
 
     @Test("SPEC-HLP-005 別スレッドから同時に呼んでも起動は1つだけ")
     func concurrentCalls() {
-        let runner = CommandRunner(executable: "/bin/sleep", arguments: ["0.4"])
+        let gate = ProcessGate()
+        let runner = CommandRunner(executable: "/bin/sh", arguments: gate.arguments)
         let results = Mutex<[CommandRunnerError?]>([])
         DispatchQueue.concurrentPerform(iterations: 8) { _ in
             do {
-                _ = try runner.run(timeout: 2)
+                _ = try runner.run(timeout: 0.1)
                 results.withLock { $0.append(nil) }
             } catch {
-                #expect(error as? CommandRunnerError == .alreadyRunning)
                 results.withLock { $0.append(error as? CommandRunnerError) }
             }
         }
+        gate.open()
+        // 子は開くまで終わらないので、起動した1つは期限で戻り、残りは実行中として断られる。
         results.withLock {
-            #expect($0.filter { $0 == nil }.count == 1)
+            #expect($0.filter { $0 == .timedOut }.count == 1)
             #expect($0.filter { $0 == .alreadyRunning }.count == 7)
         }
     }

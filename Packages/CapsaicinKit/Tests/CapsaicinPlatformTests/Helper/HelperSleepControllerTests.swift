@@ -69,8 +69,9 @@ struct HelperSleepControllerTests {
     }
 
     @Test("SPEC-HLP-005 共有 runner の見届け中は読み取りと on/off を断る（起動先は echo に差し替える）")
-    func sharedRunner() async throws {
-        let runner = CommandRunner(executable: "/bin/sleep", arguments: ["0.4"], outputLimit: 65536)
+    func sharedRunner() throws {
+        let gate = ProcessGate()
+        let runner = CommandRunner(executable: "/bin/sh", arguments: gate.arguments, outputLimit: 65536)
         #expect(throws: CommandRunnerError.timedOut) { try runner.run(timeout: 0.02) }
         let controller = HelperSleepController(run: { _, _, timeout in
             try runner.run(executable: "/bin/echo", arguments: [], timeout: timeout)
@@ -78,6 +79,6 @@ struct HelperSleepControllerTests {
         #expect(throws: CommandRunnerError.alreadyRunning) { try controller.turnOn() }
         #expect(throws: CommandRunnerError.alreadyRunning) { try controller.turnOff() }
         #expect(throws: CommandRunnerError.alreadyRunning) { try controller.readSleepDisabled() }
-        try await Task.sleep(for: .milliseconds(500))
+        gate.open()
     }
 }
