@@ -28,27 +28,27 @@ sources = ["DEC-SYS-003"]
 
 [[requirements]]
 id = "REQ-SYS-003"
-title = "表示言語は日本語"
+title = "アプリの表示は日本語、CLI の出力は英語"
 kind = "constraint"
-statement = "Capsaicin が表示する文字列は日本語だけで、英語の UI は持たない。"
-reason = "日本語だけにした理由は DEC-SYS-002 にある。"
+statement = "Capsaicin の画面に表示する文字列は日本語だけで、CLI の出力は英語だけである。"
+reason = "アプリの表示言語の判断は DEC-SYS-002、CLI の出力の言語の判断は DEC-CLI-003 にある。"
 priority = "must"
 status = "accepted"
 specs = []
 depends_on = []
-sources = ["DEC-SYS-002"]
+sources = ["DEC-SYS-002", "DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-SYS-004"
 title = "あとから言語を追加できる"
 kind = "quality"
-statement = "表示する文字列は String Catalog で管理し、あとから言語を追加できる。"
+statement = "アプリの画面に表示する文字列は String Catalog で管理し、あとから言語を追加できる。CLI の出力は対象外とする。"
 reason = "将来ほかの言語の利用者に配る場合に備えるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-UI-011"]
 depends_on = []
-sources = ["DEC-SYS-002", "DEC-SYS-007"]
+sources = ["DEC-SYS-002", "DEC-SYS-007", "DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-SYS-005"

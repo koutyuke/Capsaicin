@@ -6,13 +6,13 @@ domain_code = "CLI"
 id = "REQ-CLI-001"
 title = "コマンドで抑止を開始できる"
 kind = "functional"
-statement = "利用者は、`capsaicin on` で抑止を開始でき、そのときタイマーか指定時刻のどちらかを指定できる。抑止中に時間を指定した `on` は、解除の時刻を置き換える。"
+statement = "利用者は、`capsaicin on` で抑止を開始でき、そのときタイマー、指定時刻、時間の条件なしのどれかを指定できる。抑止中にこれらを指定した `on` は、解除の時刻を置き換え、時間の条件なしなら解除の時刻をなくす。"
 reason = "スクリプトや端末での作業の前後に、抑止を組み込めるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-CLI-001", "SPEC-CLI-007", "SPEC-BLK-011"]
 depends_on = ["REQ-BLK-006"]
-sources = []
+sources = ["DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-CLI-002"
@@ -36,7 +36,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-CLI-003", "SPEC-CLI-007"]
 depends_on = []
-sources = []
+sources = ["DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-CLI-004"
@@ -73,3 +73,15 @@ status = "accepted"
 specs = ["SPEC-CLI-006"]
 depends_on = []
 sources = ["DEC-CLI-001"]
+
+[[requirements]]
+id = "REQ-CLI-007"
+title = "コマンドの使い方を確かめられる"
+kind = "functional"
+statement = "利用者は、`capsaicin --help` で使い方、サブコマンド、`on` のオプション、終了コードを確かめられる。"
+reason = "端末からコマンドの使い方を調べられるようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-CLI-008"]
+depends_on = []
+sources = ["DEC-CLI-003"]
