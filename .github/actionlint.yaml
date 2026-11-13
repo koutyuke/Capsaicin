@@ -1,0 +1,4 @@
+# xcode-27 は GitHub のホストランナーのラベルだが、actionlint の既知のラベルにまだ含まれない。
+self-hosted-runner:
+  labels:
+    - xcode-27

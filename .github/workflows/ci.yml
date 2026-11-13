@@ -1,0 +1,32 @@
+# 検査の方針は docs/meta/decisions/DEC-SYS-011-github-actions-ci-and-release.md にある。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # リリースするコミットの CI の成功が必要なので（docs/manual/release.md）、途中で止めない。
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
+      - name: Select Xcode 27.2
+        run: sudo xcode-select --switch /Applications/Xcode_27.2.app
+      - name: Check
+        run: nix develop --command just check
+      - name: Build
+        run: nix develop --command just build

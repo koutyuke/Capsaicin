@@ -1,0 +1,16 @@
+name: Feature request / 要望
+description: Suggest an idea. English or Japanese is fine. / 機能の要望を伝えます。英語でも日本語でも構いません。
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do? / やりたいこと
+      description: The situation and what gets in the way today. / どんな場面で、今は何に困っているか。
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea / 案
+      description: How you would like Capsaicin to behave, if you have an idea. / こう動いてほしいという案があれば。
