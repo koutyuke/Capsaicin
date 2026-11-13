@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-MENU-004
 title: メニューの時間の指定を1つのサブメニューにまとめ、スリープとディスプレイの2項目をメニューから切り替えられるようにする
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-MENU-005"]
 requirements: ["REQ-MENU-002", "REQ-MENU-007"]
 based_on: ["DEC-UI-001", "DEC-BLK-009"]
 ---
