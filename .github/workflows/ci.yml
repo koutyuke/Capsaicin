@@ -1,12 +1,11 @@
-# 検査の方針は docs/meta/decisions/DEC-SYS-011-github-actions-ci-and-release.md、
-# ジョブの分け方は DEC-SYS-012 にある。
+# 検査の方針とジョブの分け方は docs/meta/decisions/DEC-SYS-013-ci-and-release-workflows.md にある。
 name: CI
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
-  # リリース（release.yml）も同じ検査を通してから配布物を作る。
+  # リリース（release.yml）も同じ検査を通してから公開する。
   workflow_call:
 
 permissions:
@@ -18,23 +17,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check:
-    name: ${{ matrix.name }}
+  # 静的検査は多くのツールを使うので、手元と同じ Nix の devShell で動かす。
+  lint:
+    name: Format and lint
     runs-on: xcode-27
     timeout-minutes: 30
-    strategy:
-      # 1つが落ちても残りを最後まで走らせ、失敗をまとめて見られるようにする。
-      fail-fast: false
-      matrix:
-        include:
-          - name: Format and lint
-            recipes: fmt-check lint test-scripts
-          - name: Package tests
-            recipes: test-package
-          - name: App tests
-            recipes: test-app
-          - name: Build
-            recipes: build
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,18 +30,45 @@ jobs:
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
-      - name: Run ${{ matrix.recipes }}
-        run: nix develop --command just ${{ matrix.recipes }}
+      - name: Run fmt-check, lint and test-scripts
+        run: nix develop --command just fmt-check lint test-scripts
+
+  # テストに要るのは just と XcodeGen だけなので、Nix の評価（約1分）を省く。
+  test:
+    name: ${{ matrix.name }}
+    runs-on: xcode-27
+    timeout-minutes: 30
+    strategy:
+      # 1つが落ちても残りを最後まで走らせ、失敗をまとめて見られるようにする。
+      fail-fast: false
+      matrix:
+        include:
+          - name: Package tests
+            recipe: test-package
+          - name: App tests
+            recipe: test-app
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/build-tools
+      - name: Select Xcode 27.2
+        run: sudo xcode-select --switch /Applications/Xcode_27.2.app
+      - name: Run ${{ matrix.recipe }}
+        run: just ${{ matrix.recipe }}
 
   # CI の合否はこのジョブだけで判断する。どれかが失敗・取り消し・スキップなら失敗にする。
   passed:
     name: All checks passed
     if: always()
-    needs: [check]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Require every check to succeed
         env:
-          RESULT: ${{ needs.check.result }}
-        run: test "$RESULT" = success
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            test "$result" = success
+          done

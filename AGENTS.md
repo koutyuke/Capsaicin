@@ -63,22 +63,23 @@ CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どち�
 
 変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。署名は ad-hoc で、Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
 
-| レシピ          | 実行すること                                                                                                                                        |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gen`           | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
-| `build`         | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
-| `build-release` | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
-| `dist`          | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
-| `test`          | `test-scripts`、`test-package`、`test-app` を実行する                                                                                               |
-| `test-scripts`  | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                      |
-| `test-package`  | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                             |
-| `test-app`      | `gen` の後、アプリを起動しないテストでバンドルと埋め込んだ実行ファイルを検査する                                                                    |
-| `fmt`           | treefmt で各言語と justfile を整形する。`nix fmt` も同じ設定・実行ファイルを使う                                                                    |
-| `fmt-check`     | 一時コピー上で treefmt を実行し、元のファイルを変えずに各言語と justfile の整形差分を検出する。String Catalog に `stale` のキーがないことも確かめる |
-| `lint-code`     | SwiftLint、markdownlint-cli2、ShellCheck、Ruff、statix、deadnix を実行する                                                                          |
-| `lint-docs`     | `docs/documentation-management.md` が定める文書の構造と参照を検査する                                                                               |
-| `lint`          | `lint-code` と `lint-docs` を実行する                                                                                                               |
-| `check`         | `fmt-check`、`lint`、`test` を順に実行する                                                                                                          |
+| レシピ             | 実行すること                                                                                                                                        |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
+| `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
+| `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
+| `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
+| `test`             | `test-scripts`、`test-package`、`test-app` を実行する                                                                                               |
+| `test-scripts`     | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                      |
+| `test-package`     | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                             |
+| `test-app`         | `gen` の後、アプリを起動しないテストでバンドルと埋め込んだ実行ファイルを検査する                                                                    |
+| `fmt`              | treefmt で各言語と justfile を整形する。`nix fmt` も同じ設定・実行ファイルを使う                                                                    |
+| `fmt-check`        | 一時コピー上で treefmt を実行し、元のファイルを変えずに各言語と justfile の整形差分を検出する。String Catalog に `stale` のキーがないことも確かめる |
+| `lint-code`        | SwiftLint、markdownlint-cli2、ShellCheck、Ruff、statix、deadnix を実行する                                                                          |
+| `lint-docs`        | `docs/documentation-management.md` が定める文書の構造と参照を検査する                                                                               |
+| `lint-build-tools` | CI が Nix を使わずに入れる `just` と XcodeGen の版（`.github/build-tools.env`）が `flake.lock` の版と一致するかを確かめる                           |
+| `lint`             | `lint-code`、`lint-docs`、`lint-build-tools` を実行する                                                                                             |
+| `check`            | `fmt-check`、`lint`、`test` を順に実行する                                                                                                          |
 
 文書の移行と衝突しないよう、`docs/` は自動整形と Markdown lint の対象から除き、`lint-docs` で構造を検査する。`*.tpl.*` は文書の構造検査から除く。移行中の文書で検査が落ちても、チケットの範囲外のファイルを直してはならない。
 

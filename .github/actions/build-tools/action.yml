@@ -1,0 +1,25 @@
+name: Build tools
+description: Nix を使わずに、.github/build-tools.env で固定した just と XcodeGen を入れる（DEC-SYS-013）。
+runs:
+  using: composite
+  steps:
+    - name: Install just and XcodeGen
+      shell: bash
+      run: |
+        set -euo pipefail
+        source .github/build-tools.env
+        tools="$RUNNER_TEMP/build-tools"
+        mkdir -p "$tools/just"
+        cd "$tools"
+        curl -fsSL --retry 3 -o just.tar.gz \
+          "https://github.com/casey/just/releases/download/$JUST_VERSION/just-$JUST_VERSION-aarch64-apple-darwin.tar.gz"
+        curl -fsSL --retry 3 -o xcodegen.zip \
+          "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+        shasum -a 256 -c - <<EOF
+        $JUST_SHA256  just.tar.gz
+        $XCODEGEN_SHA256  xcodegen.zip
+        EOF
+        tar -xzf just.tar.gz -C just just
+        ditto -x -k xcodegen.zip .
+        echo "$tools/just" >> "$GITHUB_PATH"
+        echo "$tools/xcodegen/bin" >> "$GITHUB_PATH"

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-011
 title: GitHub Actions で検査し、タグの push で GitHub Release を作る
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SYS-013"]
 requirements: ["REQ-SYS-005", "REQ-SYS-006"]
 based_on: ["DEC-SYS-004", "DEC-SYS-006", "DEC-SYS-008", "DEC-SYS-010", "HYP-HLP-003"]
 ---

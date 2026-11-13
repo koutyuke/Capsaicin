@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-012
 title: CI の検査を並列のジョブに分け、集約のジョブで合否を決める
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SYS-013"]
 requirements: []
 based_on: ["DEC-SYS-011"]
 ---

@@ -56,6 +56,14 @@ lint-code:
     statix check treefmt.nix
     deadnix --fail flake.nix treefmt.nix
 
-lint: lint-code lint-docs
+# CI が Nix を使わずに入れる just と XcodeGen の版が、flake.lock の版と一致するかを確かめる（DEC-SYS-013）。
+lint-build-tools:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    source .github/build-tools.env
+    [[ "$(just --version)" == "just $JUST_VERSION" ]] || { echo "just: flake.lock と .github/build-tools.env の版が違う" >&2; exit 1; }
+    [[ "$(xcodegen --version)" == "Version: $XCODEGEN_VERSION" ]] || { echo "xcodegen: flake.lock と .github/build-tools.env の版が違う" >&2; exit 1; }
+
+lint: lint-code lint-docs lint-build-tools
 
 check: fmt-check lint test

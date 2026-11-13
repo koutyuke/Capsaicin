@@ -38,7 +38,7 @@ based_on: ["DEC-SYS-009"]
 
 ## 影響
 
-- CI は `main` への push で走る（`DEC-SYS-011`）。`pull_request` のイベントは使わない。
+- CI は `main` への push で走る（`DEC-SYS-013`）。`pull_request` のイベントは使わない。
 - Pull Request を無効にすると、Dependabot などのボットも Pull Request を作れない。Action の版の更新は手で行う。
 - Issue のテンプレートを `.github/ISSUE_TEMPLATE/` に置き、README に Pull Request を受け付けないことを書く。
 - 過去の版の不具合は、その版を直さず、次の版で直す。
