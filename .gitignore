@@ -3,6 +3,7 @@
 .build/
 *.xcodeproj/
 .direnv/
+buildServer.json
 **/.swiftpm/
 __pycache__/
 *.pyc
