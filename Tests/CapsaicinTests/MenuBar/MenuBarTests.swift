@@ -18,16 +18,21 @@ struct MenuBarTests {
         let fixture = makeFixture()
         fixture.model.launch()
         let rows = rows(fixture)
-        #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "menu.startFor",
-                                   "separator.sleep", "menu.sleep", "separator.footer", "menu.settings", "menu.quit"])
-        #expect(rows[1].subtitle == nil)
-        #expect(rows[2].children.map(\.command) == [15, 30, 60, 120, 240, 480]
+        #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "separator.start", "menu.startNoTimeLimit",
+                                   "menu.startFor", "menu.startAt", "separator.sleep", "menu.header.sleep",
+                                   "menu.sleep.display", "menu.sleep.lidClose", "menu.header.release", "menu.battery",
+                                   "separator.footer", "menu.settings", "menu.quit"])
+        #expect(rows[1].subtitle == "オフにするまで")
+        #expect(rows[1].command == .start(nil))
+        #expect(rows[3].command == .start(.noTimeLimit))
+        #expect(rows[4].children.map(\.command) == [15, 30, 60, 120, 240, 480]
             .map { .start(.timer(TimerDuration(minutes: $0)!)) }
-            + [.durationPanel, nil, .timePanel, nil, .start(.noTimeLimit)])
+            + [.durationPanel])
+        #expect(rows[5].command == .timePanel && rows[5].children.isEmpty)
         var settings = fixture.model.settings
         settings.batteryConditionEnabled = false
         fixture.model.changeSettings(settings)
-        #expect(self.rows(fixture)[1].subtitle == "手動でオフにするまで")
+        #expect(self.rows(fixture)[1].subtitle == "オフにするまで")
     }
 
     @Test("SPEC-MENU-001 SPEC-MENU-004 抑止中は状態・オフ・時間変更・スリープ設定を並べ、電源の変化を反映する")
@@ -37,20 +42,27 @@ struct MenuBarTests {
         try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 90))))
         let initial = rows(fixture)
         #expect(initial.map(\.id) == ["menu.header.active", "menu.status.until", "menu.status.battery",
-                                      "menu.stop", "menu.changeTime", "separator.sleep", "menu.sleep",
+                                      "menu.stop", "menu.changeTime", "separator.sleep", "menu.header.sleep",
+                                      "menu.sleep.display", "menu.sleep.lidClose", "menu.header.release",
+                                      "menu.battery",
                                       "separator.footer", "menu.settings", "menu.quit"])
         #expect(initial[1].title == "1:30まで（残り1時間30分）")
         #expect(rows(fixture, now: Date(timeIntervalSince1970: 120))[1].title == "1:30まで（残り1時間28分）")
         fixture.system.powerState = PowerState(batteryLevel: 80, isOnACPower: true)
         #expect(rows(fixture)[2].title == "電源アダプタ接続中（残量低下でも継続）")
         #expect(initial[2].title == "バッテリー残量20%未満でオフ")
+        #expect(initial[3].command == .stop)
+        #expect(initial[4].children.map(\.command) == [nil] + [15, 30, 60, 120, 240, 480]
+            .map { .start(.timer(TimerDuration(minutes: $0)!)) }
+            + [.durationPanel, nil, .timePanel, nil, .start(.noTimeLimit)])
     }
 
     @Test("SPEC-MENU-004 制御の向きとヘルパーの修復を区別する", arguments: [MisalignmentDirection.leftApplied, .notApplied])
     func helperWarning(direction: MisalignmentDirection) {
         let status = BlockingStatus(session: nil, batteryCondition: nil,
                                     misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
-        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, sleepRows: [],
+        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, hasInternalBattery: true,
+                                    sleepRows: [],
                                     now: Date(timeIntervalSince1970: 0), calendar: calendar, bundle: bundle())
         #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
         #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
@@ -211,6 +223,7 @@ struct MenuBarTests {
     private func rows(_ fixture: AppFixture, now: Date = Date(timeIntervalSince1970: 0)) -> [MenuEntry] {
         MenuContent.make(status: fixture.model.status, settings: fixture.model.settings,
                          isOnACPower: fixture.system.powerState.isOnACPower,
+                         hasInternalBattery: fixture.model.capabilities.hasInternalBattery,
                          sleepRows: settingsModel(fixture).sleepRows,
                          now: now, calendar: calendar, bundle: bundle())
     }
@@ -243,7 +256,15 @@ extension MenuBarTests {
             "menu.header.fromNow": "今から",
             "menu.startFor.custom": "時間を入力…",
             "menu.startUntil": "時刻を指定…",
-            "menu.noTimeLimit": "時間指定なし",
+            "menu.noTimeLimit": "オフにするまで",
+            "menu.startNoTimeLimit": "オフにするまでオン",
+            "menu.startAt": "時刻を指定してオン…",
+            "menu.start.subtitle.timer": "%@後にオフ",
+            "menu.start.subtitle.until": "%@にオフ",
+            "menu.start.subtitle.nextDay": "明日%@にオフ",
+            "menu.start.subtitle.none": "オフにするまで",
+            "menu.battery": "バッテリー残量%d%%未満",
+            "menu.battery.subtitle": "電源アダプタ接続中は除く",
             "panel.duration.title": "時間を指定してオン",
             "panel.time.title": "時刻を指定してオン",
             "panel.changeTime.title": "オフにする時刻を変更",

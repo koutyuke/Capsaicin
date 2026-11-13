@@ -60,9 +60,9 @@ public struct TimeOfDay: Hashable, Sendable, Codable {
     }
 }
 
-/// バッテリー残量のしきい値。0〜100% を 5% 刻みで持つ。
+/// バッテリー残量のしきい値。5〜100% を 5% 刻みで持つ。
 public struct BatteryThreshold: Hashable, Sendable, Codable {
-    public static let allowedPercents = 0 ... 100
+    public static let allowedPercents = 5 ... 100
     public static let step = 5
 
     public let percent: Int

@@ -49,7 +49,8 @@ struct UserDefaultsSettingsStoreTests {
             let store = UserDefaultsSettingsStore(defaults: defaults)
             #expect(store.save(Settings()))
             let key = try #require(defaults.persistentDomain(forName: suite)?.keys.first)
-            let data = Data(#"{"timerDuration":0,"showsHUD":"bad","lidCloseDisplay":"keepOn","future":7}"#.utf8)
+            let data = Data(#"{"batteryThreshold":0,"timerDuration":0,"showsHUD":"bad","lidCloseDisplay":"keepOn","future":7}"#
+                .utf8)
             defaults.set(data, forKey: key)
             var expected = Settings()
             expected.lidCloseDisplay = .keepOn

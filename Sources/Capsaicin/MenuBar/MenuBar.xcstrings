@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "menu.battery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー残量%d%%未満"
+          }
+        }
+      }
+    },
+    "menu.battery.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電源アダプタ接続中は除く"
+          }
+        }
+      }
+    },
     "menu.changeTime" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -62,7 +84,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "時間指定なし"
+            "value" : "オフにするまで"
           }
         }
       }
@@ -100,13 +122,35 @@
         }
       }
     },
+    "menu.start.subtitle.nextDay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明日%@にオフ"
+          }
+        }
+      }
+    },
     "menu.start.subtitle.none" : {
       "extractionState" : "manual",
       "localizations" : {
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "手動でオフにするまで"
+            "value" : "オフにするまで"
+          }
+        }
+      }
+    },
+    "menu.start.subtitle.timer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@後にオフ"
           }
         }
       }
@@ -117,7 +161,18 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@まで"
+            "value" : "%@にオフ"
+          }
+        }
+      }
+    },
+    "menu.startAt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻を指定してオン…"
           }
         }
       }
@@ -140,6 +195,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "時間を入力…"
+          }
+        }
+      }
+    },
+    "menu.startNoTimeLimit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オフにするまでオン"
           }
         }
       }

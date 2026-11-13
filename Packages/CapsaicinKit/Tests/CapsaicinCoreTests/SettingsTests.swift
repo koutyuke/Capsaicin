@@ -30,10 +30,18 @@ struct SettingsTests {
         #expect((TimerDuration(minutes: minutes) != nil) == (1 ... 1440).contains(minutes))
     }
 
-    @Test("SPEC-SET-002 しきい値は 0〜100% の 5% 刻みだけを受け付ける", arguments: [-5, 0, 5, 7, 20, 100, 105])
+    @Test("SPEC-SET-002 しきい値は 5〜100% の 5% 刻みだけを受け付ける", arguments: [-5, 0, 5, 7, 20, 100, 105])
     func thresholdRange(percent: Int) {
-        let valid = (0 ... 100).contains(percent) && percent.isMultiple(of: 5)
+        let valid = (5 ... 100).contains(percent) && percent.isMultiple(of: 5)
         #expect((BatteryThreshold(percent: percent) != nil) == valid)
+    }
+
+    @Test("SPEC-SET-002 範囲外のしきい値を読むと、その項目だけ既定値にする", arguments: [0, 105])
+    func invalidThresholdFallsBack(percent: Int) throws {
+        let data = Data("{\"batteryThreshold\":\(percent),\"showsHUD\":false}".utf8)
+        var expected = Settings()
+        expected.showsHUD = false
+        #expect(try JSONDecoder().decode(Settings.self, from: data) == expected)
     }
 
     @Test("SPEC-SET-002 時刻は 0:00〜23:59 だけを受け付ける")

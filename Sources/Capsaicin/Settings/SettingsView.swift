@@ -201,7 +201,9 @@ extension SettingsView {
                                             )
                                         }
                                     },
-                                ), in: 0 ... 100, step: 5,
+                                ), in: Double(BatteryThreshold.allowedPercents.lowerBound)
+                                    ... Double(BatteryThreshold.allowedPercents.upperBound),
+                                step: Double(BatteryThreshold.step),
                             ) {
                                 Text(SettingsSection.sleep.text("battery.threshold.label"))
                             } tick: {

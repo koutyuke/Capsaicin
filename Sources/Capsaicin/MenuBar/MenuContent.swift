@@ -4,6 +4,7 @@ import Foundation
 enum MenuCommand: Equatable {
     case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit
     case toggleSleep(String), lidClose(SettingsLidCloseChoice)
+    case toggleBattery
 }
 
 struct MenuEntry {
@@ -18,7 +19,8 @@ struct MenuEntry {
 
 enum MenuContent {
     static func make(
-        status: BlockingStatus, settings: Settings, isOnACPower: Bool, sleepRows: [SettingsSleepRow],
+        status: BlockingStatus, settings: Settings, isOnACPower: Bool, hasInternalBattery: Bool,
+        sleepRows: [SettingsSleepRow],
         now: Date = Date(), calendar: Calendar = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
@@ -35,7 +37,7 @@ enum MenuContent {
                 entry.title = String(format: entry.title, time(limit.date, calendar: calendar),
                                      duration(limit.date.timeIntervalSince(now), calendar: calendar, bundle: bundle))
                 rows.append(entry)
-            } else if status.batteryCondition == nil {
+            } else {
                 rows.append(row("menu.status.noCondition"))
             }
             if let battery = status.batteryCondition {
@@ -47,24 +49,38 @@ enum MenuContent {
             }
             rows.append(row("menu.stop", command: .stop))
             rows.append(row("menu.changeTime", children:
-                [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle)))
+                [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle) + [
+                    MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
+                    MenuEntry(id: "separator.noTimeLimit"), row("menu.noTimeLimit", command: .start(.noTimeLimit)),
+                ]))
         } else {
             let limit = TimeLimitRule.timeLimit(override: nil, settings: settings, now: now, calendar: calendar)
-            let subtitle = limit.map {
-                $0.source == .timer ? duration($0.date.timeIntervalSince(now), calendar: calendar, bundle: bundle)
-                    : String(
-                        format: text("menu.start.subtitle.until", bundle: bundle),
-                        time($0.date, calendar: calendar),
-                    )
-            } ?? (status.batteryCondition == nil ? text("menu.start.subtitle.none", bundle: bundle) : nil)
+            let subtitle = startSubtitle(limit, now: now, calendar: calendar, bundle: bundle)
             rows.append(row("menu.start", subtitle: subtitle, command: .start(nil)))
+            rows.append(MenuEntry(id: "separator.start"))
+            rows.append(row("menu.startNoTimeLimit", command: .start(.noTimeLimit)))
             rows.append(row("menu.startFor", children: presets(calendar: calendar, bundle: bundle)))
+            rows.append(row("menu.startAt", command: .timePanel))
         }
-        return rows + [MenuEntry(id: "separator.sleep"),
-                       MenuEntry(id: "menu.sleep", title: SettingsSection.sleep.text("behavior.group.title"),
-                                 children: sleepEntries(sleepRows, settings: settings)),
-                       MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
+        rows += [MenuEntry(id: "separator.sleep"),
+                 MenuEntry(id: "menu.header.sleep", title: SettingsSection.sleep.text("behavior.group.title"))]
+            + sleepEntries(sleepRows, settings: settings)
+        if hasInternalBattery {
+            rows += [MenuEntry(id: "menu.header.release", title: SettingsSection.sleep.text("release.group.title")),
+                     batteryEntry(settings: settings, bundle: bundle)]
+        }
+        return rows + [MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
                        row("menu.quit", command: .quit)]
+    }
+
+    private static func startSubtitle(_ limit: TimeLimit?, now: Date, calendar: Calendar, bundle: Bundle) -> String {
+        guard let limit else { return text("menu.start.subtitle.none", bundle: bundle) }
+        if limit.source == .timer {
+            return String(format: text("menu.start.subtitle.timer", bundle: bundle),
+                          duration(limit.date.timeIntervalSince(now), calendar: calendar, bundle: bundle))
+        }
+        let key = calendar.isDate(limit.date, inSameDayAs: now) ? "menu.start.subtitle.until" : "menu.start.subtitle.nextDay"
+        return String(format: text(key, bundle: bundle), time(limit.date, calendar: calendar))
     }
 
     static func text(_ key: String, bundle: Bundle = .main) -> String {
@@ -102,12 +118,7 @@ enum MenuContent {
             id: "menu.startFor.custom",
             title: text("menu.startFor.custom", bundle: bundle),
             command: .durationPanel,
-        ),
-        MenuEntry(id: "separator.time"),
-        MenuEntry(id: "menu.startUntil", title: text("menu.startUntil", bundle: bundle), command: .timePanel),
-        MenuEntry(id: "separator.noTimeLimit"),
-        MenuEntry(id: "menu.noTimeLimit", title: text("menu.noTimeLimit", bundle: bundle),
-                  command: .start(.noTimeLimit))]
+        )]
     }
 
     private static func sleepEntries(_ rows: [SettingsSleepRow], settings: Settings) -> [MenuEntry] {
@@ -122,6 +133,13 @@ enum MenuContent {
                              command: row.setting == nil ? nil : .toggleSleep(row.key), children: choices,
                              isWarning: !row.warningLabel.isEmpty, isChecked: row.setting != nil && row.isOn)
         }
+    }
+
+    private static func batteryEntry(settings: Settings, bundle: Bundle) -> MenuEntry {
+        MenuEntry(id: "menu.battery",
+                  title: String(format: text("menu.battery", bundle: bundle), settings.batteryThreshold.percent),
+                  subtitle: settings.ignoresBatteryOnACPower ? text("menu.battery.subtitle", bundle: bundle) : nil,
+                  command: .toggleBattery, isChecked: settings.batteryConditionEnabled)
     }
 
     static func time(_ date: Date, calendar: Calendar) -> String {

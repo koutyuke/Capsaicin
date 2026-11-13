@@ -76,7 +76,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             inputPanel = nil
         }
         let rows = MenuContent.make(status: model.status, settings: model.settings,
-                                    isOnACPower: isOnACPower(), sleepRows: settings.sleepRows)
+                                    isOnACPower: isOnACPower(),
+                                    hasInternalBattery: model.capabilities.hasInternalBattery,
+                                    sleepRows: settings.sleepRows)
         update(menu, rows: rows)
     }
 
@@ -148,6 +150,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             Task { await settings.changeSleep(row, to: !row.isOn); refresh() }
         case let .lidClose(choice):
             Task { await settings.changeLidClose(to: choice); refresh() }
+        case .toggleBattery:
+            settings.change(\.batteryConditionEnabled, to: !model.settings.batteryConditionEnabled)
+            refresh()
         case .settings: openSettings()
         case .quit: quit()
         }
