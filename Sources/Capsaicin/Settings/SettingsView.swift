@@ -174,7 +174,7 @@ extension SettingsView {
                 }
             }
             if state.showsBattery {
-                Section {
+                Section(SettingsSection.sleep.text("battery.group.title")) {
                     toggle(
                         .sleep, "battery", \.batteryConditionEnabled, symbol: "battery.50percent",
                     )

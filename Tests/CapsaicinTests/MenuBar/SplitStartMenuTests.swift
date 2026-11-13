@@ -78,12 +78,13 @@ struct SplitStartMenuTests {
             ports: system.ports,
         ), saveSettings: { _ in })
         let controller = menu(settings(app))
-        #expect(controller.menu.items.contains { $0.identifier?.rawValue == "menu.header.release" } == hasBattery)
-        #expect(controller.menu.items.contains { $0.identifier?.rawValue == "menu.battery" } == hasBattery)
+        let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        #expect(quick.items.contains { $0.identifier?.rawValue == "menu.header.battery" } == hasBattery)
+        #expect(quick.items.contains { $0.identifier?.rawValue == "menu.battery" } == hasBattery)
         if hasBattery {
-            let header = try item("menu.header.release", in: controller.menu)
+            let header = try item("menu.header.battery", in: quick)
             #expect(header.isSectionHeader && header.submenu == nil)
-            #expect(header.title == SettingsSection.sleep.text("release.group.title"))
+            #expect(header.title == SettingsSection.sleep.text("battery.group.title"))
         }
     }
 
@@ -101,10 +102,10 @@ struct SplitStartMenuTests {
                 isOnACPower: fixture.system.powerState.isOnACPower,
                 hasInternalBattery: fixture.model.capabilities.hasInternalBattery, sleepRows: model.sleepRows,
                 bundle: Bundle(for: MenuBarController.self),
-            ).first { $0.id == "menu.battery" })
+            ).first { $0.id == "menu.quickSettings" }?.children.first { $0.id == "menu.battery" })
         }
         let battery = try batteryRow()
-        #expect(battery.title == "バッテリー残量35%未満")
+        #expect(battery.title == "残量35%未満でオフにする")
         #expect(battery.isChecked == enabled)
         #expect(battery.subtitle == (ignoresAdapter ? "電源アダプタ接続中は除く" : nil))
         #expect(battery.command == .toggleBattery && battery.children.isEmpty)
@@ -124,19 +125,23 @@ struct SplitStartMenuTests {
         let controller = menu(model)
         var expected = fixture.model.settings
         for enabled in [false, true] {
-            let battery = try item("menu.battery", in: controller.menu)
-            controller.menu.performActionForItem(at: controller.menu.index(of: battery))
+            let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+            let battery = try item("menu.battery", in: quick)
+            quick.performActionForItem(at: quick.index(of: battery))
             expected.batteryConditionEnabled = enabled
             #expect(fixture.model.settings == expected)
             #expect(fixture.savedSettings.last == expected)
-            #expect(try item("menu.battery", in: controller.menu).state == (enabled ? .on : .off))
+            let updated = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+            #expect(try item("menu.battery", in: updated).state == (enabled ? .on : .off))
+            #expect(try item("menu.quickSettings", in: controller.menu).subtitle
+                == (enabled ? nil : "バッテリー残量ではオフにしない"))
             #expect((fixture.model.status.batteryCondition != nil) == enabled)
             #expect(fixture.model.status.isBlocking == active)
         }
         #expect(fixture.savedSettings.count == 2)
     }
 
-    @Test("SPEC-MENU-002 停止中の時刻項目はサブメニューを持たず時刻パネルを直接開く")
+    @Test("SPEC-MENU-002 停止中の時間・時刻サブメニューの時刻項目は時刻パネルを開く")
     func directTimePanel() throws {
         _ = NSApplication.shared
         let fixture = AppFixture()
@@ -144,10 +149,11 @@ struct SplitStartMenuTests {
         var receivedMode: StartPanelInput.Mode?
         controller.makeInputPanel = { mode, _ in receivedMode = mode; return NSPanel() }
         defer { controller.stop() }
-        let entry = try item("menu.startAt", in: controller.menu)
+        let submenu = try #require(item("menu.startFor", in: controller.menu).submenu)
+        let entry = try item("menu.startUntil", in: submenu)
         #expect(entry.submenu == nil)
-        #expect(entry.title == MenuContent.text("menu.startAt"))
-        controller.menu.performActionForItem(at: controller.menu.index(of: entry))
+        #expect(entry.title == "時刻を指定…")
+        submenu.performActionForItem(at: submenu.index(of: entry))
         #expect(receivedMode == .time && controller.inputPanel != nil)
         #expect(!fixture.model.status.isBlocking)
     }

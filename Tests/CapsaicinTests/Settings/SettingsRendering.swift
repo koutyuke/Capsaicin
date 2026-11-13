@@ -3,6 +3,31 @@ import SwiftUI
 import Testing
 
 extension SettingsTests {
+    @Test("SPEC-SET-002 SPEC-SET-006 バッテリーは独立した見出しを持ち、内蔵バッテリーがなければグループごと出さない",
+          arguments: [false, true], [false, true])
+    func batteryGroup(hasBattery: Bool, enabled: Bool) throws {
+        let defaults = try #require(UserDefaults(suiteName: "SettingsBattery-" + UUID().uuidString))
+        let view = SettingsView(
+            model: makeModel(hasBattery: hasBattery, conditionsEnabled: enabled),
+            hotkey: HotkeyController(save: { _ in true }), selection: SettingsSelection(defaults: defaults), quit: {},
+        )
+        // 既存の (i) 検査と同じく、Form に渡す値を調べる。プロセス内では仮想 AX ノードを列挙できない。
+        func strings(_ value: Any) -> [String] {
+            if let text = value as? String {
+                return [text]
+            }
+            return Mirror(reflecting: value).children.flatMap { strings($0.value) }
+        }
+        let values = strings(view.release)
+        #expect(SettingsSection.sleep.text("battery.group.title") == "バッテリー")
+        #expect(SettingsSection.sleep.text("battery.label") == "残量が少なくなったらオフにする")
+        #expect(values.contains("バッテリー") == hasBattery)
+        #expect(values.contains("残量が少なくなったらオフにする") == hasBattery)
+        #expect(values.contains(SettingsSection.sleep.text("battery.threshold.label")) == hasBattery)
+        #expect(values.contains(SettingsSection.sleep.text("battery.ignoreOnAdapter.label")) == hasBattery)
+        #expect(rowHelpValues(view.release).count == (hasBattery ? 7 : 4))
+    }
+
     @Test("SPEC-UI-004 LED の独自シンボルをコードのバンドルから読み込める",
           arguments: ["custom.capsaicin.led", "custom.capsaicin.led.fill"])
     func customSymbols(name: String) throws {

@@ -13,38 +13,35 @@ struct MenuBarTests {
         return value
     }
 
-    @Test("SPEC-MENU-001 SPEC-MENU-002 停止中は開始・時間指定・スリープ設定・設定・終了を並べる")
+    @Test("SPEC-MENU-001 SPEC-MENU-002 停止中は開始・時間指定・クイック設定・設定・終了を並べる")
     func stopped() {
         let fixture = makeFixture()
         fixture.model.launch()
         let rows = rows(fixture)
         #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "separator.start", "menu.startNoTimeLimit",
-                                   "menu.startFor", "menu.startAt", "separator.sleep", "menu.header.sleep",
-                                   "menu.sleep.display", "menu.sleep.lidClose", "menu.header.release", "menu.battery",
+                                   "menu.startFor", "separator.sleep", "menu.quickSettings",
                                    "separator.footer", "menu.settings", "menu.quit"])
         #expect(rows[1].subtitle == "オフにするまで")
         #expect(rows[1].command == .start(nil))
         #expect(rows[3].command == .start(.noTimeLimit))
-        #expect(rows[4].children.map(\.command) == [15, 30, 60, 120, 240, 480]
+        #expect(rows[4].children.map(\.command) == [nil] + [15, 30, 60, 120, 240, 480]
             .map { .start(.timer(TimerDuration(minutes: $0)!)) }
-            + [.durationPanel])
-        #expect(rows[5].command == .timePanel && rows[5].children.isEmpty)
+            + [.durationPanel, nil, .timePanel])
+        #expect(rows.allSatisfy { !$0.isChecked })
         var settings = fixture.model.settings
         settings.batteryConditionEnabled = false
         fixture.model.changeSettings(settings)
         #expect(self.rows(fixture)[1].subtitle == "オフにするまで")
     }
 
-    @Test("SPEC-MENU-001 SPEC-MENU-004 抑止中は状態・オフ・時間変更・スリープ設定を並べ、電源の変化を反映する")
+    @Test("SPEC-MENU-001 SPEC-MENU-004 抑止中は状態・オフ・時間変更・クイック設定を並べ、電源の変化を反映する")
     func active() throws {
         let fixture = makeFixture()
         fixture.model.launch()
         try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 90))))
         let initial = rows(fixture)
         #expect(initial.map(\.id) == ["menu.header.active", "menu.status.until", "menu.status.battery",
-                                      "menu.stop", "menu.changeTime", "separator.sleep", "menu.header.sleep",
-                                      "menu.sleep.display", "menu.sleep.lidClose", "menu.header.release",
-                                      "menu.battery",
+                                      "menu.stop", "menu.changeTime", "separator.sleep", "menu.quickSettings",
                                       "separator.footer", "menu.settings", "menu.quit"])
         #expect(initial[1].title == "1:30まで（残り1時間30分）")
         #expect(rows(fixture, now: Date(timeIntervalSince1970: 120))[1].title == "1:30まで（残り1時間28分）")
@@ -251,19 +248,21 @@ extension MenuBarTests {
     @Test("SPEC-UI-011 SPEC-MENU-002 SPEC-MENU-003 メニューとパネルの文言をString Catalogから読む")
     func redesignResources() {
         let expected = [
-            "menu.startFor": "時間を指定してオン",
+            "menu.startFor": "時間・時刻を指定してオン",
             "menu.changeTime": "オフにする時刻を変更",
             "menu.header.fromNow": "今から",
             "menu.startFor.custom": "時間を入力…",
             "menu.startUntil": "時刻を指定…",
-            "menu.noTimeLimit": "オフにするまで",
-            "menu.startNoTimeLimit": "オフにするまでオン",
-            "menu.startAt": "時刻を指定してオン…",
+            "menu.noTimeLimit": "時間指定なし",
+            "menu.startNoTimeLimit": "時間指定なしでオン",
+            "menu.quickSettings": "クイック設定",
+            "menu.quickSettings.batteryDisabled": "バッテリー残量ではオフにしない",
+            "menu.sleep.lidClose.a11y": "%1$@、%2$@",
             "menu.start.subtitle.timer": "%@後にオフ",
             "menu.start.subtitle.until": "%@にオフ",
             "menu.start.subtitle.nextDay": "明日%@にオフ",
             "menu.start.subtitle.none": "オフにするまで",
-            "menu.battery": "バッテリー残量%d%%未満",
+            "menu.battery": "残量%d%%未満でオフにする",
             "menu.battery.subtitle": "電源アダプタ接続中は除く",
             "panel.duration.title": "時間を指定してオン",
             "panel.time.title": "時刻を指定してオン",
@@ -275,6 +274,7 @@ extension MenuBarTests {
         for (key, value) in expected {
             #expect(MenuContent.text(key, bundle: bundle()) == value)
         }
+        #expect(MenuContent.text("menu.startAt", bundle: bundle()) == "menu.startAt")
     }
 
     @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 警告は状態の先頭に残し、キー配列の案内は表示しない")

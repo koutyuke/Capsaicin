@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "ja",
   "strings" : {
+    "battery.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バッテリー"
+          }
+        }
+      }
+    },
     "battery.ignoreOnAdapter.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18,7 +29,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バッテリー残量"
+            "value" : "残量が少なくなったらオフにする"
           }
         }
       }

@@ -276,7 +276,7 @@ extension SettingsTests {
 }
 
 extension SettingsTests {
-    func makeModel(hasLid: Bool = true, conditionsEnabled: Bool? = nil) -> SettingsModel {
+    func makeModel(hasLid: Bool = true, hasBattery: Bool = true, conditionsEnabled: Bool? = nil) -> SettingsModel {
         let system = FakeSystem()
         var settings = CapsaicinCore.Settings()
         if let conditionsEnabled {
@@ -287,7 +287,7 @@ extension SettingsTests {
         let app = AppModel(controller: BlockingController(settings: settings,
                                                           capabilities: MachineCapabilities(
                                                               hasLid: hasLid,
-                                                              hasInternalBattery: true,
+                                                              hasInternalBattery: hasBattery,
                                                           ),
                                                           ports: system.ports), saveSettings: { _ in })
         app.launchAgentStatus = .ready

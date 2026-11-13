@@ -78,7 +78,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let rows = MenuContent.make(status: model.status, settings: model.settings,
                                     isOnACPower: isOnACPower(),
                                     hasInternalBattery: model.capabilities.hasInternalBattery,
-                                    sleepRows: settings.sleepRows)
+                                    sleepRows: settings.sleepRows, bundle: Bundle(for: Self.self))
         update(menu, rows: rows)
     }
 
@@ -101,13 +101,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.action = row.command == nil ? nil : #selector(performCommand(_:))
             item.state = row.isChecked ? .on : .off
             commands[row.id] = row.command
-            item.image = nil
-            item.setAccessibilityLabel(nil)
-            if row.isWarning {
-                item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
-                    .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
-                item.setAccessibilityLabel(String(format: MenuContent.text("menu.warning.a11y"), row.title))
-            }
+            updateWarning(item, row: row)
             if row.id == "menu.status.until" || row.id == "menu.status.battery" {
                 let font = NSFont.preferredFont(forTextStyle: .body)
                 let descriptor = font.fontDescriptor.addingAttributes([.featureSettings: [[
@@ -133,6 +127,19 @@ final class MenuBarController: NSObject, NSMenuDelegate {
                 item.submenu = submenu
                 update(submenu, rows: row.children)
             }
+        }
+    }
+
+    private func updateWarning(_ item: NSMenuItem, row: MenuEntry) {
+        item.image = nil
+        item.setAccessibilityLabel(row.accessibilityLabel)
+        if row.isWarning {
+            item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
+                .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
+            item.setAccessibilityLabel(String(
+                format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: Self.self)),
+                row.accessibilityLabel ?? row.title,
+            ))
         }
     }
 

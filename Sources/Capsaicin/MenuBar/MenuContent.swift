@@ -15,6 +15,7 @@ struct MenuEntry {
     var children: [MenuEntry] = []
     var isWarning = false
     var isChecked = false
+    var accessibilityLabel: String?
 }
 
 enum MenuContent {
@@ -31,6 +32,9 @@ enum MenuContent {
         }
         var rows = [row(status.isBlocking ? "menu.header.active" : "menu.header.idle")]
         rows += warnings(status: status, bundle: bundle)
+        let timeRows = [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle) + [
+            MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
+        ]
         if let session = status.session {
             if let limit = session.timeLimit {
                 var entry = row("menu.status.until")
@@ -48,27 +52,20 @@ enum MenuContent {
                 rows.append(entry)
             }
             rows.append(row("menu.stop", command: .stop))
-            rows.append(row("menu.changeTime", children:
-                [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle) + [
-                    MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
-                    MenuEntry(id: "separator.noTimeLimit"), row("menu.noTimeLimit", command: .start(.noTimeLimit)),
-                ]))
+            rows.append(row("menu.changeTime", children: timeRows + [
+                MenuEntry(id: "separator.noTimeLimit"), row("menu.noTimeLimit", command: .start(.noTimeLimit)),
+            ]))
         } else {
             let limit = TimeLimitRule.timeLimit(override: nil, settings: settings, now: now, calendar: calendar)
             let subtitle = startSubtitle(limit, now: now, calendar: calendar, bundle: bundle)
             rows.append(row("menu.start", subtitle: subtitle, command: .start(nil)))
             rows.append(MenuEntry(id: "separator.start"))
             rows.append(row("menu.startNoTimeLimit", command: .start(.noTimeLimit)))
-            rows.append(row("menu.startFor", children: presets(calendar: calendar, bundle: bundle)))
-            rows.append(row("menu.startAt", command: .timePanel))
+            rows.append(row("menu.startFor", children: timeRows))
         }
-        rows += [MenuEntry(id: "separator.sleep"),
-                 MenuEntry(id: "menu.header.sleep", title: SettingsSection.sleep.text("behavior.group.title"))]
-            + sleepEntries(sleepRows, settings: settings)
-        if hasInternalBattery {
-            rows += [MenuEntry(id: "menu.header.release", title: SettingsSection.sleep.text("release.group.title")),
-                     batteryEntry(settings: settings, bundle: bundle)]
-        }
+        rows += [MenuEntry(id: "separator.sleep"), quickSettings(sleepRows, settings: settings,
+                                                                 hasInternalBattery: hasInternalBattery,
+                                                                 bundle: bundle)]
         return rows + [MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
                        row("menu.quit", command: .quit)]
     }
@@ -121,17 +118,44 @@ enum MenuContent {
         )]
     }
 
-    private static func sleepEntries(_ rows: [SettingsSleepRow], settings: Settings) -> [MenuEntry] {
-        rows.map { row in
-            let choices: [MenuEntry] = row.key == "lidClose" ? SettingsLidCloseChoice.allCases.map { choice in
-                MenuEntry(id: "menu.sleep.lidClose." + choice.rawValue,
-                          title: SettingsSection.sleep.text("lidClose." + choice.rawValue), command: .lidClose(choice),
-                          isChecked: choice == SettingsLidCloseChoice(settings: settings))
-            } : []
-            return MenuEntry(id: "menu.sleep." + row.key, title: SettingsSection.sleep.text(row.key + ".label"),
-                             subtitle: row.warning.isEmpty ? nil : row.warning,
-                             command: row.setting == nil ? nil : .toggleSleep(row.key), children: choices,
-                             isWarning: !row.warningLabel.isEmpty, isChecked: row.setting != nil && row.isOn)
+    private static func quickSettings(_ sleepRows: [SettingsSleepRow], settings: Settings,
+                                      hasInternalBattery: Bool, bundle: Bundle) -> MenuEntry
+    {
+        var rows = [MenuEntry(id: "menu.header.sleep", title: SettingsSection.sleep.text("behavior.group.title"))]
+            + sleepEntries(sleepRows, settings: settings, bundle: bundle)
+        if hasInternalBattery {
+            rows += [MenuEntry(id: "menu.header.battery", title: SettingsSection.sleep.text("battery.group.title")),
+                     batteryEntry(settings: settings, bundle: bundle)]
+        }
+        return MenuEntry(id: "menu.quickSettings", title: text("menu.quickSettings", bundle: bundle),
+                         subtitle: hasInternalBattery && !settings.batteryConditionEnabled
+                             ? text("menu.quickSettings.batteryDisabled", bundle: bundle) : nil,
+                         children: rows, isWarning: rows.contains(where: \.isWarning))
+    }
+
+    private static func sleepEntries(_ rows: [SettingsSleepRow], settings: Settings, bundle: Bundle) -> [MenuEntry] {
+        rows.flatMap { row in
+            let title = SettingsSection.sleep.text(row.key + ".label")
+            if row.key == "lidClose" {
+                return [MenuEntry(id: "menu.header.lidClose", title: title)] + SettingsLidCloseChoice.allCases
+                    .map { choice in
+                        let selected = choice == SettingsLidCloseChoice(settings: settings)
+                        let choiceTitle = SettingsSection.sleep.text("lidClose." + choice.rawValue)
+                        return MenuEntry(id: "menu.sleep.lidClose." + choice.rawValue, title: choiceTitle,
+                                         subtitle: selected && !row.warning.isEmpty ? row.warning : nil,
+                                         command: .lidClose(choice), isWarning: selected && !row.warningLabel.isEmpty,
+                                         isChecked: selected,
+                                         accessibilityLabel: String(
+                                             format: text("menu.sleep.lidClose.a11y", bundle: bundle),
+                                             title,
+                                             choiceTitle,
+                                         ))
+                    }
+            }
+            return [MenuEntry(id: "menu.sleep." + row.key, title: title,
+                              subtitle: row.warning.isEmpty ? nil : row.warning,
+                              command: .toggleSleep(row.key),
+                              isWarning: !row.warningLabel.isEmpty, isChecked: row.isOn)]
         }
     }
 

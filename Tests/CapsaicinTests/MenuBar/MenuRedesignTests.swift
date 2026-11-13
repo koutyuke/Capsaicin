@@ -13,7 +13,7 @@ struct MenuRedesignTests {
         return calendar
     }
 
-    @Test("SPEC-MENU-002 停止中は時間だけ、抑止中は今からの見出し・時刻・条件なしも置き、チェックを付けない",
+    @Test("SPEC-MENU-002 両状態で今からの見出し・時間・時刻を並べ、抑止中だけ条件なしを追加し、チェックを付けない",
           arguments: [false, true])
     func timeSubmenu(active: Bool) throws {
         let fixture = AppFixture()
@@ -25,16 +25,17 @@ struct MenuRedesignTests {
         let controller = menu(settings(fixture))
         #expect(!controller.menu.items.contains { $0.identifier?.rawValue.contains("virtualKeyboard") == true })
         let submenu = try #require(item(active ? "menu.changeTime" : "menu.startFor", in: controller.menu).submenu)
-        #expect(submenu.items.map { $0.identifier?.rawValue } == (active ? ["menu.header.fromNow"] : []) + [
+        #expect(submenu.items.map { $0.identifier?.rawValue } == ["menu.header.fromNow"] + [
             "preset.15", "preset.30", "preset.60", "preset.120", "preset.240", "preset.480",
             "menu.startFor.custom",
-        ] + (active ? ["separator.time", "menu.startUntil", "separator.noTimeLimit", "menu.noTimeLimit"] : []))
-        #expect(submenu.items.map { $0.action != nil } == (active ? [false] : [])
-            + Array(repeating: true, count: 7) + (active ? [false, true, false, true] : []))
+        ] + ["separator.time", "menu.startUntil"] + (active ? ["separator.noTimeLimit", "menu.noTimeLimit"] : []))
+        #expect(submenu.items.map { $0.action != nil } == [false]
+            + Array(repeating: true, count: 7) + [false, true] + (active ? [false, true] : []))
         #expect(submenu.items.allSatisfy { $0.state == .off && $0.view == nil })
+        #expect(submenu.items.first?.isSectionHeader == true)
+        #expect(submenu.items.first?.title == "今から")
         if active {
-            #expect(submenu.items.first?.isSectionHeader == true)
-            #expect(submenu.items.first?.title == MenuContent.text("menu.header.fromNow"))
+            #expect(submenu.items.last?.title == "時間指定なし")
         }
         #expect(controller.menu.items.first?.isSectionHeader == true)
     }
@@ -75,25 +76,29 @@ struct MenuRedesignTests {
         await model.changeLidClose(to: choice)
         model.change(\.blocksDisplaySleep, to: false)
         let controller = menu(model)
-        let header = try item("menu.header.sleep", in: controller.menu)
+        let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        let header = try item("menu.header.sleep", in: quick)
         #expect(header.isSectionHeader && header.submenu == nil)
         #expect(header.title == SettingsSection.sleep.text("behavior.group.title"))
-        let entries = controller.menu.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
-        #expect(entries.map(\.title) == model.sleepRows.map { SettingsSection.sleep.text($0.key + ".label") })
-        #expect(entries.map(\.state) == [.off, hasLid || choice == .sleep ? .off : .on])
+        let entries = quick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
+        #expect(entries.first?.title == SettingsSection.sleep.text("display.label"))
+        #expect(entries.first?.state == .off)
         if hasLid {
-            let choices = try #require(entries[1].submenu)
-            #expect(choices.items.map(\.title) == SettingsLidCloseChoice.allCases.map {
+            let choices = Array(entries.dropFirst())
+            #expect(choices.map(\.title) == SettingsLidCloseChoice.allCases.map {
                 SettingsSection.sleep.text("lidClose." + $0.rawValue)
             })
-            #expect(choices.items.map(\.state) == SettingsLidCloseChoice.allCases.map { $0 == choice ? .on : .off })
+            #expect(choices.map(\.state) == SettingsLidCloseChoice.allCases.map { $0 == choice ? .on : .off })
         } else {
-            #expect(entries[1].submenu == nil)
+            #expect(entries[1].title == SettingsSection.sleep.text("manual.label"))
+            #expect(entries[1].state == (choice == .sleep ? .off : .on))
         }
+        #expect(entries.allSatisfy { $0.submenu == nil })
         app.launch()
         app.requestStart(from: .menu)
         controller.refresh()
-        let activeEntries = controller.menu.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
+        let activeQuick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        let activeEntries = activeQuick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
         #expect(activeEntries.map(\.title) == entries.map(\.title))
         #expect(activeEntries.map(\.state) == entries.map(\.state))
     }
@@ -110,13 +115,14 @@ struct MenuRedesignTests {
         installed = false
         model.refreshHelper()
         let controller = menu(model)
-        let lid = try item("menu.sleep.lidClose", in: controller.menu)
+        let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        let lid = try item("menu.sleep.lidClose.zeroBrightness", in: quick)
         #expect(lid.isEnabled && lid.image != nil)
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
         #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperNotReady")) == true)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("brightnessUnavailable")) == true)
-        #expect(try item("menu.sleep.lidClose.zeroBrightness", in: #require(lid.submenu)).state == .on)
+        #expect(lid.state == .on && lid.submenu == nil)
         installed = true
         fixture.system.isKnownUnavailable = false
         model.refreshHelper()
@@ -138,8 +144,9 @@ struct MenuRedesignTests {
         var errors = 0
         model.showError = { _, _ in errors += 1 }
         let controller = menu(model)
-        let display = try item("menu.sleep.display", in: controller.menu)
-        controller.menu.performActionForItem(at: controller.menu.index(of: display))
+        let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        let display = try item("menu.sleep.display", in: quick)
+        quick.performActionForItem(at: quick.index(of: display))
         await drainActions()
         #expect(fixture.model.settings.blocksDisplaySleep == !fails)
         #expect(display.state == (fails ? .off : .on))
@@ -170,7 +177,7 @@ struct MenuRedesignTests {
         model.confirm = { _, fromSetting in confirmed = true; #expect(fromSetting); return outcome != 0 }
         model.showError = { _, _ in errors += 1 }
         let controller = menu(model)
-        let choices = try #require(item("menu.sleep.lidClose", in: controller.menu).submenu)
+        let choices = try #require(item("menu.quickSettings", in: controller.menu).submenu)
         try choices.performActionForItem(at: choices.index(of: item("menu.sleep.lidClose.keepOn", in: choices)))
         await drainActions()
         #expect(confirmed)
