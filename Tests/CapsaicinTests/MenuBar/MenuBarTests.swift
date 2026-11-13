@@ -256,7 +256,6 @@ extension MenuBarTests {
             "menu.noTimeLimit": "時間指定なし",
             "menu.startNoTimeLimit": "時間指定なしでオン",
             "menu.quickSettings": "クイック設定",
-            "menu.quickSettings.batteryDisabled": "バッテリー残量ではオフにしない",
             "menu.sleep.lidClose.a11y": "%1$@、%2$@",
             "menu.start.subtitle.timer": "%@後にオフ",
             "menu.start.subtitle.until": "%@にオフ",

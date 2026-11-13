@@ -100,17 +100,6 @@
         }
       }
     },
-    "menu.quickSettings.batteryDisabled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "バッテリー残量ではオフにしない"
-          }
-        }
-      }
-    },
     "menu.quit" : {
       "extractionState" : "manual",
       "localizations" : {

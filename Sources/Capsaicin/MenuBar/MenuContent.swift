@@ -16,7 +16,6 @@ struct MenuEntry {
     var isWarning = false
     var isChecked = false
     var accessibilityLabel: String?
-    var indentationLevel = 0
 }
 
 enum MenuContent {
@@ -127,8 +126,6 @@ enum MenuContent {
             rows += [MenuEntry(id: "separator.battery"), batteryEntry(settings: settings, bundle: bundle)]
         }
         return MenuEntry(id: "menu.quickSettings", title: text("menu.quickSettings", bundle: bundle),
-                         subtitle: hasInternalBattery && !settings.batteryConditionEnabled
-                             ? text("menu.quickSettings.batteryDisabled", bundle: bundle) : nil,
                          children: rows, isWarning: rows.contains(where: \.isWarning))
     }
 
@@ -136,7 +133,7 @@ enum MenuContent {
         rows.flatMap { row in
             let title = SettingsSection.sleep.text(row.key + ".label")
             if row.key == "lidClose" {
-                // 見出しは項目名と同じ位置に描かれるので、選択肢を1段下げて見出しの下にあることを示す。
+                // 1つを選ぶ選択肢は前後を区切りで囲み、オン・オフの項目と見分けられるようにする。
                 return [MenuEntry(id: "separator.lidClose"), MenuEntry(id: "menu.header.lidClose", title: title)]
                     + SettingsLidCloseChoice.allCases
                     .map { choice in
@@ -150,7 +147,7 @@ enum MenuContent {
                                              format: text("menu.sleep.lidClose.a11y", bundle: bundle),
                                              title,
                                              choiceTitle,
-                                         ), indentationLevel: 1)
+                                         ))
                     }
             }
             return [MenuEntry(id: "menu.sleep." + row.key, title: title,

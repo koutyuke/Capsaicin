@@ -128,8 +128,7 @@ struct SplitStartMenuTests {
             #expect(fixture.savedSettings.last == expected)
             let updated = try #require(item("menu.quickSettings", in: controller.menu).submenu)
             #expect(try item("menu.battery", in: updated).state == (enabled ? .on : .off))
-            #expect(try item("menu.quickSettings", in: controller.menu).subtitle
-                == (enabled ? nil : "バッテリー残量ではオフにしない"))
+            #expect(try item("menu.quickSettings", in: controller.menu).subtitle == nil)
             #expect((fixture.model.status.batteryCondition != nil) == enabled)
             #expect(fixture.model.status.isBlocking == active)
         }

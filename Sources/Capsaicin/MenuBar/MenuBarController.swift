@@ -100,7 +100,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.target = self
             item.action = row.command == nil ? nil : #selector(performCommand(_:))
             item.state = row.isChecked ? .on : .off
-            item.indentationLevel = row.indentationLevel
             commands[row.id] = row.command
             updateWarning(item, row: row)
             if row.id == "menu.status.until" || row.id == "menu.status.battery" {

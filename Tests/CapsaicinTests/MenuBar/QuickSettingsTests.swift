@@ -54,8 +54,7 @@ struct QuickSettingsTests {
         #expect(quick.items.allSatisfy { $0.submenu == nil && $0.view == nil })
         #expect(quick.items.filter(\.isSectionHeader).map { $0.identifier?.rawValue }
             == (hasLid ? ["menu.header.lidClose"] : []))
-        #expect(quick.items.map(\.indentationLevel)
-            == quick.items.map { $0.identifier?.rawValue.hasPrefix("menu.sleep.lidClose.") == true ? 1 : 0 })
+        #expect(quick.items.allSatisfy { $0.indentationLevel == 0 })
         if hasLid {
             let header = try item("menu.header.lidClose", in: quick)
             #expect(header.isSectionHeader && header.title == SettingsSection.sleep.text("lidClose.label"))
@@ -70,9 +69,9 @@ struct QuickSettingsTests {
         }
     }
 
-    @Test("SPEC-MENU-008 クイック設定の副題は内蔵バッテリーがあり条件がオフの間だけ出す",
+    @Test("SPEC-MENU-008 クイック設定の行は副題を持たず、バッテリー残量の条件によらず同じ形にする",
           arguments: [false, true], [false, true])
-    func batterySubtitle(hasBattery: Bool, enabled: Bool) throws {
+    func rowWithoutSubtitle(hasBattery: Bool, enabled: Bool) throws {
         let system = FakeSystem()
         var value = Settings()
         value.batteryConditionEnabled = enabled
@@ -83,7 +82,7 @@ struct QuickSettingsTests {
         let controller = menu(settings(app))
         let quick = try item("menu.quickSettings", in: controller.menu)
         #expect(quick.title == "クイック設定")
-        #expect(quick.subtitle == (hasBattery && !enabled ? "バッテリー残量ではオフにしない" : nil))
+        #expect(quick.subtitle == nil)
         #expect(quick.image == nil)
     }
 
@@ -105,7 +104,7 @@ struct QuickSettingsTests {
         let parent = try item("menu.quickSettings", in: controller.menu)
         let quick = try #require(parent.submenu)
         #expect((parent.image != nil) == (choice != .sleep))
-        #expect(parent.subtitle == "バッテリー残量ではオフにしない")
+        #expect(parent.subtitle == nil)
         #expect(try item("menu.header.lidClose", in: quick).image == nil)
         for candidate in SettingsLidCloseChoice.allCases {
             let entry = try item("menu.sleep.lidClose." + candidate.rawValue, in: quick)

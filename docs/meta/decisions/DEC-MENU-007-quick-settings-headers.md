@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-MENU-007
 title: クイック設定の見出しを選択肢を持つ項目の名前にだけ使い、選択肢を字下げする
-status: accepted
+status: superseded
 supersedes: ["DEC-MENU-006"]
-superseded_by: []
+superseded_by: ["DEC-MENU-008"]
 requirements: ["REQ-MENU-002", "REQ-MENU-007", "REQ-BLK-009"]
 based_on: ["DEC-UI-001", "DEC-UI-012", "DEC-BLK-009", "DEC-SET-006"]
 ---
