@@ -7,7 +7,7 @@ public enum CLIArgumentError: Error, Hashable, Sendable {
     case unexpectedArgument(String)
     case missingValue(option: String)
     case duplicateOption(String)
-    /// `--for` と `--until` を同時に指定した。
+    /// 異なる時間指定のオプションを同時に指定した。
     case conflictingOptions
     case invalidDuration(String)
     /// 書式は正しいが、タイマーの範囲に収まらない。
@@ -38,17 +38,17 @@ public enum CLIArguments {
         var result: StartTimeOverride?
         var remaining = arguments[...]
         while let option = remaining.popFirst() {
-            guard option == "--for" || option == "--until" else { throw .unexpectedArgument(option) }
-            guard let value = remaining.popFirst() else { throw .missingValue(option: option) }
+            guard ["--for", "--until", "--no-time-limit"].contains(option) else { throw .unexpectedArgument(option) }
             switch (option, result) {
-            case ("--for", .timer?), ("--until", .specifiedTime?):
+            case ("--for", .timer?), ("--until", .specifiedTime?), ("--no-time-limit", .noTimeLimit?):
                 throw .duplicateOption(option)
             case (_, _?):
                 throw .conflictingOptions
-            case ("--for", nil):
-                result = try .timer(parseDuration(value))
+            case ("--no-time-limit", nil):
+                result = .noTimeLimit
             default:
-                result = try .specifiedTime(parseTime(value))
+                guard let value = remaining.popFirst() else { throw .missingValue(option: option) }
+                result = try option == "--for" ? .timer(parseDuration(value)) : .specifiedTime(parseTime(value))
             }
         }
         return result

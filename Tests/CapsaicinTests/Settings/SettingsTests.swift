@@ -251,7 +251,7 @@ struct SettingsTests {
 
 extension SettingsTests {
     @Test("SPEC-SET-002 SPEC-SYS-004 統合した条件の文言を同じテーブルから引き、ディスプレイの表記をそろえる")
-    func sleepResources() throws {
+    func sleepResources() {
         #expect(SettingsSection.sleep.title == "スリープ")
         for key in ["behavior.group.title", "release.group.title", "timer.label", "timer.duration.label",
                     "timer.duration.a11y", "hours", "minutes", "time.label", "time.help", "time.value.label",
@@ -272,11 +272,6 @@ extension SettingsTests {
         #expect(SettingsSection.helper.text("helperInstall.lidClose.title")
             == "ディスプレイを閉じてもスリープさせないには、ヘルパーのインストールが必要です")
         #expect(SettingsSection.helper.text("helperInstall.manualAndLid.title") == "helperInstall.manualAndLid.title")
-        let app = try appBundle()
-        #expect(app.localizedString(forKey: "mechanism.systemSleepDisabled", value: nil, table: "CLI")
-            == "メニューやディスプレイを閉じたときのスリープを防ぐ設定")
-        #expect(app.localizedString(forKey: "mechanism.displaySleepAssertion", value: nil, table: "CLI")
-            == "ディスプレイを自動でオフにしない設定")
     }
 }
 

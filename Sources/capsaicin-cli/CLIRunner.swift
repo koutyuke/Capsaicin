@@ -31,37 +31,40 @@ struct CLIRunner {
     var connector: any CLIConnecting
     var launcher: any CLILaunching
     var clock: any CLIClock
+    var now: () -> Date = Date.init
+    var timeZone: TimeZone = .current
+    var stdoutColor = false
+    var stderrColor = false
     var readinessTimeout: Double = 10
     var retryInterval: Double = 0.1
 
     func run(_ arguments: [String]) async -> CLIOutput {
+        if arguments.contains("--help") || arguments.contains("-h") {
+            return .help
+        }
         let command: IPCCommand
         do { command = try CLIArguments.parse(arguments) }
         catch {
-            guard let application = try? resolve() else {
-                // バンドルを持たないコピーにだけ必要な、最小限の bootstrap 診断。
-                return CLIOutput(exitCode: .usage, standardError: "capsaicin: 引数が正しくありません。on、off、status を指定してください。\n")
-            }
-            return CLIOutput.usage(error, text: CLIText(bundle: application.bundle))
+            return CLIOutput.usage(error, color: stderrColor)
         }
         let application: CLIApplication
         do { application = try resolve() }
         catch {
-            return CLIOutput(exitCode: .unavailable, standardError: "capsaicin: アプリ内のコマンドから実行してください。\n")
+            return CLIOutput.failure(CLIApplicationError.invalidBundle, color: stderrColor)
         }
-        let text = CLIText(bundle: application.bundle)
         do {
             let connection = try await readyConnection(application)
             // この境界より後の失敗には起動も再接続も行わない。
             do {
                 let response = try await connection.request(IPCRequest(command: command))
                 await connection.close()
-                return CLIOutput.response(response, text: text)
+                return CLIOutput.response(response, now: now(), timeZone: timeZone,
+                                          stdoutColor: stdoutColor, stderrColor: stderrColor)
             } catch {
                 await connection.close()
                 throw error
             }
-        } catch { return CLIOutput.failure(error, text: text) }
+        } catch { return CLIOutput.failure(error, color: stderrColor) }
     }
 
     private func readyConnection(_ application: CLIApplication) async throws -> any CLIConnected {

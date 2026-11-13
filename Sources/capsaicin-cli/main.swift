@@ -6,6 +6,14 @@ let runner = CLIRunner(
     connector: CLISystemConnector(),
     launcher: CLISystemLauncher(),
     clock: CLISystemClock(),
+    stdoutColor: CLIOutput.usesColor(
+        isTerminal: isatty(STDOUT_FILENO) != 0,
+        environment: ProcessInfo.processInfo.environment,
+    ),
+    stderrColor: CLIOutput.usesColor(
+        isTerminal: isatty(STDERR_FILENO) != 0,
+        environment: ProcessInfo.processInfo.environment,
+    ),
 )
 let output = await runner.run(Array(CommandLine.arguments.dropFirst()))
 FileHandle.standardOutput.write(Data(output.standardOutput.utf8))

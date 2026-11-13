@@ -26,11 +26,6 @@ final class CLIApplicationFixture {
         ]
         let plist = try PropertyListSerialization.data(fromPropertyList: info, format: .xml, options: 0)
         try plist.write(to: app.appending(path: "Contents/Info.plist"))
-        let resource = app.appending(path: "Contents/Resources/ja.lproj")
-        try manager.createDirectory(at: resource, withIntermediateDirectories: true)
-        let strings = Dictionary(uniqueKeysWithValues: CLITextKey.allCases.map { ($0.rawValue, $0.rawValue) })
-        try PropertyListSerialization.data(fromPropertyList: strings, format: .xml, options: 0)
-            .write(to: resource.appending(path: "CLI.strings"))
     }
 
     deinit { try? FileManager.default.removeItem(at: root) }

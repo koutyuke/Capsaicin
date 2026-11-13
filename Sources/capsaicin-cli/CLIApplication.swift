@@ -5,7 +5,6 @@ import MachO
 
 struct CLIApplication {
     let url: URL
-    let bundle: Bundle
     let namespace: IPCEndpoint.Namespace
 
     static func current() throws -> CLIApplication {
@@ -46,10 +45,9 @@ struct CLIApplication {
         guard main.deletingLastPathComponent().path == mainDirectory.path,
               FileManager.default.isExecutableFile(atPath: main.path),
               FileManager.default.isExecutableFile(atPath: executable.path),
-              try FileManager.default.attributesOfItem(atPath: main.path)[.type] as? FileAttributeType == .typeRegular,
-              let bundle = Bundle(url: app)
+              try FileManager.default.attributesOfItem(atPath: main.path)[.type] as? FileAttributeType == .typeRegular
         else { throw CLIApplicationError.invalidBundle }
-        return CLIApplication(url: app, bundle: bundle, namespace: namespace)
+        return CLIApplication(url: app, namespace: namespace)
     }
 
     private static func canonical(_ path: String) throws -> URL {

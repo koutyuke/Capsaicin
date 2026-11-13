@@ -137,11 +137,12 @@ struct AppModelTests {
         #expect(fixture.system.operations == [.saveRecord])
         #expect(events == [.timeLimitReplaced(.cli)])
         #expect(!MenuHUDRouting.shouldPresent(.timeLimitReplaced(.cli)))
-        let output = CLIOutput.response(response, text: .keys)
+        let output = CLIOutput.response(response, now: fixture.system.now, timeZone: fixture.system.calendar.timeZone)
         #expect(output.exitCode == .success)
         #expect(output.standardError.isEmpty)
-        #expect(output.standardOutput.contains("outcome.timeLimitReplaced"))
-        #expect(output.standardOutput.contains(option == "--for" ? "1970-01-01T00:40:00Z" : "1970-01-01T04:00:00Z"))
+        #expect(output.standardOutput == "✓ Turn-off time updated\n  Turns off  "
+            + (option == "--for" ? "0:40 (in 30m)" : "4:00 (in 3h 50m)")
+            + "\n  Battery    turns off below 20%, except on AC power\n")
     }
 
     @Test("SPEC-BLK-011 SPEC-CLI-001 期限到達後の on --for は自動解除を返し、置き換えや再開をしない")

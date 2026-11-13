@@ -2,177 +2,214 @@ import CapsaicinCore
 import CapsaicinIPC
 import Foundation
 
-enum CLITextKey: String, CaseIterable {
-    case started = "outcome.started"
-    case timeLimitReplaced = "outcome.timeLimitReplaced"
-    case alreadyBlocking = "outcome.alreadyBlocking"
-    case released = "outcome.released"
-    case alreadyStopped = "outcome.alreadyStopped"
-    case rejected = "outcome.rejected"
-    case disabled = "outcome.disabled"
-    case version = "error.version"
-    case connection = "error.connection"
-    case timeout = "error.timeout"
-    case launch = "error.launch"
-    case protocolFailure = "error.protocol"
-    case authentication = "error.authentication"
-    case usage = "error.usage"
-    case missingCommand = "argument.missingCommand"
-    case unknownCommand = "argument.unknownCommand"
-    case unexpectedArgument = "argument.unexpected"
-    case missingValue = "argument.missingValue"
-    case duplicateOption = "argument.duplicate"
-    case conflictingOptions = "argument.conflicting"
-    case invalidDuration = "argument.invalidDuration"
-    case durationOutOfRange = "argument.durationOutOfRange"
-    case invalidTime = "argument.invalidTime"
-    case blocking = "status.blocking"
-    case stopped = "status.stopped"
-    case timer = "condition.timer"
-    case specifiedTime = "condition.specifiedTime"
-    case battery = "condition.battery"
-    case ignoresAC = "condition.ignoresAC"
-    case noConditions = "condition.none"
-    case misalignment = "warning.misalignment"
-    case unsaved = "warning.unsaved"
-    case leftApplied = "direction.leftApplied"
-    case notApplied = "direction.notApplied"
-    case systemSleepDisabled = "mechanism.systemSleepDisabled"
-    case idleSleepAssertion = "mechanism.idleSleepAssertion"
-    case displaySleepAssertion = "mechanism.displaySleepAssertion"
-    case led = "mechanism.led"
-    case batteryBelowThreshold = "rejection.battery"
-    case helperNotInstalled = "rejection.helper"
-    case mechanismsFailed = "rejection.mechanisms"
-    case recordNotSaved = "rejection.record"
-    case separator = "format.separator"
-    case listSeparator = "format.listSeparator"
-}
-
-struct CLIText {
-    var lookup: (CLITextKey, [String]) -> String
-
-    init(bundle: Bundle) {
-        lookup = { key, arguments in
-            let format = bundle.localizedString(forKey: key.rawValue, value: nil, table: "CLI")
-            return String(format: format, locale: Locale(identifier: "ja_JP"), arguments: arguments)
-        }
-    }
-
-    init(lookup: @escaping (CLITextKey, [String]) -> String) {
-        self.lookup = lookup
-    }
-
-    func callAsFunction(_ key: CLITextKey, _ arguments: String...) -> String {
-        lookup(key, arguments)
-    }
-}
-
 struct CLIOutput {
     var exitCode: ExitCode
     var standardOutput = ""
     var standardError = ""
 
-    static func response(_ response: IPCResponse, text: CLIText) -> CLIOutput {
-        let status = statusLine(response.status, text: text)
-        let message: String
-        switch response.outcome {
-        case .started: message = text(.started)
-        case .timeLimitReplaced: message = text(.timeLimitReplaced)
-        case .alreadyBlocking: message = text(.alreadyBlocking)
-        case .released: message = text(.released)
-        case .alreadyStopped: message = text(.alreadyStopped)
-        case let .startRejected(reason): message = text(.rejected, rejection(reason, text: text))
-        case .cliRequestsDisabled: message = text(.disabled)
-        case .unsupportedVersion: message = text(.version)
-        case .status: return CLIOutput(exitCode: response.exitCode, standardOutput: status + "\n")
-        }
-        let line = [message, status].joined(separator: text(.separator)) + "\n"
-        if response.exitCode == .unavailable {
-            return CLIOutput(exitCode: response.exitCode, standardError: line)
-        }
-        return CLIOutput(exitCode: response.exitCode, standardOutput: line)
+    static let help = CLIOutput(exitCode: .success, standardOutput: """
+    Turn Capsaicin's sleep prevention on and off from the command line.
+
+    Usage: capsaicin <command> [options]
+
+    Commands:
+      on        Turn on sleep prevention
+      off       Turn off sleep prevention
+      status    Show whether sleep prevention is on
+
+    Options for on:
+      --for <duration>    Turn off after a duration: 30m, 2h, 1h30m (1m to 24h)
+      --until <time>      Turn off at a time of day: 4:00, 23:30 (24-hour)
+      --no-time-limit     Don't turn off at a set time
+      Without these options, on uses the timer and time set in Settings.
+      While on, these options change when it turns off.
+
+    Options:
+      -h, --help          Show this help
+
+    Exit status:
+      0   Success. For status, sleep prevention is on.
+      1   For status, sleep prevention is off.
+      64  Invalid command or option.
+      69  The request couldn't be completed.
+
+    """)
+
+    private static let unsaved = "couldn't save the state used to resume after a relaunch"
+    private static let version = "this command and the running Capsaicin are different versions"
+
+    static func usesColor(isTerminal: Bool, environment: [String: String]) -> Bool {
+        isTerminal && (environment["NO_COLOR"] ?? "").isEmpty && environment["TERM"] != "dumb"
     }
 
-    static func usage(_ error: CLIArgumentError, text: CLIText) -> CLIOutput {
-        let reason: String = switch error {
-        case .missingSubcommand: text(.missingCommand)
-        case let .unknownSubcommand(value): text(.unknownCommand, String(reflecting: value))
-        case let .unexpectedArgument(value): text(.unexpectedArgument, String(reflecting: value))
-        case let .missingValue(option): text(.missingValue, option)
-        case let .duplicateOption(option): text(.duplicateOption, option)
-        case .conflictingOptions: text(.conflictingOptions)
-        case let .invalidDuration(value): text(.invalidDuration, String(reflecting: value))
-        case let .durationOutOfRange(value): text(.durationOutOfRange, String(reflecting: value))
-        case let .invalidTime(value): text(.invalidTime, String(reflecting: value))
-        }
-        return CLIOutput(exitCode: .usage, standardError: text(.usage, reason) + "\n")
-    }
-
-    static func failure(_ error: Error, text: CLIText) -> CLIOutput {
-        let key: CLITextKey = switch error {
-        case IPCTransportError.timedOut: .timeout
-        case IPCTransportError.peerRejected, IPCTransportError.unsafeEndpoint: .authentication
-        case IPCTransportError.invalidFrame, IPCCoding.DecodingFailure.malformed: .protocolFailure
-        case IPCCoding.DecodingFailure.unsupportedVersion: .version
-        case CLIRunnerError.launchFailed: .launch
-        default: .connection
-        }
-        return CLIOutput(exitCode: .unavailable, standardError: text(key) + "\n")
-    }
-
-    private static func statusLine(_ status: BlockingStatus, text: CLIText) -> String {
-        var parts = [text(status.isBlocking ? .blocking : .stopped)]
-        if let session = status.session {
-            var conditions: [String] = []
-            if let limit = session.timeLimit {
-                // 応答の壁時計の時刻を UTC の明示付きで表す。設定から時刻を再計算しない。
-                let formatter = ISO8601DateFormatter()
-                formatter.timeZone = TimeZone(secondsFromGMT: 0)
-                conditions.append(text(
-                    limit.source == .timer ? .timer : .specifiedTime,
-                    formatter.string(from: limit.date),
-                ))
+    static func response(_ response: IPCResponse, now: Date, timeZone: TimeZone,
+                         stdoutColor: Bool = false, stderrColor: Bool = false) -> CLIOutput
+    {
+        var output = result(response, stdoutColor: stdoutColor, stderrColor: stderrColor)
+        if !output.standardOutput.isEmpty {
+            output.standardOutput += details(response.status, now: now, timeZone: timeZone, color: stdoutColor)
+            if response.outcome == .alreadyBlocking {
+                output.standardOutput += styled(
+                    "  Use --for, --until or --no-time-limit to change when it turns off.",
+                    "2",
+                    color: stdoutColor,
+                ) + "\n"
             }
-            if let battery = status.batteryCondition {
-                let condition = text(.battery, String(battery.threshold.percent))
-                conditions.append(battery.ignoresOnACPower ? condition + text(.ignoresAC) : condition)
-            }
-            parts.append(conditions.isEmpty ? text(.noConditions) : conditions.joined(separator: text(.listSeparator)))
         }
         for mechanism in Mechanism.allCases {
-            if let direction = status.misalignments[mechanism] {
-                parts.append(text(
-                    .misalignment,
-                    name(mechanism, text: text),
-                    text(direction == .leftApplied ? .leftApplied : .notApplied),
-                ))
+            if let direction = response.status.misalignments[mechanism] {
+                output.standardError += diagnostic(
+                    "warning",
+                    misalignment(mechanism, direction: direction),
+                    color: stderrColor,
+                )
             }
         }
-        if status.isRecordUnsaved {
-            parts.append(text(.unsaved))
+        if response.status.isRecordUnsaved {
+            output.standardError += diagnostic("warning", unsaved, color: stderrColor)
         }
-        return parts.joined(separator: text(.separator))
+        return output
     }
 
-    private static func name(_ mechanism: Mechanism, text: CLIText) -> String {
-        let key: CLITextKey = switch mechanism {
-        case .systemSleepDisabled: .systemSleepDisabled
-        case .idleSleepAssertion: .idleSleepAssertion
-        case .displaySleepAssertion: .displaySleepAssertion
-        case .led: .led
+    private static func result(_ response: IPCResponse, stdoutColor: Bool, stderrColor: Bool) -> CLIOutput {
+        var output = CLIOutput(exitCode: response.exitCode)
+        switch response.outcome {
+        case .started: output.standardOutput = headline("✓", "Sleep prevention on", color: stdoutColor)
+        case .timeLimitReplaced: output.standardOutput = headline("✓", "Turn-off time updated", color: stdoutColor)
+        case .alreadyBlocking: output.standardOutput = headline(
+                "•",
+                "Sleep prevention is already on",
+                color: stdoutColor,
+            )
+        case .released: output.standardOutput = headline("✓", "Sleep prevention off", color: stdoutColor)
+        case .alreadyStopped: output.standardOutput = headline(
+                "•",
+                "Sleep prevention is already off",
+                color: stdoutColor,
+            )
+        case .status:
+            output.standardOutput = response.status.isBlocking
+                ? headline("●", "Sleep prevention on", color: stdoutColor)
+                : headline("○", "Sleep prevention off", color: stdoutColor)
+        case let .startRejected(reason):
+            output.standardError = diagnostic("error", "couldn't turn on sleep prevention: "
+                + rejection(reason, status: response.status), color: stderrColor)
+        case .cliRequestsDisabled:
+            output.standardError = diagnostic(
+                "error",
+                "commands from the CLI are turned off in Capsaicin Settings",
+                color: stderrColor,
+            )
+        case .unsupportedVersion:
+            output.standardError = diagnostic("error", version, color: stderrColor)
         }
-        return text(key)
+        return output
     }
 
-    private static func rejection(_ reason: StartRejection, text: CLIText) -> String {
+    static func usage(_ error: CLIArgumentError, color: Bool = false) -> CLIOutput {
+        let reason = switch error {
+        case .missingSubcommand: "missing command"
+        case let .unknownSubcommand(value): "unknown command \(String(reflecting: value))"
+        case let .unexpectedArgument(value): "unexpected argument \(String(reflecting: value))"
+        case let .missingValue(option): "\(option) requires a value"
+        case let .duplicateOption(option): "\(option) can only be used once"
+        case .conflictingOptions: "--for, --until and --no-time-limit can't be used together"
+        case let .invalidDuration(value): "invalid duration \(String(reflecting: value)) for --for; use 30m, 2h or 1h30m"
+        case let .durationOutOfRange(value): "duration \(String(reflecting: value)) for --for is out of range; use 1m to 24h"
+        case let .invalidTime(value): "invalid time \(String(reflecting: value)) for --until; use H:MM, e.g. 4:00"
+        }
+        return CLIOutput(
+            exitCode: .usage,
+            standardError: diagnostic("error", reason, color: color) + "Run 'capsaicin --help' for usage.\n",
+        )
+    }
+
+    static func failure(_ error: Error, color: Bool = false) -> CLIOutput {
+        let reason: String = switch error {
+        case IPCTransportError.timedOut: "Capsaicin didn't respond in time; the request may already have taken effect"
+        case IPCTransportError.peerRejected, IPCTransportError.unsafeEndpoint: "couldn't verify the connection to Capsaicin"
+        case IPCTransportError.invalidFrame, IPCCoding.DecodingFailure.malformed: "received an invalid response from Capsaicin"
+        case IPCCoding.DecodingFailure.unsupportedVersion: version
+        case CLIRunnerError.launchFailed: "couldn't launch Capsaicin"
+        case CLIApplicationError.invalidBundle: "run this command from inside Capsaicin.app"
+        default: "couldn't communicate with Capsaicin; the request may already have taken effect"
+        }
+        return CLIOutput(exitCode: .unavailable, standardError: diagnostic("error", reason, color: color))
+    }
+
+    private static func details(_ status: BlockingStatus, now: Date, timeZone: TimeZone, color: Bool) -> String {
+        guard let session = status.session else { return "" }
+        let turnsOff: String
+        if let limit = session.timeLimit {
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = timeZone
+            formatter.dateFormat = "H:mm"
+            turnsOff = "\(formatter.string(from: limit.date)) (in \(duration(limit.date.timeIntervalSince(now))))"
+        } else {
+            turnsOff = "when you turn it off"
+        }
+        var lines = detail("Turns off", turnsOff, color: color)
+        if let battery = status.batteryCondition {
+            var value = "turns off below \(battery.threshold.percent)%"
+            if battery.ignoresOnACPower {
+                value += ", except on AC power"
+            }
+            lines += detail("Battery", value, color: color)
+        }
+        return lines
+    }
+
+    private static func duration(_ seconds: TimeInterval) -> String {
+        guard seconds >= 60 else { return "under a minute" }
+        let minutes = Int(seconds / 60)
+        guard minutes >= 60 else { return "\(minutes)m" }
+        let hours = "\(minutes / 60)h"
+        return minutes % 60 == 0 ? hours : "\(hours) \(minutes % 60)m"
+    }
+
+    private static func rejection(_ reason: StartRejection, status: BlockingStatus) -> String {
         switch reason {
-        case .batteryBelowThreshold: return text(.batteryBelowThreshold)
-        case .helperNotInstalled: return text(.helperNotInstalled)
-        case .recordNotSaved: return text(.recordNotSaved)
+        case .batteryBelowThreshold:
+            if let battery = status.batteryCondition {
+                return "the battery is below \(battery.threshold.percent)%"
+            }
+            return "the battery is below the threshold set in Settings"
+        case .helperNotInstalled: return "the helper isn't installed; install or repair it in Settings"
+        case .recordNotSaved: return unsaved
         case let .mechanismsFailed(mechanisms):
-            let names = Mechanism.allCases.filter { mechanisms.contains($0) }.map { name($0, text: text) }
-            return text(.mechanismsFailed, names.joined(separator: text(.listSeparator)))
+            return Mechanism.allCases.filter { mechanisms.contains($0) }
+                .map { misalignment($0, direction: .notApplied) }.joined(separator: "; ")
         }
+    }
+
+    private static func misalignment(_ mechanism: Mechanism, direction: MisalignmentDirection) -> String {
+        switch (mechanism, direction) {
+        case (.systemSleepDisabled, .leftApplied): "couldn't restore system sleep"
+        case (.systemSleepDisabled, .notApplied): "couldn't prevent system sleep"
+        case (.idleSleepAssertion, .leftApplied): "couldn't restore idle sleep"
+        case (.idleSleepAssertion, .notApplied): "couldn't prevent idle sleep"
+        case (.displaySleepAssertion, .leftApplied): "couldn't restore display sleep"
+        case (.displaySleepAssertion, .notApplied): "couldn't prevent display sleep"
+        case (.led, .leftApplied): "couldn't turn off the Caps Lock LED"
+        case (.led, .notApplied): "couldn't light the Caps Lock LED"
+        }
+    }
+
+    private static func headline(_ symbol: String, _ message: String, color: Bool) -> String {
+        styled(symbol, symbol == "✓" || symbol == "●" ? "32" : "2", color: color)
+            + " " + styled(message, "1", color: color) + "\n"
+    }
+
+    private static func detail(_ label: String, _ value: String, color: Bool) -> String {
+        "  " + styled(label.padding(toLength: 9, withPad: " ", startingAt: 0), "2", color: color) + "  " + value + "\n"
+    }
+
+    private static func diagnostic(_ prefix: String, _ message: String, color: Bool) -> String {
+        styled(prefix + ":", prefix == "error" ? "1;31" : "1;33", color: color) + " " + message + "\n"
+    }
+
+    private static func styled(_ text: String, _ code: String, color: Bool) -> String {
+        color ? "\u{1B}[\(code)m\(text)\u{1B}[0m" : text
     }
 }

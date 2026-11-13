@@ -11,6 +11,7 @@ struct CLIArgumentsTests {
     @Test("SPEC-CLI-001 on、off、status を受け付ける")
     func subcommands() {
         #expect(parse("on") == .success(.start(nil)))
+        #expect(parse("on --no-time-limit") == .success(.start(.noTimeLimit)))
         #expect(parse("off") == .success(.stop))
         #expect(parse("status") == .success(.status))
     }
@@ -65,6 +66,16 @@ struct CLIArgumentsTests {
         #expect(parse("on --for 1h --for 2h") == .failure(.duplicateOption("--for")))
         #expect(parse("on --until 1:00 --until 2:00") == .failure(.duplicateOption("--until")))
         #expect(parse("on --for") == .failure(.missingValue(option: "--for")))
+    }
+
+    @Test("SPEC-CLI-001 --no-time-limit は値を取らず、ほかの時間指定と排他で重複を拒む")
+    func noTimeLimitOptions() {
+        #expect(parse("on --for 30m --no-time-limit") == .failure(.conflictingOptions))
+        #expect(parse("on --no-time-limit --for 30m") == .failure(.conflictingOptions))
+        #expect(parse("on --no-time-limit --until 4:00") == .failure(.conflictingOptions))
+        #expect(parse("on --until 4:00 --no-time-limit") == .failure(.conflictingOptions))
+        #expect(parse("on --no-time-limit --no-time-limit") == .failure(.duplicateOption("--no-time-limit")))
+        #expect(parse("on --no-time-limit 1h") == .failure(.unexpectedArgument("1h")))
     }
 
     @Test("SPEC-CLI-007 不明なサブコマンドと余分な引数は使い方の誤り")

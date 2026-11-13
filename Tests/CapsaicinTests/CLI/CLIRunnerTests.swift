@@ -77,21 +77,50 @@ private final class FakeCLILauncher: CLILaunching {
 struct CLIRunnerTests {
     @Test(
         "SPEC-CLI-007 引数エラーを先に決め、接続も起動もしない",
-        arguments: [[], ["--help"], ["unexpected", "argument"], ["on", "--for", "0m"]],
+        arguments: [
+            ([String](), "missing command"),
+            (["unexpected", "argument"], "unknown command \"unexpected\""),
+            (["on", "--for", "0m"], "duration \"0m\" for --for is out of range; use 1m to 24h"),
+        ],
     )
-    func parseFirst(arguments: [String]) async {
+    func parseFirst(arguments: [String], reason: String) async {
         let connector = FakeCLIConnector()
         let launcher = FakeCLILauncher()
+        var resolutions = 0
         let runner = CLIRunner(
-            resolve: { throw CLIApplicationError.invalidBundle },
+            resolve: { resolutions += 1; throw CLIApplicationError.invalidBundle },
             connector: connector,
             launcher: launcher,
             clock: FakeCLIClock(),
         )
         let output = await runner.run(arguments)
         #expect(output.exitCode == .usage)
-        #expect(!output.standardError.isEmpty)
+        #expect(output.standardError == "error: " + reason + "\nRun 'capsaicin --help' for usage.\n")
         #expect(output.standardOutput.isEmpty)
+        #expect(resolutions == 0)
+        #expect(connector.attempts == 0)
+        #expect(launcher.urls.isEmpty)
+    }
+
+    @Test("SPEC-CLI-008 ヘルプを最優先し、バンドル確認・接続・起動をしない",
+          arguments: [["--help"], ["-h"], ["on", "--help"], ["status", "-h"], ["on", "--for", "x", "--help"]])
+    func helpFirst(arguments: [String]) async {
+        let connector = FakeCLIConnector()
+        let launcher = FakeCLILauncher()
+        var resolutions = 0
+        let runner = CLIRunner(
+            resolve: { resolutions += 1; throw CLIApplicationError.invalidBundle },
+            connector: connector,
+            launcher: launcher,
+            clock: FakeCLIClock(),
+            stdoutColor: true,
+            stderrColor: true,
+        )
+        let output = await runner.run(arguments)
+        #expect(output.exitCode == .success)
+        #expect(output.standardOutput == CLIOutput.help.standardOutput)
+        #expect(output.standardError.isEmpty)
+        #expect(resolutions == 0)
         #expect(connector.attempts == 0)
         #expect(launcher.urls.isEmpty)
     }
@@ -106,7 +135,10 @@ struct CLIRunnerTests {
             launcher: launcher,
             clock: FakeCLIClock(),
         )
-        #expect(await runner.run(["status"]).exitCode == .unavailable)
+        let output = await runner.run(["status"])
+        #expect(output.exitCode == .unavailable)
+        #expect(output.standardOutput.isEmpty)
+        #expect(output.standardError == "error: run this command from inside Capsaicin.app\n")
         #expect(connector.attempts == 0)
         #expect(launcher.urls.isEmpty)
     }
@@ -226,7 +258,7 @@ struct CLIRunnerTests {
         let output = await runner.run(["off"])
         #expect(output.exitCode.rawValue == 69)
         #expect(output.standardOutput.isEmpty)
-        #expect(output.standardError == "error.protocol\n")
+        #expect(output.standardError == "error: received an invalid response from Capsaicin\n")
         #expect(connector.attempts == 1)
         #expect(connector.connection.requests.map(\.command) == [.stop])
         #expect(connector.connection.closes == 1)
@@ -260,5 +292,24 @@ struct CLIRunnerTests {
         #expect(!configuration.promptsUserIfNeeded)
         #expect(!configuration.allowsRunningApplicationSubstitution)
         #expect(!configuration.createsNewApplicationInstance)
+    }
+
+    @Test("SPEC-CLI-001 SPEC-CLI-003 現在時刻とタイムゾーンを差し込み、時間条件なしの要求をそのまま送る")
+    func injectedWallClock() async throws {
+        let fixture = try CLIApplicationFixture()
+        let connector = FakeCLIConnector()
+        let now = Date(timeIntervalSince1970: 0)
+        connector.connection.response = IPCResponse(outcome: .timeLimitReplaced, status: BlockingStatus(
+            session: BlockingSession(timeLimit: TimeLimit(date: now.addingTimeInterval(5399), source: .timer)),
+            batteryCondition: nil, misalignments: [:], isRecordUnsaved: false,
+        ))
+        let runner = try CLIRunner(resolve: fixture.resolve, connector: connector,
+                                   launcher: FakeCLILauncher(), clock: FakeCLIClock(), now: { now },
+                                   timeZone: #require(TimeZone(secondsFromGMT: -5 * 3600)))
+        let output = await runner.run(["on", "--no-time-limit"])
+        #expect(connector.connection.requests.map(\.command) == [.start(.noTimeLimit)])
+        #expect(output.exitCode == .success)
+        #expect(output.standardOutput == "✓ Turn-off time updated\n  Turns off  20:29 (in 1h 29m)\n")
+        #expect(output.standardError.isEmpty)
     }
 }
