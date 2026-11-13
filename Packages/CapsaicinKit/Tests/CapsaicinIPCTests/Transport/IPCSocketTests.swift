@@ -21,8 +21,8 @@ struct IPCSocketTests {
         let pair = try socketPair()
         defer { close(pair.0); close(pair.1) }
         let payload = Data(repeating: 42, count: IPCSocket.maximumPayload)
-        async let received = Task.detached { try IPCSocket.read(pair.1, until: .now() + 1) }.value
-        try await Task.detached { try IPCSocket.write(pair.0, payload, until: .now() + 1) }.value
+        async let received = ipcBackground { try IPCSocket.read(pair.1, until: .now() + 1) }
+        try await ipcBackground { try IPCSocket.write(pair.0, payload, until: .now() + 1) }
         #expect(try await received == payload)
     }
 
@@ -32,9 +32,9 @@ struct IPCSocketTests {
         defer { close(pair.0); close(pair.1) }
         let started = ContinuousClock.now
         await #expect(throws: IPCTransportError.timedOut) {
-            try await Task.detached {
+            try await ipcBackground {
                 try IPCSocket.write(pair.0, Data(repeating: 42, count: IPCSocket.maximumPayload), until: .now() + 0.08)
-            }.value
+            }
         }
         #expect(started.duration(to: .now) < .seconds(1))
     }
@@ -43,7 +43,8 @@ struct IPCSocketTests {
     func readDeadline() async throws {
         let pair = try socketPair()
         defer { close(pair.0); close(pair.1) }
-        let reading = Task.detached { try IPCSocket.read(pair.0, until: .now() + 0.12) }
+        let deadline = DispatchTime.now() + 0.12
+        let reading = Task { try await ipcBackground { try IPCSocket.read(pair.0, until: deadline) } }
         for _ in 0 ..< 3 {
             try sendRaw(pair.1, Data([42]), eof: false)
             try await Task.sleep(for: .milliseconds(50))

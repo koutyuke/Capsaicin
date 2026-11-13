@@ -77,6 +77,18 @@ private func makeTestSocket() throws -> Int32 {
     catch { close(descriptor); throw error }
 }
 
+/// 受け付けた接続を、本番と同じ設定にして返す。
+/// 相手の Task がスレッドプールで進めるよう、ブロックする accept は専用のスレッドで待つ。
+/// スレッドプールの小さい環境（CI のランナー）では、テスト本体がプールを塞ぐと相手の Task が始まらない。
+func acceptRaw(_ listener: Int32) async throws -> Int32 {
+    try await ipcBackground {
+        let accepted = accept(listener, nil, nil)
+        guard accepted >= 0 else { throw IPCTransportError.system(errno) }
+        do { try IPCSocket.configure(accepted); return accepted }
+        catch { close(accepted); throw error }
+    }
+}
+
 func sendRaw(_ descriptor: Int32, _ data: Data, eof: Bool = true) throws {
     var offset = 0
     while offset < data.count {

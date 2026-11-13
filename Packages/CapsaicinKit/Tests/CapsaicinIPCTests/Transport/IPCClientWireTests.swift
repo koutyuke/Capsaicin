@@ -37,15 +37,14 @@ struct IPCClientWireTests {
         let connection = try await fixture.client().connect()
         let request = IPCRequest(command: expectation.command)
         let operation = Task { try await connection.request(request) }
-        let accepted = accept(listener, nil, nil)
-        #expect(accepted >= 0)
+        let accepted = try await acceptRaw(listener)
         defer { close(accepted) }
-        try IPCSocket.configure(accepted)
-        #expect(try IPCCoding.decodeRequest(receiveRaw(accepted)) == request)
+        #expect(try await IPCCoding.decodeRequest(ipcBackground { try receiveRaw(accepted) }) == request)
         var status = transportStopped
         status.session = BlockingSession(timeLimit: nil)
         let response = IPCResponse(outcome: outcome, status: status)
-        try sendRaw(accepted, IPCCoding.encode(response))
+        let wire = try IPCCoding.encode(response)
+        try await ipcBackground { try sendRaw(accepted, wire) }
         if expectation.allowed.contains(outcome) {
             #expect(try await operation.value == response)
         } else {
@@ -73,21 +72,21 @@ struct IPCClientWireTests {
         defer { close(listener) }
         let connection = try await fixture.client().connect()
         let operation = Task { try await connection.request(IPCRequest(command: .status)) }
-        let accepted = accept(listener, nil, nil)
-        #expect(accepted >= 0)
+        let accepted = try await acceptRaw(listener)
         defer { close(accepted) }
-        try IPCSocket.configure(accepted)
-        _ = try receiveRaw(accepted)
         let wire = try responseWire(kind)
-        if kind == "valid" {
-            for byte in wire {
-                try sendRaw(accepted, Data([byte]), eof: false)
+        try await ipcBackground {
+            _ = try receiveRaw(accepted)
+            if kind == "valid" {
+                for byte in wire {
+                    try sendRaw(accepted, Data([byte]), eof: false)
+                }
+            } else {
+                try sendRaw(accepted, wire, eof: false)
             }
-        } else {
-            try sendRaw(accepted, wire, eof: false)
-        }
-        if kind != "oversized" {
-            try sendRaw(accepted, Data())
+            if kind != "oversized" {
+                try sendRaw(accepted, Data())
+            }
         }
         switch kind {
         case "valid", "boundary": #expect(try await operation.value.outcome == .status)
@@ -120,15 +119,13 @@ struct IPCClientWireTests {
         defer { close(listener) }
         let connection = try await fixture.client(timing: IPCTiming(clientRequest: 0.1)).connect()
         let operation = Task { try await connection.request(IPCRequest(command: .status)) }
-        let accepted = accept(listener, nil, nil)
+        let accepted = try await acceptRaw(listener)
         defer { close(accepted) }
-        try IPCSocket.configure(accepted)
-        _ = try receiveRaw(accepted)
-        try sendRaw(
-            accepted,
-            IPCCoding.encode(IPCResponse(outcome: .status, status: transportStopped)),
-            eof: false,
-        )
+        let wire = try IPCCoding.encode(IPCResponse(outcome: .status, status: transportStopped))
+        try await ipcBackground {
+            _ = try receiveRaw(accepted)
+            try sendRaw(accepted, wire, eof: false)
+        }
         await #expect(throws: IPCTransportError.timedOut) { try await operation.value }
         await connection.close()
     }

@@ -71,8 +71,7 @@ struct IPCTransportTests {
             }
             #expect(await spy.calls == 0)
             try sendRaw(descriptor, Data())
-            // 同期読み取りで MainActor の handler を塞がない。
-            let wire = try await Task.detached { try receiveRaw(descriptor) }.value
+            let wire = try await ipcBackground { try receiveRaw(descriptor) }
             close(descriptor)
             #expect(try IPCCoding.decodeResponse(wire).outcome == .status)
             for input in [
@@ -88,7 +87,7 @@ struct IPCTransportTests {
             }
             let boundary = try fixture.makeRawConnection()
             try sendRaw(boundary, valid + Data(repeating: 32, count: IPCSocket.maximumPayload - valid.count))
-            let response = try await Task.detached { try receiveRaw(boundary) }.value
+            let response = try await ipcBackground { try receiveRaw(boundary) }
             close(boundary)
             #expect(try IPCCoding.decodeResponse(response).outcome == .status)
             #expect(await spy.calls == 2)
@@ -117,7 +116,7 @@ struct IPCTransportTests {
             defer { close(descriptor) }
             let started = ContinuousClock.now
             try sendRaw(descriptor, Data(payload.utf8))
-            let wire = try await Task.detached { try receiveRaw(descriptor) }.value
+            let wire = try await ipcBackground { try receiveRaw(descriptor) }
             #expect(started.duration(to: .now) < .seconds(1))
             #expect(wire.isEmpty)
             #expect(scheduler.calls == 0)
