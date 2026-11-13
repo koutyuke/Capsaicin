@@ -1,9 +1,9 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
 
-  <h1>🌶️ Capsaicin</h1>
+  <h1>🌶️ Capsaicin 🌶️</h1>
 
-  <p><i>Mac のスリープを止めている間、Caps Lock の LED が知らせます。</i></p>
+  <p><i>Macに、眠れない刺激を。</i></p>
   <p>
     <a href="https://github.com/koutyuke/Capsaicin/actions/workflows/ci.yml"><img src="https://github.com/koutyuke/Capsaicin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <img src="https://img.shields.io/badge/macOS-26%2B-000000?logo=apple&amp;logoColor=white" alt="macOS 26+">
@@ -22,44 +22,54 @@
 
 ## 概要
 
-**Capsaicin** は、Mac のスリープを種類ごとに止め、止めている間は Caps Lock の LED を点灯させるメニューバーアプリです。画面を見なくても、スリープを止めたままかどうかが分かります。変えるのは LED の表示だけで、Caps Lock の入力状態は変わりません。
+**Capsaicin** は Mac のスリープを用途に合わせて止められるユーティリティアプリです。
 
-```text
-               ┌──→ スリープを止める（自動 / ディスプレイ / 手動 / ディスプレイを閉じたとき）
-抑止を開始 ────┤
-               └──→ Caps Lock の LED を点灯
+- **スリープの防止**: 自動スリープ、ディスプレイスリープ、手動スリープなど、このアプリ 1 つで止めることができます。
+- **ディスプレイを閉じてもスリープさせない**: MacBook のディスプレイを閉じた際の挙動も制御できます。デフォルトのシステムスリープはもちろん、ディスプレイスリープや画面をつけたままの状態のほか、閉じたときに画面の明るさを 0 にすることもできます。
+- **自動解除**: タイマー、指定時刻、バッテリー残量の低下で自動的に解除でき、解除したら元のスリープ設定に戻すことができます。
+- **複数の操作方法**: メニューバーのほか、ホットキーや CLI からでも開始・解除することができます。
+- **HUD での通知**: 開始・解除の切り替えやアプリからの警告を、画面上に通知することができます。
+- **Caps Lock LED での状態確認**: スリープを止めている間はキーボードの Caps Lock LED が点灯し、止めているかどうかを画面を見ずに確認することができます。Caps Lock の入力状態は変わらず、入力監視の権限も不要です。
+- **最小限の root 権限**: root 権限が必要な処理は小さなヘルパーに集約し、特定の処理以外では root 権限を必要としません。
 
-解除・タイマー・指定時刻・バッテリー残量 ──→ スリープの設定と LED を元に戻す
-```
+## 着想を得たアプリ
 
-- **止めるスリープを選べる**: 自動スリープ、ディスプレイスリープとスクリーンセーバ、手動スリープ、ディスプレイを閉じたときのスリープを止められます。ディスプレイを閉じたときは、ディスプレイをオフにするか輝度を 0 にして動かし続けられます。
-- **画面を見ずに分かる LED**: 内蔵と外付けのキーボードの Caps Lock の LED を点灯します。Caps Lock の入力状態は変えず、入力監視の権限も求めません。
-- **止めたままにしない**: タイマー、指定時刻、バッテリー残量で解除し、スリープの設定を元に戻します。終了、クラッシュ、再起動の後も後片付けをします。
-- **メニューバー、ホットキー、CLI**: メニューバー、自分で割り当てるホットキー、`capsaicin` コマンドで開始と解除ができます。メニューバーとホットキーでの切り替えは HUD で知らせます。
-- **最小限の root ヘルパー**: 管理者認証で承認する設置と削除の処理を除けば、root で動くのは、2つのサブコマンドだけを受け付ける小さなヘルパーだけです。
+Capsaicin は、次の2つのアプリから着想を得て作りました。それぞれのアプリを作成・公開している開発者の方々に、心より感謝とリスペクトを申し上げます。
 
-UI は日本語だけです。開発中で、配布用のビルドはまだありません。使うには、ソースからビルドします。
+- [Capsomnia](https://github.com/fuji-mak/Capsomnia): Caps Lock をスリープを止めるスイッチにし、その LED で状態を示す macOS アプリです。Caps Lock の LED で状態を知らせる発想と、root 権限が要る処理だけを小さなヘルパーに任せる構成は、Capsomnia にならっています。
+- [Amphetamine](https://apps.apple.com/app/amphetamine/id937984704): Mac のスリープを止めるアプリです。自動スリープを止めたうえで、ほかの種類のスリープを追加で止める形と、メニューから設定を選べる作りを参考にしました。
 
-## 動作環境
+Capsaicin はこれらのアプリとは別のアプリとして独立して作っており、各開発者およびプロジェクトとは一切関係がありません。Capsaicin に関する不具合の報告やお問い合わせを、それぞれの開発者の方々へ行うことはお控えください。
 
-- Apple Silicon の Mac
+## インストール
+
+### サポート
+
+- Apple Silicon の Mac（Intel の Mac には対応していません）
 - macOS 26 以降
 
-## root 権限で動くヘルパー
+### GitHub Release
 
-手動スリープとディスプレイを閉じたときのスリープを止めるには、root 権限が要ります。この2つを止める設定を選ぶと、Capsaicin は管理者認証を1回求め、次の3つを設置します。
+1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.zip` をダウンロードする。
+2. zip を展開し、`Capsaicin.app` を「アプリケーション」フォルダーに移動する。
+3. `Capsaicin.app` を開く。
 
-| 設置するもの     | 置き場所                          | 役割                                                                                                 |
-| ---------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| ヘルパー         | `/Library/PrivilegedHelperTools/` | `on`（`pmset -a disablesleep 1` と同じ）と `off`（`pmset -a disablesleep 0` と同じ）だけを受け付ける |
-| sudoers のルール | `/etc/sudoers.d/`                 | インストールしたユーザーに、ヘルパーの `on` と `off` だけをパスワードなしで許可する                  |
-| LaunchDaemon     | `/Library/LaunchDaemons/`         | Mac の起動時にヘルパーの `off` を実行し、スリープを止めたままにしない                                |
+Capsaicin は Apple の公証を受けていないため、初回は macOS に開くのを止められます。その場合は「システム設定」>「プライバシーとセキュリティ」を開き、「セキュリティ」の「このまま開く」をクリックしてください。
 
-3つは設定画面の「ヘルパー」から削除できます。振る舞いは [`docs/specs/helper.md`](./docs/specs/helper.md)、この構成を選んだ理由は [`DEC-HLP-001`](./docs/meta/decisions/DEC-HLP-001-minimal-helper-via-sudoers.md) にあります。
+ダウンロードした zip が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt
+gh attestation verify Capsaicin-{バージョン}.zip --repo koutyuke/Capsaicin
+```
+
+### Homebrew
+
+自前の Homebrew tap で配布する予定です（準備中）。
 
 ## ソースからビルドする
 
-Xcode 27.2 と、flakes を有効にした Nix が必要です。次を実行します。
+Xcode 27.2 と、flakes を有効にした Nix が必要です。
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
@@ -67,7 +77,7 @@ cd Capsaicin
 nix develop --command just build
 ```
 
-アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` にできます。ad-hoc 署名で、Apple の公証は受けていません（理由は [`DEC-SYS-004`](./docs/meta/decisions/DEC-SYS-004-no-developer-program-distribution.md)）。
+アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` に生成されます。
 
 ## 開発とテスト
 
@@ -77,18 +87,18 @@ nix develop --command just test   # 検査スクリプト、パッケージ、�
 nix develop --command just fmt    # treefmt ですべてのファイルを整形
 ```
 
-開発環境の前提とすべてのレシピは [`AGENTS.md`](./AGENTS.md) にあります。
+詳しくはドキュメントを参照してください。
 
-## 文書
+## ドキュメント
 
 - 🧭 [文書の入口](./docs/README.md) — 要件、仕様、判断の探し方
-- 🎯 [製品の概要](./docs/product/overview.md) — 目的、利用者、目標、非目標
+- 🎯 [アプリの概要](./docs/product/overview.md) — 目的、利用者、目標、非目標
 - 📐 [仕様](./docs/specs/) — 機能ごとの振る舞い
 - 🧱 [判断](./docs/meta/decisions/) — 何を選び、なぜ選び、いつ見直すか
 
 ## 貢献
 
-不具合の報告と要望は、[Issues](https://github.com/koutyuke/Capsaicin/issues) で受け付けています。英語でも日本語でも構いません。Pull Request は受け付けていません。
+不具合の報告と要望は、[Issues](https://github.com/koutyuke/Capsaicin/issues) で受け付けています。英語でも日本語でも構いません。
 
 ## ライセンス
 

@@ -1,9 +1,9 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
 
-  <h1>🌶️ Capsaicin</h1>
+  <h1>🌶️ Capsaicin 🌶️</h1>
 
-  <p><i>Keep your Mac awake, and let the Caps Lock LED tell you it is.</i></p>
+  <p><i>A spicy kick to keep your Mac awake.</i></p>
   <p>
     <a href="https://github.com/koutyuke/Capsaicin/actions/workflows/ci.yml"><img src="https://github.com/koutyuke/Capsaicin/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
     <img src="https://img.shields.io/badge/macOS-26%2B-000000?logo=apple&amp;logoColor=white" alt="macOS 26+">
@@ -22,44 +22,54 @@
 
 ## Overview
 
-**Capsaicin** is a menu bar app that prevents your Mac from sleeping, one kind of sleep at a time, and lights the Caps Lock LED while it does. You can tell whether sleep prevention is on without looking at the screen. Only the LED changes; the Caps Lock input state stays as it is.
+**Capsaicin** is a macOS utility app designed to prevent your Mac from sleeping according to your needs.
 
-```text
-            ┌──→ Sleep prevented (idle / display / manual / closed display)
-Turn on ────┤
-            └──→ Caps Lock LED on
+- **Sleep Prevention**: Prevent idle sleep, display sleep, manual sleep, and more—all within a single app.
+- **Keep Awake with Display Closed**: Control behavior when closing your MacBook's display. In addition to default system sleep, you can choose display sleep, keep the screen on, or set screen brightness to 0 when closed.
+- **Automatic Deactivation**: Automatically restore normal sleep settings via timers, a scheduled time of day, or when the battery level drops low.
+- **Multiple Ways to Control**: Start and end sleep prevention from the menu bar, configurable hotkeys, or the command line (CLI).
+- **HUD Notifications**: Receive on-screen notifications for status toggles and app warnings.
+- **Status via Caps Lock LED**: The Caps Lock LED lights up while sleep prevention is active, allowing you to check the status without looking at the screen. The actual Caps Lock typing state is not modified, and Input Monitoring permissions are not required.
+- **Minimal Root Privileges**: Privileged operations requiring root are isolated into a small helper tool; root access is never requested for anything else.
 
-Turn off, timer, time of day, or low battery ──→ sleep settings and LED restored
-```
+## Inspiration
 
-- **Choose What Stays Awake**: Prevent idle sleep, display sleep and the screen saver, manual sleep, and sleep when the display is closed. When the display is closed, the Mac can keep running with the display off or its brightness at 0.
-- **An LED You Can See Without Looking**: Lights the Caps Lock LED on built-in and external keyboards. It does not change the Caps Lock input state and does not ask for Input Monitoring permission.
-- **Turns Itself Off**: Ends after a timer, at a time of day, or when the battery runs low, and restores the sleep settings. It also cleans up after a quit, a crash, or a restart.
-- **Menu Bar, Hotkey, and CLI**: Turn it on and off from the menu bar, a global hotkey you assign, or the `capsaicin` command. A HUD shows changes made from the menu bar or the hotkey.
-- **A Minimal Root Helper**: Apart from the install and removal steps you approve with administrator authentication, the only code that runs as root is a small helper that accepts two subcommands.
+Capsaicin was inspired by the following two applications. We express our sincere gratitude and respect to their creators.
 
-The UI is in Japanese only. Capsaicin is under development and has no prebuilt releases yet; build it from source.
+- [Capsomnia](https://github.com/fuji-mak/Capsomnia): A macOS app that turns Caps Lock into a sleep prevention switch and indicates state via its LED. Capsaicin adopts Capsomnia's idea of indicating state through the Caps Lock LED and delegating only root-required tasks to a minimal helper tool.
+- [Amphetamine](https://apps.apple.com/app/amphetamine/id937984704): A Mac keep-awake app. Capsaicin references its approach of preventing idle sleep first while allowing users to optionally suppress other sleep types, as well as its menu-based configuration structure.
 
-## Requirements
+Capsaicin is developed independently as a separate application and is not affiliated with either developer or project. Please do not contact the creators of those applications regarding bugs or inquiries about Capsaicin.
 
-- A Mac with Apple Silicon
+## Installation
+
+### Supported Environments
+
+- Apple Silicon Mac (Intel Macs are not supported)
 - macOS 26 or later
 
-## Privileged Helper
+### GitHub Releases
 
-Preventing manual sleep and sleep when the display is closed requires root. When you choose a setting that needs it, Capsaicin asks for administrator authentication once and installs three items.
+1. Download `Capsaicin-{version}.zip` from [Releases](https://github.com/koutyuke/Capsaicin/releases).
+2. Unpack the zip archive and move `Capsaicin.app` to your Applications folder.
+3. Open `Capsaicin.app`.
 
-| Item         | Location                          | Role                                                                                                |
-| ------------ | --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Helper       | `/Library/PrivilegedHelperTools/` | Accepts only `on` (same as `pmset -a disablesleep 1`) and `off` (same as `pmset -a disablesleep 0`) |
-| sudoers rule | `/etc/sudoers.d/`                 | Lets the installing user run only the helper's `on` and `off` without a password                    |
-| LaunchDaemon | `/Library/LaunchDaemons/`         | Runs the helper's `off` at startup so sleep is never left disabled                                  |
+Because Capsaicin is not notarized by Apple, macOS may block it on first launch. If this occurs, open **System Settings** > **Privacy & Security**, scroll to **Security**, and click **Open Anyway**.
 
-You can remove all three from the Helper section in Settings. See [`docs/specs/helper.md`](./docs/specs/helper.md) for the behavior and [`DEC-HLP-001`](./docs/meta/decisions/DEC-HLP-001-minimal-helper-via-sudoers.md) for why this design was chosen (both in Japanese).
+To verify that the downloaded zip archive has not been tampered with, compare it against `SHA256SUMS.txt` from the release or verify it using the [GitHub CLI](https://cli.github.com/):
 
-## Build from Source
+```bash
+shasum -a 256 -c SHA256SUMS.txt
+gh attestation verify Capsaicin-{version}.zip --repo koutyuke/Capsaicin
+```
 
-You need Xcode 27.2 and Nix with flakes enabled. Run this from the repository root:
+### Homebrew
+
+Distribution via a dedicated Homebrew tap is planned (coming soon).
+
+## Building from Source
+
+Requires Xcode 27.2 and Nix with flakes enabled.
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
@@ -67,33 +77,33 @@ cd Capsaicin
 nix develop --command just build
 ```
 
-The app is built at `.build/xcode/Build/Products/Debug/Capsaicin.app`. It is ad-hoc signed and not notarized by Apple ([`DEC-SYS-004`](./docs/meta/decisions/DEC-SYS-004-no-developer-program-distribution.md) explains why).
+The app will be generated at `.build/xcode/Build/Products/Debug/Capsaicin.app`.
 
 ## Development & Testing
 
 ```bash
-nix develop --command just check  # Format check, lint, and all tests
+nix develop --command just check  # Format check, linting, and all tests
 nix develop --command just test   # Script, package, and app tests
 nix develop --command just fmt    # Format all files with treefmt
 ```
 
-See [`AGENTS.md`](./AGENTS.md) for the development environment and every recipe.
+For more details, please refer to the documentation.
 
 ## Documentation
 
-The documents are written in Japanese.
+The documentation is written in Japanese.
 
-- 🧭 [Documentation index](./docs/README.md) — how to find requirements, specifications, and decisions
-- 🎯 [Product overview](./docs/product/overview.md) — purpose, users, goals, and non-goals
-- 📐 [Specifications](./docs/specs/) — how each feature behaves
-- 🧱 [Decisions](./docs/meta/decisions/) — what was chosen, why, and when to revisit it
+- 🧭 [Documentation Index](./docs/README.md) — How to find requirements, specifications, and design decisions
+- 🎯 [Product Overview](./docs/product/overview.md) — Purpose, target users, goals, and non-goals
+- 📐 [Specifications](./docs/specs/) — Behavioral specifications for each feature
+- 🧱 [Decisions](./docs/meta/decisions/) — Architectural decisions: choices, rationale, and revisit triggers
 
 ## Contributing
 
-Bug reports and feature requests are welcome in [Issues](https://github.com/koutyuke/Capsaicin/issues), in English or Japanese. Pull requests are not accepted.
+Bug reports and feature requests are welcome in [Issues](https://github.com/koutyuke/Capsaicin/issues), in English or Japanese.
 
 ## License
 
 Copyright 2026 koutyuke
 
-Licensed under the [MIT License](./LICENSE). Third-party works included in this repository are listed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
+Licensed under the [MIT License](./LICENSE). Third-party notices are listed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
