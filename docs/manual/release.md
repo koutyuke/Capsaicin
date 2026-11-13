@@ -5,11 +5,12 @@
 ## 前提
 
 - 最初のリリースの前に、`HYP-HLP-003`（別の Mac でもヘルパーが署名によらず動くか）を確かめ、根拠を残している。確かめていなければリリースしない。
+  - 例外として、0.0.0 はリリースの流れ（ワークフロー、attestation、immutable なリリース）を確かめるためのテスト版とし、この前提の対象外にする。リリースノートに、使わないことを書く。
 - リリースするコミットが `main` にあり、そのコミットの CI が成功している。
 
 ## 手順
 
-1. `project.yml` の `MARKETING_VERSION` を新しい版にし、`CURRENT_PROJECT_VERSION` を1増やす。版は Semantic Versioning に従う。
+1. `project.yml` の `MARKETING_VERSION` を新しい版にし、`CURRENT_PROJECT_VERSION` を1増やす（最初のリリースは `1` のまま）。版は Semantic Versioning に従う。
 2. `nix develop --command just check` を実行し、変更をコミットして `main` に push する。CI の成功を待つ。
 3. 版の変更を含むコミットに、注釈付きのタグを付ける。タグの本文がリリースノートになる。
 
