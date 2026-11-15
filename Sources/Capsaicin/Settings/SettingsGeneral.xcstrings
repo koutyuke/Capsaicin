@@ -1,9 +1,15 @@
 {
-  "sourceLanguage" : "ja",
+  "sourceLanguage" : "en",
   "strings" : {
     "appearance.group.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15,6 +21,12 @@
     "backgroundDisabled.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning: Background item is disabled"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +38,12 @@
     "backgroundDisabled.help" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capsaicin's background item is disabled in macOS System Settings, so the app cannot automatically restart after a crash. Allow it in Login Items & Extensions."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37,6 +55,12 @@
     "backgroundDisabled.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background item is disabled"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -48,6 +72,12 @@
     "dockIcon.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show icon in Dock"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59,6 +89,12 @@
     "help.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Help for %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70,6 +106,12 @@
     "hud.help" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Displays a brief one-line overlay at the bottom of the screen showing status changes and warnings. Appears when using the menu or hotkey, and when turned off automatically by timer, scheduled time, or low battery. Does not appear when controlled from the CLI."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81,6 +123,12 @@
     "hud.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show HUD when switching"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92,6 +140,12 @@
     "launchAtLogin.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open at login"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -103,6 +157,12 @@
     "menuBarIcon.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show icon in menu bar"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -114,6 +174,12 @@
     "restartUnavailable.help" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to register or launch the background item. You can continue using the app, but if it crashes, you will need to open it manually."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -125,6 +191,12 @@
     "restartUnavailable.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not automatically restart after crash"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -136,6 +208,12 @@
     "resume.help" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep prevention resumes with its timer or scheduled time only if it was active before the app closed."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -147,6 +225,12 @@
     "resume.label" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resume sleep prevention"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,6 +242,12 @@
     "resume.option.app" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After crash only"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -169,6 +259,12 @@
     "resume.option.appAndMac" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "After crash and Mac restart"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -180,6 +276,12 @@
     "resume.option.never" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Never"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -191,6 +293,12 @@
     "startup.group.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startup"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -202,6 +310,12 @@
     "title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

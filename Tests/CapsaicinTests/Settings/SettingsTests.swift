@@ -36,7 +36,7 @@ struct SettingsTests {
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
         #expect(missing[1].help == SettingsSection.sleep.text("helperNotReady")
-            + SettingsSection.sleep.text("lidClose.help"))
+            + "\n" + SettingsSection.sleep.text("lidClose.help"))
     }
 
     @Test("SPEC-SET-005 SPEC-SET-006 蓋のある Mac はポップアップ、ない Mac はスイッチの行になる", arguments: [true, false])
@@ -241,7 +241,9 @@ struct SettingsTests {
         let app = try appBundle()
         for section in SettingsSection.allCases {
             let table = "Settings" + section.rawValue.capitalized
-            #expect(app.url(forResource: table, withExtension: "strings", subdirectory: "ja.lproj") != nil)
+            for language in ["en", "ja"] {
+                #expect(app.url(forResource: table, withExtension: "strings", subdirectory: "\(language).lproj") != nil)
+            }
             #expect(app.localizedString(forKey: "title", value: nil, table: table) == section.title)
         }
         let license = try #require(app.url(forResource: "KeyboardShortcuts-LICENSE", withExtension: "txt"))
@@ -251,8 +253,10 @@ struct SettingsTests {
 
 extension SettingsTests {
     @Test("SPEC-SET-002 SPEC-SYS-004 統合した条件の文言を同じテーブルから引き、ディスプレイの表記をそろえる")
-    func sleepResources() {
-        #expect(SettingsSection.sleep.title == "スリープ")
+    func sleepResources() throws {
+        let app = try appBundle()
+        let japanese = try localizedAppBundle("ja")
+        #expect(SettingsSection.sleep.title == app.localizedString(forKey: "title", value: nil, table: "SettingsSleep"))
         for key in ["behavior.group.title", "release.group.title", "timer.label", "timer.duration.label",
                     "timer.duration.a11y", "hours", "minutes", "time.label", "time.help", "time.value.label",
                     "battery.label", "battery.threshold.label", "battery.threshold.value",
@@ -261,7 +265,12 @@ extension SettingsTests {
                     "lidClose.keepOn",
                     "lidClose.help", "brightnessUnavailable", "brightnessUnavailable.a11y"]
         {
-            #expect(SettingsSection.sleep.text(key) != key)
+            #expect(japanese.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
+            #expect(SettingsSection.sleep.text(key) == app.localizedString(
+                forKey: key,
+                value: nil,
+                table: "SettingsSleep",
+            ))
         }
         for key in ["manualAndLid.label", "manualAndLid.help", "lidDisplay.label", "lidDisplay.help",
                     "lidDisplay.turnOff", "lidDisplay.keepOn", "timer.duration.help", "time.value.help",
@@ -270,7 +279,7 @@ extension SettingsTests {
             #expect(SettingsSection.sleep.text(key) == key)
         }
         #expect(SettingsSection.helper.text("helperInstall.lidClose.title")
-            == "ディスプレイを閉じてもスリープさせないには、ヘルパーのインストールが必要です")
+            == app.localizedString(forKey: "helperInstall.lidClose.title", value: nil, table: "SettingsHelper"))
         #expect(SettingsSection.helper.text("helperInstall.manualAndLid.title") == "helperInstall.manualAndLid.title")
     }
 }

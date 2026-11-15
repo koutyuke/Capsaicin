@@ -62,9 +62,15 @@ enum AppComposition {
         guard alert == .terminationIncomplete else { return }
         let panel = NSAlert()
         panel.alertStyle = .informational
-        panel.messageText = "一部の制御を元に戻せませんでした"
-        panel.informativeText = "スリープまたは LED の制御が残っています。次に Capsaicin を起動したときに戻し直します。"
-        panel.addButton(withTitle: "OK")
+        panel.messageText = Bundle.main.localizedString(
+            forKey: "alert.terminationIncomplete.title", value: nil, table: "App",
+        )
+        panel.informativeText = Bundle.main.localizedString(
+            forKey: "alert.terminationIncomplete.message", value: nil, table: "App",
+        )
+        panel.addButton(withTitle: Bundle.main.localizedString(
+            forKey: "alert.terminationIncomplete.button", value: nil, table: "App",
+        ))
         panel.runModal()
     }
 }

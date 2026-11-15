@@ -13,9 +13,9 @@ sources: ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/
 
 ### オーナーの観測
 
-ディスプレイを2枚つなぎ、メニューバーのアイコンのメニューで抑止を切り替えると、フォーカスのあるディスプレイのアイコンは切り替わるが、もう一方のディスプレイのアイコンは前の状態のまま残った。このときの実装は、ボタンに重ねた `NSImageView` に `setSymbolImage(_:contentTransition: .replace)` で画像を渡していた（`TASK-048`）。
+ディスプレイを2枚つなぎ、メニューバーのアイコンのメニューで抑止を切り替えると、フォーカスのあるディスプレイのアイコンは切り替わるが、もう一方のディスプレイのアイコンは前の状態のまま残った。このときの実装は、ボタンに重ねた `NSImageView` に `setSymbolImage(_:contentTransition: .replace)` で画像を渡していた（f94b928）。
 
-`NSStatusBarButton.image` に直接入れる実装（`TASK-060`、b558a89）に替えた後、オーナーが同じ2枚のディスプレイで確かめた。両方のディスプレイのアイコンが切り替わり、メニューバーの明暗での色とメニューを開いたときの強調にも問題はなかった。
+`NSStatusBarButton.image` に直接入れる実装（b558a89）に替えた後、オーナーが同じ2枚のディスプレイで確かめた。両方のディスプレイのアイコンが切り替わり、メニューバーの明暗での色とメニューを開いたときの強調にも問題はなかった。
 
 ### AppKit の仕組み
 
@@ -40,7 +40,7 @@ sources: ["/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/
 ## 確かめ方
 
 1. Objective-C ランタイムで `NSStatusItem`、`NSStatusBarWindow`、`NSStatusItemReplicantView` のメソッドと変数を列挙した。
-2. 使い捨てのプロセスでステータス項目を作り、`TASK-048` と同じ手順でボタンに `NSImageView` を重ねた。`NSStatusItemReplicantView` の `setSnapshotImage:…` を差し替えて、渡る画像を受け取った。
+2. 使い捨てのプロセスでステータス項目を作り、f94b928 と同じ手順でボタンに `NSImageView` を重ねた。`NSStatusItemReplicantView` の `setSnapshotImage:…` を差し替えて、渡る画像を受け取った。
 3. 表の切り替え方ごとに1〜1.5秒待ち、受け取った画像の不透明な画素を数えた。
 4. `NSImageView` の `draw(_:)` で呼び出し履歴を出し、複製用の画像を描く経路を確かめた。
 

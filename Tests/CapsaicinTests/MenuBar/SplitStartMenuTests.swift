@@ -23,7 +23,7 @@ struct SplitStartMenuTests {
             let status = BlockingStatus(session: nil, batteryCondition: batteryEnabled ? BatteryCondition(
                 threshold: settings.batteryThreshold, ignoresOnACPower: settings.ignoresBatteryOnACPower,
             ) : nil, misalignments: [:], isRecordUnsaved: false)
-            let rows = MenuContent.make(
+            let rows = try MenuContent.make(
                 status: status,
                 settings: settings,
                 isOnACPower: false,
@@ -31,7 +31,8 @@ struct SplitStartMenuTests {
                 sleepRows: [],
                 now: now,
                 calendar: calendar,
-                bundle: Bundle(for: MenuBarController.self),
+                locale: Locale(identifier: "ja_JP"),
+                bundle: localizedAppBundle("ja"),
             )
             return try #require(rows.first { $0.id == "menu.start" }?.subtitle)
         }
@@ -65,7 +66,10 @@ struct SplitStartMenuTests {
                                     sleepRows: [],
                                     bundle: Bundle(for: MenuBarController.self))
         #expect(rows[1].id == "menu.status.noCondition")
-        #expect(rows[1].title == "手動でオフにするまで継続")
+        #expect(rows[1].title == MenuContent.text(
+            "menu.status.noCondition",
+            bundle: Bundle(for: MenuBarController.self),
+        ))
         #expect(rows[2].id == (batteryEnabled ? "menu.status.battery" : "menu.stop"))
     }
 
@@ -100,12 +104,19 @@ struct SplitStartMenuTests {
             ).first { $0.id == "menu.quickSettings" }?.children.first { $0.id == "menu.battery" })
         }
         let battery = try batteryRow()
-        #expect(battery.title == "バッテリー残量35%未満でオフにする")
+        #expect(battery.title == String(
+            format: MenuContent.text("menu.battery", bundle: Bundle(for: MenuBarController.self)),
+            35,
+        ))
         #expect(battery.isChecked == enabled)
-        #expect(battery.subtitle == (ignoresAdapter ? "電源アダプタ接続中は除く" : nil))
+        let subtitle = ignoresAdapter ? MenuContent.text(
+            "menu.battery.subtitle",
+            bundle: Bundle(for: MenuBarController.self),
+        ) : nil
+        #expect(battery.subtitle == subtitle)
         #expect(battery.command == .toggleBattery && battery.children.isEmpty)
         fixture.system.powerState = PowerState(batteryLevel: 80, isOnACPower: true)
-        #expect(try batteryRow().subtitle == (ignoresAdapter ? "電源アダプタ接続中は除く" : nil))
+        #expect(try batteryRow().subtitle == subtitle)
     }
 
     @Test("SPEC-MENU-008 SPEC-BLK-009 バッテリー項目は設定画面と同じ経路で保存し、抑止中なら反映する",
@@ -146,7 +157,7 @@ struct SplitStartMenuTests {
         let submenu = try #require(item("menu.startFor", in: controller.menu).submenu)
         let entry = try item("menu.startUntil", in: submenu)
         #expect(entry.submenu == nil)
-        #expect(entry.title == "時刻を指定…")
+        #expect(entry.title == MenuContent.text("menu.startUntil", bundle: Bundle(for: MenuBarController.self)))
         submenu.performActionForItem(at: submenu.index(of: entry))
         #expect(receivedMode == .time && controller.inputPanel != nil)
         #expect(!fixture.model.status.isBlocking)

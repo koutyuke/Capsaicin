@@ -176,8 +176,8 @@ jobs:
           VERSION: ${{ needs.release-package.outputs.version }}
         run: |
           args=(--target "$MERGE_SHA" --notes-file release-notes.md --title "Capsaicin $VERSION")
-          # 1.0.0 未満は、公開の前提を確かめ終えていない版としてプレリリースにする。
-          if [[ "$VERSION" == 0.* ]]; then
+          # プレリリースにするかは、版ではなく PR のラベルで決める（DEC-SYS-016）。
+          if jq -e 'any(.pull_request.labels[]; .name == "S-Prerelease")' "$GITHUB_EVENT_PATH" >/dev/null; then
             args+=(--prerelease)
           fi
           gh release create "v$VERSION" \

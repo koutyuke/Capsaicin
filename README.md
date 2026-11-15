@@ -1,6 +1,8 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
 
+  <img src="./.github/assets/capsaicin-icon.png" alt="Capsaicin" width="128" height="128">
+
   <h1>🌶️ Capsaicin 🌶️</h1>
 
   <p><i>A spicy kick to keep your Mac awake.</i></p>
@@ -66,6 +68,41 @@ gh attestation verify Capsaicin-{version}.zip --repo koutyuke/Capsaicin
 ### Homebrew
 
 Distribution via a dedicated Homebrew tap is planned (coming soon).
+
+## Troubleshooting
+
+### Other Sleep Prevention Apps
+
+If another app that prevents sleep is running, its sleep settings can conflict with Capsaicin's, and Capsaicin may not prevent sleep or restore your settings as expected. Quit the other app completely before launching Capsaicin.
+
+### Key Remapping Apps
+
+If a key remapping app such as Karabiner-Elements controls the Caps Lock LED, the LED may turn off even while sleep prevention is active. Turn off Caps Lock LED control in that app's settings.
+
+#### Karabiner-Elements
+
+In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lock LED`.
+
+## Uninstallation
+
+1. If you installed the helper, open Capsaicin's settings, go to **ヘルパー** (Helper), and click **削除** (Delete). Capsaicin's interface is in Japanese only. The helper is installed under `/Library` and `/etc`, so it remains even after you delete the app.
+2. Quit Capsaicin from the menu bar.
+3. In Terminal, remove the LaunchAgent that Capsaicin uses to launch at login and to restart after a crash. If `launchctl` reports that the service is not found, it is already unloaded; continue to the next command.
+
+   ```bash
+   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
+   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
+   ```
+
+4. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
+5. To also remove your settings and records, run:
+
+   ```bash
+   defaults delete io.github.koutyuke.capsaicin
+   rm -r ~/Library/Application\ Support/io.github.koutyuke.capsaicin
+   ```
+
+If you deleted the app before deleting the helper, reinstall Capsaicin and start again from step 1.
 
 ## Building from Source
 

@@ -27,8 +27,10 @@ struct QuickSettingsTests {
         ])
         #expect(controller.menu.items.allSatisfy { $0.state == .off && $0.view == nil })
         if !active {
-            #expect(try item("menu.startNoTimeLimit", in: controller.menu).title == "時間指定なしでオン")
-            #expect(try item("menu.startFor", in: controller.menu).title == "時間・時刻を指定してオン")
+            #expect(try item("menu.startNoTimeLimit", in: controller.menu).title == MenuContent
+                .text("menu.startNoTimeLimit", bundle: Bundle(for: MenuBarController.self)))
+            #expect(try item("menu.startFor", in: controller.menu).title
+                == MenuContent.text("menu.startFor", bundle: Bundle(for: MenuBarController.self)))
         }
     }
 
@@ -61,7 +63,10 @@ struct QuickSettingsTests {
             for choice in SettingsLidCloseChoice.allCases {
                 let entry = try item("menu.sleep.lidClose." + choice.rawValue, in: quick)
                 #expect(entry.state == (choice == .sleep ? .on : .off))
-                #expect(entry.accessibilityLabel() == header.title + "、" + entry.title)
+                #expect(entry.accessibilityLabel() == String(
+                    format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: Bundle(for: MenuBarController.self)),
+                    header.title, entry.title,
+                ))
                 #expect(choices.first { $0.id == entry.identifier?.rawValue }?.command == .lidClose(choice))
             }
         } else {
@@ -81,7 +86,7 @@ struct QuickSettingsTests {
         ), saveSettings: { _ in })
         let controller = menu(settings(app))
         let quick = try item("menu.quickSettings", in: controller.menu)
-        #expect(quick.title == "クイック設定")
+        #expect(quick.title == MenuContent.text("menu.quickSettings", bundle: Bundle(for: MenuBarController.self)))
         #expect(quick.subtitle == nil)
         #expect(quick.image == nil)
     }
@@ -111,7 +116,10 @@ struct QuickSettingsTests {
             let warns = candidate == choice && choice != .sleep
             #expect((entry.image != nil) == warns)
             #expect(entry.subtitle == (warns ? model.sleepRows[1].warning : nil))
-            let label = SettingsSection.sleep.text("lidClose.label") + "、" + entry.title
+            let label = String(
+                format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: Bundle(for: MenuBarController.self)),
+                SettingsSection.sleep.text("lidClose.label"), entry.title,
+            )
             #expect(entry.accessibilityLabel() == (warns
                     ? String(
                         format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: MenuBarController.self)),

@@ -105,7 +105,7 @@ extension SettingsTests {
 
     @Test("SPEC-SET-005 明るさを0を選んだときだけ輝度の注意を出し、ヘルパーの注意を先頭に置く",
           arguments: SettingsLidCloseChoice.allCases, [HelperInstallationState.installed, .partial, .notInstalled])
-    func brightnessWarning(choice: SettingsLidCloseChoice, helper: HelperInstallationState) async {
+    func brightnessWarning(choice: SettingsLidCloseChoice, helper: HelperInstallationState) async throws {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
             state: { .installed }, perform: { _ in .cancelled }, completed: { _, _ in },
@@ -124,12 +124,14 @@ extension SettingsTests {
         if choice == .zeroBrightness {
             keys.append("brightnessUnavailable")
         }
-        #expect(row.help == keys.map { SettingsSection.sleep.text($0) }.joined()
-            + SettingsSection.sleep.text("lidClose.help"))
-        #expect(row.warningLabel == keys.map { SettingsSection.sleep.text($0 + ".a11y") }.joined(separator: "、"))
+        #expect(row.help == (keys + ["lidClose.help"]).map { SettingsSection.sleep.text($0) }.joined(separator: "\n"))
+        #expect(row.warningLabel == keys.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and)))
         #expect(unavailable.lidCloseChoice == choice)
         #expect(!unavailable.isBusy)
-        #expect(SettingsSection.sleep.text("brightnessUnavailable.a11y") == "警告、画面の明るさを変更できません")
-        #expect(SettingsSection.sleep.text("lidClose.zeroBrightness") == "明るさを0")
+        let bundle = try localizedAppBundle("ja")
+        #expect(bundle.localizedString(forKey: "brightnessUnavailable.a11y", value: nil, table: "SettingsSleep")
+            == "警告、画面の明るさを変更できません")
+        #expect(bundle
+            .localizedString(forKey: "lidClose.zeroBrightness", value: nil, table: "SettingsSleep") == "明るさを0")
     }
 }

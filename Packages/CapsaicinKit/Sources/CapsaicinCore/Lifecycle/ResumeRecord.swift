@@ -1,6 +1,5 @@
 import Foundation
 
-/// 前回の正常な終了の理由。
 public enum ExitReason: String, Hashable, Sendable, Codable {
     case userQuit
     case sessionEnd
@@ -20,7 +19,6 @@ public struct ResumeRecord: Hashable, Sendable {
     public var misalignments: Misalignments = [:]
     /// 記録を最後に書いた壁時計の時刻。
     public var lastUpdated: Date
-    /// 直近のクラッシュ後の起動の時刻。
     public var crashLaunches: [Date] = []
 
     public init(lastUpdated: Date) {

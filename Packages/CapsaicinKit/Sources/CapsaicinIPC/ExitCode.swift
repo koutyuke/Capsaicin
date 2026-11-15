@@ -10,7 +10,6 @@ public enum ExitCode: Int32, Hashable, Sendable {
 }
 
 public extension IPCResponse {
-    /// 応答から CLI の終了コードを決める。
     var exitCode: ExitCode {
         switch outcome {
         case .started, .timeLimitReplaced, .alreadyBlocking:

@@ -1,11 +1,6 @@
-/// 仕組みの実際の状態の見込みと、あるべき状態から、合わせられていない制御を求める。
 public enum MechanismAlignment {
-    /// - Parameters:
-    ///   - targets: あるべき状態で適用している仕組み。停止中は空。
-    ///   - observed: 仕組みごとの、適用していると見込める状態。キーがなければ分からない（前のプロセスから残ったもの）。
+    /// - Parameter observed: 仕組みごとの、適用していると見込める状態。キーがなければ分からない（前のプロセスから残ったもの）。
     ///     disablesleep は、最後に読んだ `SleepDisabled` を持つ。
-    ///   - ownsSleepDisabled: disablesleep の所有。
-    ///   - controllable: 評価する仕組み。LED を制御できない環境では LED を含めない。
     public static func misalignments(
         targets: Set<Mechanism>,
         observed: [Mechanism: Bool],
