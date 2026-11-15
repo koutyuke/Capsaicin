@@ -69,6 +69,41 @@ gh attestation verify Capsaicin-{バージョン}.zip --repo koutyuke/Capsaicin
 
 自前の Homebrew tap で配布する予定です（準備中）。
 
+## トラブルシューティング
+
+### ほかのスリープ防止アプリを使っている場合
+
+スリープを防止するほかのアプリが動いていると、スリープの設定が Capsaicin とぶつかり、意図どおりにスリープを止めたり元の設定に戻したりできないことがあります。Capsaicin を起動する前に、そのアプリを完全に終了してください。
+
+### キー配列を変更するアプリを使っている場合
+
+Karabiner-Elements などのキー配列を変更するアプリが Caps Lock の LED を制御していると、スリープを止めている間でも LED が消えることがあります。そのアプリの設定で、Caps Lock の LED の制御をオフにしてください。
+
+#### Karabiner-Elements
+
+設定画面で `Devices > 対象のキーボード > Manipulate caps lock LED`をオフにしてください。
+
+## アンインストール
+
+1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除**をクリックしてください。Capsaicinのインターフェースは日本語のみです。ヘルパーは`/Library`と`/etc`にインストールされるため、アプリを削除した後も残ります。
+2. メニューバーからCapsaicinを終了します。
+3. Terminalで、Capsaicinがログイン時の起動やクラッシュ後の再起動に使用するLaunchAgentを削除します。`launchctl`がサービスが見つからないと報告した場合は、すでにアンロードされているため、次のコマンドに進んでください。
+
+   ```bash
+   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
+   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
+   ```
+
+4. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
+5. 設定や記録も削除するには、以下を実行します。
+
+   ```bash
+   defaults delete io.github.koutyuke.capsaicin
+   rm -r ~/Library/Application\ Support/io.github.koutyuke.capsaicin
+   ```
+
+ヘルパーを削除する前にアプリを削除してしまった場合は、Capsaicinを再インストールし、手順1からやり直してください。
+
 ## ソースからビルドする
 
 Xcode 27.2 と、flakes を有効にした Nix が必要です。
