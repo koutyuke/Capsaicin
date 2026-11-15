@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-002
 title: 表示言語は日本語だけにし、文字列は String Catalog で管理する
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SYS-017"]
 requirements: ["REQ-SYS-003", "REQ-SYS-004"]
 based_on: []
 ---
