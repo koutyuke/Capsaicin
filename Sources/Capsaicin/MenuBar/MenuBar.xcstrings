@@ -4,6 +4,12 @@
     "menu.battery" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Off Below %d%% Battery"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -15,6 +21,12 @@
     "menu.battery.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Except on power adapter"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -26,6 +38,12 @@
     "menu.changeTime" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change Turn-Off Time"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -37,6 +55,12 @@
     "menu.duration.lessThanMinute" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Less than a minute"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -48,6 +72,12 @@
     "menu.header.active" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sleep Prevention On"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -59,6 +89,12 @@
     "menu.header.fromNow" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From Now"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -70,6 +106,12 @@
     "menu.header.idle" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capsaicin"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -81,6 +123,12 @@
     "menu.noTimeLimit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Time Limit"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -92,6 +140,12 @@
     "menu.quickSettings" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Settings"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -103,6 +157,12 @@
     "menu.quit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit Capsaicin"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -114,6 +174,12 @@
     "menu.settings" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -125,6 +191,12 @@
     "menu.sleep.lidClose.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -136,6 +208,12 @@
     "menu.start" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Sleep Prevention On"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -147,6 +225,12 @@
     "menu.start.subtitle.nextDay" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off tomorrow at %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,6 +242,12 @@
     "menu.start.subtitle.none" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until turned off"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -169,6 +259,12 @@
     "menu.start.subtitle.timer" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off in %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -180,6 +276,12 @@
     "menu.start.subtitle.until" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off at %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -191,6 +293,12 @@
     "menu.startFor" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On with Time Limit"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -202,6 +310,12 @@
     "menu.startFor.custom" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Duration…"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -213,6 +327,12 @@
     "menu.startNoTimeLimit" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On with No Time Limit"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -224,6 +344,12 @@
     "menu.startUntil" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until a Time…"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -235,6 +361,12 @@
     "menu.status.battery" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off below %d%% battery"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -246,6 +378,12 @@
     "menu.status.battery.onAdapter" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Won’t turn off while on power adapter"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -257,6 +395,12 @@
     "menu.status.noCondition" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until you turn it off"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -268,6 +412,12 @@
     "menu.status.until" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Until %1$@ (%2$@ remaining)"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -279,6 +429,12 @@
     "menu.stop" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn Sleep Prevention Off"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -290,6 +446,12 @@
     "menu.warning.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning: %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -301,6 +463,12 @@
     "menu.warning.remainingSleepSetting.helper.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair it in Helper settings"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -312,6 +480,12 @@
     "menu.warning.remainingSleepSetting.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A setting that blocks sleep is still on"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -323,6 +497,12 @@
     "menu.warning.stateSaveFailed.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not save state"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -334,6 +514,12 @@
     "menu.warning.unalignedLed.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not toggle Caps Lock LED"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -345,6 +531,12 @@
     "menu.warning.unappliedSleep.helper.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repair it in Helper settings"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -356,6 +548,12 @@
     "menu.warning.unappliedSleep.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some sleep is not being prevented"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -366,6 +564,12 @@
     },
     "panel.cancel" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -377,6 +581,12 @@
     "panel.change" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -388,6 +598,12 @@
     "panel.changeTime.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change Turn-Off Time"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -399,6 +615,12 @@
     "panel.duration.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On for Duration"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -410,6 +632,12 @@
     "panel.duration.until" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off at %@"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -421,6 +649,12 @@
     "panel.start" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -431,6 +665,12 @@
     },
     "panel.time.label" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -441,6 +681,12 @@
     },
     "panel.time.nextDay" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turns off tomorrow at this time"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -452,6 +698,12 @@
     "panel.time.title" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn On Until a Time"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -463,6 +715,12 @@
     "statusItem.active.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capsaicin, sleep prevention on"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -474,6 +732,12 @@
     "statusItem.idle.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capsaicin, sleep prevention off"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-089
 title: アプリの画面の英語の文言を String Catalog に入れる
-status: in_progress
+status: done
 requirements: ["REQ-SYS-003", "REQ-SYS-004"]
 depends_on: []
 assignee: Gemini（Antigravity、gemini-3.8-flash、thinking_level high）
@@ -118,4 +118,12 @@ nix develop --command just fmt-check
 
 ## レビュー
 
-（PM が記入する）
+Gemini が 8 カタログ 161 キーに英語を入れ、定義書を作った。差分は `"en"` の追加だけで、書式指定子の検査と `just fmt-check` が通った。用語（Sleep prevention、System sleep、Display sleep、power adapter）は macOS と `DEC-CLI-003` にそろっていた。
+
+PM が全キーを日本語と並べて読み、次を直した。
+
+- 長い、または意味が曖昧な文言: メニューの電源アダプターの状態行、HUD の一部を戻せない理由、開始できない状態、時間・時刻のサブメニューと時刻のパネルのタイトル、残っているスリープの設定の警告、キー配列を変更するアプリの案内、`manual.label`（Apple メニューのスリープであることを明示し、ヘルパーの案内の引用もそろえた）。
+- 説明文の言い回しと引用符（直線の引用符を “ ” にした）: `cli.help`、`hotkey.help`、`lidClose.help`、ヘルパーのインストールと削除の案内。
+- 担当が報告した日本語の脱字（`cli.help` の「取得することできます」）を直した。
+
+実画面での収まりと VoiceOver の読み上げは、`TASK-091` の後に手順書 8.8 で確かめる。
