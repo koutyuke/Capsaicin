@@ -12,7 +12,8 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 
 - 作業はチケット（[`docs/meta/tasks/`](docs/meta/tasks/)）単位で進める。チケットの「範囲」に書かれたファイルだけを変更する。範囲外の変更が必要だと分かったら、変更せずに報告する。
 - PM の指示がない限り、`git commit` や `git push` をしない。変更は作業ツリーに残し、PM がレビューしてからコミットする。
-- リポジトリは GitHub の `koutyuke/Capsaicin` で公開している。共有するブランチは `main` だけで、Pull Request は使わない（`DEC-SYS-010`）。タグの作成と push、リリースはオーナーだけが行う（`docs/manual/release.md`）。
+- ブランチの規則は [`DEC-SYS-014`](docs/meta/decisions/DEC-SYS-014-git-flow-branches-and-release-pull-requests.md) に従う。チケットで指示されたときは、作業ブランチを push し、`develop` への PR を作ってよい。スキル `capsaicin-release` による、オーナーが承認した `release/*` または `hotfix/*` の push を除き、`main`、`develop`、`release/*`、`hotfix/*` への push と、タグの作成と push はしない。マージはオーナーだけが行う。
+- リリースの準備はスキル `capsaicin-release` で行う。push と PR の作成はオーナーの承認を得てから行う。
 - 判断に迷ったら、推測で埋めずに報告する。確かめていない前提は仮説（`HYP-*`）として扱う。
 
 ## 破ってはいけないもの
@@ -69,6 +70,7 @@ CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どち�
 | `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
 | `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
 | `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
+| `prepare-release`  | `develop`（`patch` なら `hotfix/*`）から、版を上げたリリース用のコミットを手元に作り、材料を `.build/release/` に書き出す。push はしない            |
 | `test`             | `test-scripts`、`test-package`、`test-app` を実行する                                                                                               |
 | `test-scripts`     | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                      |
 | `test-package`     | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                             |
