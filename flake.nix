@@ -35,6 +35,7 @@
           statix
           deadnix
           lefthook
+          gh
           ruff
           python
           formatting.config.build.wrapper

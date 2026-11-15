@@ -23,6 +23,9 @@ dist: build-release
     ditto -c -k --norsrc --noextattr --noacl --keepParent .build/xcode/Build/Products/Release/Capsaicin.app .build/dist/Capsaicin-{{ version }}.zip
     cd .build/dist && shasum -a 256 Capsaicin-{{ version }}.zip > SHA256SUMS.txt
 
+prepare-release mode="":
+    python3 scripts/prepare_release.py {{ mode }}
+
 test: test-scripts test-package test-app
 
 test-scripts:
@@ -56,7 +59,7 @@ lint-code:
     statix check treefmt.nix
     deadnix --fail flake.nix treefmt.nix
 
-# CI が Nix を使わずに入れる just と XcodeGen の版が、flake.lock の版と一致するかを確かめる（DEC-SYS-013）。
+# CI が Nix を使わずに入れる just と XcodeGen の版が、flake.lock の版と一致するかを確かめる（DEC-SYS-015）。
 lint-build-tools:
     #!/usr/bin/env bash
     set -euo pipefail
