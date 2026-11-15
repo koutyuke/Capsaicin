@@ -1,5 +1,5 @@
 name: Build tools
-description: Nix を使わずに、.github/build-tools.env で固定した just と XcodeGen を入れる（DEC-SYS-013）。
+description: Nix を使わずに、.github/build-tools.env で固定した just と XcodeGen を入れる（DEC-SYS-015）。
 runs:
   using: composite
   steps:

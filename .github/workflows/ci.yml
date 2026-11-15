@@ -1,20 +1,20 @@
-# 検査の方針とジョブの分け方は docs/meta/decisions/DEC-SYS-013-ci-and-release-workflows.md にある。
+# 検査の方針とジョブの分け方は docs/meta/decisions/DEC-SYS-015-pull-request-ci-and-release-on-merge.md にある。
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
   workflow_dispatch:
-  # リリース（release.yml）も同じ検査を通してから公開する。
-  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  # リリースするコミットの CI の成功が必要なので（docs/manual/release.md）、途中で止めない。
-  cancel-in-progress: false
+  group: ci-${{ github.event.pull_request.number || github.run_id }}
+  # PR は最新の実行だけを残す。push と手動実行は run_id ごとに別のグループになる。
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # 静的検査は多くのツールを使うので、手元と同じ Nix の devShell で動かす。

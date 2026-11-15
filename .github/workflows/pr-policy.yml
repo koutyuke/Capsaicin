@@ -1,0 +1,84 @@
+# PR の規則は docs/meta/decisions/DEC-SYS-015-pull-request-ci-and-release-on-merge.md にある。
+name: PR policy
+
+on:
+  pull_request:
+    branches: [develop, main]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: PR policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-tags: true
+          persist-credentials: false
+      - name: Check PR policy
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          fail() {
+            echo "::error::$1"
+            exit 1
+          }
+
+          has_label() {
+            jq -e --arg name "$1" \
+              'any(.pull_request.labels[]; .name == $name)' \
+              "$GITHUB_EVENT_PATH" >/dev/null
+          }
+
+          type_label_count="$(jq \
+            '[.pull_request.labels[].name | select(startswith("T-"))] | length' \
+            "$GITHUB_EVENT_PATH")"
+
+          if [[ "$BASE_REF" == develop ]]; then
+            if [[ "$type_label_count" -ne 1 ]]; then
+              fail "A PR to develop must have exactly one T-* label (found $type_label_count)."
+            fi
+            exit 0
+          fi
+
+          if [[ "$HEAD_REPOSITORY" != "$REPOSITORY" ]]; then
+            fail "A PR to main must come from a branch in $REPOSITORY."
+          fi
+
+          version="$(awk '$1 == "MARKETING_VERSION:" { gsub(/"/, "", $2); print $2; exit }' project.yml)"
+
+          case "$HEAD_REF" in
+            release/v*)
+              branch_version="${HEAD_REF#release/v}"
+              if ! has_label S-Release; then
+                fail "A PR from release/v* to main must have the S-Release label."
+              fi
+              if [[ "$branch_version" != "$version" ]]; then
+                fail "Release branch version $branch_version does not match MARKETING_VERSION $version."
+              fi
+              ;;
+            hotfix/*)
+              if ! has_label S-Hotfix; then
+                fail "A PR from hotfix/* to main must have the S-Hotfix label."
+              fi
+              if [[ "$type_label_count" -ne 1 ]]; then
+                fail "A PR from hotfix/* to main must have exactly one T-* label (found $type_label_count)."
+              fi
+              ;;
+            *)
+              fail "A PR to main must come from release/v* or hotfix/*."
+              ;;
+          esac
+
+          if git show-ref --verify --quiet "refs/tags/v$version"; then
+            fail "Tag v$version already exists."
+          fi
