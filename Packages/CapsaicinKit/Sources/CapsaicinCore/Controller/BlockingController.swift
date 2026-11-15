@@ -36,12 +36,10 @@ public final class BlockingController {
         }
     }
 
-    /// 合わせ直しを試みる間隔。
     static let reconcileInterval: TimeInterval = 60
 
     public internal(set) var settings: Settings
     public let capabilities: MachineCapabilities
-    /// 抑止中だけある。
     public internal(set) var session: BlockingSession?
     public internal(set) var isRecordUnsaved = false
     public var onEvent: ((BlockingEvent) -> Void)?
@@ -129,7 +127,6 @@ public final class BlockingController {
         }
     }
 
-    /// ホットキー。停止中なら指定なしで開始し、抑止中なら解除する。
     public func toggleByHotkey() {
         if isBlocking {
             requestStop(from: .hotkey)
@@ -146,7 +143,6 @@ public final class BlockingController {
 
     // MARK: 時刻と電源
 
-    /// 解除の条件を確かめ、閉じた間の輝度を保ち、合わせ直しの間隔が過ぎていれば合わせ直す。
     public func timePassed() {
         notifyingWarnings {
             if releaseIfConditionMet() {
@@ -164,7 +160,7 @@ public final class BlockingController {
         notifyingWarnings { releaseIfConditionMet() }
     }
 
-    /// 合わせ直す。ヘルパーの設置と修復の後に呼ぶ。
+    /// ヘルパーの設置と修復の後に呼ぶ。
     public func reconcile() {
         notifyingWarnings { reconcileListed() }
     }

@@ -1,11 +1,10 @@
-/// 開始、解除、設定の変更、合わせ直しの手順。記録の更新の順序は再開用の記録の仕様に従う。
+/// 記録の更新の順序は再開用の記録の仕様に従う。
 extension BlockingController {
-    /// あるべき状態で適用している仕組み。停止中は空。
     var currentTargets: Set<Mechanism> {
         isBlocking ? effectiveSettings.mechanisms : []
     }
 
-    /// 開始する（再開を含む）。止めるスリープに必要な仕組みは全部か無しかにする。
+    /// 止めるスリープに必要な仕組みは全部か無しかにする。
     func start(_ newSession: BlockingSession, trigger: StartTrigger) -> StartResult {
         let effective = effectiveSettings
         if let rejection = BlockingRules.rejectionBeforeApplying(
@@ -70,7 +69,6 @@ extension BlockingController {
         saveRecord()
     }
 
-    /// 自動の解除の条件が成り立っていれば解除する。
     @discardableResult
     func releaseIfConditionMet() -> Bool {
         guard let session,
@@ -141,7 +139,6 @@ extension BlockingController {
         return !isRecordUnsaved
     }
 
-    /// 警告（合わせられていない制御、保存できていない記録）が変わったら通知する。
     @discardableResult
     func notifyingWarnings<Result>(_ body: () -> Result) -> Result {
         let before = (misalignments, isRecordUnsaved)

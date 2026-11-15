@@ -20,7 +20,6 @@ public enum LowerSleepDisabledAction: Hashable, Sendable {
     case failUnreadable
 }
 
-/// disablesleep の所有の規則。
 public enum SleepDisabledOwnership {
     /// - Parameter sleepDisabled: `SleepDisabled` の値。読めなければ nil。
     public static func raiseAction(sleepDisabled: Bool?, owned: Bool) -> RaiseSleepDisabledAction {

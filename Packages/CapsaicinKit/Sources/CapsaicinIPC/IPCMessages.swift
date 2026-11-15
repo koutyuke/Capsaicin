@@ -5,7 +5,6 @@ public enum IPCProtocol {
     public static let version = 2
 }
 
-/// CLI の要求。
 public enum IPCCommand: Hashable, Sendable, Codable {
     /// `capsaicin on`。時間の指定がなければ、設定のタイマーと指定時刻を使う。
     case start(StartTimeOverride?)
@@ -25,7 +24,6 @@ public struct IPCRequest: Hashable, Sendable, Codable {
     }
 }
 
-/// 要求に対する結果。
 public enum IPCOutcome: Hashable, Sendable, Codable {
     case started
     case timeLimitReplaced
@@ -37,7 +35,6 @@ public enum IPCOutcome: Hashable, Sendable, Codable {
     case status
     /// 「CLI からの操作を受け付ける」がオフなので拒んだ。
     case cliRequestsDisabled
-    /// 要求の形式のバージョンが違う。
     case unsupportedVersion
 }
 

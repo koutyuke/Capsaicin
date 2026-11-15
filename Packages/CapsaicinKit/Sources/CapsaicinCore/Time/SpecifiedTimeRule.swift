@@ -1,6 +1,5 @@
 import Foundation
 
-/// 指定時刻から解除の時刻を求める規則。
 public enum SpecifiedTimeRule {
     /// `now` より厳密に後で、壁時計の時と分が一致し秒が 0 の時刻のうち、最も早いもの。
     ///

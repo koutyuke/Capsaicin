@@ -1,12 +1,10 @@
 import Foundation
 
-/// 解除の時刻の由来。
 public enum TimeLimitSource: String, Hashable, Sendable, Codable {
     case timer
     case specifiedTime
 }
 
-/// 解除の時刻（壁時計の時刻）とその由来。
 public struct TimeLimit: Hashable, Sendable, Codable {
     public var date: Date
     public var source: TimeLimitSource
@@ -24,7 +22,6 @@ public enum StartTimeOverride: Hashable, Sendable, Codable {
     case noTimeLimit
 }
 
-/// 開始または置き換えの要求から、解除の時刻を決める規則。
 public enum TimeLimitRule {
     /// 使う条件から解除の時刻を1つ決める。早い方を使い、同じ時刻なら由来は指定時刻にする。どちらも使わなければ nil。
     public static func timeLimit(
@@ -65,7 +62,6 @@ public enum TimeLimitRule {
         }
     }
 
-    /// 現在時刻が解除の時刻以上なら、時間の条件が成り立つ。
     public static func isReached(_ limit: TimeLimit, now: Date) -> Bool {
         now >= limit.date
     }

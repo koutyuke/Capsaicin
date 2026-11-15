@@ -7,7 +7,6 @@ public enum CLIArgumentError: Error, Hashable, Sendable {
     case unexpectedArgument(String)
     case missingValue(option: String)
     case duplicateOption(String)
-    /// 異なる時間指定のオプションを同時に指定した。
     case conflictingOptions
     case invalidDuration(String)
     /// 書式は正しいが、タイマーの範囲に収まらない。
@@ -15,7 +14,6 @@ public enum CLIArgumentError: Error, Hashable, Sendable {
     case invalidTime(String)
 }
 
-/// `capsaicin` の引数を要求にする。
 public enum CLIArguments {
     /// - Parameter arguments: プログラム名を除いた引数。
     public static func parse(_ arguments: [String]) throws(CLIArgumentError) -> IPCCommand {

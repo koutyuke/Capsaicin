@@ -4,14 +4,14 @@ id: EVID-LED-015
 title: Transport が "Virtual" のキーボードを対象から外すと、Sidecar の仮想キーボードに書かず、案内も出なかった
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（2e1c028）、Karabiner-Elements 16.3.0 は終了、内蔵キーボードと Lofree Flow Lite（2.4 GHz）
-sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-led-check/20261112-142839/verification-results.txt", "~/capsaicin-led-check/20261112-142839/58-applog.txt", "~/capsaicin-led-check/20261112-142839/58-on-leds.txt", "~/capsaicin-led-check/20261112-142839/58-on-kbds.txt"]
+sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-led-check/20261112-142839/verification-results.txt", "~/capsaicin-led-check/20261112-142839/58-applog.txt", "~/capsaicin-led-check/20261112-142839/58-on-leds.txt", "~/capsaicin-led-check/20261112-142839/58-on-kbds.txt", "87e3f19:docs/manual/led-fix-verification.md"]
 ---
 
 # EVID-LED-015 Transport が "Virtual" のキーボードを対象から外すと、Sidecar の仮想キーボードに書かず、案内も出なかった
 
 ## 確かめた事実
 
-`TASK-058` の「検証」の手順を行った。Capsaicin は、キーボードのうち、`Transport` を持ち、その値が `"Virtual"` ではないサービスだけに書く版である。LED と案内はオーナーの目視による。
+「確かめ方」の手順を行った。Capsaicin は、キーボードのうち、`Transport` を持ち、その値が `"Virtual"` ではないサービスだけに書く版である。LED と案内はオーナーの目視による。
 
 - Karabiner-Elements を終了した後も、Sidecar の仮想キーボード（サービスの登録 ID `0x100047355`、`Transport` は `"Virtual"`）は残っていた。`EVID-LED-014` と同じ登録 ID である。
 - 抑止の前、メニューと、設定の「LED」セクションに、案内は出なかった。
@@ -21,7 +21,14 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `TASK-058` の「検証」。記録は `~/capsaicin-led-check/20261112-142839/` にある。書き込みの対象は `58-applog.txt` の `targets` を読み、登録 ID は `58-on-kbds.txt` と `58-on-leds.txt` と照らした。
+準備は `87e3f19:docs/manual/led-fix-verification.md` の手順0による。
+
+1. Karabiner-Elements を終了し、`kbds` の出力に `Transport` が `Virtual` の行があることを確かめ、その登録 ID を控えた。
+2. メニューと、設定の「LED」セクションに案内がないことを見た。
+3. 抑止を始め、内蔵キーボードの LED を目視し、`snap 58-on` を実行した。
+4. 抑止を解除し、`applog > "$LC/58-applog.txt"` を実行した。
+
+記録は `~/capsaicin-led-check/20261112-142839/` にある。書き込みの対象は `58-applog.txt` の `targets` を読み、登録 ID は `58-on-kbds.txt` と `58-on-leds.txt` と照らした。
 
 ## 適用範囲
 
