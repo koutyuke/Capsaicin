@@ -18,7 +18,6 @@ extension MachineCapabilities {
     static let desktop = MachineCapabilities(hasLid: false, hasInternalBattery: false)
 }
 
-/// コントローラーの通知を記録する。
 @MainActor
 final class EventRecorder {
     private(set) var events: [BlockingEvent] = []

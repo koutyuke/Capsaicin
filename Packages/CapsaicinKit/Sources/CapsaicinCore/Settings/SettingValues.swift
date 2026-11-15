@@ -1,12 +1,10 @@
 import Foundation
 
-/// 解除のタイマーの長さ。1 分〜24 時間を 1 分単位で持つ。
 public struct TimerDuration: Hashable, Sendable, Codable {
     public static let allowedMinutes = 1 ... 24 * 60
 
     public let minutes: Int
 
-    /// 範囲外なら nil を返す。
     public init?(minutes: Int) {
         guard Self.allowedMinutes.contains(minutes) else { return nil }
         self.minutes = minutes
@@ -31,12 +29,10 @@ public struct TimerDuration: Hashable, Sendable, Codable {
     }
 }
 
-/// 壁時計の時と分。
 public struct TimeOfDay: Hashable, Sendable, Codable {
     public let hour: Int
     public let minute: Int
 
-    /// 時が 0〜23、分が 0〜59 でなければ nil を返す。
     public init?(hour: Int, minute: Int) {
         guard (0 ... 23).contains(hour), (0 ... 59).contains(minute) else { return nil }
         self.hour = hour
@@ -60,14 +56,12 @@ public struct TimeOfDay: Hashable, Sendable, Codable {
     }
 }
 
-/// バッテリー残量のしきい値。5〜100% を 5% 刻みで持つ。
 public struct BatteryThreshold: Hashable, Sendable, Codable {
     public static let allowedPercents = 5 ... 100
     public static let step = 5
 
     public let percent: Int
 
-    /// 範囲外か刻みに合わなければ nil を返す。
     public init?(percent: Int) {
         guard Self.allowedPercents.contains(percent), percent.isMultiple(of: Self.step) else { return nil }
         self.percent = percent
@@ -88,7 +82,6 @@ public struct BatteryThreshold: Hashable, Sendable, Codable {
     }
 }
 
-/// 「再起動後に抑止を再開する」の選択。
 public enum ResumePolicy: String, Hashable, Sendable, Codable, CaseIterable {
     case never
     case afterAppRestart

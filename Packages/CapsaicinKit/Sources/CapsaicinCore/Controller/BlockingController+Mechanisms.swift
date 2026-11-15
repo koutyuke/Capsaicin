@@ -1,13 +1,10 @@
-/// 仕組みを操作できなかった理由。
 enum AlignmentFailure: Hashable {
     case operationFailed
     /// disablesleep の所有を保存できなかったので `on` を実行しなかった。
     case recordNotSaved
 }
 
-/// 仕組みをあるべき状態に向けて操作する手順。
 extension BlockingController {
-    /// この環境で扱う仕組み。LED を制御できない環境では LED を除く。
     var controllableMechanisms: Set<Mechanism> {
         var result = Set(Mechanism.allCases)
         if !ports.led.isAvailable {
@@ -16,7 +13,7 @@ extension BlockingController {
         return result
     }
 
-    /// 仕組みを並びの順に操作し、操作できなかった仕組みを返す。扱わない仕組みと、見込みがあるべき状態と同じ仕組みは操作しない。
+    /// 扱わない仕組みと、見込みがあるべき状態と同じ仕組みは操作しない。
     @discardableResult
     func align(_ mechanisms: [Mechanism], to targets: Set<Mechanism>) -> [Mechanism: AlignmentFailure] {
         var failures: [Mechanism: AlignmentFailure] = [:]
@@ -72,7 +69,6 @@ extension BlockingController {
         return lowerSleepDisabled()
     }
 
-    /// disablesleep を立てるときの規則。
     private func raiseSleepDisabled() -> AlignmentFailure? {
         let reading = try? ports.helper.readSleepDisabled()
         observed[.systemSleepDisabled] = reading
@@ -100,7 +96,6 @@ extension BlockingController {
         }
     }
 
-    /// disablesleep を下ろすときの規則。自分が立てたものだけを下ろす。
     private func lowerSleepDisabled() -> AlignmentFailure? {
         guard record.ownsSleepDisabled else { return nil }
         let reading = try? ports.helper.readSleepDisabled()

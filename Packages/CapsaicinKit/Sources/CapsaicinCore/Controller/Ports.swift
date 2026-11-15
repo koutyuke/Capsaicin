@@ -14,7 +14,6 @@ public protocol BuiltInDisplayBrightnessControlling {
     func setBrightness(_ value: Float) throws
 }
 
-/// 電源管理アサーション。
 @MainActor
 public protocol PowerAssertionControlling {
     /// 種類ごとに1つ作る。作成と解放はどちらも冪等で、作ってある種類の作成は何もせずに成功とする。
@@ -24,18 +23,14 @@ public protocol PowerAssertionControlling {
     func releaseAssertion(_ kind: AssertionKind) throws
 }
 
-/// ヘルパーによるシステムのスリープの制御。
+/// どの操作も実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
+/// 期限を過ぎた子プロセスは止めずに終わるまで見届け、その間の読み取りと操作は子プロセスを起動せずに throw する。
 @MainActor
 public protocol HelperSleepControlling {
     /// ヘルパーの3つの構成要素がそろっているか。
     var isHelperInstalled: Bool { get }
-    /// `SleepDisabled` を読む。読めなければ throw する。
-    /// 実装は期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
-    /// 期限を過ぎた子プロセスは止めずに終わるまで見届け、その間の読み取りと操作は子プロセスを起動せずに throw する。
     func readSleepDisabled() throws -> Bool
-    /// ヘルパーの `on`。実装は期限を持ち、期限切れは throw する。
     func turnOn() throws
-    /// ヘルパーの `off`。実装は期限を持ち、期限切れは throw する。
     func turnOff() throws
 }
 
@@ -58,11 +53,9 @@ public protocol PowerStateProviding {
 @MainActor
 public protocol BootTimeProviding {
     /// 読めないときは取得不能を示す `Date.distantPast` を返す。過去の起動時刻としては扱わない。
-    /// 取得不能なら通常の起動とし、自動再開せず、前回のセッションと disablesleep の所有を捨てる。
     var bootTime: Date { get }
 }
 
-/// 再開用の記録の読み書き。
 @MainActor
 public protocol ResumeRecordStoring {
     /// 記録がなければ nil。読めない（壊れている、形式が違う）ときも nil を返し、実装の側でログに残す。
@@ -71,7 +64,6 @@ public protocol ResumeRecordStoring {
     func save(_ record: ResumeRecord) -> Bool
 }
 
-/// 現在時刻と、利用者の暦とタイムゾーン。
 @MainActor
 public protocol TimeProviding {
     var now: Date { get }

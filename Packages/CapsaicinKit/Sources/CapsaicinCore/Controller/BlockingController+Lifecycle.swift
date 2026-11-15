@@ -1,6 +1,4 @@
-/// 起動、終了、ヘルパーの削除の手順。
 public extension BlockingController {
-    /// 起動時の処理。起動の理由を判定し、再開するか、すべての仕組みを停止中のあるべき状態に合わせる。
     @discardableResult
     func launch() -> LaunchReason {
         notifyingWarnings {
@@ -35,7 +33,6 @@ public extension BlockingController {
                 now: now,
             )
             if resumes, let resumed = record.session {
-                // 再開は、記録の解除の時刻と由来を引き継いだ開始。拒否されたら停止中で起動する。
                 _ = start(resumed, trigger: .resume)
             } else {
                 restoreStopped(clearingCrashLaunches: false)
@@ -82,7 +79,6 @@ public extension BlockingController {
         }
     }
 
-    /// ヘルパーの削除の処理の最初に `pmset -a disablesleep 0` を実行するか。
     func resetsSleepDisabledOnHelperRemoval() -> Bool {
         SleepDisabledOwnership.resetsOnHelperRemoval(
             owned: record.ownsSleepDisabled,
@@ -90,8 +86,7 @@ public extension BlockingController {
         )
     }
 
-    /// ヘルパーの削除に成功した。所有を「立てていない」にしてから、手動スリープをオフにしていまの抑止に反映する。
-    /// アプリは、その後の `settings` を保存する。
+    /// アプリは、この後の `settings` を保存する。
     func helperRemovalSucceeded() {
         notifyingWarnings {
             record.ownsSleepDisabled = false

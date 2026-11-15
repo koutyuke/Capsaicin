@@ -34,7 +34,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApplication.shared.terminate(nil)
     }
 
-    /// 起動中に Finder などから開き直したときや、Dock のアイコンをクリックしたときは設定画面を開く。
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
         runtime?.openSettings()
         return false

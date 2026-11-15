@@ -1,6 +1,5 @@
 import Foundation
 
-/// 起動の理由。
 public enum LaunchReason: Hashable, Sendable {
     case afterCrash
     /// Mac の再起動・ログアウトの後。
@@ -8,7 +7,6 @@ public enum LaunchReason: Hashable, Sendable {
     case normal
 }
 
-/// 起動の理由の判定、連続クラッシュの扱い、再開の判断。
 public enum LaunchRules {
     public static let crashWindow: TimeInterval = 10 * 60
     public static let crashLimit = 3
@@ -27,7 +25,6 @@ public enum LaunchRules {
         bootTime != .distantPast && bootTime > record.lastUpdated
     }
 
-    /// 起動のたびに 10 分より古いものを除き、クラッシュ後の起動なら今回の時刻を加える。
     public static func updatingCrashLaunches(_ launches: [Date], at now: Date, afterCrash: Bool) -> [Date] {
         let recent = launches.filter { now.timeIntervalSince($0) <= crashWindow }
         return afterCrash ? recent + [now] : recent
@@ -38,7 +35,6 @@ public enum LaunchRules {
         launches.count >= crashLimit
     }
 
-    /// 再開を試みるか。
     public static func shouldResume(
         reason: LaunchReason,
         policy: ResumePolicy,
