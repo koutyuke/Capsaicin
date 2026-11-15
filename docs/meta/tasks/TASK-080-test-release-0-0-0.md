@@ -2,7 +2,7 @@
 schema: task
 id: TASK-080
 title: 0.0.0 のテスト版でリリースの流れを確かめる
-status: in_progress
+status: done
 requirements: []
 depends_on: ["TASK-079"]
 assignee: PM（Claude）
@@ -29,3 +29,8 @@ assignee: PM（Claude）
 ## 検証
 
 上の完了条件を、ワークフローの結果と GitHub Release の内容で確かめる。
+
+## レビュー
+
+- GitHub Release `v0.0.0` がプレリリースとして作られ、`Capsaicin-0.0.0.zip` と `SHA256SUMS.txt` が添付されている。リリースノートに署名は混ざっていない。
+- ダウンロードした zip が `SHA256SUMS.txt` と一致し、`gh attestation verify` を通ることを PM が確かめた（2026-11-15）。
