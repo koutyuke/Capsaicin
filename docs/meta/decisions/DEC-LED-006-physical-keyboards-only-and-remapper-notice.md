@@ -23,7 +23,7 @@ based_on: ["DEC-LED-001", "EVID-LED-006", "EVID-LED-007", "EVID-LED-008", "EVID-
 
 ## 背景
 
-`DEC-LED-005` は、Karabiner-Elements のプロセスを検出したら、LED が点かないことと「Manipulate caps lock LED」をオフにする避け方を案内すると決めていた。案内を、LED に影響するときだけに絞る方法を `TASK-055` で調べ、次のことが分かった。
+`DEC-LED-005` は、Karabiner-Elements のプロセスを検出したら、LED が点かないことと「Manipulate caps lock LED」をオフにする避け方を案内すると決めていた。案内を、LED に影響するときだけに絞る方法を調べ、次のことが分かった。
 
 - Karabiner-Elements のアプリを終了しても常駐プロセスは残るので、プロセスの検出では案内が出続ける。仮想キーボードは、アプリの終了で消える（`EVID-LED-009`）。
 - キーボードの占有の印（`DebugState`）で、アプリの終了と「Modify events」のオフは見分けられる。ただし、デバッグ用の値で、「Manipulate caps lock LED」をオフにしても印は残る（`EVID-LED-009`、`HYP-LED-008`）。
