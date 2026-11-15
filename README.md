@@ -1,6 +1,8 @@
 <!-- markdownlint-disable MD033 MD041 -->
 <div align="center">
 
+  <img src="./.github/assets/capsaicin-icon.png" alt="Capsaicin" width="128" height="128">
+
   <h1>🌶️ Capsaicin 🌶️</h1>
 
   <p><i>A spicy kick to keep your Mac awake.</i></p>
