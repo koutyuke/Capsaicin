@@ -83,6 +83,7 @@ nix develop --command just prepare-release patch
 次をオーナーに見せ、ブランチの push と PR の作成をまとめて承認してよいか尋ねる。明確な承認が得られるまでは、どちらも行わない。
 
 - 版とリリースの種類
+- プレリリースにするか。`DEC-SYS-016` に従って案を示し、オーナーに決めてもらう
 - リリースノートの全文
 - 材料の一覧との対応。載せた PR と載せなかった PR、緊急の修正では各コミットを示す
 
@@ -94,6 +95,7 @@ nix develop --command just prepare-release patch
 
 - 通常のリリース: `--label S-Release`
 - 緊急の修正: `--label S-Hotfix` と、オーナーに確かめた種類のラベル
+- プレリリースにする場合は、どちらも `--label S-Prerelease` を足す
 
 作成した PR の URL をオーナーに伝える。
 
