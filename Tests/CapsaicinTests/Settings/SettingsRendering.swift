@@ -19,10 +19,8 @@ extension SettingsTests {
             return Mirror(reflecting: value).children.flatMap { strings($0.value) }
         }
         let values = strings(view.release)
-        #expect(SettingsSection.sleep.text("battery.group.title") == "バッテリー")
-        #expect(SettingsSection.sleep.text("battery.label") == "残量が少なくなったらオフにする")
-        #expect(values.contains("バッテリー") == hasBattery)
-        #expect(values.contains("残量が少なくなったらオフにする") == hasBattery)
+        #expect(values.contains(SettingsSection.sleep.text("battery.group.title")) == hasBattery)
+        #expect(values.contains(SettingsSection.sleep.text("battery.label")) == hasBattery)
         #expect(values.contains(SettingsSection.sleep.text("battery.threshold.label")) == hasBattery)
         #expect(values.contains(SettingsSection.sleep.text("battery.ignoreOnAdapter.label")) == hasBattery)
         #expect(rowHelpValues(view.release).count == (hasBattery ? 7 : 4))

@@ -60,7 +60,8 @@ struct MenuBarTests {
                                     misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
         let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, hasInternalBattery: true,
                                     sleepRows: [],
-                                    now: Date(timeIntervalSince1970: 0), calendar: calendar, bundle: bundle())
+                                    now: Date(timeIntervalSince1970: 0), calendar: calendar,
+                                    locale: Locale(identifier: "ja_JP"), bundle: bundle())
         #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
         #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
     }
@@ -222,7 +223,7 @@ struct MenuBarTests {
                          isOnACPower: fixture.system.powerState.isOnACPower,
                          hasInternalBattery: fixture.model.capabilities.hasInternalBattery,
                          sleepRows: settingsModel(fixture).sleepRows,
-                         now: now, calendar: calendar, bundle: bundle())
+                         now: now, calendar: calendar, locale: Locale(identifier: "ja_JP"), bundle: bundle())
     }
 
     private func makeFixture() -> AppFixture {
@@ -240,7 +241,7 @@ struct MenuBarTests {
 
     private func bundle() -> Bundle {
         let products = Bundle(for: MenuCatalogLocator.self).bundleURL.deletingLastPathComponent()
-        return Bundle(url: products.appending(path: "Capsaicin.app"))!
+        return Bundle(url: products.appending(path: "Capsaicin.app/Contents/Resources/ja.lproj"))!
     }
 }
 

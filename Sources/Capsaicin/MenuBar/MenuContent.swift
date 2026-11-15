@@ -22,7 +22,7 @@ enum MenuContent {
     static func make(
         status: BlockingStatus, settings: Settings, isOnACPower: Bool, hasInternalBattery: Bool,
         sleepRows: [SettingsSleepRow],
-        now: Date = Date(), calendar: Calendar = .current, bundle: Bundle = .main,
+        now: Date = Date(), calendar: Calendar = .current, locale: Locale = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
                  children: [MenuEntry] = []) -> MenuEntry
@@ -32,14 +32,18 @@ enum MenuContent {
         }
         var rows = [row(status.isBlocking ? "menu.header.active" : "menu.header.idle")]
         rows += warnings(status: status, bundle: bundle)
-        let timeRows = [row("menu.header.fromNow")] + presets(calendar: calendar, bundle: bundle) + [
+        let timeRows = [row("menu.header.fromNow")] + presets(calendar: calendar, locale: locale, bundle: bundle) + [
             MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
         ]
         if let session = status.session {
             if let limit = session.timeLimit {
                 var entry = row("menu.status.until")
-                entry.title = String(format: entry.title, time(limit.date, calendar: calendar),
-                                     duration(limit.date.timeIntervalSince(now), calendar: calendar, bundle: bundle))
+                entry.title = String(
+                    format: entry.title,
+                    DisplayFormat.time(limit.date, calendar: calendar, locale: locale),
+                    duration(limit.date.timeIntervalSince(now), calendar: calendar,
+                             locale: locale, bundle: bundle),
+                )
                 rows.append(entry)
             } else {
                 rows.append(row("menu.status.noCondition"))
@@ -57,7 +61,7 @@ enum MenuContent {
             ]))
         } else {
             let limit = TimeLimitRule.timeLimit(override: nil, settings: settings, now: now, calendar: calendar)
-            let subtitle = startSubtitle(limit, now: now, calendar: calendar, bundle: bundle)
+            let subtitle = startSubtitle(limit, now: now, calendar: calendar, locale: locale, bundle: bundle)
             rows.append(row("menu.start", subtitle: subtitle, command: .start(nil)))
             rows.append(MenuEntry(id: "separator.start"))
             rows.append(row("menu.startNoTimeLimit", command: .start(.noTimeLimit)))
@@ -70,14 +74,24 @@ enum MenuContent {
                        row("menu.quit", command: .quit)]
     }
 
-    private static func startSubtitle(_ limit: TimeLimit?, now: Date, calendar: Calendar, bundle: Bundle) -> String {
+    private static func startSubtitle(_ limit: TimeLimit?, now: Date, calendar: Calendar,
+                                      locale: Locale, bundle: Bundle) -> String
+    {
         guard let limit else { return text("menu.start.subtitle.none", bundle: bundle) }
         if limit.source == .timer {
             return String(format: text("menu.start.subtitle.timer", bundle: bundle),
-                          duration(limit.date.timeIntervalSince(now), calendar: calendar, bundle: bundle))
+                          duration(
+                              limit.date.timeIntervalSince(now),
+                              calendar: calendar,
+                              locale: locale,
+                              bundle: bundle,
+                          ))
         }
         let key = calendar.isDate(limit.date, inSameDayAs: now) ? "menu.start.subtitle.until" : "menu.start.subtitle.nextDay"
-        return String(format: text(key, bundle: bundle), time(limit.date, calendar: calendar))
+        return String(
+            format: text(key, bundle: bundle),
+            DisplayFormat.time(limit.date, calendar: calendar, locale: locale),
+        )
     }
 
     static func text(_ key: String, bundle: Bundle = .main) -> String {
@@ -106,10 +120,10 @@ enum MenuContent {
         return rows
     }
 
-    private static func presets(calendar: Calendar, bundle: Bundle) -> [MenuEntry] {
+    private static func presets(calendar: Calendar, locale: Locale, bundle: Bundle) -> [MenuEntry] {
         [15, 30, 60, 120, 240, 480].map { minutes in
             MenuEntry(id: "preset.\(minutes)",
-                      title: duration(Double(minutes * 60), calendar: calendar, bundle: bundle),
+                      title: duration(Double(minutes * 60), calendar: calendar, locale: locale, bundle: bundle),
                       command: .start(.timer(TimerDuration(minutes: minutes)!)))
         } + [MenuEntry(
             id: "menu.startFor.custom",
@@ -164,20 +178,10 @@ enum MenuContent {
                   command: .toggleBattery, isChecked: settings.batteryConditionEnabled)
     }
 
-    static func time(_ date: Date, calendar: Calendar) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        formatter.dateFormat = "H:mm"
-        return formatter.string(from: date)
-    }
-
-    private static func duration(_ seconds: TimeInterval, calendar: Calendar, bundle: Bundle) -> String {
+    private static func duration(_ seconds: TimeInterval, calendar: Calendar, locale: Locale,
+                                 bundle: Bundle) -> String
+    {
         guard seconds >= 60 else { return text("menu.duration.lessThanMinute", bundle: bundle) }
-        let formatter = DateComponentsFormatter()
-        formatter.calendar = calendar
-        formatter.allowedUnits = [.hour, .minute]
-        formatter.unitsStyle = .abbreviated
-        return formatter.string(from: floor(seconds / 60) * 60) ?? ""
+        return DisplayFormat.duration(floor(seconds / 60) * 60, calendar: calendar, locale: locale)
     }
 }

@@ -3,8 +3,8 @@ options:
   minimumXcodeGenVersion: 2.44.1
   deploymentTarget:
     macOS: "26.0"
-  developmentLanguage: ja
-  knownRegions: [ja]
+  developmentLanguage: en
+  knownRegions: [en, ja]
 settings:
   base:
     ARCHS: arm64

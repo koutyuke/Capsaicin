@@ -23,7 +23,7 @@ struct HUDContent: Equatable {
     /// 解除後の status にはセッションがないため、指定時刻の表示には解除前のセッションを渡す。
     static func make(
         for event: BlockingEvent, status: BlockingStatus, previousSession: BlockingSession? = nil,
-        now: Date = Date(), calendar: Calendar = .current, bundle: Bundle = .main,
+        now: Date = Date(), calendar: Calendar = .current, locale: Locale = .current, bundle: Bundle = .main,
     ) -> Self? {
         func text(_ key: String) -> String {
             bundle.localizedString(forKey: key, value: nil, table: "HUD")
@@ -33,15 +33,13 @@ struct HUDContent: Equatable {
         case .started, .timeLimitReplaced:
             let detail = status.session?.timeLimit.map { limit in
                 if limit.source == .specifiedTime {
-                    return String(format: text("hud.condition.until"), time(limit.date, calendar: calendar))
+                    return String(format: text("hud.condition.until"),
+                                  DisplayFormat.time(limit.date, calendar: calendar, locale: locale))
                 }
-                let formatter = DateComponentsFormatter()
-                formatter.calendar = calendar
-                formatter.allowedUnits = [.hour, .minute]
-                formatter.unitsStyle = .abbreviated
                 // 開始から HUD を作るまでの遅れで端数の分が切り捨てられ、1分少なく出ないよう分に丸める。
                 let minutes = max(1, (limit.date.timeIntervalSince(now) / 60).rounded())
-                return String(format: text("hud.condition.for"), formatter.string(from: minutes * 60) ?? "")
+                return String(format: text("hud.condition.for"),
+                              DisplayFormat.duration(minutes * 60, calendar: calendar, locale: locale))
             }
             return Self(
                 symbol: "custom.capsaicin.led.fill",
@@ -58,7 +56,8 @@ struct HUDContent: Equatable {
             case .timeLimit(.timer): result.detail = text("hud.reason.timer")
             case .timeLimit(.specifiedTime):
                 result.detail = previousSession?.timeLimit.map {
-                    String(format: text("hud.reason.time"), time($0.date, calendar: calendar))
+                    String(format: text("hud.reason.time"),
+                           DisplayFormat.time($0.date, calendar: calendar, locale: locale))
                 } ?? text("hud.reason.timeReached")
             case .batteryBelowThreshold:
                 result.detail = status.batteryCondition.map {
@@ -83,13 +82,5 @@ struct HUDContent: Equatable {
         case .mechanismsFailed: "hud.reason.applyFailedAtStart"
         case .recordNotSaved: "hud.reason.stateSaveFailedAtStart"
         }
-    }
-
-    private static func time(_ date: Date, calendar: Calendar) -> String {
-        let formatter = DateFormatter()
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        formatter.dateFormat = "H:mm"
-        return formatter.string(from: date)
     }
 }
