@@ -47,7 +47,7 @@ PR を開いたとき、更新したとき、ラベルを変えたときに、Ub
 `release/v*` か `hotfix/*` から `main` への PR で動く。
 
 - **確認用のビルド**: PR を開いたときと更新したときに、`just dist` で Release 構成・ad-hoc 署名の zip を作り、Actions の artifact としてアップロードする。PR には、ダウンロード先を示すコメントを1つだけ置き、更新のたびに書き換える。
-- **公開**: PR がマージされたら、マージのコミットで `just dist` を実行し、zip にビルドの来歴の attestation（`actions/attest-build-provenance`）を付ける。マージした時点の PR の本文をリリースノートにして、タグ `v{MARKETING_VERSION}` の GitHub Release を作り、zip と `SHA256SUMS.txt` を添付してから公開する。版が 1.0.0 未満ならプレリリースにする。
+- **公開**: PR がマージされたら、マージのコミットで `just dist` を実行し、zip にビルドの来歴の attestation（`actions/attest-build-provenance`）を付ける。マージした時点の PR の本文をリリースノートにして、タグ `v{MARKETING_VERSION}` の GitHub Release を作り、zip と `SHA256SUMS.txt` を添付してから公開する。PR に `S-Prerelease` があればプレリリースにする（`DEC-SYS-016`）。
 - マージ前に必須のチェックがベースに追いついた状態で通っているので、公開のときに CI を実行し直さない。
 
 ### 共通
