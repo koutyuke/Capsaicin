@@ -1,6 +1,6 @@
 name: Feature request / 要望
 description: Suggest an idea. English or Japanese is fine. / 機能の要望を伝えます。英語でも日本語でも構いません。
-labels: [enhancement]
+labels: [T-Enhancement]
 body:
   - type: textarea
     id: problem

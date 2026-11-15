@@ -1,6 +1,6 @@
 name: Bug report / 不具合の報告
 description: Report something that does not work as expected. English or Japanese is fine. / 期待どおりに動かないことを報告します。英語でも日本語でも構いません。
-labels: [bug]
+labels: [T-Bug]
 body:
   - type: textarea
     id: what-happened
