@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-010
 title: main だけで開発し、Pull Request を無効にして Issue だけを受け付ける
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SYS-014"]
 requirements: []
 based_on: ["DEC-SYS-009"]
 ---
