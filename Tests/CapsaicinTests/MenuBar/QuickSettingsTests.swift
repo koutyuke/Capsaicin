@@ -63,7 +63,10 @@ struct QuickSettingsTests {
             for choice in SettingsLidCloseChoice.allCases {
                 let entry = try item("menu.sleep.lidClose." + choice.rawValue, in: quick)
                 #expect(entry.state == (choice == .sleep ? .on : .off))
-                #expect(entry.accessibilityLabel() == header.title + "、" + entry.title)
+                #expect(entry.accessibilityLabel() == String(
+                    format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: Bundle(for: MenuBarController.self)),
+                    header.title, entry.title,
+                ))
                 #expect(choices.first { $0.id == entry.identifier?.rawValue }?.command == .lidClose(choice))
             }
         } else {
@@ -113,7 +116,10 @@ struct QuickSettingsTests {
             let warns = candidate == choice && choice != .sleep
             #expect((entry.image != nil) == warns)
             #expect(entry.subtitle == (warns ? model.sleepRows[1].warning : nil))
-            let label = SettingsSection.sleep.text("lidClose.label") + "、" + entry.title
+            let label = String(
+                format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: Bundle(for: MenuBarController.self)),
+                SettingsSection.sleep.text("lidClose.label"), entry.title,
+            )
             #expect(entry.accessibilityLabel() == (warns
                     ? String(
                         format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: MenuBarController.self)),
