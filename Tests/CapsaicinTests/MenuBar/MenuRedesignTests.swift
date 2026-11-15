@@ -33,9 +33,11 @@ struct MenuRedesignTests {
             + Array(repeating: true, count: 7) + [false, true] + (active ? [false, true] : []))
         #expect(submenu.items.allSatisfy { $0.state == .off && $0.view == nil })
         #expect(submenu.items.first?.isSectionHeader == true)
-        #expect(submenu.items.first?.title == "今から")
+        #expect(submenu.items.first?.title
+            == MenuContent.text("menu.header.fromNow", bundle: Bundle(for: MenuBarController.self)))
         if active {
-            #expect(submenu.items.last?.title == "時間指定なし")
+            #expect(submenu.items.last?.title
+                == MenuContent.text("menu.noTimeLimit", bundle: Bundle(for: MenuBarController.self)))
         }
         #expect(controller.menu.items.first?.isSectionHeader == true)
     }

@@ -28,27 +28,27 @@ sources = ["DEC-SYS-003"]
 
 [[requirements]]
 id = "REQ-SYS-003"
-title = "アプリの表示は日本語、CLI の出力は英語"
-kind = "constraint"
-statement = "Capsaicin の画面に表示する文字列は日本語だけで、CLI の出力は英語だけである。"
-reason = "アプリの表示言語の判断は DEC-SYS-002、CLI の出力の言語の判断は DEC-CLI-003 にある。"
+title = "アプリは英語と日本語で表示し、時刻は OS の設定に従う"
+kind = "functional"
+statement = "アプリの画面に表示する文字列は英語と日本語で用意し、macOS の言語の設定に従ってどちらかを表示する。どちらでもない言語の設定では英語を表示する。画面の時刻は OS の地域と時刻の設定に従う。CLI の出力は英語だけである。"
+reason = "アプリの表示言語と時刻の表記の判断は DEC-SYS-017、CLI の出力の言語の判断は DEC-CLI-003 にある。"
 priority = "must"
 status = "accepted"
-specs = []
+specs = ["SPEC-UI-011", "SPEC-UI-012"]
 depends_on = []
-sources = ["DEC-SYS-002", "DEC-CLI-003"]
+sources = ["DEC-SYS-017", "DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-SYS-004"
 title = "あとから言語を追加できる"
 kind = "quality"
-statement = "アプリの画面に表示する文字列は String Catalog で管理し、あとから言語を追加できる。CLI の出力は対象外とする。"
+statement = "アプリの画面に表示する文字列は String Catalog で管理し、開発言語は英語とする。あとから言語を追加できる。CLI の出力は対象外とする。"
 reason = "将来ほかの言語の利用者に配る場合に備えるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-UI-011"]
 depends_on = []
-sources = ["DEC-SYS-002", "DEC-SYS-007", "DEC-CLI-003"]
+sources = ["DEC-SYS-017", "DEC-SYS-007", "DEC-CLI-003"]
 
 [[requirements]]
 id = "REQ-SYS-005"

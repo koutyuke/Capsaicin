@@ -114,7 +114,7 @@ struct StartPanelView: View {
                     Text(input.releaseDate(now: context.date, calendar: .current).map {
                         String(
                             format: MenuContent.text("panel.duration.until"),
-                            MenuContent.time($0, calendar: .current),
+                            DisplayFormat.time($0),
                         )
                     } ?? "")
                         .foregroundStyle(.secondary).monospacedDigit()

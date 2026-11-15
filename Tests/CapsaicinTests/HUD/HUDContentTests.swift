@@ -2,8 +2,6 @@ import CapsaicinCore
 import Foundation
 import Testing
 
-private final class HUDCatalogLocator: NSObject {}
-
 struct HUDContentTests {
     private var status: BlockingStatus {
         BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false)
@@ -19,11 +17,11 @@ struct HUDContentTests {
     private func content(
         _ event: BlockingEvent, status: BlockingStatus? = nil, previousSession: BlockingSession? = nil,
     ) throws -> HUDContent {
-        let products = Bundle(for: HUDCatalogLocator.self).bundleURL.deletingLastPathComponent()
-        let bundle = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))
+        let bundle = try localizedAppBundle("ja")
         return try #require(HUDContent.make(
             for: event, status: status ?? self.status, previousSession: previousSession,
-            now: Date(timeIntervalSince1970: 0), calendar: calendar, bundle: bundle,
+            now: Date(timeIntervalSince1970: 0), calendar: calendar, locale: Locale(identifier: "ja_JP"),
+            bundle: bundle,
         ))
     }
 

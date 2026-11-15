@@ -85,9 +85,10 @@ struct SettingsSleepRow: Identifiable {
             {
                 warnings.append("brightnessUnavailable")
             }
-            row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.joined(separator: "、")
-            row.warning = warnings.map { SettingsSection.sleep.text($0) }.joined()
-            row.help = row.warning + SettingsSection.sleep.text(row.key + ".help")
+            row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and))
+            let warningTexts = warnings.map { SettingsSection.sleep.text($0) }
+            row.warning = warningTexts.joined(separator: "\n")
+            row.help = (warningTexts + [SettingsSection.sleep.text(row.key + ".help")]).joined(separator: "\n")
             return row
         }
     }

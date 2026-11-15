@@ -24,7 +24,7 @@ Capsaicin は、Mac のスリープを止めている間だけ Caps Lock の LED
 v1 では次のものを扱わない。
 
 - Mac App Store での公開、有料販売、ライセンス認証、公証、自動アップデート（公証しない理由は `DEC-SYS-004`）
-- 英語の UI（`DEC-SYS-002`）、Intel Mac と macOS 25 以前（`DEC-SYS-003`）
+- Intel Mac と macOS 25 以前（`DEC-SYS-003`）
 - Caps Lock キーによる抑止の切り替え（`DEC-KEY-001`）
 - 手動スリープとディスプレイを閉じたときのスリープの片方だけを止めること（`DEC-BLK-006`）
 - 温度による自動解除
