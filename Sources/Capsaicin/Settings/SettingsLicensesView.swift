@@ -5,11 +5,14 @@ struct SettingsLicensesView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(spacing: 0) {
             Text(bundle.localizedString(forKey: "licenses.label", value: nil, table: "SettingsAbout"))
-                .font(.headline).accessibilityAddTraits(.isHeader)
-                .padding([.top, .horizontal], 20)
-            licenses
+                .font(.title3).fontWeight(.semibold).accessibilityAddTraits(.isHeader)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24).padding(.top, 20).padding(.bottom, 12)
+            Divider()
+            ScrollView { licenses }
+            Divider()
             HStack {
                 Spacer()
                 Button(bundle.localizedString(forKey: "licenses.done", value: nil, table: "SettingsAbout")) {
@@ -17,9 +20,10 @@ struct SettingsLicensesView: View {
                 }
                 .buttonStyle(.bordered).keyboardShortcut(.defaultAction)
             }
-            .padding([.horizontal, .bottom], 20)
+            .padding(.horizontal, 24).padding(.vertical, 16)
         }
-        .frame(width: 560, height: 420)
+        // 原文は 80 字前後で改行してあるので、折り返さずに読める幅にする。設定ウインドウの幅 720 pt に収める。
+        .frame(width: 680, height: 440)
         .background {
             // 本文にフォーカスがなくても Esc で閉じられるよう、Return とは別に登録する。
             Button("") { dismiss() }.keyboardShortcut(.cancelAction).hidden().accessibilityHidden(true)
@@ -27,33 +31,27 @@ struct SettingsLicensesView: View {
     }
 
     private var licenses: some View {
-        Form {
+        VStack(alignment: .leading, spacing: 32) {
             ForEach(SettingsLicense.allCases, id: \.self) { license in
-                Section {
-                    VStack(alignment: .leading, spacing: 12) {
-                        if let source = license.source {
-                            Text(verbatim: source).textSelection(.enabled)
-                        }
-                        switch Result(catching: { try license.text(in: bundle) }) {
-                        case let .success(text):
-                            Text(verbatim: text).textSelection(.enabled)
-                                .fixedSize(horizontal: false, vertical: true)
-                        case .failure:
-                            Text(bundle.localizedString(
-                                forKey: "licenses.unavailable",
-                                value: nil,
-                                table: "SettingsAbout",
-                            ))
-                        }
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(verbatim: license.rawValue).font(.headline).accessibilityAddTraits(.isHeader)
+                    if let source = license.source {
+                        Text(verbatim: source).font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
                     }
-                    .font(.callout).foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                } header: {
-                    Text(verbatim: license.rawValue)
+                    switch Result(catching: { try license.text(in: bundle) }) {
+                    case let .success(text):
+                        Text(verbatim: text).font(.callout).textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 4)
+                    case .failure:
+                        Text(bundle.localizedString(forKey: "licenses.unavailable", value: nil, table: "SettingsAbout"))
+                            .font(.callout).foregroundStyle(.secondary)
+                    }
                 }
             }
         }
-        .formStyle(.grouped)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(24)
     }
 }
 
