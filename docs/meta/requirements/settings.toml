@@ -73,3 +73,15 @@ status = "accepted"
 specs = ["SPEC-SET-006", "SPEC-BLK-012"]
 depends_on = []
 sources = ["DEC-BLK-006", "HYP-SET-001", "HYP-SET-002"]
+
+[[requirements]]
+id = "REQ-SET-007"
+title = "アプリからリポジトリと同梱するコードのライセンスを開ける"
+kind = "functional"
+statement = "利用者は、アプリの中からリポジトリを開き、Capsaicin と同梱するコードのライセンスの全文を読める。"
+reason = "ソースの公開先と、利用するコードの条件をアプリから確かめられるようにするため。"
+priority = "should"
+status = "accepted"
+specs = ["SPEC-SET-004", "SPEC-SET-008"]
+depends_on = []
+sources = ["DEC-SYS-019", "DEC-UI-014"]
