@@ -25,7 +25,10 @@ struct AboutResourcesTests {
             #expect(SettingsLicense.reflowed(text).split(whereSeparator: \.isWhitespace)
                 == text.split(whereSeparator: \.isWhitespace))
         }
-        #expect(SettingsLicense.sparkle.source?.contains("2.10.1") == true)
+        // 表示する版は、組み込んだ Sparkle から読み、project.yml で固定した版と一致する。
+        let project = try String(contentsOf: root.appending(path: "project.yml"), encoding: .utf8)
+        let pinned = try #require(project.firstMatch(of: /Sparkle:\n.*\n\s+exactVersion: (\S+)/)?.1)
+        #expect(SettingsLicense.sparkle.source?.hasPrefix("Sparkle \(pinned)\n") == true)
         #expect(SettingsLicense.sparkle.source?.contains("https://github.com/sparkle-project/Sparkle") == true)
     }
 

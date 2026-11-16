@@ -1,3 +1,4 @@
+import Sparkle
 import SwiftUI
 
 struct SettingsLicensesView: View {
@@ -64,7 +65,9 @@ enum SettingsLicense: String, CaseIterable {
     case capsaicin = "Capsaicin", keyboardShortcuts = "KeyboardShortcuts", sparkle = "Sparkle"
 
     var source: String? {
-        self == .sparkle ? "Sparkle 2.10.1\nhttps://github.com/sparkle-project/Sparkle" : nil
+        guard self == .sparkle else { return nil }
+        let version = Bundle(for: SPUUpdater.self).object(forInfoDictionaryKey: "CFBundleShortVersionString")
+        return "Sparkle \(version as? String ?? "")\nhttps://github.com/sparkle-project/Sparkle"
     }
 
     func text(in bundle: Bundle) throws -> String {

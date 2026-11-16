@@ -164,6 +164,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
             item.image?.isTemplate = true
         }
+        if #available(macOS 27, *) {
+            // macOS 27 は既定でメニューの画像を隠すので、警告と更新の知らせのアイコンは常に表示する。
+            item.preferredImageVisibility = item.image == nil ? .automatic : .visible
+        }
     }
 
     @objc private func performCommand(_ sender: NSMenuItem) {
