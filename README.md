@@ -143,4 +143,4 @@ Bug reports and feature requests are welcome in [Issues](https://github.com/kout
 
 Copyright 2026 koutyuke
 
-Licensed under the [MIT License](./LICENSE). Third-party notices are listed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
+Licensed under the [MIT License](./LICENSE).

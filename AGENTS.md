@@ -18,7 +18,7 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 
 ## 破ってはいけないもの
 
-1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。`scripts/manual/` はアプリの起動とプロセスの停止を行うオーナー専用の補助なので、エージェントは実行しない。
+1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。justfile の `manual` グループのレシピ（`start`、`stop`、`restart`、`status`）はアプリの起動とプロセスの停止を行うオーナー専用の操作なので、エージェントは実行しない。
 2. **Caps Lock の入力状態を変えない。** LED の表示だけを扱う。
 3. **root で動くコードを増やさない。** ヘルパーが受け付けるのは決められたサブコマンドだけにする。ヘルパーにシェル、任意のパス、任意の環境変数を通さない。
 4. **本番コードに `REQ-*` と `SPEC-*` を書かない。** 仕様との対応はテスト名が持つ。
@@ -29,6 +29,8 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 Apple Silicon の Mac、macOS 26 以上、Xcode 27.2（Swift 6.4）、flakes が有効な Nix を前提とする。`/usr/bin/xcode-select -p` が Xcode の Developer ディレクトリを指すことを確認する。プロジェクトから Xcode の選択やシステム設定は変更しない。
 
 `nix develop` で devShell に入る。エージェントはシェルの状態に依存しないよう、リポジトリのルートから `nix develop --command just …` の形で実行する。`.envrc` は `use flake` だけを持つ。direnv は devShell に含めない。自動適用したい利用者が開発機に別途用意し、`direnv allow` を判断する。エージェントは実行しない。
+
+just のレシピと `scripts/` のスクリプトが出すメッセージは英語で、コメントと docstring は日本語で書く。
 
 Nix は以下のツールを `flake.lock` で固定して供給する。Swift コンパイラーと macOS SDK は Nix から入れず、ホストの `/usr/bin/xcrun` と `/usr/bin/xcodebuild` を使う。devShell は `mkShellNoCC` とし、`DEVELOPER_DIR` と `SDKROOT` は設定しない。SwiftLint に必要な Xcode のツールチェーン指定は、その呼び出しにだけ渡す。
 
@@ -53,12 +55,11 @@ CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どち�
 
 ## エージェントのスキル
 
-スキルの実体は `.agents/skills/` に置き、Claude Code が読む `.claude/skills/` からは相対パスの symlink を張る。実体、symlink、`skills-lock.json` はすべてコミットする。`skills-lock.json` は取得元のコミットを固定しておらず、lock から復元すると取得元の最新が入る。そのため実体をリポジトリに持ち、変更を差分でレビューできるようにする。未追跡のファイルは新しい worktree に入らないので、コミットしておけば委譲先の worktree でも同じスキルを使える。
+Git で追跡するスキルは、このリポジトリの手順に依存する `capsaicin-release` だけとする。実体は `.agents/skills/` に置き、Claude Code が読む `.claude/skills/` からは相対パスの symlink を張る。他のファイルと同じく直接編集してレビューする。
 
-- 外部のスキル（`skills-lock.json` に載っているもの）は `bunx skills add <source>` で入れ、`bunx skills update` で更新する。手では編集しない。手で直しても次の更新で上書きされる。
-- 追加と更新は PM が判断する。更新したら差分を読み、意図しない指示が混ざっていないことを確かめてからコミットする。
-- 自作のスキル（`skills-lock.json` に載っていないもの）は `bunx skills update` の対象外なので、他のファイルと同じく直接編集してレビューする。
-- `.agents/skills/` は自動整形と Markdown lint の対象から除く。外部のスキルを整形すると、取得元との差分が更新のたびに生じるためである。自作のスキルの品質はレビューで確かめる。
+それ以外のスキルは各自の好みで入れるものなので追跡しない。`.gitignore` が `.agents/skills/` と `.claude/skills/` の下の `capsaicin-release` 以外と、`skills-lock.json` を除外する。未追跡のファイルは新しい worktree に入らないので、委譲先の worktree でも使いたいスキルはユーザー単位の場所に置く。
+
+`.agents/skills/` は自動整形と Markdown lint の対象から除く。手元にある未追跡のスキルを整形しないためである。`capsaicin-release` の品質はレビューで確かめる。
 
 ## 検証
 
@@ -68,6 +69,10 @@ CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どち�
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
 | `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
+| `status`           | オーナー専用。Debug ジョブ・plist とこのチェックアウトの対応、全 Debug プロセス、スリープの状態を読む                                               |
+| `stop`             | オーナー専用。すべてのチェックアウトの Debug アプリを終了する                                                                                       |
+| `start`            | オーナー専用。Debug アプリが動いていないことを確かめ、ジョブを外してこのチェックアウトのビルドを開く                                                |
+| `restart`          | オーナー専用。ビルドに成功してから `stop`、`start` の順に実行する                                                                                   |
 | `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
 | `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
 | `prepare-release`  | `develop`（`patch` なら `hotfix/*`）から、版を上げたリリース用のコミットを手元に作り、材料を `.build/release/` に書き出す。push はしない            |

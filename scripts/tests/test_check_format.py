@@ -1,9 +1,11 @@
 """整形検査が入力を変更せず、formatter の失敗をそのまま返すことを確かめる。"""
 
+import io
 import shutil
 import subprocess
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -83,6 +85,8 @@ class CheckFormatTests(unittest.TestCase):
                         % state
                     )
                     with (
+                        redirect_stderr(io.StringIO()) as stderr,
+                        redirect_stdout(io.StringIO()) as stdout,
                         patch(
                             "scripts.check_format.subprocess.check_output",
                             return_value=files,
@@ -93,6 +97,15 @@ class CheckFormatTests(unittest.TestCase):
                         ),
                     ):
                         self.assertEqual(check_format(root), expected)
+                    self.assertEqual(stdout.getvalue(), "")
+                    self.assertEqual(
+                        stderr.getvalue(),
+                        "Stale String Catalog keys found; set extractionState to manual "
+                        "for keys looked up dynamically, or remove unused keys.\n"
+                        "  Sample.xcstrings: key\n"
+                        if state == "stale"
+                        else "",
+                    )
 
 
 if __name__ == "__main__":
