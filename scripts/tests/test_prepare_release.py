@@ -138,6 +138,10 @@ class ReleaseFlowTests(unittest.TestCase):
         result = self.prepare()
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout, "Version: 0.4.0\nMaterials: .build/release/v0.4.0.json\n"
+        )
+        self.assertEqual(result.stderr, "")
         self.assertEqual(self.git("branch", "--show-current"), "release/v0.4.0")
         self.assertEqual(self.git("log", "-1", "--format=%s"), "Release v0.4.0")
         self.assertEqual(
@@ -163,6 +167,10 @@ class ReleaseFlowTests(unittest.TestCase):
         result = self.prepare("patch")
 
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout, "Version: 0.3.1\nMaterials: .build/release/v0.3.1.json\n"
+        )
+        self.assertEqual(result.stderr, "")
         self.assertEqual(self.git("branch", "--show-current"), "hotfix/crash")
         self.assertEqual(self.git("log", "-1", "--format=%s"), "Release v0.3.1")
         material = self.read_material("0.3.1")
@@ -170,6 +178,19 @@ class ReleaseFlowTests(unittest.TestCase):
         self.assertEqual(material["pull_requests"], [])
         self.assertEqual(material["commits"][0]["subject"], "Fix crash")
         self.assertEqual(len(material["commits"][0]["sha"]), 40)
+
+    def test_dirty_worktree_reports_error_and_hint(self):
+        (self.repo / "project.yml").write_text(PROJECT + "# dirty\n", encoding="utf-8")
+
+        result = self.prepare()
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr,
+            "error: The working tree has changes.\n"
+            "hint: Commit or stash the changes, then try again.\n",
+        )
 
 
 if __name__ == "__main__":

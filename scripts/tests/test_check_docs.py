@@ -106,18 +106,18 @@ class CheckDocsTests(unittest.TestCase):
         ]:
             with self.subTest(text=text):
                 self.write("meta/tasks/TASK-001-sample.md", text)
-                self.assert_error("schema がない、または不明")
+                self.assert_error("Missing or unknown schema")
 
     def test_missing_toml_schema(self):
         self.write(
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace('schema = "requirement-set"\n', ""),
         )
-        self.assert_error("schema がない、または不明")
+        self.assert_error("Missing or unknown schema")
 
     def test_misplaced_record_without_schema_is_not_silently_skipped(self):
         self.write("TASK-002-misplaced.md", "# schema なし")
-        self.assert_error("TASK-002-misplaced.md: schema がない、または不明")
+        self.assert_error("TASK-002-misplaced.md: Missing or unknown schema")
 
     def test_schema_placement_and_extension(self):
         for name in [
@@ -127,19 +127,19 @@ class CheckDocsTests(unittest.TestCase):
         ]:
             with self.subTest(name=name):
                 self.write(name, SPECIFICATION)
-                self.assert_error("schema と置き場所が不一致")
+                self.assert_error("Schema and location do not match")
 
     def test_missing_required_fields(self):
         self.record("task")
         self.write(
             "meta/tasks/TASK-001-sample.md", "---\nschema: task\nid: TASK-001\n---\n"
         )
-        self.assert_error("必須項目がない: title")
-        self.assert_error("必須項目がない: depends_on")
+        self.assert_error("Missing required field: title")
+        self.assert_error("Missing required field: depends_on")
         self.write(
             "meta/requirements/menu.toml", REQUIREMENTS.replace('reason = "理由"\n', "")
         )
-        self.assert_error("必須項目がない: reason")
+        self.assert_error("Missing required field: reason")
 
     def test_id_formats_prefixes_domains_and_filenames(self):
         for identifier in [
@@ -155,21 +155,21 @@ class CheckDocsTests(unittest.TestCase):
         self.record("task", id="TASK-001")
         path = self.root / "meta/tasks/TASK-001-sample.md"
         path.rename(path.with_name("TASK-001.md"))
-        self.assert_error("ファイル名と id")
+        self.assert_error("Filename and id do not match")
 
     def test_duplicate_record_and_requirement_ids(self):
         path = self.record("task")
         self.write("meta/tasks/TASK-001-other.md", path.read_text())
-        self.assert_error("ID が重複: TASK-001")
+        self.assert_error("Duplicate ID: TASK-001")
         self.write("meta/requirements/other.toml", REQUIREMENTS)
-        self.assert_error("ID が重複: REQ-MENU-001")
+        self.assert_error("Duplicate ID: REQ-MENU-001")
 
     def test_duplicate_specification_ids(self):
         self.write(
             "specs/menu.md",
             SPECIFICATION + "\n## SPEC-MENU-001 再定義\n\n関連要件: REQ-MENU-001\n",
         )
-        self.assert_error("ID が重複: SPEC-MENU-001")
+        self.assert_error("Duplicate ID: SPEC-MENU-001")
 
     def test_all_reference_fields_and_types(self):
         fields = [
@@ -183,10 +183,10 @@ class CheckDocsTests(unittest.TestCase):
             "superseded_by",
         ]
         cases = [
-            (["TASK-999"], "参照先の ID が存在しない"),
-            (["TASK-1"], "ID の形式が不正"),
-            ("TASK-001", "ID の配列"),
-            ([None], "ID の配列"),
+            (["TASK-999"], "Referenced ID does not exist"),
+            (["TASK-1"], "Invalid ID format"),
+            ("TASK-001", "must be an array of IDs"),
+            ([None], "must be an array of IDs"),
         ]
         for field in fields:
             for value, expected in cases:
@@ -196,10 +196,10 @@ class CheckDocsTests(unittest.TestCase):
 
     def test_requirement_reference_fields(self):
         cases = [
-            ('["REQ-MENU-999"]', "参照先の ID が存在しない"),
-            ('["TASK-1"]', "ID の形式が不正"),
-            ('"TASK-001"', "ID の配列"),
-            ("[1]", "ID の配列"),
+            ('["REQ-MENU-999"]', "Referenced ID does not exist"),
+            ('["TASK-1"]', "Invalid ID format"),
+            ('"TASK-001"', "must be an array of IDs"),
+            ("[1]", "must be an array of IDs"),
         ]
         for field in ["specs", "sources", "depends_on"]:
             for value, expected in cases:
@@ -216,56 +216,58 @@ class CheckDocsTests(unittest.TestCase):
         self.write(
             path.relative_to(self.root), path.read_text() + "参照: `DEC-MENU-999`。\n"
         )
-        self.assert_error("参照先の ID が存在しない: DEC-MENU-999")
+        self.assert_error("Referenced ID does not exist: DEC-MENU-999")
 
     def test_requirement_to_specification_consistency(self):
         self.write(
             "specs/menu.md", SPECIFICATION.replace("REQ-MENU-001", "REQ-MENU-002")
         )
-        self.assert_error("双方向不一致: REQ-MENU-001.specs")
+        self.assert_error("Bidirectional mismatch: REQ-MENU-001.specs")
 
     def test_specification_to_requirement_consistency(self):
         self.write(
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace('["SPEC-MENU-001"]', "[]"),
         )
-        self.assert_error("双方向不一致: SPEC-MENU-001")
+        self.assert_error("Bidirectional mismatch: SPEC-MENU-001")
 
     def test_related_requirements_must_be_at_start(self):
         self.write(
             "specs/menu.md", SPECIFICATION.replace("関連要件:", "説明。\n\n関連要件:")
         )
-        self.assert_error("節の先頭に 関連要件:")
+        self.assert_error("Section does not start with '関連要件:'")
 
     def test_specification_document_id_and_domain(self):
         self.write(
             "specs/menu.md",
             SPECIFICATION.replace("domain: MENU", "domain: BLK\nid: SPEC-MENU-999"),
         )
-        self.assert_error("文書自体は id を持たない")
-        self.assert_error("ID の種別または領域が不一致")
+        self.assert_error("Specification documents must not have an id")
+        self.assert_error("ID kind or domain does not match")
 
     def test_requirement_domain_and_reference_kinds(self):
         text = REQUIREMENTS.replace('domain_code = "MENU"', 'domain_code = "BLK"')
         text = text.replace('specs = ["SPEC-MENU-001"]', 'specs = ["REQ-MENU-001"]')
         self.write("meta/requirements/menu.toml", text)
-        self.assert_error("ID の種別または領域が不一致")
-        self.assert_error("specs の ID の種別が不正")
+        self.assert_error("ID kind or domain does not match")
+        self.assert_error("Invalid ID kind in specs")
 
     def test_requirement_file_domain_and_code_must_match(self):
         self.write(
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace('domain = "menu"', 'domain = "blocking"'),
         )
-        self.assert_error("要件のファイル名・domain・domain_code が不一致")
+        self.assert_error("Requirement filename, domain, and domain_code do not match")
         self.write(
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace('domain_code = "MENU"', 'domain_code = "BLK"'),
         )
-        self.assert_error("要件のファイル名・domain・domain_code が不一致")
+        self.assert_error("Requirement filename, domain, and domain_code do not match")
         self.write("meta/requirements/menu.toml", REQUIREMENTS)
         self.write("meta/requirements/wrong.toml", REQUIREMENTS)
-        self.assert_error("wrong.toml: 要件のファイル名・domain・domain_code が不一致")
+        self.assert_error(
+            "wrong.toml: Requirement filename, domain, and domain_code do not match"
+        )
 
     def test_all_domain_file_names(self):
         for code, name in DOMAIN_FILES.items():
@@ -279,7 +281,7 @@ class CheckDocsTests(unittest.TestCase):
 
     def test_specification_filename_must_match_domain(self):
         self.write("specs/wrong.md", SPECIFICATION)
-        self.assert_error("wrong.md: 仕様のファイル名と domain が不一致")
+        self.assert_error("wrong.md: Specification filename and domain do not match")
 
     def test_specification_headings_in_fenced_examples_are_ignored(self):
         for opening, closing in [
@@ -306,15 +308,15 @@ class CheckDocsTests(unittest.TestCase):
         ]:
             with self.subTest(field=field):
                 self.record("task", **{field: ["REQ-MENU-001"]})
-                self.assert_error(f"{field} の ID の種別が不正")
+                self.assert_error(f"Invalid ID kind in {field}")
         self.record("task")
         self.record("plan", depends_on=["TASK-001"])
-        self.assert_error("depends_on の ID の種別が不正")
+        self.assert_error("Invalid ID kind in depends_on")
         self.write(
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace("sources = []", 'sources = ["REQ-MENU-001"]'),
         )
-        self.assert_error("sources の ID の種別が不正")
+        self.assert_error("Invalid ID kind in sources")
 
     def test_only_constraints_may_have_no_specs(self):
         text = REQUIREMENTS.replace('specs = ["SPEC-MENU-001"]', "specs = []")
@@ -325,7 +327,7 @@ class CheckDocsTests(unittest.TestCase):
                 "meta/requirements/menu.toml",
                 text.replace('kind = "functional"', f'kind = "{kind}"'),
             )
-            self.assert_error("constraint 以外の要件に仕様がない")
+            self.assert_error("Non-constraint requirement has no specifications")
         self.write(
             "meta/requirements/menu.toml",
             text.replace('kind = "functional"', 'kind = "constraint"'),
@@ -337,12 +339,12 @@ class CheckDocsTests(unittest.TestCase):
             "meta/requirements/menu.toml",
             REQUIREMENTS.replace('reason = "理由"', 'reason = "DEC-MENU-999 を参照"'),
         )
-        self.assert_error("参照先の ID が存在しない: DEC-MENU-999")
+        self.assert_error("Referenced ID does not exist: DEC-MENU-999")
 
     def test_invalid_enums_including_non_scalar_values(self):
         for schema in STATUSES:
             self.record(schema, status=["bad"])
-            self.assert_error("status の許可値ではない")
+            self.assert_error("Invalid value for status")
             self.record(schema)
         for field in ["kind", "priority", "status"]:
             original = {"kind": "functional", "priority": "must", "status": "accepted"}[
@@ -350,7 +352,7 @@ class CheckDocsTests(unittest.TestCase):
             ]
             text = REQUIREMENTS.replace(f'{field} = "{original}"', f'{field} = "bad"')
             self.write("meta/requirements/menu.toml", text)
-            self.assert_error(f"{field} の許可値ではない")
+            self.assert_error(f"Invalid value for {field}")
 
     def test_invalid_yaml_toml_and_containers(self):
         for text in [
@@ -362,10 +364,10 @@ class CheckDocsTests(unittest.TestCase):
             self.write("meta/tasks/TASK-001-sample.md", text)
             self.assertTrue(check_docs(self.root))
         self.write("meta/requirements/menu.toml", "schema = [")
-        self.assert_error("構文を読み取れない")
+        self.assert_error("Cannot parse document")
         text = 'schema = "requirement-set"\ndomain = "menu"\ndomain_code = "MENU"\nrequirements = "not a list"\n'
         self.write("meta/requirements/menu.toml", text)
-        self.assert_error("[[requirements]] の配列")
+        self.assert_error("must be an array of [[requirements]] tables")
 
     def test_templates_and_unmanaged_documents_are_excluded(self):
         self.write("meta/tasks/task.tpl.md", "invalid yaml: [")
@@ -376,24 +378,52 @@ class CheckDocsTests(unittest.TestCase):
 
     def test_product_body_references_are_checked(self):
         self.write("product/overview.md", "参照: `REQ-MENU-999`。")
-        self.assert_error("参照先の ID が存在しない: REQ-MENU-999")
+        self.assert_error("Referenced ID does not exist: REQ-MENU-999")
 
     def test_root_readme_body_references_are_checked(self):
         self.write("README.md", "参照: `REQ-MENU-999`。")
-        self.assert_error("README.md: 参照先の ID が存在しない: REQ-MENU-999")
+        self.assert_error("README.md: Referenced ID does not exist: REQ-MENU-999")
 
     def test_cli_exit_codes_and_missing_root(self):
         script = Path(__file__).resolve().parents[1] / "check_docs.py"
         result = subprocess.run(
-            [sys.executable, str(script), str(self.root)], capture_output=True
+            [sys.executable, str(script), str(self.root)],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "Docs check passed.\n")
+        self.assertEqual(result.stderr, "")
         self.record("task", status="bad")
         result = subprocess.run(
-            [sys.executable, str(script), str(self.root)], capture_output=True
+            [sys.executable, str(script), str(self.root)],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result.returncode, 1)
-        self.assertIn("文書ディレクトリがない", check_docs(self.root / "missing")[0])
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr,
+            "Docs check failed: 1 error.\n"
+            "  meta/tasks/TASK-001-sample.md: Invalid value for status: 'bad'.\n",
+        )
+        self.record("hypothesis", status="bad")
+        result = subprocess.run(
+            [sys.executable, str(script), str(self.root)],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(
+            result.stderr,
+            "Docs check failed: 2 errors.\n"
+            "  meta/hypotheses/HYP-MENU-001-sample.md: Invalid value for status: 'bad'.\n"
+            "  meta/tasks/TASK-001-sample.md: Invalid value for status: 'bad'.\n",
+        )
+        self.assertIn(
+            "Docs directory does not exist", check_docs(self.root / "missing")[0]
+        )
 
 
 if __name__ == "__main__":

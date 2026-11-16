@@ -30,6 +30,8 @@ Apple Silicon の Mac、macOS 26 以上、Xcode 27.2（Swift 6.4）、flakes が
 
 `nix develop` で devShell に入る。エージェントはシェルの状態に依存しないよう、リポジトリのルートから `nix develop --command just …` の形で実行する。`.envrc` は `use flake` だけを持つ。direnv は devShell に含めない。自動適用したい利用者が開発機に別途用意し、`direnv allow` を判断する。エージェントは実行しない。
 
+just のレシピと `scripts/` のスクリプトが出すメッセージは英語で、コメントと docstring は日本語で書く。
+
 Nix は以下のツールを `flake.lock` で固定して供給する。Swift コンパイラーと macOS SDK は Nix から入れず、ホストの `/usr/bin/xcrun` と `/usr/bin/xcodebuild` を使う。devShell は `mkShellNoCC` とし、`DEVELOPER_DIR` と `SDKROOT` は設定しない。SwiftLint に必要な Xcode のツールチェーン指定は、その呼び出しにだけ渡す。
 
 | ツール                                 | 用途                                                                |

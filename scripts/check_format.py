@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -21,11 +22,11 @@ def check_format(root):
     stale = stale_strings(root, [Path(os.fsdecode(name)) for name in names])
     if stale:
         print(
-            "Xcode がコードから見つけられないキーがある。"
-            "コードから動的に引くキーなら extractionState を manual にし、"
-            "使っていないキーなら消す:"
+            "Stale String Catalog keys found; set extractionState to manual "
+            "for keys looked up dynamically, or remove unused keys.",
+            file=sys.stderr,
         )
-        print("\n".join(stale))
+        print("\n".join(f"  {key}" for key in stale), file=sys.stderr)
     (root / ".build").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(
         prefix="fmt-check-", dir=root / ".build"
