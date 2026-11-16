@@ -46,6 +46,7 @@ Debug ビルドは、すべての worktree で bundle ID と LaunchAgent を共�
 - `start` のジョブの取り外しは、plist を消さない一時的な操作である。オーナーだけが実行する。
 - shellcheck は justfile のレシピを検査しないので、レシピは小さく保つ。
 - 手順書のリテラルは、bundle ID やヘルパーの配置先を変えたら合わせて直す。
+- `start` と `status` は、`launchctl print` の出力にある `program =` の行でジョブが動かす実行ファイルを読む。オーナーがコミット `df8a905` の状態で4つのレシピを実機で実行し、問題がないことを確かめた。
 
 ## 覆す条件
 
