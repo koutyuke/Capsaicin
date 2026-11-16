@@ -11,7 +11,7 @@ struct SettingsLicensesView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24).padding(.top, 20).padding(.bottom, 12)
             Divider()
-            ScrollView { licenses }
+            licenses
             Divider()
             HStack {
                 Spacer()
@@ -31,27 +31,33 @@ struct SettingsLicensesView: View {
     }
 
     private var licenses: some View {
-        VStack(alignment: .leading, spacing: 32) {
+        Form {
             ForEach(SettingsLicense.allCases, id: \.self) { license in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(verbatim: license.rawValue).font(.headline).accessibilityAddTraits(.isHeader)
-                    if let source = license.source {
-                        Text(verbatim: source).font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if let source = license.source {
+                            Text(verbatim: source).foregroundStyle(.secondary).textSelection(.enabled)
+                        }
+                        switch Result(catching: { try license.text(in: bundle) }) {
+                        case let .success(text):
+                            Text(verbatim: text).textSelection(.enabled)
+                                .fixedSize(horizontal: false, vertical: true)
+                        case .failure:
+                            Text(bundle.localizedString(
+                                forKey: "licenses.unavailable", value: nil, table: "SettingsAbout",
+                            ))
+                            .foregroundStyle(.secondary)
+                        }
                     }
-                    switch Result(catching: { try license.text(in: bundle) }) {
-                    case let .success(text):
-                        Text(verbatim: text).font(.callout).textSelection(.enabled)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 4)
-                    case .failure:
-                        Text(bundle.localizedString(forKey: "licenses.unavailable", value: nil, table: "SettingsAbout"))
-                            .font(.callout).foregroundStyle(.secondary)
-                    }
+                    .font(.callout)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
+                } header: {
+                    Text(verbatim: license.rawValue)
                 }
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
+        .formStyle(.grouped)
     }
 }
 
