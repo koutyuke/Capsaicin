@@ -35,10 +35,12 @@ struct AboutResourcesTests {
                     "softwareUpdate.neverChecked", "softwareUpdate.available", "softwareUpdate.readyToInstall",
                     "softwareUpdate.check.button", "softwareUpdate.check.a11y", "softwareUpdate.update.button",
                     "softwareUpdate.update.a11y", "links.group.title", "website.label", "website.a11y",
-                    "licenses.label"]
+                    "licenses.label", "licenses.done"]
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsAbout") != key)
         }
+        #expect(bundle.localizedString(forKey: "licenses.done", value: nil, table: "SettingsAbout")
+            == (language == "en" ? "Done" : "完了"))
         for key in ["menu.update.available", "menu.update.available.subtitle"] {
             #expect(MenuContent.text(key, bundle: bundle) != key)
         }

@@ -38,33 +38,27 @@ struct SettingsView: View {
             .navigationSplitViewColumnWidth(200)
             .toolbar(removing: .sidebarToggle)
         } detail: {
-            NavigationStack(path: $selection.path) {
-                Form {
-                    switch selection.section {
-                    case .general: general
-                    case .sleep: sleep
-                    case .led: led
-                    case .controls: controls
-                    case .helper: helper
-                    case .about:
-                        SettingsAboutContent(updater: model.app.updater, quit: quit, bundle: bundle)
+            Form {
+                switch selection.section {
+                case .general: general
+                case .sleep: sleep
+                case .led: led
+                case .controls: controls
+                case .helper: helper
+                case .about:
+                    SettingsAboutContent(updater: model.app.updater, quit: quit, bundle: bundle)
+                }
+            }.formStyle(.grouped).toggleStyle(.switch)
+                // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
+                .contentMargins(.top, -8, for: .scrollContent)
+                // About の下端はフッターで決めるため、Form 既定の下余白 20 pt を相殺する。
+                .contentMargins(.bottom, selection.section == .about ? -20 : 0, for: .scrollContent)
+                .navigationTitle(selection.section.title)
+                .onChange(of: selection.section, initial: true) {
+                    if selection.section == .about {
+                        model.app.updater.refresh()
                     }
-                }.formStyle(.grouped).toggleStyle(.switch)
-                    // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
-                    .contentMargins(.top, -8, for: .scrollContent)
-                    // About の下端はフッターで決めるため、Form 既定の下余白 20 pt を相殺する。
-                    .contentMargins(.bottom, selection.section == .about ? -20 : 0, for: .scrollContent)
-                    .navigationTitle(selection.section.title)
-                    .id(selection.path.isEmpty)
-                    .navigationDestination(for: SettingsDestination.self) { _ in
-                        SettingsLicensesView(bundle: bundle)
-                    }
-                    .onAppear {
-                        if selection.section == .about {
-                            model.app.updater.refresh()
-                        }
-                    }
-            }.id(selection.section)
+                }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .background {

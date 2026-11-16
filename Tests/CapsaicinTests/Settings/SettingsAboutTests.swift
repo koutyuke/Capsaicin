@@ -61,53 +61,72 @@ struct SettingsAboutTests {
             }
         }
     }
-
-    @Test("SPEC-SET-008 下の階層を記憶せず、別のセクションへ移ると最上段に戻る")
-    func navigationReset() throws {
-        let defaults = try #require(UserDefaults(suiteName: "AboutNavigation-" + UUID().uuidString))
-        defer { defaults.removeObject(forKey: "settingsSection") }
-        let selection = SettingsSelection(defaults: defaults)
-        selection.section = .about
-        selection.path = [.licenses]
-        let restored = SettingsSelection(defaults: defaults)
-        #expect(restored.section == .about && restored.path.isEmpty)
-        selection.section = .general
-        #expect(selection.path.isEmpty)
-        selection.section = .about
-        #expect(selection.path.isEmpty)
-    }
 }
 
 extension SettingsTests {
-    @Test("SPEC-SET-008 ライセンスを同じ右側に開き、標準タイトルと戻る操作を持つ")
-    func licenseNavigation() async throws {
+    @Test("SPEC-SET-008 ライセンスのシートを完了・Return・Esc で閉じても親のタイトルと枠を変えない",
+          arguments: ["done", "return", "escape"])
+    func licenseSheet(dismissal: String) async throws {
         _ = NSApplication.shared
         let defaults = try #require(UserDefaults(suiteName: "AboutLicenseView-" + UUID().uuidString))
         defer { defaults.removeObject(forKey: "settingsSection") }
         let selection = SettingsSelection(defaults: defaults)
         selection.section = .about
         let app = try appBundle()
-        let window = SettingsWindowController.makeWindow(rootView: SettingsView(
+        let window = SettingsWindowController.makeWindow(rootView: LicenseSheetHost(content: SettingsView(
             model: makeModel(), hotkey: HotkeyController(save: { _ in true }), selection: selection,
             quit: {}, bundle: app,
-        ), selection: selection)
+        ), bundle: app), selection: selection)
         defer { window.close() }
+        // SwiftUI のシートには表示中の親が必要なため、テスト用ウインドウだけを画面外に配置する。
+        window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
+        window.orderBack(nil)
         await layout(window)
-        selection.path = [.licenses]
+        let frame = window.frame
+        let contentRect = window.contentLayoutRect
+        let closeButton = try #require(window.standardWindowButton(.closeButton))
+        let closeFrame = closeButton.frame
+        let toolbar = window.toolbar
+        let sheet = try #require(window.attachedSheet)
+        defer { window.endSheet(sheet) }
+        await layout(sheet)
+        let view = try #require(sheet.contentView)
+        #expect(view.frame.size == NSSize(width: 560, height: 420))
+        let done = try #require(accessibilityDescendants(view).first {
+            $0.accessibilityRole?() == .button && $0.accessibilityLabel?()
+                == app.localizedString(forKey: "licenses.done", value: nil, table: "SettingsAbout")
+        })
+        if dismissal == "done" {
+            #expect(done.accessibilityPerformPress?() == true)
+        } else {
+            let character = dismissal == "return" ? "\r" : "\u{1b}"
+            let event = try #require(NSEvent.keyEvent(
+                with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                windowNumber: sheet.windowNumber, context: nil, characters: character,
+                charactersIgnoringModifiers: character, isARepeat: false,
+                keyCode: dismissal == "return" ? 36 : 53,
+            ))
+            #expect(sheet.performKeyEquivalent(with: event))
+        }
         await layout(window)
-        #expect(window.title == app.localizedString(forKey: "licenses.label", value: nil, table: "SettingsAbout"))
-        #expect(window.toolbar?.items.isEmpty == false)
-        selection.path = []
-        await layout(window)
+        #expect(window.attachedSheet == nil)
+        #expect(selection.section == .about)
         #expect(window.title == SettingsSection.about.title)
-        selection.path = [.licenses]
-        await layout(window)
-        selection.section = .general
-        await layout(window)
-        #expect(window.title == SettingsSection.general.title)
-        selection.section = .about
-        await layout(window)
-        #expect(selection.path.isEmpty)
-        #expect(window.title == SettingsSection.about.title)
+        #expect(window.frame == frame && window.contentLayoutRect == contentRect)
+        #expect(closeButton.frame == closeFrame)
+        #expect(window.toolbar === toolbar && window.toolbarStyle == .unified)
+        #expect(window.toolbar?.items.isEmpty == true)
+    }
+}
+
+private struct LicenseSheetHost<Content: View>: View {
+    let content: Content
+    let bundle: Bundle
+    @State private var isPresented = true
+
+    var body: some View {
+        content.sheet(isPresented: $isPresented) {
+            SettingsLicensesView(bundle: bundle).environment(\.accessibilityEnabled, true)
+        }
     }
 }

@@ -7,6 +7,7 @@ struct SettingsAboutContent: View {
     let quit: () -> Void
     var bundle: Bundle = .main
     @Environment(\.locale) private var locale
+    @State private var showsLicenses = false
 
     var body: some View {
         Section {
@@ -36,9 +37,7 @@ struct SettingsAboutContent: View {
             }
             .buttonStyle(.plain).foregroundStyle(.primary)
             .accessibilityHint(text("website.a11y"))
-            NavigationLink(value: SettingsDestination.licenses) {
-                SettingsRow(title: text("licenses.label"), symbol: "doc.text") {}
-            }
+            licenses
         } header: {
             Text(text("links.group.title"))
         } footer: {
@@ -46,10 +45,26 @@ struct SettingsAboutContent: View {
         }
     }
 
+    var licenses: some View {
+        Button {
+            showsLicenses = true
+        } label: {
+            SettingsRow(title: text("licenses.label"), symbol: "doc.text") {
+                Image(systemName: "chevron.right").imageScale(.small).foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
+        }
+        .buttonStyle(.plain).foregroundStyle(.primary)
+        .accessibilityLabel(text("licenses.label"))
+        .sheet(isPresented: $showsLicenses) {
+            SettingsLicensesView(bundle: bundle)
+        }
+    }
+
     private var header: some View {
         VStack(spacing: 12) {
             Image(nsImage: NSWorkspace.shared.icon(forFile: bundle.bundlePath))
-                .resizable().frame(width: 80, height: 80)
+                .resizable().frame(width: 96, height: 96)
                 .accessibilityLabel(text("icon.a11y"))
             VStack(spacing: 4) {
                 Text(verbatim: "Capsaicin").font(.title).foregroundStyle(.primary)

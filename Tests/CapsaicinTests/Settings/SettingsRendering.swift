@@ -219,7 +219,7 @@ extension SettingsTests {
         window.display()
     }
 
-    private func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
+    func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
         [element] + (element.accessibilityChildren?() as? [AnyObject] ?? [])
             .flatMap { accessibilityDescendants($0) }
     }

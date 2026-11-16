@@ -2,8 +2,31 @@ import SwiftUI
 
 struct SettingsLicensesView: View {
     var bundle: Bundle = .main
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(bundle.localizedString(forKey: "licenses.label", value: nil, table: "SettingsAbout"))
+                .font(.headline).accessibilityAddTraits(.isHeader)
+                .padding([.top, .horizontal], 20)
+            licenses
+            HStack {
+                Spacer()
+                Button(bundle.localizedString(forKey: "licenses.done", value: nil, table: "SettingsAbout")) {
+                    dismiss()
+                }
+                .buttonStyle(.bordered).keyboardShortcut(.defaultAction)
+            }
+            .padding([.horizontal, .bottom], 20)
+        }
+        .frame(width: 560, height: 420)
+        .background {
+            // 本文にフォーカスがなくても Esc で閉じられるよう、Return とは別に登録する。
+            Button("") { dismiss() }.keyboardShortcut(.cancelAction).hidden().accessibilityHidden(true)
+        }
+    }
+
+    private var licenses: some View {
         Form {
             ForEach(SettingsLicense.allCases, id: \.self) { license in
                 Section {
@@ -31,8 +54,6 @@ struct SettingsLicensesView: View {
             }
         }
         .formStyle(.grouped)
-        .contentMargins(.top, -8, for: .scrollContent)
-        .navigationTitle(bundle.localizedString(forKey: "licenses.label", value: nil, table: "SettingsAbout"))
     }
 }
 
