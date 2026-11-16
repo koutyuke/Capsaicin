@@ -22,7 +22,7 @@
 ## 1. 開始前の状態と試験用の材料を用意する
 
 - **目的**: `HYP-SYS-002`、`SPEC-SET-007` の試験を、本番の鍵・アプリを使わず復元可能にする。
-- **前提**: [実機確認の手順](verification.md)の1.1〜1.4を実施する。環境、未読込の `.debug` ジョブ、Release の常駐処理がないこと、設定と再開記録の退避、LED の独立復旧手段のゲートを省かない。今回ヘルパーを設置しない。`SleepDisabled` の開始値は `0` とする。`trash` が必要である。
+- **前提**: [実機確認の手順](verification.md)の1.1〜1.4を実施する。環境、未読込の `.debug` ジョブ、Release の常駐処理がないこと、設定と再開記録の退避、LED の独立復旧手段のゲートを省かない。今回ヘルパーを設置しない。`SleepDisabled` の開始値は `0` とする。`trash` が必要である。 zsh で `noclobber` を有効にしているなら、既存のファイルへ書き直すときは `>` を `>|` に読み替える。
 - **操作**:
   1. リポジトリのルートを同じ Bash で開き、既存の変数と退避先を再利用する。
 
@@ -95,7 +95,7 @@ scripts/manual/update-test.sh prepare 8123 local-ats
 
      ```sh
      /usr/bin/xattr -lr "$UAPP" > "$B/update-A-xattr.txt"
-     /usr/bin/codesign -d -r- "$UAPP" 2> "$B/update-A-requirement.txt"
+     /usr/bin/codesign -d -r- "$UAPP" > "$B/update-A-requirement.txt" 2>&1
      /usr/bin/codesign -dv --verbose=4 "$UAPP" 2> "$B/update-A-signature.txt"
      ```
 
@@ -128,7 +128,7 @@ scripts/manual/update-test.sh prepare 8123 local-ats
    /bin/launchctl print "$JOB"
    ```
 
-3. ジョブがサービスなしになったことを確かめる。今回作った `UAPP` だけを `trash "$UAPP"` へ移し、2節のブラウザのダウンロードから入れ直す。このとき、既に今回作った親フォルダーは再利用する。試験用フォルダー全体や既存のアプリは削除しない。まだ A を起動しない。
+3. ジョブがサービスなしになったことを確かめる。今回作った `UAPP` だけを `trash "$UAPP"` へ移し、2節のブラウザのダウンロードから入れ直す。このとき、既に今回作った親フォルダーは再利用する。試験用フォルダー全体や既存のアプリは削除しない。AppCleaner などがアプリをゴミ箱へ移したときに関連ファイルの削除を提案しても、断る。再開の記録などの退避した状態は7節で戻すまで残す。まだ A を起動しない。
 4. 既存設定の退避が読めることを再確認してから、今回の Debug 設定だけを消す。
 
    ```sh
@@ -164,7 +164,7 @@ scripts/manual/update-test.sh prepare 8123 local-ats
      「このアプリについて」を撮る。ほかのアプリを前面にしてから手動確認し、確認中のボタン、Sparkle の結果画面、終了後の日時を観察する。OS の12時間制／24時間制を切り替えてページを開き直す。昨日・それ以前の日時は実際にその日に確認した記録で確かめ、なければその部分を判定不能とする。OS の日付は変えない。
   3. システム設定で文字を大きくして、このページを上端から下端までスクロールする。版とビルド番号をコピーし、`UAPP/Contents/Info.plist` と比較する。アイコン、カード、余白、終了ボタン、著作権を `SPEC-SET-004` と照らす。
   4. VoiceOver でアプリアイコンのラベル、アプリ名の見出し、状態の静的テキスト、確認ボタンを読む。(i) を Tab と Space で開く。「Web サイト」の読み上げとヒントを聞き、文字のない部分を押して既定のブラウザの URL を記録する。
-  5. 「ライセンス」を開き、3部品の本文を下端までスクロールしてコピーする。バンドル内のライセンス全文と比較し、Sparkle の外部コードの条項も確認する。標準の戻る操作と、別のセクションへ移って戻る操作をそれぞれ試す。
+  5. 「ライセンス」を開き、3部品の本文を下端までスクロールしてコピーする。バンドル内のライセンス全文と比較し、Sparkle の外部コードの条項も確認する。完了ボタン、Return、Esc でそれぞれ閉じ、スクロール位置とサイドバーの選択を見る。
   6. 「確認のみ」にして4節の方法で定期確認を起こす。新しい版の行とボタンの読み上げを記録する。Sparkle の画面の自動ダウンロードのチェックを切り替え、開いたままのポップアップとの連動を見る。インストールはまだ選ばない。逆方向も、ポップアップの選択を変えて Sparkle の画面を開き直し、チェックを読む。
   7. ダウンロード前に Sparkle の画面を閉じ、A を終了する。「確認をオフ、ダウンロードをオン」は次で用意してから起動し、ポップアップを読む。
 
@@ -227,7 +227,7 @@ scripts/manual/update-test.sh prepare 8123 local-ats
      ```sh
      /usr/bin/xattr -lr "$UAPP" > "$B/update-B-xattr.txt"
      /usr/bin/codesign --verify --deep --strict "$UAPP"
-     /usr/bin/codesign -d -r- "$UAPP" 2> "$B/update-B-requirement.txt"
+     /usr/bin/codesign -d -r- "$UAPP" > "$B/update-B-requirement.txt" 2>&1
      /usr/bin/plutil -p "$UAPP/Contents/Info.plist" > "$B/update-B-info.txt"
      ```
 

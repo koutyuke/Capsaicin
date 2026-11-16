@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-SYS-002
 title: Sparkle 2 は、ad-hoc 署名で launchd の管理下にある Capsaicin を、利用者の追加の操作なしに更新できる
-status: open
+status: supported
 affects: ["DEC-SYS-019", "DEC-LCY-005"]
-evidence: []
+evidence: ["EVID-SYS-003"]
 ---
 
 # HYP-SYS-002 Sparkle 2 は、ad-hoc 署名で launchd の管理下にある Capsaicin を、利用者の追加の操作なしに更新できる
@@ -31,4 +31,7 @@ ad-hoc 署名で公証していない Capsaicin を、Sparkle 2 で同じく ad-
 
 ## 結果
 
-未確認。
+2026-11-16、macOS 27.2.1 で主張1〜3が成り立った（`EVID-SYS-003`）。主張4と5は、一部だけ確かめた。
+
+- 主張4: 再起動後に新しい版が起動し、項目が重複しないことは確かめた。利用者が無効にしていた状態が保たれるかは、未確認である。
+- 主張5: 記録の結果から間接に確かめただけで、終了の分類そのものは見ていない。
