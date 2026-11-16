@@ -4,7 +4,7 @@ id: EVID-SYS-003
 title: ad-hoc 署名で launchd の管理下にある Capsaicin を、Sparkle 2.10.1 で利用者の追加の操作なしに更新できた
 observed_on: 2026-11-16
 environment: Apple Silicon（arm64）、macOS 27.2.1（26B131）、Xcode 27.2、Debug 構成の 0.9.0 (100) → 0.9.1 (101)、配信は 127.0.0.1 の HTTP、ヘルパーは未設置
-sources: ["docs/manual/update-verification.md"]
+sources: ["ac1897d:docs/manual/update-verification.md", "ac1897d:scripts/manual/update-test.sh"]
 ---
 
 # EVID-SYS-003 ad-hoc 署名で launchd の管理下にある Capsaicin を、Sparkle 2.10.1 で利用者の追加の操作なしに更新できた
@@ -33,7 +33,7 @@ sources: ["docs/manual/update-verification.md"]
 
 ## 確かめ方
 
-オーナーが [アプリ内の更新を実機で確認して元に戻す手順](../../manual/update-verification.md)を、`feature/sparkle-updates` の `ac1897d` で実施した。
+オーナーが、`feature/sparkle-updates` の `ac1897d` にあった手順書 `docs/manual/update-verification.md` に従って実施した。手順書と補助スクリプトは、確認を終えた後に削除した。再び確かめるときは、そのコミットから取り出し、`DEC-SYS-020` の just のレシピに合わせて直す。
 
 - 鍵は使い捨てのものを使った。
 - 版の番号とビルド番号だけが違う2つの Debug ビルドを `scripts/manual/update-test.sh` で作った。
