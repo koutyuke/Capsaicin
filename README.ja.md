@@ -141,4 +141,4 @@ nix develop --command just fmt    # treefmt ですべてのファイルを整形
 
 Copyright 2026 koutyuke
 
-本リポジトリは [MIT License](./LICENSE) のもとで公開されています。リポジトリに含める第三者の著作物は [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md) にあります。
+本リポジトリは [MIT License](./LICENSE) のもとで公開されています。

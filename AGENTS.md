@@ -53,12 +53,11 @@ CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どち�
 
 ## エージェントのスキル
 
-スキルの実体は `.agents/skills/` に置き、Claude Code が読む `.claude/skills/` からは相対パスの symlink を張る。実体、symlink、`skills-lock.json` はすべてコミットする。`skills-lock.json` は取得元のコミットを固定しておらず、lock から復元すると取得元の最新が入る。そのため実体をリポジトリに持ち、変更を差分でレビューできるようにする。未追跡のファイルは新しい worktree に入らないので、コミットしておけば委譲先の worktree でも同じスキルを使える。
+Git で追跡するスキルは、このリポジトリの手順に依存する `capsaicin-release` だけとする。実体は `.agents/skills/` に置き、Claude Code が読む `.claude/skills/` からは相対パスの symlink を張る。他のファイルと同じく直接編集してレビューする。
 
-- 外部のスキル（`skills-lock.json` に載っているもの）は `bunx skills add <source>` で入れ、`bunx skills update` で更新する。手では編集しない。手で直しても次の更新で上書きされる。
-- 追加と更新は PM が判断する。更新したら差分を読み、意図しない指示が混ざっていないことを確かめてからコミットする。
-- 自作のスキル（`skills-lock.json` に載っていないもの）は `bunx skills update` の対象外なので、他のファイルと同じく直接編集してレビューする。
-- `.agents/skills/` は自動整形と Markdown lint の対象から除く。外部のスキルを整形すると、取得元との差分が更新のたびに生じるためである。自作のスキルの品質はレビューで確かめる。
+それ以外のスキルは各自の好みで入れるものなので追跡しない。`.gitignore` が `.agents/skills/` と `.claude/skills/` の下の `capsaicin-release` 以外と、`skills-lock.json` を除外する。未追跡のファイルは新しい worktree に入らないので、委譲先の worktree でも使いたいスキルはユーザー単位の場所に置く。
+
+`.agents/skills/` は自動整形と Markdown lint の対象から除く。手元にある未追跡のスキルを整形しないためである。`capsaicin-release` の品質はレビューで確かめる。
 
 ## 検証
 
