@@ -91,7 +91,7 @@ extension SettingsTests {
         defer { window.endSheet(sheet) }
         await layout(sheet)
         let view = try #require(sheet.contentView)
-        #expect(view.frame.size == NSSize(width: 680, height: 440))
+        #expect(view.frame.size == NSSize(width: 540, height: 400))
         let done = try #require(accessibilityDescendants(view).first {
             $0.accessibilityRole?() == .button && $0.accessibilityLabel?()
                 == app.localizedString(forKey: "licenses.done", value: nil, table: "SettingsAbout")

@@ -22,8 +22,7 @@ struct SettingsLicensesView: View {
             }
             .padding(.horizontal, 24).padding(.vertical, 16)
         }
-        // 原文は 80 字前後で改行してあるので、折り返さずに読める幅にする。設定ウインドウの幅 720 pt に収める。
-        .frame(width: 680, height: 440)
+        .frame(width: 540, height: 400)
         .background {
             // 本文にフォーカスがなくても Esc で閉じられるよう、Return とは別に登録する。
             Button("") { dismiss() }.keyboardShortcut(.cancelAction).hidden().accessibilityHidden(true)
@@ -40,7 +39,7 @@ struct SettingsLicensesView: View {
                         }
                         switch Result(catching: { try license.text(in: bundle) }) {
                         case let .success(text):
-                            Text(verbatim: text).textSelection(.enabled)
+                            Text(verbatim: SettingsLicense.reflowed(text)).textSelection(.enabled)
                                 .fixedSize(horizontal: false, vertical: true)
                         case .failure:
                             Text(bundle.localizedString(
@@ -73,5 +72,24 @@ enum SettingsLicense: String, CaseIterable {
             throw CocoaError(.fileNoSuchFile)
         }
         return try String(contentsOf: url, encoding: .utf8)
+    }
+
+    /// 原文は固定幅で改行してあるので、段落の中の改行を空白に変え、シートの幅で折り返せるようにする。
+    /// 50 字に満たない行（著作権者の列挙や見出し）の後と、番号付きの項目の前では改行を残す。
+    static func reflowed(_ text: String) -> String {
+        var lines: [String] = []
+        var previousLength = 0
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if previousLength >= 50, !trimmed.isEmpty, trimmed.firstMatch(of: /^\d+\.\s/) == nil,
+               let last = lines.popLast()
+            {
+                lines.append(last.replacing(/\s+$/, with: "") + " " + trimmed)
+            } else {
+                lines.append(String(line))
+            }
+            previousLength = line.count
+        }
+        return lines.joined(separator: "\n")
     }
 }
