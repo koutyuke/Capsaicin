@@ -49,7 +49,7 @@ struct SettingsAboutContent: View {
     private var header: some View {
         VStack(spacing: 12) {
             Image(nsImage: NSWorkspace.shared.icon(forFile: bundle.bundlePath))
-                .resizable().frame(width: 64, height: 64)
+                .resizable().frame(width: 80, height: 80)
                 .accessibilityLabel(text("icon.a11y"))
             VStack(spacing: 4) {
                 Text(verbatim: "Capsaicin").font(.title).foregroundStyle(.primary)
