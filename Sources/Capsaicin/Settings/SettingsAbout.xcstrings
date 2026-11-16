@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Checks for a new version about once a day. With “Download and install,” the update is installed and Capsaicin restarts while sleep prevention is off. Only stable releases are offered."
+            "value" : "Checks for a new version about once a day. With “Download and install,” the update is installed and Capsaicin restarts when sleep prevention is off and the Settings window is closed. Only stable releases are offered."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1日に1回ほど新しいバージョンを確認します。「ダウンロードしてインストール」では、スリープ防止をオフにしているときにインストールし、Capsaicinを起動し直します。対象は安定版だけです。"
+            "value" : "1日に1回ほど新しいバージョンを確認します。「ダウンロードしてインストール」では、スリープ防止がオフで、設定ウインドウが閉じているときにインストールし、Capsaicinを起動し直します。対象は安定版だけです。"
           }
         }
       }
@@ -262,13 +262,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Version %@ is ready to install"
+            "value" : "Version %@ is waiting to be installed"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バージョン%@のインストールを待っています"
+            "value" : "バージョン%@はインストール待ちです"
           }
         }
       }

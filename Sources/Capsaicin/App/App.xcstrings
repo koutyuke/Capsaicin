@@ -92,13 +92,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installing the update will stop sleep prevention and restart Capsaicin. Sleep prevention will not resume automatically."
+            "value" : "Installing the update will turn sleep prevention off and restart Capsaicin. Sleep prevention will not turn back on automatically."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップデートをインストールすると抑止を解除し、Capsaicin を起動し直します。抑止は自動で再開しません。"
+            "value" : "アップデートをインストールするとスリープ防止がオフになり、Capsaicinを起動し直します。スリープ防止は自動でオンになりません。"
           }
         }
       }
@@ -109,13 +109,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Stop Sleep Prevention and Install?"
+            "value" : "Turn sleep prevention off and install?"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "抑止を解除してインストールしますか？"
+            "value" : "スリープ防止をオフにしてインストールしますか？"
           }
         }
       }
