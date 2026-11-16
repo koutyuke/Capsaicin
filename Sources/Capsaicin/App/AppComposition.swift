@@ -28,7 +28,8 @@ enum AppComposition {
                 time: SystemTime(),
             ),
         )
-        let model = AppModel(controller: controller, saveSettings: { store.save($0) })
+        let model = AppModel(controller: controller, saveSettings: { store.save($0) },
+                             updater: UpdateModel(bundle: bundle))
         model.onAlert = showAlert
         let settings = SettingsModel(app: model, helper: .live(
             helper: helper, installer: HelperInstaller(),
@@ -103,6 +104,7 @@ private final class AppServices {
     private var releaseTimer: Timer?
     private var wakeObservers: [any NSObjectProtocol] = []
     private var screenLock: ScreenLockObserver?
+    private var settingsCloseObserver: any NSObjectProtocol?
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
          lid: LidStateMonitor, virtualKeyboard: VirtualKeyboardMonitor, display: DisplaySleep, server: IPCServer,
@@ -126,6 +128,17 @@ private final class AppServices {
         settingsWindow = SettingsWindowController(
             model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }), quit: menuBar.quit,
         )
+        settingsCloseObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification, object: settingsWindow?.window, queue: .main,
+        ) { [weak model] _ in
+            MainActor.assumeIsolated {
+                guard let model else { return }
+                model.updater.updateInstallationConditions(
+                    isBlocking: model.status.isBlocking,
+                    settingsWindowIsOpen: false,
+                )
+            }
+        }
         // メニューからの変更でも、確認・エラーが必要なときだけ既存のシートの親を前面に出す。
         let confirm = settings.confirm
         settings.confirm = { [weak self] operation, fromSetting in
@@ -148,6 +161,7 @@ private final class AppServices {
         }
         menuBar.start()
         refresh(model.status)
+        model.updater.start()
         minuteTimer = Timer(timeInterval: 60, repeats: true) { [weak model] _ in
             MainActor.assumeIsolated { model?.timePassed() }
         }
@@ -199,6 +213,10 @@ private final class AppServices {
         model.onEvent = nil
         menuBar.stop()
         HotkeyController.stop()
+        if let settingsCloseObserver {
+            NotificationCenter.default.removeObserver(settingsCloseObserver)
+            self.settingsCloseObserver = nil
+        }
         settingsWindow?.close()
         settingsWindow = nil
         wakeObservers.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
@@ -214,6 +232,8 @@ private final class AppServices {
 
     func openSettings() {
         settingsWindow?.open()
+        model.updater.updateInstallationConditions(isBlocking: model.status.isBlocking,
+                                                   settingsWindowIsOpen: settingsWindow?.window?.isVisible == true)
     }
 
     private func systemStateChanged() {
@@ -223,6 +243,8 @@ private final class AppServices {
     }
 
     private func refresh(_ status: BlockingStatus) {
+        model.updater.updateInstallationConditions(isBlocking: status.isBlocking,
+                                                   settingsWindowIsOpen: settingsWindow?.window?.isVisible == true)
         scheduleRelease(status)
         menuBar.refresh()
         let policy: NSApplication.ActivationPolicy = model.settings.showsDockIcon ? .regular : .accessory

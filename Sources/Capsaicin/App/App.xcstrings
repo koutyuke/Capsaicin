@@ -51,6 +51,74 @@
           }
         }
       }
+    },
+    "alert.updateInstallation.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今はしない"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.install" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Update"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールする"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installing the update will stop sleep prevention and restart Capsaicin. Sleep prevention will not resume automatically."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートをインストールすると抑止を解除し、Capsaicin を起動し直します。抑止は自動で再開しません。"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Sleep Prevention and Install?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抑止を解除してインストールしますか？"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -72,6 +72,7 @@ final class SettingsWindowController: NSWindowController {
 
     func open() {
         model.refreshHelper()
+        model.app.updater.refresh()
         bringToFront()
     }
 
@@ -94,8 +95,12 @@ final class SettingsWindowController: NSWindowController {
 @MainActor
 @Observable
 final class SettingsSelection {
+    var path: [SettingsDestination] = []
     var section: SettingsSection {
         didSet {
+            if section != oldValue {
+                path = []
+            }
             defaults.set(section.rawValue, forKey: "settingsSection")
             didSelect?(section)
         }
@@ -108,4 +113,8 @@ final class SettingsSelection {
         self.defaults = defaults
         section = defaults.string(forKey: "settingsSection").flatMap(SettingsSection.init(rawValue:)) ?? .general
     }
+}
+
+enum SettingsDestination: Hashable {
+    case licenses
 }

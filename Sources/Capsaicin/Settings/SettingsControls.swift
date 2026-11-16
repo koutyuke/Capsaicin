@@ -27,12 +27,14 @@ struct SettingsInfo: View {
 
 struct SettingsRow<Content: View>: View {
     let title: String
+    var subtitle: String?
     var help = ""
     var symbol: String?
     var child = false
     var enabled = true
     /// 空でなければ、アイコンを注意の記号にし、この文を読み上げる。
     var warningLabel = ""
+    var controlAccessibilityLabel: String?
     @ViewBuilder var content: () -> Content
     var body: some View {
         HStack {
@@ -44,8 +46,14 @@ struct SettingsRow<Content: View>: View {
                         .accessibilityLabel(warningLabel)
                         .accessibilityHidden(warningLabel.isEmpty)
                 }
-                Text(title).foregroundStyle(enabled ? .primary : .secondary)
-                    .disabled(!enabled)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).foregroundStyle(enabled ? .primary : .secondary)
+                        .disabled(!enabled)
+                    if let subtitle {
+                        Text(subtitle).font(.callout).foregroundStyle(.secondary)
+                            .lineLimit(1).help(subtitle)
+                    }
+                }
                 if !help.isEmpty {
                     SettingsInfo(title: title, help: help)
                 }
@@ -53,8 +61,9 @@ struct SettingsRow<Content: View>: View {
             .padding(.leading, child ? 28 : 0)
             Spacer()
             content().disabled(!enabled)
-                .accessibilityLabel(title).accessibilityHint(help)
+                .accessibilityLabel(controlAccessibilityLabel ?? title).accessibilityHint(help)
         }
+        .contentShape(Rectangle())
     }
 }
 

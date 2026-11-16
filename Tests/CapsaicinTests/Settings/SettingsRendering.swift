@@ -115,9 +115,7 @@ extension SettingsTests {
         let quit = accessibilityDescendants(view).first {
             $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == title
         }
-        if section == .about {
-            #expect(try #require(quit).accessibilityPerformPress?() == true)
-        } else {
+        if section != .about {
             #expect(quit == nil)
         }
         if section == .general {
@@ -127,6 +125,27 @@ extension SettingsTests {
                     <= scroll.contentSize.height + 1)
             }
         }
+    }
+
+    @Test("SPEC-SET-004 フッターの終了ボタンはメニューと同じ文言と終了処理を使う")
+    func aboutQuit() async throws {
+        _ = NSApplication.shared
+        let app = try appBundle()
+        let defaults = try #require(UserDefaults(suiteName: "AboutQuit-" + UUID().uuidString))
+        let selection = SettingsSelection(defaults: defaults)
+        var quits = 0
+        // Form の仮想 AX ノードはプロセス内では列挙できないため、同じフッターを単独で描画する。
+        let footer = SettingsAboutContent(updater: UpdateModel(), quit: { quits += 1 }, bundle: app).footer
+        let window = SettingsWindowController.makeWindow(rootView: footer.environment(\.accessibilityEnabled, true),
+                                                         selection: selection)
+        defer { window.close() }
+        await layout(window)
+        let view = try #require(window.contentView)
+        let button = try #require(accessibilityDescendants(view).first {
+            $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == MenuContent.text("menu.quit", bundle: app)
+        })
+        #expect(button.accessibilityPerformPress?() == true)
+        #expect(quits == 1)
     }
 
     func saveRendering(_ window: NSWindow, to url: URL) throws {

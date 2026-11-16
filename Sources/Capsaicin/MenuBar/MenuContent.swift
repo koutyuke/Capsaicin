@@ -2,7 +2,7 @@ import CapsaicinCore
 import Foundation
 
 enum MenuCommand: Equatable {
-    case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit
+    case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit, checkForUpdates
     case toggleSleep(String), lidClose(SettingsLidCloseChoice)
     case toggleBattery
 }
@@ -22,6 +22,7 @@ enum MenuContent {
     static func make(
         status: BlockingStatus, settings: Settings, isOnACPower: Bool, hasInternalBattery: Bool,
         sleepRows: [SettingsSleepRow],
+        pendingUpdateVersion: String? = nil,
         now: Date = Date(), calendar: Calendar = .current, locale: Locale = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
@@ -32,6 +33,7 @@ enum MenuContent {
         }
         var rows = [row(status.isBlocking ? "menu.header.active" : "menu.header.idle")]
         rows += warnings(status: status, bundle: bundle)
+        rows += updateReminder(version: pendingUpdateVersion, bundle: bundle)
         let timeRows = [row("menu.header.fromNow")] + presets(calendar: calendar, locale: locale, bundle: bundle) + [
             MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
         ]
@@ -72,6 +74,13 @@ enum MenuContent {
                                                                  bundle: bundle)]
         return rows + [MenuEntry(id: "separator.footer"), row("menu.settings", command: .settings),
                        row("menu.quit", command: .quit)]
+    }
+
+    private static func updateReminder(version: String?, bundle: Bundle) -> [MenuEntry] {
+        guard let version else { return [] }
+        return [MenuEntry(id: "menu.update.available", title: text("menu.update.available", bundle: bundle),
+                          subtitle: String(format: text("menu.update.available.subtitle", bundle: bundle), version),
+                          command: .checkForUpdates), MenuEntry(id: "separator.update")]
     }
 
     private static func startSubtitle(_ limit: TimeLimit?, now: Date, calendar: Calendar,
