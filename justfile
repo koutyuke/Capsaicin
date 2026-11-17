@@ -75,7 +75,7 @@ lint: lint-code lint-docs lint-build-tools
 
 check: fmt-check lint test
 
-# Show the Debug job, paths, processes, and sleep state (owner only).
+# Show the Debug job, paths, processes, and sleep state (agents need owner approval).
 [group('manual')]
 status:
     #!/usr/bin/env bash
@@ -103,7 +103,7 @@ status:
     /usr/bin/pmset -g assertions | /usr/bin/grep -i capsaicin || echo 'No Capsaicin assertions, or could not read them.'
     exit 0
 
-# Quit all Debug apps, then send SIGTERM only to remaining processes (owner only).
+# Quit all Debug apps, then send SIGTERM only to remaining processes (agents need owner approval).
 [group('manual')]
 stop:
     #!/usr/bin/env bash
@@ -128,7 +128,7 @@ stop:
     printf 'Debug PIDs still running:\n%s\n' "$(pids)" >&2
     exit 1
 
-# Open this checkout's Debug app after unloading its job (owner only).
+# Open this checkout's Debug app after unloading its job (agents need owner approval).
 [group('manual')]
 start:
     #!/usr/bin/env bash
@@ -154,6 +154,6 @@ start:
     echo 'The Debug job did not start within 10 seconds.' >&2
     exit 1
 
-# Build, stop, and start this checkout's Debug app, in that order (owner only).
+# Build, stop, and start this checkout's Debug app, in that order (agents need owner approval).
 [group('manual')]
 restart: build stop start
