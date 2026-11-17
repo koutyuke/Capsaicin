@@ -2,7 +2,7 @@
 schema: task
 id: TASK-103
 title: SMAppService の前提を実機で確かめるための試作アプリを作る
-status: todo
+status: in_review
 requirements: []
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -66,4 +66,4 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## レビュー
 
-未レビュー。
+試作はブランチ `spike/smappservice-probe` の `4c08aa3` にあり、PM がレビューした（デーモンは記録だけを書き、XPC の相手を両方向で Team ID と署名識別子で限る。Swift と C で347行）。実機確認の手順書は同じブランチの `Prototypes/SMAppServiceProbe/MANUAL.md` にある。オーナーの実機確認の結果を根拠に書き起こしてから完了にする。
