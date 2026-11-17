@@ -105,6 +105,8 @@ jobs:
       contents: read
     outputs:
       version: ${{ steps.version.outputs.version }}
+      sparkle_version: ${{ steps.version.outputs.sparkle_version }}
+      sparkle_sha256: ${{ steps.version.outputs.sparkle_sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -115,7 +117,13 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
       - name: Read version
         id: version
-        run: echo "version=$(just --evaluate version)" >> "$GITHUB_OUTPUT"
+        run: |
+          source .github/build-tools.env
+          {
+            echo "version=$(just --evaluate version)"
+            echo "sparkle_version=$SPARKLE_VERSION"
+            echo "sparkle_sha256=$SPARKLE_SHA256"
+          } >> "$GITHUB_OUTPUT"
       - name: Require unused version
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -126,6 +134,49 @@ jobs:
           fi
       - name: Package
         run: just dist
+      - name: Require increasing build number
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import plistlib
+          import re
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+          import zipfile
+
+          def get(path, accept="application/vnd.github+json"):
+              request = urllib.request.Request(
+                  f"https://api.github.com/repos/{os.environ['REPO']}/{path}",
+                  headers={"Authorization": f"Bearer {os.environ['GH_TOKEN']}", "Accept": accept},
+              )
+              return urllib.request.urlopen(request).read()
+
+          try:
+              latest = json.loads(get("releases/latest"))
+          except urllib.error.HTTPError as error:
+              if error.code != 404:
+                  raise
+              print("No latest release; skipping build-number comparison")
+          else:
+              tag = latest["tag_name"]
+              ref = urllib.parse.quote(tag, safe="")
+              project = get(f"contents/project.yml?ref={ref}", "application/vnd.github.raw+json").decode()
+              previous = re.findall(r'^\s+CURRENT_PROJECT_VERSION: "([0-9]+)"\s*$', project, re.MULTILINE)
+              if len(previous) != 1:
+                  raise SystemExit("Cannot read a unique CURRENT_PROJECT_VERSION at the latest tag")
+              with zipfile.ZipFile(f".build/dist/Capsaicin-{os.environ['VERSION']}.zip") as archive:
+                  info = plistlib.loads(archive.read("Capsaicin.app/Contents/Info.plist"))
+              current = str(info["CFBundleVersion"])
+              if not re.fullmatch(r"[0-9]+", current) or int(current) <= int(previous[0]):
+                  raise SystemExit(f"CFBundleVersion {current} must be greater than {previous[0]} ({tag})")
+              print(f"Build number {current} > {previous[0]} ({tag})")
+          PY
       - name: Upload release package
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -137,9 +188,111 @@ jobs:
             .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
             .build/dist/SHA256SUMS.txt
 
+  release-appcast:
+    name: Sign release appcast
+    needs: release-package
+    runs-on: xcode-27
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.release-package.outputs.version }}
+    steps:
+      # checkout やリポジトリ内の処理を実行せず、秘密鍵をビルドから隔離する。
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-dist
+          path: dist
+      - name: Install Sparkle tools
+        env:
+          SPARKLE_VERSION: ${{ needs.release-package.outputs.sparkle_version }}
+          SPARKLE_SHA256: ${{ needs.release-package.outputs.sparkle_sha256 }}
+        run: |
+          tools="$RUNNER_TEMP/sparkle"
+          mkdir -p "$tools"
+          curl -fsSL -o "$RUNNER_TEMP/Sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz"
+          printf '%s  %s\n' "$SPARKLE_SHA256" "$RUNNER_TEMP/Sparkle.tar.xz" | shasum -a 256 -c -
+          tar -xf "$RUNNER_TEMP/Sparkle.tar.xz" -C "$tools"
+      - name: Check archive and write release notes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          import plistlib
+          import zipfile
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          archives = list(Path("dist").glob("*.zip"))
+          if archives != [Path(f"dist/Capsaicin-{version}.zip")]:
+              raise SystemExit("Expected exactly the release zip")
+          with zipfile.ZipFile(archives[0]) as archive:
+              info = plistlib.loads(archive.read("Capsaicin.app/Contents/Info.plist"))
+          public_key = info.get("SUPublicEDKey", "").strip()
+          if not public_key or len(base64.b64decode(public_key, validate=True)) != 32:
+              raise SystemExit("The release app must have a nonempty 32-byte SUPublicEDKey")
+          body = os.environ["PR_BODY"]
+          if not body.strip():
+              raise SystemExit("The pull request body is empty")
+          Path(f"dist/Capsaicin-{version}.md").write_text(body + "\n", encoding="utf-8")
+          PY
+      # 秘密鍵はこのステップだけに渡し、ファイルやコマンドの引数には書かない。
+      - name: Generate signed appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$SPARKLE_ED_PRIVATE_KEY" ]]; then
+            echo "::error::SPARKLE_ED_PRIVATE_KEY is not set"
+            exit 1
+          fi
+          printf '%s\n' "$SPARKLE_ED_PRIVATE_KEY" | "$RUNNER_TEMP/sparkle/bin/generate_appcast" \
+            --ed-key-file - \
+            --embed-release-notes \
+            --download-url-prefix "https://github.com/koutyuke/Capsaicin/releases/download/v$VERSION/" \
+            -o dist/appcast.xml dist
+      - name: Require archive and feed signatures
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          data = Path("dist/appcast.xml").read_bytes()
+          items = ET.fromstring(data).findall("./channel/item")
+          if len(items) != 1:
+              raise SystemExit("The appcast must contain exactly one item")
+          enclosure = items[0].find("enclosure")
+          if enclosure is None:
+              raise SystemExit("The appcast item must have an enclosure")
+          signature = enclosure.get("{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature", "")
+          if len(base64.b64decode(signature, validate=True)) != 64:
+              raise SystemExit("The appcast item must have sparkle:edSignature (check the signing key)")
+          version = os.environ["VERSION"]
+          expected_url = f"https://github.com/koutyuke/Capsaicin/releases/download/v{version}/Capsaicin-{version}.zip"
+          if enclosure.get("url") != expected_url:
+              raise SystemExit("The appcast must point to the release zip at its tag URL")
+          signing_block = re.search(
+              rb"<!-- sparkle-signatures:\nedSignature: ([A-Za-z0-9+/]{86}==)\nlength: ([0-9]+)\n-->\n?\Z", data
+          )
+          if signing_block is None or int(signing_block[2]) != signing_block.start():
+              raise SystemExit("The appcast must have a feed signature (check SURequireSignedFeed)")
+          print("One item, archive signature, tag URL, and feed signature checked")
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-appcast
+          if-no-files-found: error
+          retention-days: 7
+          path: dist/appcast.xml
+
   publish:
     name: Publish
-    needs: release-package
+    needs: [release-package, release-appcast]
     if: >-
       github.event.action == 'closed' &&
       github.event.pull_request.merged == true &&
@@ -155,6 +308,10 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release-dist
+          path: dist
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-appcast
           path: dist
       - name: Write release notes
         env:
@@ -183,4 +340,5 @@ jobs:
           gh release create "v$VERSION" \
             "dist/Capsaicin-$VERSION.zip" \
             dist/SHA256SUMS.txt \
+            dist/appcast.xml \
             "${args[@]}"

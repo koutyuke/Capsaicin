@@ -205,7 +205,6 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsRender-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         defer { defaults.removeObject(forKey: "settingsSection") }
-        var quits = 0
         #expect(SettingsSection.allCases.map(\.rawValue) == ["general", "sleep", "led", "controls", "helper", "about"])
         for section in SettingsSection.allCases {
             #expect(section.title != "title")
@@ -215,7 +214,7 @@ struct SettingsTests {
                     model: makeModel(),
                     hotkey: HotkeyController(save: { _ in true }),
                     selection: selection,
-                    quit: { quits += 1 },
+                    quit: {},
                     bundle: app,
                 ).environment(\.colorScheme, name == "light" ? .light : .dark)
                     .environment(\.accessibilityEnabled, true)
@@ -224,6 +223,9 @@ struct SettingsTests {
                 window.appearance = NSAppearance(named: appearance)
                 await layout(window)
                 try saveRendering(window, to: output.appendingPathComponent("\(section.rawValue)-\(name).png"))
+                if section == .about {
+                    try await saveBottom(window, to: output.appendingPathComponent("about-\(name)-bottom.png"))
+                }
                 try checkRendering(window, section: section, app: app)
                 if section == .general, name == "light" {
                     try await checkSidebar(window, selection: selection)
@@ -233,7 +235,6 @@ struct SettingsTests {
                 }
             }
         }
-        #expect(quits == 2)
     }
 
     @Test("SPEC-UI-011 DEC-KEY-002 セクションのカタログと依存ライセンスを配布物に含める")

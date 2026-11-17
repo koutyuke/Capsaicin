@@ -118,6 +118,9 @@ struct MenuRedesignTests {
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
         let lid = try item("menu.sleep.lidClose.zeroBrightness", in: quick)
         #expect(lid.isEnabled && lid.image != nil)
+        if #available(macOS 27, *) {
+            #expect(lid.preferredImageVisibility == .visible)
+        }
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
         #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperNotReady")) == true)

@@ -14,6 +14,7 @@ final class AppModel {
     private(set) var status: BlockingStatus
     private(set) var settings: Settings
     let capabilities: MachineCapabilities
+    let updater: UpdateModel
     var hasVirtualKeyboard = false
     var launchAgentStatus = LaunchAgentStatus.unavailable
     var willRestartAfterCrash: Bool {
@@ -28,8 +29,11 @@ final class AppModel {
     private let controller: BlockingController
     private let saveSettings: (Settings) -> Void
 
-    init(controller: BlockingController, saveSettings: @escaping (Settings) -> Void) {
+    init(controller: BlockingController, saveSettings: @escaping (Settings) -> Void,
+         updater: UpdateModel = UpdateModel())
+    {
         self.controller = controller
+        self.updater = updater
         self.saveSettings = saveSettings
         status = controller.status
         settings = controller.settings

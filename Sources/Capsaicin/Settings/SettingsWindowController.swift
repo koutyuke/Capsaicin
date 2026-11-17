@@ -72,6 +72,7 @@ final class SettingsWindowController: NSWindowController {
 
     func open() {
         model.refreshHelper()
+        model.app.updater.refresh()
         bringToFront()
     }
 

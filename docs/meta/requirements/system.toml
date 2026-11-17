@@ -30,7 +30,7 @@ sources = ["DEC-SYS-003"]
 id = "REQ-SYS-003"
 title = "アプリは英語と日本語で表示し、時刻は OS の設定に従う"
 kind = "functional"
-statement = "アプリの画面に表示する文字列は英語と日本語で用意し、macOS の言語の設定に従ってどちらかを表示する。どちらでもない言語の設定では英語を表示する。画面の時刻は OS の地域と時刻の設定に従う。CLI の出力は英語だけである。"
+statement = "アプリの画面の文言は英語と日本語で用意し、macOS の言語の設定に従ってどちらかを表示する。どちらでもない言語の設定では英語を表示する。ライセンスの全文、部品名、著作権の表示は原文のまま表示する。画面の時刻は OS の地域と時刻の設定に従う。CLI の出力は英語だけである。"
 reason = "アプリの表示言語と時刻の表記の判断は DEC-SYS-017、CLI の出力の言語の判断は DEC-CLI-003 にある。"
 priority = "must"
 status = "accepted"
@@ -85,3 +85,15 @@ status = "accepted"
 specs = []
 depends_on = []
 sources = []
+
+[[requirements]]
+id = "REQ-SYS-008"
+title = "アプリから安定版に更新できる"
+kind = "functional"
+statement = "利用者は、アプリから安定版の更新を確認し、手動または自動で更新できる。更新によって、利用者の確認なしに抑止中の作業を中断しない。"
+reason = "アプリを手で入れ替えずに更新でき、スリープを止めている目的も損なわないようにするため。"
+priority = "must"
+status = "accepted"
+specs = ["SPEC-SET-007", "SPEC-MENU-009", "SPEC-LCY-008"]
+depends_on = []
+sources = ["DEC-SYS-019", "DEC-LCY-005", "DEC-UI-014"]

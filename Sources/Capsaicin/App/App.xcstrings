@@ -51,6 +51,74 @@
           }
         }
       }
+    },
+    "alert.updateInstallation.cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Now"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今はしない"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.install" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Install Update"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールする"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installing the update will turn sleep prevention off and restart Capsaicin. Sleep prevention will not turn back on automatically."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートをインストールするとスリープ防止がオフになり、Capsaicinを起動し直します。スリープ防止は自動でオンになりません。"
+          }
+        }
+      }
+    },
+    "alert.updateInstallation.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn sleep prevention off and install?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止をオフにしてインストールしますか？"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

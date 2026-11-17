@@ -38,24 +38,27 @@ struct SettingsView: View {
             .navigationSplitViewColumnWidth(200)
             .toolbar(removing: .sidebarToggle)
         } detail: {
-            Group {
-                if selection.section == .about {
-                    about
-                } else {
-                    Form {
-                        switch selection.section {
-                        case .general: general
-                        case .sleep: sleep
-                        case .led: led
-                        case .controls: controls
-                        case .helper: helper
-                        case .about: EmptyView()
-                        }
-                    }.formStyle(.grouped).toggleStyle(.switch)
-                        // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
-                        .contentMargins(.top, -8, for: .scrollContent)
+            Form {
+                switch selection.section {
+                case .general: general
+                case .sleep: sleep
+                case .led: led
+                case .controls: controls
+                case .helper: helper
+                case .about:
+                    SettingsAboutContent(updater: model.app.updater, quit: quit, bundle: bundle)
                 }
-            }
+            }.formStyle(.grouped).toggleStyle(.switch)
+                // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
+                .contentMargins(.top, -8, for: .scrollContent)
+                // About の下端はフッターで決めるため、Form 既定の下余白 20 pt を相殺する。
+                .contentMargins(.bottom, selection.section == .about ? -20 : 0, for: .scrollContent)
+                .navigationTitle(selection.section.title)
+                .onChange(of: selection.section, initial: true) {
+                    if selection.section == .about {
+                        model.app.updater.refresh()
+                    }
+                }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .background {
@@ -308,27 +311,6 @@ extension SettingsView {
 }
 
 extension SettingsView {
-    private var about: some View {
-        VStack(spacing: 8) {
-            Image(nsImage: NSWorkspace.shared.icon(forFile: bundle.bundlePath)).resizable().frame(
-                width: 96, height: 96,
-            )
-            .accessibilityLabel(SettingsSection.about.text("icon.a11y"))
-            Text(verbatim: "Capsaicin").font(.title)
-            Text(
-                String(
-                    format: SettingsSection.about.text("version"),
-                    bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—",
-                    bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—",
-                ),
-            )
-            .font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
-            Button(MenuContent.text("menu.quit", bundle: bundle), action: quit)
-                .buttonStyle(.bordered)
-                .padding(.top, 8)
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
     private func helperButton(_ operation: HelperManagementOperation) -> some View {
         Button(SettingsSection.helper.text(SettingsModel.operationKey(operation) + ".button")) {
             Task { await model.manage(operation) }
