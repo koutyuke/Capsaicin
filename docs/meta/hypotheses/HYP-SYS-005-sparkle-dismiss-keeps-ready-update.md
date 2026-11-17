@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-SYS-005
 title: Sparkle 2.10.1 で準備済みの版に Dismiss を返しても、その版は次の確認と終了時にインストールできる
-status: open
+status: supported
 affects: ["DEC-LCY-007", "SPEC-LCY-008"]
-evidence: []
+evidence: ["EVID-SYS-004"]
 ---
 
 # HYP-SYS-005 Sparkle 2.10.1 で準備済みの版に Dismiss を返しても、その版は次の確認と終了時にインストールできる
@@ -38,4 +38,4 @@ Sparkle 2.10.1 で、展開まで終えた版の「インストールして再�
 
 ## 結果
 
-未確認。
+支持された（`EVID-SYS-004`）。2026-11-18、macOS 27.2.1 で、主張1〜3がすべて成り立った。主張1の画面の様子と、確かめ方の手順4は、オーナーの目視で確かめた。
