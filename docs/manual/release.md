@@ -6,6 +6,7 @@
 
 - リリースの流れを試すときは、試運転用の分岐を足さず、`0.0.x` のバージョンで本番と同じ流れを通す。
 - Sparkle 対応版を初めて公開する前に、オーナーが次の署名鍵を用意する。更新の配信の仕組みは `DEC-SYS-019` を参照する。
+- Developer ID で署名した版を初めて公開する前に、オーナーが「Developer ID の証明書と公証用のキーを登録する」の secret を登録する。署名と公証の方針は `DEC-SYS-021` を参照する。
 
 ## 更新の署名鍵を用意する（初回だけ）
 
@@ -57,11 +58,60 @@
 
    ゴミ箱に移したこの一時フォルダーを Finder で選び、「今すぐ削除」で平文のファイルを消す。鍵をコピーしたクリップボードやエディターの保存内容にも残さない。
 
+## Developer ID の証明書と公証用のキーを登録する（初回と、証明書を作り直したとき）
+
+オーナーが Mac のターミナルで行う。1Password に保管した Developer ID Application 証明書の `.p12`、その書き出し用パスワード、App Store Connect の Team Key の `.p8`、Key ID、Issuer ID が必要である。シェルのトレース（`set -x`）を無効にし、値を画面やシェルの履歴へ書かない。
+
+1. 所有者だけが読める一時フォルダーを作る。
+
+   ```sh
+   umask 077
+   key_dir="$(mktemp -d "${TMPDIR:-/tmp}/capsaicin-developer-id.XXXXXX")"
+   ```
+
+   1Password から `.p12` を `$key_dir/developer-id.p12`、`.p8` を `$key_dir/AuthKey.p8` に書き出し、所有者だけが読めることを確かめる。
+
+   ```sh
+   chmod 600 "$key_dir/developer-id.p12" "$key_dir/AuthKey.p8"
+   ```
+
+2. ファイルの内容を標準入力から Actions secret に登録する。base64 の内容や Team Key を画面へ表示したり、別の平文ファイルへ保存したりしない。
+
+   ```sh
+   base64 -i "$key_dir/developer-id.p12" |
+     gh secret set DEVELOPER_ID_P12_BASE64 --repo koutyuke/Capsaicin
+   gh secret set NOTARY_API_KEY --repo koutyuke/Capsaicin < "$key_dir/AuthKey.p8"
+   ```
+
+3. 次の3つは、各コマンドの対話入力へ 1Password から値を貼り付ける。値をコマンドの引数に書かない。
+
+   ```sh
+   gh secret set DEVELOPER_ID_P12_PASSWORD --repo koutyuke/Capsaicin
+   gh secret set NOTARY_API_KEY_ID --repo koutyuke/Capsaicin
+   gh secret set NOTARY_API_ISSUER_ID --repo koutyuke/Capsaicin
+   ```
+
+4. 一時フォルダーを片付ける。
+
+   ```sh
+   trash "$key_dir"
+   unset key_dir
+   ```
+
+   ゴミ箱に移した一時フォルダーを Finder で選び、「今すぐ削除」で平文のファイルを消す。クリップボードにも値を残さない。
+
+Developer ID Application 証明書の有効期限は 2027年12月17日である。期限の前に証明書を作り直し、`.p12` と `DEVELOPER_ID_P12_BASE64`、`DEVELOPER_ID_P12_PASSWORD` を差し替える。
+
 ## 通常のリリース
 
 1. `develop` で、エージェントにスキル `capsaicin-release` を使ってリリースの準備を進めるよう依頼する。
 2. エージェントが示したバージョン、プレリリースにするか、PR の本文を確かめる。問題がなければ、ブランチの push と PR の作成を承認する。プレリリースにするかは、マージの前なら PR の `S-Prerelease` を付け外しして変えられる。
-3. PR のコメントから確認用のビルドをダウンロードし、実機で確かめる。
+3. PR のコメントから確認用のビルドをダウンロードし、Developer ID で署名され、公証されていることと、実機で既存の機能が動くことを確かめる。zip を展開し、次を実行する。`codesign` の出力に `Authority=Developer ID Application`、`spctl` の出力に `source=Notarized Developer ID` が含まれている必要がある。
+
+   ```sh
+   codesign -dv --verbose=2 Capsaicin.app 2>&1
+   spctl --assess --type execute -vv Capsaicin.app
+   ```
 4. 必要な修正を PR の本文に反映し、PR をマージする。マージした時点の本文がリリースノートになる。
 5. Release ワークフローの成功を待つ。GitHub Release が公開され、`Capsaicin-{バージョン}.zip`、`SHA256SUMS.txt`、`appcast.xml` が添付されていることを確かめる。プレリリースにも `appcast.xml` は付くが、アプリに配信されるのは latest の安定版だけである。
 6. zip をダウンロードし、このリポジトリのワークフローでビルドされたものかを確かめる。

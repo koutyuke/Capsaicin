@@ -54,13 +54,13 @@ sources = ["DEC-SYS-017", "DEC-SYS-007", "DEC-CLI-003"]
 id = "REQ-SYS-005"
 title = "Apple Developer Program なしでビルドして使える"
 kind = "constraint"
-statement = "v1 は、Apple Developer Program に加入せずに、自分の Mac でソースからビルドして使える。"
-reason = "加入しない判断は DEC-SYS-004 にある。"
+statement = "Apple Developer Program に加入していなくても、自分の Mac でソースからビルドして使える。"
+reason = "ソースからビルドする人に証明書を求めないため。配布物だけを署名する判断は DEC-SYS-021 にある。"
 priority = "must"
 status = "accepted"
 specs = []
 depends_on = []
-sources = ["DEC-SYS-004", "DEC-SYS-005"]
+sources = ["DEC-SYS-021", "DEC-SYS-005"]
 
 [[requirements]]
 id = "REQ-SYS-006"
@@ -72,7 +72,7 @@ priority = "must"
 status = "accepted"
 specs = []
 depends_on = []
-sources = ["DEC-SYS-004", "DEC-HLP-001", "DEC-CLI-002", "HYP-HLP-003"]
+sources = ["DEC-SYS-021", "DEC-HLP-001", "DEC-CLI-002", "HYP-HLP-003"]
 
 [[requirements]]
 id = "REQ-SYS-007"
