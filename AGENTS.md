@@ -63,7 +63,7 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 ## 検証
 
-変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。署名は ad-hoc で、Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
+変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
 
 | レシピ             | 実行すること                                                                                                                                        |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |

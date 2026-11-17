@@ -56,8 +56,6 @@ Capsaicin is developed independently as a separate application and is not affili
 2. Unpack the zip archive and move `Capsaicin.app` to your Applications folder.
 3. Open `Capsaicin.app`.
 
-Because Capsaicin is not notarized by Apple, macOS may block it on first launch. If this occurs, open **System Settings** > **Privacy & Security**, scroll to **Security**, and click **Open Anyway**.
-
 To verify that the downloaded zip archive has not been tampered with, compare it against `SHA256SUMS.txt` from the release or verify it using the [GitHub CLI](https://cli.github.com/):
 
 ```bash
