@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-LCY-002
 title: アプリは常に launchd の管理下で動かす
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-LCY-008"]
 requirements: ["REQ-LCY-001", "REQ-LCY-003", "REQ-LCY-005"]
 based_on: ["DEC-LCY-001", "EVID-LCY-001", "EVID-LCY-002", "HYP-LCY-002", "HYP-LCY-003"]
 ---

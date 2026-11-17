@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-005
 title: Team ID を持つ署名のアプリは、SMAppService.daemon を登録し、承認の後に XPC で同じ Team ID の相手とだけ通信できる
-status: open
+status: supported
 affects: ["DEC-HLP-004"]
-evidence: []
+evidence: ["EVID-HLP-004"]
 ---
 
 # HYP-HLP-005 Team ID を持つ署名のアプリは、SMAppService.daemon を登録し、承認の後に XPC で同じ Team ID の相手とだけ通信できる
@@ -25,10 +25,12 @@ macOS 26 以上で、`/Applications` に置いたアプリが次のすべてを�
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（`TASK-103`）と、その手順書で確かめる。試作のデーモンは `pmset` を実行せず、要求に自分の uid と版と `kern.bootsessionuuid` を返すだけにする。
+オーナーが、試作のアプリ（ブランチ `spike/smappservice-probe`）と、その手順書で確かめる。試作のデーモンは `pmset` を実行せず、要求に自分の uid と版と `kern.bootsessionuuid` を返すだけにする。
 
 デーモンの登録は、永続的なシステム変更である。終わったら、試作のアプリから unregister し、システム設定の「ログイン項目と機能拡張」から項目が消えたことを確かめ、`/Applications` から試作のアプリを削除する。
 
 ## 結果
 
-未確認。
+支持された（`EVID-HLP-004`）。Apple Development で署名し、公証していない試作で、主張の 1、2、3、5 が成り立った。登録は `requiresApproval` を経て、許可の後に `enabled` になった。デーモンは `euid=0` で応答し、使われないと終了し、次の接続で起動し直した。ad-hoc 署名の相手の接続は、デーモンの署名の条件で落とされた。後片付けは Mac の起動ごとに1回だけだった。
+
+主張の 4 は外れた。ad-hoc 署名のアプリでも、登録、承認、ad-hoc 署名のデーモンの起動まで進んだ。止めたのは、デーモンが自分で求める XPC の署名の条件だけだった。この主張は (c) の成否に関わらないので、ほかの主張とあわせて支持とした。ad-hoc 署名のビルドで root を要する機能を使えないのは、XPC の署名の条件で接続が落とされるためである。Developer ID で署名して公証した版では試していない。

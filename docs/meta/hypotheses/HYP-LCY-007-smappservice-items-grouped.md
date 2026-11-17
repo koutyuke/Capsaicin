@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LCY-007
 title: SMAppService で登録した agent と daemon は、システム設定でアプリの1つの項目にまとまる
-status: open
+status: supported
 affects: ["DEC-HLP-004"]
-evidence: []
+evidence: ["EVID-LCY-003"]
 ---
 
 # HYP-LCY-007 SMAppService で登録した agent と daemon は、システム設定でアプリの1つの項目にまとまる
@@ -19,8 +19,8 @@ evidence: []
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（`TASK-103`）で agent、daemon、mainApp を登録した状態で、システム設定の画面写真を残す。開発元の名前として何が出るかも記録する。片付けは `HYP-HLP-005` と同じである。
+オーナーが、試作のアプリ（ブランチ `spike/smappservice-probe`）で agent、daemon、mainApp を登録した状態で、システム設定の画面写真を残す。開発元の名前として何が出るかも記録する。片付けは `HYP-HLP-005` と同じである。
 
 ## 結果
 
-未確認。
+支持された（`EVID-LCY-003`）。daemon と agent は、バックグラウンドの一覧でアプリ名の1項目にまとまり、スイッチをオフにすると両方が `requiresApproval` になった。mainApp は「ログイン時に開く」に別に出た。開発元の名前は出なかった。アイコンは、試作にアイコンがないので確かめられていない。実装した Capsaicin の確認で見る。

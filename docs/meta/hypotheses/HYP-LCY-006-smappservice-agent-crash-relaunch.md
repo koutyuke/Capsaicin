@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LCY-006
 title: SMAppService.agent は KeepAlive の Crashed でアプリを起動し直し、launchctl kickstart で起動できる
-status: open
+status: supported
 affects: ["DEC-HLP-004", "DEC-LCY-002"]
-evidence: []
+evidence: ["EVID-LCY-003"]
 ---
 
 # HYP-LCY-006 SMAppService.agent は KeepAlive の Crashed でアプリを起動し直し、launchctl kickstart で起動できる
@@ -24,8 +24,8 @@ evidence: []
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（`TASK-103`）と、その手順書で確かめる。agent と mainApp の登録は永続的なシステム変更である。終わったら、試作のアプリから両方を unregister し、システム設定から消えたことを確かめる。
+オーナーが、試作のアプリ（ブランチ `spike/smappservice-probe`）と、その手順書で確かめる。agent と mainApp の登録は永続的なシステム変更である。終わったら、試作のアプリから両方を unregister し、システム設定から消えたことを確かめる。
 
 ## 結果
 
-未確認。
+支持された（`EVID-LCY-003`）。agent は登録とログインでは起動せず、`kickstart` で起動し、クラッシュでは起動し直し、正常終了では起動し直さなかった。mainApp を登録するとログイン時にアプリが起動し、unregister すると起動しなかった。agent はその影響を受けなかった。mainApp を unregister しても、動いているアプリは終了しなかった。

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-HLP-003
 title: ヘルパーは C の小さな実行ファイルにし、自分の sudoers のルールだけを検証して設置する
-status: accepted
+status: superseded
 supersedes: ["DEC-HLP-002"]
-superseded_by: []
+superseded_by: ["DEC-HLP-005"]
 requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-003", "REQ-HLP-005", "REQ-HLP-006"]
 based_on: ["DEC-HLP-001", "EVID-HLP-001", "EVID-HLP-002"]
 ---

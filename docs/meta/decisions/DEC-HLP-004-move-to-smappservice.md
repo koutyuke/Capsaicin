@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-HLP-004
 title: root ヘルパーとバックグラウンド項目を SMAppService に移す方向を採り、試作で前提を確かめてから設計を確定する
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-HLP-005"]
 requirements: ["REQ-SYS-005", "REQ-SYS-006", "REQ-HLP-002", "REQ-HLP-004", "REQ-LCY-001", "REQ-LCY-003"]
 based_on: ["DEC-SYS-021", "DEC-HLP-001", "DEC-HLP-003", "DEC-LCY-002", "HYP-BLK-007", "HYP-HLP-005", "HYP-HLP-006", "HYP-HLP-007", "HYP-LCY-006", "HYP-LCY-007"]
 ---

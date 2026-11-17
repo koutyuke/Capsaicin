@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-006
 title: 同じ Team ID と署名識別子の版へ入れ替えて登録し直しても、デーモンの承認は保たれ、新しい版に XPC でつながる
-status: open
+status: supported
 affects: ["DEC-HLP-004"]
-evidence: []
+evidence: ["EVID-HLP-005"]
 ---
 
 # HYP-HLP-006 同じ Team ID と署名識別子の版へ入れ替えて登録し直しても、デーモンの承認は保たれ、新しい版に XPC でつながる
@@ -24,8 +24,8 @@ evidence: []
 
 ## 確かめ方
 
-オーナーが、試作のアプリの2つの版（`TASK-103`）と、その手順書で確かめる。macOS のバージョンを記録する。登録の後片付けは `HYP-HLP-005` と同じである。
+オーナーが、試作のアプリの2つの版（ブランチ `spike/smappservice-probe`）と、その手順書で確かめる。macOS のバージョンを記録する。登録の後片付けは `HYP-HLP-005` と同じである。
 
 ## 結果
 
-未確認。
+支持された（`EVID-HLP-005`）。別の inode への置き換えでも、同じバンドルへの上書きでも、承認は保たれ、新しい版のデーモンが応答した。主張の 2 より強く、登録し直す前から、次に起動したデーモンは新しい版だった。unregister の直後の register は EPERM で1回失敗し、3秒待った試し直しで成功した。plist の中身を変えた版では試していない。
