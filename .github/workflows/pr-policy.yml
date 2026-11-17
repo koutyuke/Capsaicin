@@ -73,6 +73,9 @@ jobs:
               if [[ "$type_label_count" -ne 1 ]]; then
                 fail "A PR from hotfix/* to main must have exactly one T-* label (found $type_label_count)."
               fi
+              if has_label I-Breaking; then
+                fail "A PR from hotfix/* to main must not have the I-Breaking label."
+              fi
               ;;
             *)
               fail "A PR to main must come from release/v* or hotfix/*."

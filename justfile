@@ -27,8 +27,8 @@ dist: build-release
     ditto -c -k --norsrc --noextattr --noacl --keepParent .build/xcode/Build/Products/Release/Capsaicin.app .build/dist/Capsaicin-{{ version }}.zip
     cd .build/dist && shasum -a 256 Capsaicin-{{ version }}.zip > SHA256SUMS.txt
 
-prepare-release mode="":
-    python3 scripts/prepare_release.py {{ mode }}
+prepare-release kind:
+    python3 scripts/prepare_release.py {{ kind }}
 
 test: test-scripts test-package test-app
 

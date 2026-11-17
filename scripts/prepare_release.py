@@ -16,6 +16,9 @@ BUILD_LINE = re.compile(
 )
 
 
+KINDS = ("major", "minor", "patch")
+
+
 class ReleaseError(Exception):
     """利用者が直せる理由で準備を止める。"""
 
@@ -27,11 +30,6 @@ def next_version(version, kind):
     if kind == "minor":
         return f"{major}.{minor + 1}.0"
     return f"{major}.{minor}.{patch + 1}"
-
-
-def release_kind(version, pull_requests):
-    breaking = any(item["breaking"] for item in pull_requests)
-    return "major" if breaking and int(version.split(".")[0]) else "minor"
 
 
 def pull_request_numbers(subjects):
@@ -90,6 +88,16 @@ def latest_release():
         )
     numbers, tag = max(versions)
     return tag, ".".join(map(str, numbers))
+
+
+def branch_refs(pattern):
+    """手元と origin にある、名前が pattern に当たるブランチを返す。"""
+    return git(
+        "for-each-ref",
+        "--format=%(refname)",
+        f"refs/heads/{pattern}",
+        f"refs/remotes/origin/{pattern}",
+    ).stdout
 
 
 def ensure_ancestor(revision):
@@ -178,7 +186,7 @@ def patch_commits():
     ]
 
 
-def prepare(mode):
+def prepare(kind):
     if git("status", "--porcelain").stdout:
         raise ReleaseError(
             "error: The working tree has changes.\n"
@@ -208,54 +216,65 @@ def prepare(mode):
         )
 
     branch = git("branch", "--show-current").stdout.strip()
-    if mode == "patch":
-        if not branch.startswith("hotfix/"):
+    if branch.startswith("hotfix/"):
+        if kind != "patch":
             raise ReleaseError(
-                "error: The current branch is not hotfix/*.\n"
-                "hint: Create a hotfix/* branch from main and switch to it."
+                "error: A hotfix/* branch can only make a patch release.\n"
+                "hint: Run with patch, or release from develop."
             )
         if not git("rev-list", "origin/main..HEAD").stdout:
             raise ReleaseError(
                 "error: No commits to release on the hotfix branch.\n"
                 "hint: Commit the fix, then try again."
             )
-        kind = "patch"
         version = next_version(previous, kind)
+        # develop から同じ版の PATCH を準備中なら、どちらかが公開に失敗するので止める。
+        if branch_refs(f"release/v{version}"):
+            raise ReleaseError(
+                f"error: release/v{version} already exists.\n"
+                "hint: Complete or remove that release, then try again."
+            )
         pull_requests = []
         commits = patch_commits()
-    else:
-        if branch != "develop":
-            raise ReleaseError(
-                "error: The current branch is not develop.\nhint: Switch to develop."
-            )
+    elif branch == "develop":
         if git("rev-parse", "HEAD").stdout != git("rev-parse", "origin/develop").stdout:
             raise ReleaseError(
                 "error: develop does not match origin/develop.\n"
                 "hint: Push or pull to bring them in sync."
             )
-        release_refs = git(
-            "for-each-ref",
-            "--format=%(refname)",
-            "refs/heads/release/",
-            "refs/remotes/origin/release/",
-        ).stdout
-        if release_refs:
+        if branch_refs("release/"):
             raise ReleaseError(
                 "error: A release/* branch already exists.\n"
                 "hint: Complete or remove the current release, then try again."
             )
+        # hotfix/* も次の PATCH の版を使うので、同時に準備しない。
+        if kind == "patch" and branch_refs("hotfix/"):
+            raise ReleaseError(
+                "error: A hotfix/* branch exists.\n"
+                "hint: Complete or remove the hotfix, then try again."
+            )
         pull_requests = read_pull_requests(tag)
-        kind = release_kind(previous, pull_requests)
+        breaking = [f"#{item['number']}" for item in pull_requests if item["breaking"]]
+        if kind == "patch" and breaking:
+            raise ReleaseError(
+                f"error: A patch release cannot include I-Breaking PRs: {', '.join(breaking)}.\n"
+                "hint: Run with minor or major."
+            )
         version = next_version(previous, kind)
         branch = f"release/v{version}"
         commits = []
+    else:
+        raise ReleaseError(
+            "error: The current branch is not develop or hotfix/*.\n"
+            "hint: Switch to develop, or to a hotfix/* branch for a patch release."
+        )
 
     if git("tag", "--list", f"v{version}").stdout:
         raise ReleaseError(
             f"error: Tag v{version} already exists.\n"
             "hint: Check the tag and version history."
         )
-    if mode != "patch":
+    if not branch.startswith("hotfix/"):
         git("switch", "-c", branch)
 
     try:
@@ -288,14 +307,15 @@ def prepare(mode):
 
 def main(argv=None):
     args = sys.argv[1:] if argv is None else argv
-    if args not in ([], ["patch"]):
+    if len(args) != 1 or args[0] not in KINDS:
         print(
-            "usage: prepare_release.py [patch]\nRun with no arguments, or patch for a patch release.",
+            "usage: prepare_release.py {major|minor|patch}\n"
+            "Run with the part of the version to increase.",
             file=sys.stderr,
         )
         return 1
     try:
-        prepare(args[0] if args else "release")
+        prepare(args[0])
     except ReleaseError as exc:
         print(exc, file=sys.stderr)
         return 1
