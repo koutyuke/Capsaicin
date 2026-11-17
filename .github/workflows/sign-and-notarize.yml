@@ -1,0 +1,238 @@
+name: Sign and notarize
+
+on:
+  workflow_call:
+    inputs:
+      input-artifact:
+        required: true
+        type: string
+      zip-name:
+        required: true
+        type: string
+      output-artifact:
+        required: true
+        type: string
+    secrets:
+      DEVELOPER_ID_P12_BASE64:
+        required: true
+      DEVELOPER_ID_P12_PASSWORD:
+        required: true
+      NOTARY_API_KEY:
+        required: true
+      NOTARY_API_KEY_ID:
+        required: true
+      NOTARY_API_ISSUER_ID:
+        required: true
+    outputs:
+      artifact_url:
+        description: 署名と公証を終えた artifact の URL
+        value: ${{ jobs.sign-and-notarize.outputs.artifact_url }}
+
+permissions: {}
+
+jobs:
+  sign-and-notarize:
+    runs-on: xcode-27
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      artifact_url: ${{ steps.upload.outputs.artifact-url }}
+    env:
+      ZIP_NAME: ${{ inputs.zip-name }}
+    steps:
+      - name: Set temporary paths
+        run: |
+          {
+            echo "KEYCHAIN_PATH=$RUNNER_TEMP/capsaicin-signing.keychain-db"
+            echo "KEYCHAIN_LIST_PATH=$RUNNER_TEMP/capsaicin-keychain-list.txt"
+            echo "P12_PATH=$RUNNER_TEMP/capsaicin-developer-id.p12"
+            echo "NOTARY_KEY_PATH=$RUNNER_TEMP/AuthKey.p8"
+            echo "APP_PATH=$RUNNER_TEMP/capsaicin-package/Capsaicin.app"
+            echo "NOTARY_ARCHIVE_PATH=$RUNNER_TEMP/Capsaicin-notarization.zip"
+          } >> "$GITHUB_ENV"
+      # どの secret が不足しているかを、秘密情報を使う前にまとめて示す。
+      - name: Require signing secrets
+        env:
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          missing=()
+          for name in \
+            DEVELOPER_ID_P12_BASE64 \
+            DEVELOPER_ID_P12_PASSWORD \
+            NOTARY_API_KEY \
+            NOTARY_API_KEY_ID \
+            NOTARY_API_ISSUER_ID; do
+            [[ -n "${!name}" ]] || missing+=("$name")
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf '::error::Missing required secret: %s\n' "${missing[@]}"
+            exit 1
+          fi
+      # checkout せず、ビルドジョブが作った ad-hoc 署名の zip だけを受け取る。
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.input-artifact }}
+          path: dist
+      - name: Check unsigned package
+        run: |
+          if [[ ! "$ZIP_NAME" =~ ^Capsaicin-[[:alnum:]][[:alnum:].+_-]*[.]zip$ ]]; then
+            echo '::error::Invalid package zip name'
+            exit 1
+          fi
+          archives=(dist/*.zip)
+          if [[ ${#archives[@]} -ne 1 || "${archives[0]}" != "dist/$ZIP_NAME" ]]; then
+            echo '::error::Expected exactly the requested package zip'
+            exit 1
+          fi
+          (cd dist && shasum -a 256 -c SHA256SUMS.txt)
+      - name: Create temporary signing keychain
+        env:
+          DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          keychain_password="$(openssl rand -hex 32)"
+          security list-keychains -d user |
+            sed -E 's/^[[:space:]]*"(.*)"[[:space:]]*$/\1/' > "$KEYCHAIN_LIST_PATH"
+
+          printf '%s' "$DEVELOPER_ID_P12_BASE64" | base64 -D > "$P12_PATH"
+          chmod 600 "$P12_PATH"
+          security create-keychain -p "$keychain_password" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$keychain_password" "$KEYCHAIN_PATH"
+          security import "$P12_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$DEVELOPER_ID_P12_PASSWORD" \
+            -T /usr/bin/codesign
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s \
+            -k "$keychain_password" \
+            "$KEYCHAIN_PATH" >/dev/null
+
+          keychains=()
+          while IFS= read -r keychain; do
+            [[ -n "$keychain" ]] && keychains+=("$keychain")
+          done < "$KEYCHAIN_LIST_PATH"
+          keychains+=("$KEYCHAIN_PATH")
+          security list-keychains -d user -s "${keychains[@]}"
+
+          identity_count="$(
+            security find-identity -v -p codesigning "$KEYCHAIN_PATH" |
+              grep -F -c '"Developer ID Application:' || true
+          )"
+          if [[ "$identity_count" != 1 ]]; then
+            echo "::error::Expected exactly one valid Developer ID Application identity; found $identity_count (check the .p12 and the Developer ID G2 intermediate certificate)"
+            exit 1
+          fi
+      - name: Sign app from the inside out
+        run: |
+          mkdir -p "$(dirname "$APP_PATH")"
+          ditto -x -k "dist/$ZIP_NAME" "$(dirname "$APP_PATH")"
+          [[ -d "$APP_PATH" ]] || { echo '::error::Capsaicin.app is missing'; exit 1; }
+
+          sparkle="$APP_PATH/Contents/Frameworks/Sparkle.framework"
+          sign=(codesign --force --timestamp --options runtime --keychain "$KEYCHAIN_PATH" --sign "Developer ID Application")
+          "${sign[@]}" --identifier io.github.koutyuke.capsaicin.cli \
+            "$APP_PATH/Contents/Helpers/capsaicin"
+          "${sign[@]}" --identifier io.github.koutyuke.capsaicin.helper \
+            "$APP_PATH/Contents/Helpers/capsaicin-helper"
+          "${sign[@]}" "$sparkle/Versions/B/XPCServices/Installer.xpc"
+          "${sign[@]}" --preserve-metadata=entitlements \
+            "$sparkle/Versions/B/XPCServices/Downloader.xpc"
+          "${sign[@]}" "$sparkle/Versions/B/Autoupdate"
+          "${sign[@]}" "$sparkle/Versions/B/Updater.app"
+          "${sign[@]}" "$sparkle"
+          "${sign[@]}" "$APP_PATH"
+
+          codesign --verify --strict --deep --verbose=2 "$APP_PATH"
+      - name: Write notarization key
+        env:
+          NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+        run: |
+          umask 077
+          printf '%s\n' "$NOTARY_API_KEY" > "$NOTARY_KEY_PATH"
+          chmod 600 "$NOTARY_KEY_PATH"
+      - name: Submit for notarization
+        env:
+          NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+          NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+        run: |
+          ditto -c -k --keepParent "$APP_PATH" "$NOTARY_ARCHIVE_PATH"
+          set +e
+          result="$(
+            xcrun notarytool submit "$NOTARY_ARCHIVE_PATH" \
+              --key "$NOTARY_KEY_PATH" \
+              --key-id "$NOTARY_API_KEY_ID" \
+              --issuer "$NOTARY_API_ISSUER_ID" \
+              --wait \
+              --output-format json
+          )"
+          command_status=$?
+          set -e
+          printf '%s\n' "$result"
+
+          submission_id="$(jq -r '.id // empty' <<< "$result" 2>/dev/null || true)"
+          notarization_status="$(jq -r '.status // empty' <<< "$result" 2>/dev/null || true)"
+          if [[ $command_status -ne 0 || "$notarization_status" != Accepted ]]; then
+            if [[ -n "$submission_id" ]]; then
+              xcrun notarytool log "$submission_id" \
+                --key "$NOTARY_KEY_PATH" \
+                --key-id "$NOTARY_API_KEY_ID" \
+                --issuer "$NOTARY_API_ISSUER_ID" || true
+            fi
+            echo "::error::Notarization was not accepted (status: ${notarization_status:-unknown})"
+            exit 1
+          fi
+      - name: Staple and validate
+        run: |
+          xcrun stapler staple "$APP_PATH"
+          xcrun stapler validate "$APP_PATH"
+          if ! assessment="$(spctl --assess --type execute -vv "$APP_PATH" 2>&1)"; then
+            printf '%s\n' "$assessment"
+            exit 1
+          fi
+          printf '%s\n' "$assessment"
+          if ! grep -F 'source=Notarized Developer ID' <<< "$assessment" >/dev/null; then
+            echo '::error::Gatekeeper assessment did not report source=Notarized Developer ID'
+            exit 1
+          fi
+      - name: Repackage signed app
+        run: |
+          mkdir -p signed-dist
+          ditto -c -k --norsrc --noextattr --noacl --keepParent \
+            "$APP_PATH" "signed-dist/$ZIP_NAME"
+          (cd signed-dist && shasum -a 256 "$ZIP_NAME" > SHA256SUMS.txt)
+      - name: Upload signed package
+        id: upload
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ inputs.output-artifact }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            signed-dist/${{ inputs.zip-name }}
+            signed-dist/SHA256SUMS.txt
+      - name: Clean up signing credentials
+        if: always()
+        run: |
+          if [[ -f "$KEYCHAIN_LIST_PATH" ]]; then
+            keychains=()
+            while IFS= read -r keychain; do
+              [[ -n "$keychain" ]] && keychains+=("$keychain")
+            done < "$KEYCHAIN_LIST_PATH"
+            security list-keychains -d user -s "${keychains[@]}" || true
+          fi
+          if [[ -f "$KEYCHAIN_PATH" ]]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi
+          rm -f \
+            "$KEYCHAIN_PATH" \
+            "$KEYCHAIN_LIST_PATH" \
+            "$P12_PATH" \
+            "$NOTARY_KEY_PATH" \
+            "$NOTARY_ARCHIVE_PATH"

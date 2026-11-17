@@ -18,7 +18,7 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 
 ## 破ってはいけないもの
 
-1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。justfile の `manual` グループのレシピ（`start`、`stop`、`restart`、`status`）はアプリの起動とプロセスの停止を行うオーナー専用の操作なので、エージェントは実行しない。
+1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。例外として、オーナーが確認の対象と手順を承認したときに限り、自分の worktree の Debug アプリの起動と終了（justfile の `app` グループのレシピを含む）、それに伴う Debug の LaunchAgent の登録と Debug のジョブへの `launchctl`、状態の読み取りを行ってよい。範囲と、承認があっても行わないことは `DEC-SYS-024` にある。
 2. **Caps Lock の入力状態を変えない。** LED の表示だけを扱う。
 3. **root で動くコードを増やさない。** ヘルパーが受け付けるのは決められたサブコマンドだけにする。ヘルパーにシェル、任意のパス、任意の環境変数を通さない。
 4. **本番コードに `REQ-*` と `SPEC-*` を書かない。** 仕様との対応はテスト名が持つ。
@@ -65,28 +65,28 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
 
-| レシピ             | 実行すること                                                                                                                                        |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
-| `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
-| `status`           | オーナー専用。Debug ジョブ・plist とこのチェックアウトの対応、全 Debug プロセス、スリープの状態を読む                                               |
-| `stop`             | オーナー専用。すべてのチェックアウトの Debug アプリを終了する                                                                                       |
-| `start`            | オーナー専用。Debug アプリが動いていないことを確かめ、ジョブを外してこのチェックアウトのビルドを開く                                                |
-| `restart`          | オーナー専用。ビルドに成功してから `stop`、`start` の順に実行する                                                                                   |
-| `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
-| `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
-| `prepare-release`  | `develop`（`patch` なら `hotfix/*`）から、版を上げたリリース用のコミットを手元に作り、材料を `.build/release/` に書き出す。push はしない            |
-| `test`             | `test-scripts`、`test-package`、`test-app` を実行する                                                                                               |
-| `test-scripts`     | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                      |
-| `test-package`     | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                             |
-| `test-app`         | `gen` の後、アプリを起動しないテストでバンドルと埋め込んだ実行ファイルを検査する                                                                    |
-| `fmt`              | treefmt で各言語と justfile を整形する。`nix fmt` も同じ設定・実行ファイルを使う                                                                    |
-| `fmt-check`        | 一時コピー上で treefmt を実行し、元のファイルを変えずに各言語と justfile の整形差分を検出する。String Catalog に `stale` のキーがないことも確かめる |
-| `lint-code`        | SwiftLint、markdownlint-cli2、ShellCheck、Ruff、statix、deadnix を実行する                                                                          |
-| `lint-docs`        | `docs/documentation-management.md` が定める文書の構造と参照を検査する                                                                               |
-| `lint-build-tools` | CI が Nix を使わずに入れる `just` と XcodeGen の版（`.github/build-tools.env`）が `flake.lock` の版と一致するかを確かめる                           |
-| `lint`             | `lint-code`、`lint-docs`、`lint-build-tools` を実行する                                                                                             |
-| `check`            | `fmt-check`、`lint`、`test` を順に実行する                                                                                                          |
+| レシピ             | 実行すること                                                                                                                                         |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                  |
+| `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                     |
+| `status`           | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。Debug ジョブ・plist とこのチェックアウトの対応、全 Debug プロセス、スリープの状態を読む |
+| `stop`             | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。すべてのチェックアウトの Debug アプリを終了する                                         |
+| `start`            | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。Debug アプリが動いていないことを確かめ、ジョブを外してこのチェックアウトのビルドを開く  |
+| `restart`          | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。ビルドに成功してから `stop`、`start` の順に実行する                                     |
+| `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                         |
+| `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                      |
+| `prepare-release`  | `develop`（`patch` なら `hotfix/*`）から、版を上げたリリース用のコミットを手元に作り、材料を `.build/release/` に書き出す。push はしない             |
+| `test`             | `test-scripts`、`test-package`、`test-app` を実行する                                                                                                |
+| `test-scripts`     | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                       |
+| `test-package`     | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                              |
+| `test-app`         | `gen` の後、アプリを起動しないテストでバンドルと埋め込んだ実行ファイルを検査する                                                                     |
+| `fmt`              | treefmt で各言語と justfile を整形する。`nix fmt` も同じ設定・実行ファイルを使う                                                                     |
+| `fmt-check`        | 一時コピー上で treefmt を実行し、元のファイルを変えずに各言語と justfile の整形差分を検出する。String Catalog に `stale` のキーがないことも確かめる  |
+| `lint-code`        | SwiftLint、markdownlint-cli2、ShellCheck、Ruff、statix、deadnix を実行する                                                                           |
+| `lint-docs`        | `docs/documentation-management.md` が定める文書の構造と参照を検査する                                                                                |
+| `lint-build-tools` | CI が Nix を使わずに入れる `just` と XcodeGen の版（`.github/build-tools.env`）が `flake.lock` の版と一致するかを確かめる                            |
+| `lint`             | `lint-code`、`lint-docs`、`lint-build-tools` を実行する                                                                                              |
+| `check`            | `fmt-check`、`lint`、`test` を順に実行する                                                                                                           |
 
 文書の移行と衝突しないよう、`docs/` は自動整形と Markdown lint の対象から除き、`lint-docs` で構造を検査する。`*.tpl.*` は文書の構造検査から除く。移行中の文書で検査が落ちても、チケットの範囲外のファイルを直してはならない。
 
@@ -94,6 +94,6 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 開発ツールが通常のキャッシュをユーザー領域に書くことと、Xcode がビルド済み `.debug` アプリを LaunchServices に登録することは許可する。`HOME` や `CFFIXED_USER_HOME` は変更せず、SwiftPM と Swift マクロの標準の sandbox を使う。SwiftFormat には treefmt から `--cache ignore` を渡し、ユーザー領域にキャッシュを書かせない。
 
-この許可はシステム設定や常駐処理の変更には及ばない。`sudo`、`pmset` の設定変更、`launchctl` は実行しない。`~/Library/LaunchAgents`、`/Library/LaunchAgents`、`/Library/LaunchDaemons`、`/etc/sudoers`、`/etc/sudoers.d`、`/Library/PrivilegedHelperTools` への書き込みと、ヘルパーのインストールは禁止する。
+この許可はシステム設定や常駐処理の変更には及ばない。`sudo`、`pmset` の設定変更、`launchctl` は実行しない（オーナーが承認した Debug アプリの確認は例外で、範囲は `DEC-SYS-024` にある）。`~/Library/LaunchAgents`、`/Library/LaunchAgents`、`/Library/LaunchDaemons`、`/etc/sudoers`、`/etc/sudoers.d`、`/Library/PrivilegedHelperTools` への書き込みと、ヘルパーのインストールは禁止する。
 
 Git フックが必要なら `nix develop --command lefthook install` を実行する。pre-commit は `fmt-check` と `lint` だけで、自動整形、自動ステージ、テストは行わない。treefmt の `--ci` はファイルを書き換えるため、検査として直接使わず `just fmt-check` を使う。

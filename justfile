@@ -20,6 +20,24 @@ build: gen
 build-release: gen
     /usr/bin/xcodebuild {{ xcode_base }} -configuration Release build
 
+# 確認用 Debug の追加 dylib を作らず、PR とコミットを名前に含む zip を作る。
+[positional-arguments]
+dist-debug pr sha: gen
+    #!/usr/bin/env bash
+    set -euo pipefail
+    pr="$1"
+    sha="$2"
+    [[ "$pr" =~ ^[0-9]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Invalid PR number or commit SHA' >&2; exit 1; }
+    /usr/bin/xcodebuild {{ xcode_args }} ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO build
+    if find '{{ debug_app }}' -type f \( -name '*.debug.dylib' -o -name '__preview.dylib' \) -print | grep -q .; then
+        echo 'Unexpected Debug or preview dylib in the app' >&2
+        exit 1
+    fi
+    mkdir -p .build/debug-dist
+    zip_name="Capsaicin-debug-pr${pr}-${sha:0:7}.zip"
+    ditto -c -k --norsrc --noextattr --noacl --keepParent '{{ debug_app }}' ".build/debug-dist/$zip_name"
+    (cd .build/debug-dist && shasum -a 256 "$zip_name" > SHA256SUMS.txt)
+
 # Create a distribution zip and SHA-256 checksum in .build/dist/.
 dist: build-release
     mkdir -p .build/dist
@@ -75,8 +93,8 @@ lint: lint-code lint-docs lint-build-tools
 
 check: fmt-check lint test
 
-# Show the Debug job, paths, processes, and sleep state (owner only).
-[group('manual')]
+# Show the Debug job, paths, processes, and sleep state (agents need owner approval).
+[group('app')]
 status:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -103,8 +121,8 @@ status:
     /usr/bin/pmset -g assertions | /usr/bin/grep -i capsaicin || echo 'No Capsaicin assertions, or could not read them.'
     exit 0
 
-# Quit all Debug apps, then send SIGTERM only to remaining processes (owner only).
-[group('manual')]
+# Quit all Debug apps, then send SIGTERM only to remaining processes (agents need owner approval).
+[group('app')]
 stop:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -128,8 +146,8 @@ stop:
     printf 'Debug PIDs still running:\n%s\n' "$(pids)" >&2
     exit 1
 
-# Open this checkout's Debug app after unloading its job (owner only).
-[group('manual')]
+# Open this checkout's Debug app after unloading its job (agents need owner approval).
+[group('app')]
 start:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -154,6 +172,6 @@ start:
     echo 'The Debug job did not start within 10 seconds.' >&2
     exit 1
 
-# Build, stop, and start this checkout's Debug app, in that order (owner only).
-[group('manual')]
+# Build, stop, and start this checkout's Debug app, in that order (agents need owner approval).
+[group('app')]
 restart: build stop start
