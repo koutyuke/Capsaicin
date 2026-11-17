@@ -9,19 +9,25 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
     let isEnabled: Bool
     private(set) var canCheckForUpdates = false
     private(set) var lastUpdateCheckDate: Date?
-    private(set) var pendingUpdateVersion: String?
+    var pendingUpdateVersion: String? {
+        dismissedInstallationVersion ?? scheduledUpdateVersion
+    }
+
     private(set) var pendingInstallationVersion: String?
+    private var scheduledUpdateVersion: String?
+    private var dismissedInstallationVersion: String?
     private var currentMode = AutomaticUpdateMode.off
-    @ObservationIgnored private var controller: SPUStandardUpdaterController?
+    @ObservationIgnored private var updater: SPUUpdater?
     @ObservationIgnored private var observations: [NSKeyValueObservation] = []
     @ObservationIgnored private var pendingInstallation: (() -> Void)?
+    private let bundle: Bundle
     private var isBlocking = false
     private var settingsWindowIsOpen = false
 
     var automaticUpdateMode: AutomaticUpdateMode {
         get { currentMode }
         set {
-            guard let updater = controller?.updater else { return }
+            guard let updater else { return }
             updater.automaticallyChecksForUpdates = newValue.automaticallyChecksForUpdates
             updater.automaticallyDownloadsUpdates = newValue.automaticallyDownloadsUpdates
             refresh()
@@ -29,6 +35,7 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
     }
 
     init(bundle: Bundle = .main) {
+        self.bundle = bundle
         isEnabled = UpdatePolicy.isEnabled(
             feedURL: bundle.object(forInfoDictionaryKey: "SUFeedURL") as? String ?? "",
             publicKey: bundle.object(forInfoDictionaryKey: "SUPublicEDKey") as? String ?? "",
@@ -37,12 +44,15 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
     }
 
     func start() {
-        guard isEnabled, controller == nil else { return }
-        let controller = SPUStandardUpdaterController(
-            startingUpdater: false, updaterDelegate: self, userDriverDelegate: self,
-        )
-        self.controller = controller
-        let updater = controller.updater
+        guard isEnabled, updater == nil else { return }
+        let standard = SPUStandardUserDriver(hostBundle: bundle, delegate: self)
+        let userDriver = InstallationUserDriver(standard: standard) { [weak self] choice, stage, version in
+            guard let self else { return choice }
+            return installationReply(choice, stage: stage, version: version,
+                                     confirm: confirmStoppingForInstallation)
+        }
+        let updater = SPUUpdater(hostBundle: bundle, applicationBundle: bundle, userDriver: userDriver, delegate: self)
+        self.updater = updater
         observations = [
             updater.observe(\.automaticallyChecksForUpdates, options: [.initial, .new]) { [weak self] _, _ in
                 MainActor.assumeIsolated { self?.refresh() }
@@ -57,13 +67,17 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
                 MainActor.assumeIsolated { self?.refresh() }
             },
         ]
-        controller.startUpdater()
+        do {
+            try updater.start()
+        } catch {
+            NSAlert(error: error).runModal()
+        }
     }
 
     func checkForUpdates() {
         guard canCheckForUpdates else { return }
         NSApp.activate(ignoringOtherApps: true)
-        controller?.checkForUpdates(nil)
+        updater?.checkForUpdates()
     }
 
     func updateInstallationConditions(isBlocking: Bool, settingsWindowIsOpen: Bool) {
@@ -73,7 +87,7 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
     }
 
     func refresh() {
-        guard let updater = controller?.updater else { return }
+        guard let updater else { return }
         currentMode = AutomaticUpdateMode(
             automaticallyChecksForUpdates: updater.automaticallyChecksForUpdates,
             automaticallyDownloadsUpdates: updater.automaticallyDownloadsUpdates,
@@ -103,17 +117,19 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
     func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem,
                                                    state _: SPUUserUpdateState)
     {
+        // 次の提示に引き継ぐ。返答後にも届く attention の通知では取り消しの記録を消さない。
+        dismissedInstallationVersion = nil
         if !handleShowingUpdate {
-            pendingUpdateVersion = update.displayVersionString
+            scheduledUpdateVersion = update.displayVersionString
         }
     }
 
     func standardUserDriverDidReceiveUserAttention(forUpdate _: SUAppcastItem) {
-        pendingUpdateVersion = nil
+        scheduledUpdateVersion = nil
     }
 
     func standardUserDriverWillFinishUpdateSession() {
-        pendingUpdateVersion = nil
+        scheduledUpdateVersion = nil
     }
 
     func updater(_: SPUUpdater, willInstallUpdateOnQuit item: SUAppcastItem,
@@ -126,25 +142,22 @@ final class UpdateModel: NSObject, SPUUpdaterDelegate, @preconcurrency SPUStanda
         return true
     }
 
-    func updater(_: SPUUpdater, shouldPostponeRelaunchForUpdate item: SUAppcastItem,
-                 untilInvokingBlock installHandler: @escaping () -> Void) -> Bool
+    func installationReply(_ choice: SPUUserUpdateChoice, stage: SPUUserUpdateStage, version: String,
+                           confirm: () -> Bool) -> SPUUserUpdateChoice
     {
-        guard isBlocking else { return false }
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            if confirmStoppingForInstallation() {
-                installHandler()
-            } else {
-                // 取り消しは今のインストールだけを止める。抑止と設定画面が終わったら続ける。
-                pendingInstallationVersion = item.displayVersionString
-                pendingInstallation = installHandler
-            }
+        let resolved = UpdateInstallationReply.resolve(choice, stage: stage, isBlocking: isBlocking, confirm: confirm)
+        if choice == .install, resolved == .dismiss {
+            dismissedInstallationVersion = version
         }
-        return true
+        return resolved
     }
 
-    func updater(_: SPUUpdater, didFinishUpdateCycleFor _: SPUUpdateCheck, error _: any Error?) {
-        pendingUpdateVersion = nil
+    func updater(_: SPUUpdater, didFinishUpdateCycleFor _: SPUUpdateCheck, error: any Error?) {
+        scheduledUpdateVersion = nil
+        // Dismiss で終わるセッションでは、次に画面を見るまで取り消した版を知らせる。
+        if error != nil {
+            dismissedInstallationVersion = nil
+        }
         pendingInstallationVersion = nil
         pendingInstallation = nil
         refresh()
