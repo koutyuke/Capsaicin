@@ -76,7 +76,7 @@ lint: lint-code lint-docs lint-build-tools
 check: fmt-check lint test
 
 # Show the Debug job, paths, processes, and sleep state (agents need owner approval).
-[group('manual')]
+[group('app')]
 status:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -104,7 +104,7 @@ status:
     exit 0
 
 # Quit all Debug apps, then send SIGTERM only to remaining processes (agents need owner approval).
-[group('manual')]
+[group('app')]
 stop:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -129,7 +129,7 @@ stop:
     exit 1
 
 # Open this checkout's Debug app after unloading its job (agents need owner approval).
-[group('manual')]
+[group('app')]
 start:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -155,5 +155,5 @@ start:
     exit 1
 
 # Build, stop, and start this checkout's Debug app, in that order (agents need owner approval).
-[group('manual')]
+[group('app')]
 restart: build stop start

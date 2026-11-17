@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-020
 title: 実機確認の操作は just のレシピにし、手順書のシェル変数は退避先だけにする
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SYS-024"]
 requirements: []
 based_on: ["DEC-LCY-002"]
 ---

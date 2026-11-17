@@ -18,7 +18,7 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 
 ## 破ってはいけないもの
 
-1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。例外として、オーナーが確認の対象と手順を承認したときに限り、自分の worktree の Debug アプリの起動と終了（justfile の `manual` グループのレシピを含む）、それに伴う Debug の LaunchAgent の登録と Debug のジョブへの `launchctl`、状態の読み取りを行ってよい。範囲と、承認があっても行わないことは `DEC-SYS-024` にある。
+1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。例外として、オーナーが確認の対象と手順を承認したときに限り、自分の worktree の Debug アプリの起動と終了（justfile の `app` グループのレシピを含む）、それに伴う Debug の LaunchAgent の登録と Debug のジョブへの `launchctl`、状態の読み取りを行ってよい。範囲と、承認があっても行わないことは `DEC-SYS-024` にある。
 2. **Caps Lock の入力状態を変えない。** LED の表示だけを扱う。
 3. **root で動くコードを増やさない。** ヘルパーが受け付けるのは決められたサブコマンドだけにする。ヘルパーにシェル、任意のパス、任意の環境変数を通さない。
 4. **本番コードに `REQ-*` と `SPEC-*` を書かない。** 仕様との対応はテスト名が持つ。
