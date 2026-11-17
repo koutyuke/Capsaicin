@@ -106,7 +106,9 @@ Developer ID Application 証明書の有効期限は 2027年12月17日である�
 
 1. `develop` で、エージェントにスキル `capsaicin-release` を使ってリリースの準備を進めるよう依頼する。
 2. エージェントが示したバージョン、プレリリースにするか、PR の本文を確かめる。問題がなければ、ブランチの push と PR の作成を承認する。プレリリースにするかは、マージの前なら PR の `S-Prerelease` を付け外しして変えられる。
-3. PR のコメントから確認用のビルドをダウンロードし、Developer ID で署名され、公証されていることと、実機で既存の機能が動くことを確かめる。zip を展開し、次を実行する。`codesign` の出力に `Authority=Developer ID Application`、`spctl` の出力に `source=Notarized Developer ID` が含まれている必要がある。
+3. PR の `Release preview` コメントが `ready` になったら、Download から確認用のビルドをダウンロードする。コメントは種類ごとに1つで、ビルドの前に `building`、成功時に `ready`、失敗時に `failed` へ書き換わる。`ready` にはコミット、Release の版、署名と公証の状態、artifact の期限（7日間）、実行のログが表示される。Release の確認用ビルドは、インストール済みの正式版を置き換える。
+
+   Developer ID で署名され、公証されていることと、実機で既存の機能が動くことを確かめる。zip を展開し、次を実行する。`codesign` の出力に `Authority=Developer ID Application`、`spctl` の出力に `source=Notarized Developer ID` が含まれている必要がある。
 
    ```sh
    codesign -dv --verbose=2 Capsaicin.app 2>&1
@@ -123,6 +125,23 @@ Developer ID Application 証明書の有効期限は 2027年12月17日である�
 7. 「戻しマージ」へ進む。
 
 v0.1.0 の利用者には、最初の Sparkle 対応版を手で入れ替えてもらう。v0.1.0 にはアプリ内の更新の仕組みがない。
+
+## develop への PR の Debug 確認用ビルド
+
+オーナーが GitHub に `S-Preview` ラベルを作り、同じリポジトリのブランチから `develop` へ向けた PR に付ける（`DEC-SYS-023`）。署名と公証には、上記の Developer ID と公証用の5つの secret を使う。外部リポジトリからの PR では動かない。
+
+```text
+S-Preview を付ける／ラベルがある PR を更新する
+  → Debug preview: building
+  → ad-hoc ビルド → 別ジョブで署名・公証
+  → Debug preview: ready または failed
+```
+
+`Debug preview` コメントの Download から `Capsaicin-debug-pr{PR番号}-{コミットの先頭7桁}.zip` を取得する。bundle ID は `io.github.koutyuke.capsaicin.debug` で、正式版と同時に入れられる。Sparkle による更新は無効である。artifact は7日間保持される。
+
+ラベルを付けたまま head を更新すると作り直し、同じ PR の古い実行を取り消す。取り消した実行は結果のコメントを更新しない。手動で取り消して後続の実行がない場合は `building` のままなので、コメントの実行ログを確認する。ほかのラベルを付けただけでは作り直さない。
+
+初回は、コメントが増えずに `building` から `ready` へ変わること、コミットとファイル名が PR の head に一致すること、zip の署名と公証が「通常のリリース」の手順3のコマンドで確認できることを確かめる。実機では正式版との共存、更新が無効であること、既存の機能を確認する。push による作り直しと、失敗時の `failed` 表示も確かめる。Release の確認用ビルドでも、同じ状態の切り替えと既存コメントの更新を確認する。
 
 ## 緊急の修正
 
