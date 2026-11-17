@@ -61,7 +61,7 @@ targets:
           SPARKLE_PUBLIC_ED_KEY: ""
         Release:
           SPARKLE_FEED_URL: https://github.com/koutyuke/Capsaicin/releases/latest/download/appcast.xml
-          SPARKLE_PUBLIC_ED_KEY: ""
+          SPARKLE_PUBLIC_ED_KEY: "j11dFPcM5gV6ikr2GJQLThZvg98/AcJGcYPkfCKDjac="
     dependencies:
       - package: KeyboardShortcuts
       - package: Sparkle
