@@ -2,7 +2,7 @@
 schema: task
 id: TASK-111
 title: 検証ごとの手順書を SMAppService のヘルパーと agent に合わせ、残る確認のファイルを作る
-status: todo
+status: in_review
 requirements: []
 depends_on: ["TASK-110"]
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -63,3 +63,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 - `nix develop --command just check`
 - `/usr/bin/grep -n 'sudoers\|PrivilegedHelperTools\|LaunchDaemons\|LaunchAgents\|修復\|管理者\|bootstrap' docs/manual/verification/*.md` の結果を、残す理由とともに報告する。
+
+## レビュー
+
+Codex が書いた途中で接続が切れたので、PM が引き取って確かめた。README、prepare、cleanup と古い前提のファイルを SMAppService に合わせ、新しく `login-and-crash-restart.md`、`helper-approval-guidance.md`、`debug-agent-worktree-switch.md` を作っている。ラベル、定義の場所、`just` の出力、アラートと状態の文の文言は、`project.yml`、`justfile`、String Catalog と一致する。残る `sudoers` などの語は、v0.1.0 の残りの検出とほかのアプリの root ヘルパーの確認だけである。`just check` は通る。
