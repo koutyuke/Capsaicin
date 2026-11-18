@@ -17,7 +17,7 @@ based_on: ["DEC-HLP-005", "EVID-LCY-001", "EVID-LCY-002", "EVID-LCY-003", "HYP-L
 
 - アプリ自身を実行する agent を、`Contents/Library/LaunchAgents/` の plist（`BundleProgram`、`RunAtLoad=false`、`KeepAlive={Crashed=true}`）で持ち、`SMAppService.agent` で常に登録する。
 - 直接起動されたアプリ（Finder、ログイン時の起動、Sparkle の再起動）は、これまでどおり `launchctl kickstart` で agent からの起動を求め、自分は終了する。launchd が起動したアプリだけを動かす。引き渡せたかは `kickstart` の成否で決める。
-- 「ログイン時に起動する」は、`SMAppService.mainApp` の register と unregister で切り替える。ログイン時に起動したアプリも直接起動なので、agent に引き渡す。mainApp の unregister は、動いているアプリを終了しない。
+- 「ログイン時に起動」は、`SMAppService.mainApp` の register と unregister で切り替える。ログイン時に起動したアプリも直接起動なので、agent に引き渡す。mainApp の unregister は、動いているアプリを終了しない。
 - `~/Library/LaunchAgents` に plist を書かず、`launchctl bootstrap` と `bootout` も使わない。
 - daemon と agent は、システム設定でアプリの1つの項目にまとまり、そのスイッチは両方を止める（`EVID-LCY-003`）。設定画面は、項目がオフのとき、ヘルパーとクラッシュ時の再起動の両方が止まっていることを示す。
 - 登録し直しは、デーモンと同じ規則で行う（`DEC-HLP-005`）。起動時に前回登録した版と今の版を比べ、違えば登録し直す。
@@ -40,8 +40,8 @@ based_on: ["DEC-HLP-005", "EVID-LCY-001", "EVID-LCY-002", "EVID-LCY-003", "HYP-L
 
 ## 影響
 
-- `specs/lifecycle.md` の起動と登録の節、`specs/settings.md` の「ログイン時に起動する」を直す。
-- 「ログイン時に起動する」のオンとオフが、agent の登録の有無から mainApp の登録の有無に変わる。
+- `specs/lifecycle.md` の起動と登録の節、`specs/settings.md` の「ログイン時に起動」を直す。
+- 「ログイン時に起動」のオンとオフが、agent の登録の有無から mainApp の登録の有無に変わる。
 - `justfile` の `app` グループのレシピ（`DEC-SYS-024`）は、`~/Library/LaunchAgents` の Debug の plist を前提にしている。実装の変更で合わせて直す。
 - v0.1.0 の `~/Library/LaunchAgents` の plist は、`DEC-HLP-005` と同じく手順書で片付ける。
 
