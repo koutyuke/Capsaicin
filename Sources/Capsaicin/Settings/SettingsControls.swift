@@ -132,6 +132,9 @@ struct SettingsSidebarSpacer: NSViewRepresentable {
         var availableHeight: CGFloat = 0
         private var height: CGFloat = 0
         private var padding: CGFloat = 0
+        private var rowHeights: [CGFloat] = []
+        private weak var observedRow: NSTableRowView?
+        private var updateScheduled = false
 
         override var intrinsicContentSize: NSSize {
             NSSize(width: NSView.noIntrinsicMetric, height: height)
@@ -142,13 +145,42 @@ struct SettingsSidebarSpacer: NSViewRepresentable {
             updateHeight()
         }
 
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            updateHeight()
+        }
+
+        @objc private func rowFrameChanged(_: Notification) {
+            guard !updateScheduled else { return }
+            updateScheduled = true
+            // 行のフレーム通知は表の再配置中にも届くため、残りの行の高さが確定してから読む。
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                updateScheduled = false
+                updateHeight()
+            }
+        }
+
         func updateHeight() {
             guard let scroll = enclosingScrollView, let table = scroll.documentView as? NSTableView,
                   table.numberOfRows == SettingsSection.allCases.count + 1
             else { return }
+            if let row = table.rowView(atRow: 4, makeIfNecessary: false), observedRow !== row {
+                NotificationCenter.default.removeObserver(self, name: NSView.frameDidChangeNotification, object: nil)
+                observedRow = row
+                // 表が見える高さまで伸びたままでも、上の行の高さが変われば空き行の原点は動く。
+                row.postsFrameChangedNotifications = true
+                NotificationCenter.default.addObserver(self, selector: #selector(rowFrameChanged(_:)),
+                                                       name: NSView.frameDidChangeNotification, object: row)
+            }
             // SwiftUI の contentSize にはツールバー由来の余白も混ざるため、システム設定に従う実際の行の高さを読む。
-            let rowsHeight = (0 ..< table.numberOfRows).filter { $0 != 4 }
-                .reduce(CGFloat.zero) { $0 + table.rect(ofRow: $1).height }
+            let nextRowHeights = (0 ..< table.numberOfRows).filter { $0 != 4 }.map { table.rect(ofRow: $0).height }
+            if nextRowHeights != rowHeights {
+                rowHeights = nextRowHeights
+                // 古い余白で空き行を短くしすぎると測り直せないため、一度広げて実際の余白を測る。
+                padding = 0
+            }
+            let rowsHeight = rowHeights.reduce(CGFloat.zero, +)
             // 表は行のほかにサイドバー既定の余白を持ち、これも引かないとはみ出してスクロールする。
             // 内容が見える高さより短いと表は見える高さまで伸びて余白を測れないので、はみ出しているときに測って覚える。
             let visibleHeight =
