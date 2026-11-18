@@ -32,7 +32,6 @@ printf 'APP=%s\n' "$APP"
 ```sh
 /usr/bin/open "$APP"
 sleep 5
-/bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
 /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
 ```
 
