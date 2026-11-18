@@ -17,7 +17,7 @@ sources: []
 
 ## 確かめ方
 
-`docs/manual/verification.md` の 2.1 で、Finder からアプリを起動した。その後、次を実行した。
+`723f717:docs/manual/verification.md` の 2.1 で、Finder からアプリを起動した。その後、次を実行した。
 
 ```sh
 /usr/bin/log show --style compact --start "2026-11-06 13:46:10" --end "2026-11-06 13:47:30" \
@@ -33,4 +33,4 @@ sources: []
 ## 未確認のこと
 
 - 記録が作られるまでにかかる時間と、それが何で決まるか。
-- 利用者がバックグラウンド項目を無効にしたとき、`bootstrap` と `kickstart` のどちらが、どう失敗するか（`verification.md` の 2.3 で確かめる）。
+- 利用者がバックグラウンド項目を無効にしたとき、`bootstrap` と `kickstart` のどちらが、どう失敗するか（クラッシュ時の再起動を SMAppService の agent に移す実装で確かめる。`DEC-LCY-008`）。
