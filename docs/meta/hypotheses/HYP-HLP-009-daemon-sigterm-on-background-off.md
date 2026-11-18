@@ -23,7 +23,7 @@ evidence: ["EVID-HLP-012"]
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`、`TASK-114`）と、`docs/manual/verification/background-off-while-blocking.md` で確かめる。項目のオフとオンは永続的なシステム変更で、終わったらオンに戻す。
+オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`）と、`docs/manual/verification/background-off-while-blocking.md` で確かめる。項目のオフとオンは永続的なシステム変更で、終わったらオンに戻す。
 
 ## 結果
 

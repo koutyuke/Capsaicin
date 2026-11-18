@@ -4,7 +4,7 @@ id: EVID-HLP-013
 title: 抑止中にデーモンを SIGKILL で終了させると、アプリは中断を受けて on を送り直し、launchd が起動した新しいデーモンが役目を持ち、アプリの終了で off を実行した
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。試作 `spike/daemon-cleanup-probe` の `d76d393` を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した。agent は登録していない
-sources: ["docs/meta/hypotheses/HYP-HLP-010-app-reconnects-after-daemon-exit.md", "docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
+sources: ["docs/meta/hypotheses/HYP-HLP-010-app-reconnects-after-daemon-exit.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-HLP-013 抑止中にデーモンを SIGKILL で終了させると、アプリは中断を受けて on を送り直し、launchd が起動した新しいデーモンが役目を持ち、アプリの終了で off を実行した

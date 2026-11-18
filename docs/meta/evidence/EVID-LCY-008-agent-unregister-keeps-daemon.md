@@ -4,7 +4,7 @@ id: EVID-LCY-008
 title: 別のビルドが登録した Debug の agent は、同じ bundle ID と plist 名のビルドの unregister で notRegistered になり、デーモンの登録とバックグラウンドの項目のスイッチは変わらなかった
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、日本語表示。登録したのは `feature/smappservice` の `195dda2` の Debug ビルド、解除したのは試作 `spike/daemon-cleanup-probe` の `d76d393`。どちらも bundle ID `io.github.koutyuke.capsaicin.debug`、接尾辞のない同じ agent とヘルパーの plist 名で、同じ Team ID の Developer ID Application で署名した
-sources: ["docs/meta/hypotheses/HYP-LCY-009-agent-item-removed-by-unregister.md", "docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
+sources: ["docs/meta/hypotheses/HYP-LCY-009-agent-item-removed-by-unregister.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-LCY-008 別のビルドが登録した Debug の agent は、同じ bundle ID と plist 名のビルドの unregister で notRegistered になり、デーモンの登録とバックグラウンドの項目のスイッチは変わらなかった

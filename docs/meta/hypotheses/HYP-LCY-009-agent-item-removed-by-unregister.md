@@ -22,7 +22,7 @@ agent をやめた版に移った Mac に、使われない agent の項目が�
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`、`TASK-114`）を起動し、そのアプリが一度だけ行う unregister の前後で、`launchctl print` と、試作のアプリがログに出す `status` を見る。agent の登録の解除は永続的なシステム変更で、元に戻すには今の `feature/smappservice` のビルドを起動し直す。
+オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`）を起動し、そのアプリが一度だけ行う unregister の前後で、`launchctl print` と、試作のアプリがログに出す `status` を見る。agent の登録の解除は永続的なシステム変更で、元に戻すには今の `feature/smappservice` のビルドを起動し直す。
 
 ## 結果
 

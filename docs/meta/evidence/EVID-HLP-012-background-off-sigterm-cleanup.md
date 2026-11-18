@@ -4,7 +4,7 @@ id: EVID-HLP-012
 title: 抑止中にバックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行し、アプリは同じ PID のまま切断と承認待ちを検知した
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、日本語表示。試作 `spike/daemon-cleanup-probe` の `d76d393` を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した。agent は登録していない
-sources: ["docs/meta/hypotheses/HYP-HLP-009-daemon-sigterm-on-background-off.md", "docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
+sources: ["docs/meta/hypotheses/HYP-HLP-009-daemon-sigterm-on-background-off.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-HLP-012 抑止中にバックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行し、アプリは同じ PID のまま切断と承認待ちを検知した
