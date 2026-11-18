@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-LCY-008
 title: Sparkle は、更新の後に古いプロセスが終了してから新しい版を起動する
 status: supported
-affects: ["SPEC-LCY-008", "SPEC-LCY-005"]
+affects: ["SPEC-LCY-008"]
 evidence: ["EVID-LCY-006"]
 ---
 

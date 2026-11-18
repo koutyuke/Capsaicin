@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-LCY-003
 title: アプリは launchd から起動されたかを判定できる
 status: open
-affects: ["DEC-LCY-002", "REQ-LCY-005", "SPEC-LCY-005"]
+affects: []
 evidence: []
 ---
 
@@ -11,11 +11,11 @@ evidence: []
 
 ## 主張
 
-LaunchAgent から起動されたアプリには、環境変数 `XPC_SERVICE_NAME` に LaunchAgent のラベルが入り、Finder や `open` から直接起動されたアプリには入らない（または別の値が入る）。アプリはこれで、launchd に引き渡すべきかを判定できる。
+LaunchAgent から起動されたアプリには、環境変数 `XPC_SERVICE_NAME` に LaunchAgent のラベルが入り、Finder や `open` から直接起動されたアプリには入らない（または別の値が入る）。
 
 ## 外れたときに起きること
 
-直接起動されたアプリが、自分が launchd の管理下にあるかを判定できず、`SPEC-LCY-005` の引き渡しで終了と起動を繰り返すおそれがある。`DEC-LCY-002` の判定の方法を見直す。
+採用中の要件・仕様への影響はない。`DEC-LCY-010` の構成では、アプリは LaunchAgent への引き渡しを行わず、この判定を使わない。
 
 ## 確かめ方
 

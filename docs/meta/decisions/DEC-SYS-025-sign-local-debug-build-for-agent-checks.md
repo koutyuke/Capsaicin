@@ -31,7 +31,7 @@ based_on: ["DEC-SYS-021", "DEC-SYS-024", "DEC-HLP-005", "DEC-LCY-008", "EVID-LCY
 
 手元のビルドの署名:
 
-- ad-hoc 署名のままにし、手元では agent を確かめない。PR のビルドだけで確かめる（不採用）。worktree を切り替える確認（`SPEC-LCY-005`）と、日々の開発で `just start` が使えない。
+- ad-hoc 署名のままにし、手元では agent を確かめない。PR のビルドだけで確かめる（不採用）。worktree を切り替える確認（launchd の管理下で動く仕様）と、日々の開発で `just start` が使えない。
 - `xcodebuild` の署名の設定で、ビルドのときに署名する（不採用）。KeyboardShortcuts のリソースバンドルの自動署名とぶつかって失敗した（`EVID-LCY-004`）。証明書を持たない人の `just build` も壊れる。
 - ビルドの後に署名し直すレシピを置く（採用）。`just build` は変わらず、証明書を持つ人だけが使う。
 

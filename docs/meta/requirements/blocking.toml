@@ -178,6 +178,6 @@ statement = "利用者は、抑止中にメニューと CLI で時間の解除�
 reason = "オンにした後に時間を変えたいとき、一度オフにしてスリープ防止を外さずに済ませるため。"
 priority = "should"
 status = "accepted"
-specs = ["SPEC-BLK-003", "SPEC-BLK-011", "SPEC-CLI-001", "SPEC-CLI-007", "SPEC-HUD-001", "SPEC-HUD-002", "SPEC-LCY-007"]
+specs = ["SPEC-BLK-003", "SPEC-BLK-011", "SPEC-CLI-001", "SPEC-CLI-007", "SPEC-HUD-001", "SPEC-HUD-002"]
 depends_on = ["REQ-BLK-006"]
 sources = ["DEC-BLK-009"]

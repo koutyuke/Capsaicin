@@ -3,7 +3,7 @@ schema: task
 id: TASK-108
 title: ログイン時の起動とクラッシュ時の再起動を SMAppService の agent と mainApp に移す
 status: in_review
-requirements: ["REQ-LCY-001", "REQ-LCY-003", "REQ-LCY-005"]
+requirements: ["REQ-LCY-001", "REQ-LCY-003"]
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 ---
@@ -14,7 +14,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 `DEC-LCY-008` のとおり、`~/Library/LaunchAgents` に plist を書いて `launchctl bootstrap` する方式をやめ、アプリのバンドルに入れた定義を `SMAppService.agent` で登録する。「ログイン時に起動する」は `SMAppService.mainApp` の登録で切り替える。振る舞い（launchd の管理下で動く、クラッシュで起動し直す、直接起動したアプリは agent に引き渡して終わる）は変えない。
 
-振る舞いの正は `docs/specs/lifecycle.md` の `SPEC-LCY-001`、`SPEC-LCY-003`、`SPEC-LCY-005`、`SPEC-LCY-006` と、登録し直しの規則 `docs/specs/helper.md` の `SPEC-HLP-007` である。根拠は `EVID-LCY-003` にある。試作の `/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-smappservice-probe/Prototypes/SMAppServiceProbe/App/ProbeApp.swift` と `Plists/` も参考にしてよい（写さない）。
+振る舞いの正は `docs/specs/lifecycle.md` の `SPEC-LCY-001`、`SPEC-LCY-003`、launchd の管理下で動く仕様、`SPEC-LCY-006` と、登録し直しの規則 `docs/specs/helper.md` の `SPEC-HLP-007` である。根拠は `EVID-LCY-003` にある。試作の `/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-smappservice-probe/Prototypes/SMAppServiceProbe/App/ProbeApp.swift` と `Plists/` も参考にしてよい（写さない）。
 
 ## 範囲
 

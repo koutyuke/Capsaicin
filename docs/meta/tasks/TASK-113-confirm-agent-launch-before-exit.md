@@ -3,7 +3,7 @@ schema: task
 id: TASK-113
 title: 直接起動したアプリが、agent のジョブが動き出したことを確かめてから終了するようにする
 status: in_review
-requirements: ["REQ-LCY-005"]
+requirements: []
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 ---
@@ -14,7 +14,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 直接起動したアプリは、`LaunchAgent.registerAndStart` で agent を登録し、`launchctl kickstart` のコマンドが成功したら `.ready` を返して終了する。`kickstart` は exec の成否を待たないので、launchd が起動の制約で agent を止めても、アプリは何も示さずに消える（`EVID-LCY-004`）。`DEC-LCY-009` に従い、agent のジョブのプロセスが動いていて、その実行ファイルがこのバンドルの実行ファイルであることを確かめてから `.ready` を返す。5 秒の間に確かめられなければ `.launchFailed` を返す。`.launchFailed` のときにアプリが動き続け、「一般」に再起動されないことを示すのは、今の `AppRuntime.start` と `SettingsView` のままでよい。
 
-振る舞いの正は `docs/specs/lifecycle.md` の `SPEC-LCY-005`。必ず読む: `DEC-LCY-009`、`DEC-LCY-008`、`EVID-LCY-004`。
+振る舞いの正は `docs/specs/lifecycle.md` の launchd の管理下で動く仕様。必ず読む: `DEC-LCY-009`、`DEC-LCY-008`、`EVID-LCY-004`。
 
 ## 範囲
 
@@ -28,7 +28,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
    - ジョブの PID は `launchctl print gui/<uid>/<label>` の `pid = ` の行から読むか、`kickstart -p` の出力を使う。どちらを使うかは、exec が失敗した場合にも誤って `.ready` にならない方を選び、理由をレビューに書く。ジョブが外された（`print` が失敗する）ときは、待たずに `.launchFailed` にしてよい。
    - 実行ファイルのパスは `proc_pidpath` で引く。プロセス名や引数では照らさない（agent から起動したプロセスの引数は相対パスになる）。
    - 自分自身の PID は一致とみなさない。
-2. 確かめる処理は、既存の `runLaunchctl` と同じく差し替えられるようにし、Swift Testing で次を確かめる: 起動したプロセスが一致して `.ready`、ジョブが外されて `.launchFailed`、別の実行ファイルのプロセスで `.launchFailed`、5 秒を過ぎて `.launchFailed`（待機は差し替えて実時間を使わない）、`kickstart` の失敗で `.launchFailed`。既存のテストは、意味を変えずに新しい注入に合わせる。テスト名は既存の形（`SPEC-LCY-005 …`）に合わせる。
+2. 確かめる処理は、既存の `runLaunchctl` と同じく差し替えられるようにし、Swift Testing で次を確かめる: 起動したプロセスが一致して `.ready`、ジョブが外されて `.launchFailed`、別の実行ファイルのプロセスで `.launchFailed`、5 秒を過ぎて `.launchFailed`（待機は差し替えて実時間を使わない）、`kickstart` の失敗で `.launchFailed`。既存のテストは、意味を変えずに新しい注入に合わせる。テスト名は既存の形（launchd の管理下で動く仕様の ID で始まる形）に合わせる。
 3. 失敗したときは、既存の `Logger` で理由（ジョブがない、PID がない、実行ファイルが違う、時間切れ）を `.error` で残す。パスは `privacy: .private` にする。
 
 ## 守ること

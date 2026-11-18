@@ -1,6 +1,8 @@
 # 準備: 開始前の状態を保存する
 
-ほかの検証ファイルを始める前に、最初の1回だけ行う。開始前の状態を退避先 `B` に保存し、起動前ゲートを通る。ここを通せない環境では、ほかの検証ファイルを実施しない。確かめる仕様と仮説に先立ち、`SPEC-LCY-005`、`SPEC-LCY-007`、`SPEC-HLP-005`、`SPEC-SET-002`、`SPEC-LED-001` の確認で既存の環境を失わないようにする。
+ほかの検証ファイルを始める前に、最初の1回だけ行う。開始前の状態を退避先 `B` に保存し、起動前ゲートを通る。ここを通せない環境では、ほかの検証ファイルを実施しない。`SPEC-LCY-006`、`SPEC-LCY-009`、`SPEC-BLK-013`、`SPEC-HLP-005`、`SPEC-SET-002`、`SPEC-LED-001` の確認で既存の環境を失わないようにする。
+
+この手順は、試作の状態記録 `resume-record.json` の退避・復元と、開発機に残った Debug agent の片付けにも使う。試作の記録のキーや agent の plist の確認は、その検証用ビルドに固有のものである。製品の起動と保存する記録は `SPEC-LCY-006` と `SPEC-BLK-013` に従い、試作と製品を混同しない。
 
 操作1〜3で状態を読んで退避し、操作4で検証対象のアプリを用意して起動前の準備を終える。全体の所要時間は未実測である。
 
@@ -61,7 +63,6 @@
    /bin/launchctl print system/io.github.koutyuke.capsaicin.helper > "$B/release-helper.before.txt" 2>&1
    printf '%s\n' "$?" > "$B/release-helper-print.exit.txt"
    /usr/bin/sfltool dumpbtm > "$B/btm.before.txt"
-   /usr/sbin/sysctl kern.boottime > "$B/boottime.before.txt"
    /bin/date '+%Y-%m-%dT%H:%M:%S%z' > "$B/date.before.txt"
    /usr/bin/awk '$1 == "SleepDisabled" {print $2}' "$B/pmset.before.txt" > "$B/sleep-disabled.before.txt"
    cat "$B/sleep-disabled.before.txt" "$B/agent-print.exit.txt" "$B/agent.before.txt"
@@ -75,7 +76,7 @@
 
    開始値が `1` でも、ここでは下ろさない。その場合、`SleepDisabled = 0` を前提にする検証ファイルは実施しない。
 
-### 3. 設定と再開用の記録を退避し、旧方式の残留を調べる
+### 3. 設定と試作の状態記録を退避し、旧方式の残留を調べる
 
 1. Debug の設定をドメイン全体で保存する。ホットキーの値もこの退避に含まれる。
 
@@ -98,7 +99,7 @@
    touch "$B/defaults.absent"
    ```
 
-2. 再開用の記録を、存在しなかったことも含めて保存する。
+2. 試作の状態記録を、存在しなかったことも含めて保存する。
 
    ```sh
    if [ -L "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then
@@ -203,9 +204,9 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 
 ### 残った Debug agent の登録を片付ける
 
-これは `HYP-LCY-009` が未確認の段階の、オーナー向けの片付けである。システム設定のスイッチをオフにするだけでは、SMAppService の登録解除にはならない。`~/Library/LaunchAgents` のファイル削除や `sfltool resetbtm` は行わない。
+これは、起動時に agent を unregister する試作を使った、オーナー向けの片付けである。製品のアプリはこの登録解除を行わない（`DEC-LCY-010`）。解除の実測と、BTM の無効な項目が残ることは `EVID-LCY-008` にある。システム設定のスイッチをオフにするだけでは、SMAppService の登録解除にはならない。`~/Library/LaunchAgents` のファイル削除や `sfltool resetbtm` は行わない。
 
-1. この節に進めるのは、操作2の例外の対象だけである。`B` に設定と再開用の記録の退避、開始前の登録の記録があり、起動できる署名の試作を用意し、操作4の LED の戻し方を記録していることを確認する。アプリを起動するため、通常は「ログイン時に起動」の保存値に応じて mainApp も登録される。今回の一時的な mainApp の登録解除もオーナーが承認する。
+1. この節に進めるのは、操作2の例外の対象だけである。`B` に設定と試作の状態記録の退避、開始前の登録の記録があり、起動できる署名の試作を用意し、操作4の LED の戻し方を記録していることを確認する。アプリを起動するため、通常は「ログイン時に起動」の保存値に応じて mainApp も登録される。今回の一時的な mainApp の登録解除もオーナーが承認する。
 
    ```sh
    /usr/bin/pgrep -x Capsaicin
@@ -214,7 +215,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
    /usr/bin/sfltool dumpbtm > "$B/btm.agent-cleanup.before.txt"
    ```
 
-   アプリの PID がないこと、`SleepDisabled 0`、対象が Debug の既知の agent だけであることを読み直す。抑止・所有・未復旧の制御を含む再開用の記録があれば起動しない。
+   アプリの PID がないこと、`SleepDisabled 0`、対象が Debug の既知の agent だけであることを読み直す。抑止・所有・未復旧の制御を含む試作の状態記録があれば起動しない。
 
 2. 別のターミナルで、起動前からログを記録する。
 
@@ -254,7 +255,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
    /usr/bin/pmset -g
    ```
 
-4. アプリが停止し、登録と抑止が片付いている場合だけ、試作の起動で変わった Debug の設定と再開用の記録を退避時に戻す。既存の退避物が読めなければ変更せず PM に渡す。
+4. アプリが停止し、登録と抑止が片付いている場合だけ、試作の起動で変わった Debug の設定と試作の状態記録を退避時に戻す。既存の退避物が読めなければ変更せず PM に渡す。
 
    ```sh
    if [ -f "$B/defaults.before.plist" ]; then /usr/bin/defaults import io.github.koutyuke.capsaicin.debug "$B/defaults.before.plist"; fi
@@ -265,7 +266,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
    /usr/bin/defaults read io.github.koutyuke.capsaicin.debug
    ```
 
-   設定を `B/defaults.before.txt` と照合する。ドメインが元からなかった場合は存在しない旨だけのエラーでよい。再開用の記録も元からなかった場合は、今回作ったファイルがなくなったことを確認する。登録解除した agent は意図した片付けなので作り直さない。解除前へ戻す必要がある場合は、記録した元の同署名の通常版を起動すると agent が再登録されるが、その操作は PM と相談してから行う。
+   設定を `B/defaults.before.txt` と照合する。ドメインが元からなかった場合は存在しない旨だけのエラーでよい。試作の状態記録も元からなかった場合は、今回作ったファイルがなくなったことを確認する。登録解除した agent は意図した片付けなので作り直さない。解除前へ戻す必要がある場合は、記録した元の同署名の通常版を起動すると agent が再登録されるが、その操作は PM と相談してから行う。
 
 5. ログ用ターミナルを Control-C で止め、前後の状態と復元結果を `"$B/result-prepare.txt"` に残す。この `B` は片付け前の記録として保管する。**まだほかの検証は始めず、`prepare.md` を新しい退避先で最初から行い、登録なしの起動前ゲートを通す。** この節での登録解除だけをもって仮説を確認済みにしない。
 
@@ -282,7 +283,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 `"$B/result-prepare.txt"` に次を書く。
 
 - macOS の版とビルド番号、機種、`xcode-select -p` の出力
-- `SleepDisabled` の開始値、4つの `launchctl print` の終了コードと本文、BTM とシステム設定の Capsaicin の項目、`boottime`、`date`
+- `SleepDisabled` の開始値、4つの `launchctl print` の終了コードと本文、BTM とシステム設定の Capsaicin の項目、`date`
 - `defaults` の終了コード、`record.absent`・`defaults.absent` の有無、旧方式の8ファイルの有無。既存データがあった場合は中身の要約（認証情報は写さない）
 - PR とコミット、アプリの絶対パス、ビルド番号、bundle ID、署名の Team ID、埋め込んだ実行ファイルと定義、LED の戻し方の承認
 - 成功／失敗／判定不能、未実施の操作と理由

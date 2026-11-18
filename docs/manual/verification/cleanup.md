@@ -1,6 +1,8 @@
 # 片付け: 開始前の状態へ戻す
 
-検証を終えたら、どこまで進めたかにかかわらず必ず行う。今回の変更を取り除き、`prepare.md` で保存した開始前の状態へ戻し、結果を PM に渡す。確かめる仕様は `SPEC-BLK-007`、`SPEC-HLP-004`、`SPEC-HLP-005`、`SPEC-LCY-002`、`SPEC-LCY-005`、`SPEC-LCY-007`、`SPEC-SET-002` である。
+検証を終えたら、どこまで進めたかにかかわらず必ず行う。今回の変更を取り除き、`prepare.md` で保存した開始前の状態へ戻し、結果を PM に渡す。確かめる仕様は `SPEC-BLK-007`、`SPEC-BLK-013`、`SPEC-HLP-004`、`SPEC-HLP-005`、`SPEC-LCY-002`、`SPEC-SET-002` である。
+
+`resume-record.json` と agent の片付けは、試作とその検証用ビルドの実データを保護するための手順である。製品が抑止のセッションや所有を保存する前提にはしない（`DEC-LCY-010`）。
 
 動的確認（アプリの起動）を一度も始めていなければ、操作1の1に従う。始めていれば、操作1から順に行う。
 
@@ -71,7 +73,7 @@ if [ -f "$B/app-path.txt" ]; then APP="$(cat "$B/app-path.txt")"; printf 'APP=%s
 
 開始時に既存の登録がなく、アプリが停止し、ヘルパー・LED・抑止を戻せていることが前提である。mainApp の登録も外している。`APP` と検証中に使ったほかの worktree のビルドを、今回のものと識別できる。
 
-1. プロセスがないことを確かめ、試験後の設定と再開用の記録を保存する。
+1. プロセスがないことを確かめ、試験後の設定と試作の状態記録を保存する。
 
    ```sh
    /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
@@ -83,20 +85,20 @@ if [ -f "$B/app-path.txt" ]; then APP="$(cat "$B/app-path.txt")"; printf 'APP=%s
 
    **ゴミ箱を空にすると、中身は元に戻せない。** 既存のゴミ箱の中身を保存し、オーナーが空にしてよいと判断した場合だけ Finder から空にする。空にできなければ削除の確認は未完了とし、残したアプリの所在を PM に渡す。
 
-3. **次は今回の設定と再開用の記録を消す。退避物が読めることを先に確かめ、失敗したら実行しない。**
+3. **次は今回の設定と試作の状態記録を消す。退避物が読めることを先に確かめ、失敗したら実行しない。**
 
    ```sh
    if [ -f "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then trash "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"; fi
    /usr/bin/defaults delete io.github.koutyuke.capsaicin.debug
    ```
 
-   期待: 今回のアプリと agent のジョブ、システム設定の Capsaicin の項目、今回の再開用の記録・Debug の設定が消える。ドメインが既にない旨だけなら、`defaults delete` の失敗は削除済みとして記録する。
+   期待: 今回のアプリと、検証用ビルドが登録した agent のジョブ、システム設定の Capsaicin の項目、今回の試作の状態記録・Debug の設定が消える。ドメインが既にない旨だけなら、`defaults delete` の失敗は削除済みとして記録する。
 
-   プロセスやヘルパーの登録が残る、退避が失敗する、パスが想定と違う場合は止める。Release のドメインや IPC の共有ディレクトリには触れない。再開用の記録を含むユーザーの Application Support ディレクトリ全体も削除しない。デーモンの起動の記録 `/Library/Application Support/io.github.koutyuke.capsaicin.debug/boot-session-uuid` とそのディレクトリは削除後も残る。Release も `/Library/Application Support/io.github.koutyuke.capsaicin/` に記録を持つが、どちらにも触れない。`sfltool resetbtm` はほかのアプリの登録も消すので使わない。
+   プロセスやヘルパーの登録が残る、退避が失敗する、パスが想定と違う場合は止める。Release のドメインや IPC の共有ディレクトリには触れない。試作の状態記録を含むユーザーの Application Support ディレクトリ全体も削除しない。デーモンの起動の記録 `/Library/Application Support/io.github.koutyuke.capsaicin.debug/boot-session-uuid` とそのディレクトリは削除後も残る。Release も `/Library/Application Support/io.github.koutyuke.capsaicin/` に記録を持つが、どちらにも触れない。`sfltool resetbtm` はほかのアプリの登録も消すので使わない。
 
 ### 3. 既存のデータと OS 設定を戻す
 
-復元後はアプリを起動しない。古い抑止セッションを再開させないため、開始時に停止済み・所有なしと確認した記録だけを戻す。
+復元後はアプリを起動しない。試作の状態記録を読む検証用ビルドで意図しない制御を行わないため、開始時に停止済み・所有なしと確認した記録だけを戻す。
 
 1. 開始前に存在したデータだけを戻す。
 

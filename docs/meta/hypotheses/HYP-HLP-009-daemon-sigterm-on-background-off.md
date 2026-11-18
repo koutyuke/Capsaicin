@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-HLP-009
 title: バックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行でき、アプリはそれを検知できる
 status: supported
-affects: ["SPEC-HLP-004", "SPEC-BLK-007", "SPEC-LCY-005"]
+affects: ["SPEC-HLP-004", "SPEC-BLK-007"]
 evidence: ["EVID-HLP-012"]
 ---
 
