@@ -27,4 +27,4 @@ evidence: ["EVID-HLP-012"]
 
 ## 結果
 
-実機で支持された（`EVID-HLP-012`）。項目をオフにすると、デーモンは `SIGTERM` を受けて `off` を実行し、`SleepDisabled` は 0 になった。アプリは同じ PID のまま `interrupted` と `invalid` を受け、どちらでも `SMAppService.daemon` は `requiresApproval` だった。macOS 27.2.1 の画面の名前は「一般」の「ログイン項目」だった。
+実機で支持された（`EVID-HLP-012`）。項目をオフにすると、デーモンは `SIGTERM` を受けて `off` を実行し、`SleepDisabled` は 0 になった。アプリは同じ PID のまま `interrupted` と `invalid` を受け、どちらでも `SMAppService.daemon` は `requiresApproval` だった。

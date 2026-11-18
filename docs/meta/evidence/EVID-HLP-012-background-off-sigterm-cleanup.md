@@ -11,7 +11,7 @@ sources: ["docs/meta/hypotheses/HYP-HLP-009-daemon-sigterm-on-background-off.md"
 
 ## 確かめた事実
 
-オーナーがヘルパーを登録して抑止を始め、デーモン（PID 76598）がアプリ（PID 74829）の後片付けの役目を持ち、`SleepDisabled 1` になったことを確かめた。その後、システム設定の「一般」の「ログイン項目」にある「アプリのバックグラウンドでのアクティビティ」で、「Capsaicin.app」のスイッチをオフにした。
+オーナーがヘルパーを登録して抑止を始め、デーモン（PID 76598）がアプリ（PID 74829）の後片付けの役目を持ち、`SleepDisabled 1` になったことを確かめた。その後、システム設定の「一般 > ログイン項目と機能拡張」（画面の見出しは「ログイン項目」）にある「アプリのバックグラウンドでのアクティビティ」で、「Capsaicin.app」のスイッチをオフにした。
 
 - BTM のデーモンの項目は `[enabled, allowed, not notified]` から `[enabled, disallowed, not notified]` になった。
 - 02:00:24.587 に、同じデーモンが `SIGTERM cleanup off: success=true` を記録した。02:00:29 の `pmset -g` は `SleepDisabled 0` で、`launchctl print` はデーモンのサービスなしだった。
@@ -28,9 +28,9 @@ sources: ["docs/meta/hypotheses/HYP-HLP-009-daemon-sigterm-on-background-off.md"
 
 ## 適用範囲
 
-macOS 27.2.1 で、アプリとデーモンを1つのバックグラウンドの項目として許可している場合に当てはまる。この版のシステム設定の画面の名前は「ログイン項目」で、「ログイン項目と機能拡張」ではなかった。
+macOS 27.2.1 で、アプリとデーモンを1つのバックグラウンドの項目として許可している場合に当てはまる。
 
 ## 未確認のこと
 
 - 抑止をしていないとき（デーモンが動いていないとき）に項目をオフにした場合の、アプリの検知。
-- macOS 26 での画面の名前と振る舞い。英語表示の画面の名前。
+- macOS 26 での振る舞い。
