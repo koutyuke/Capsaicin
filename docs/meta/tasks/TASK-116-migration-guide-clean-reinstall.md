@@ -2,7 +2,7 @@
 schema: task
 id: TASK-116
 title: v0.1.0 からの移行の手順書を、設定と記録も消して入れ直す形にする
-status: todo
+status: done
 requirements: []
 depends_on: []
 assignee: Gemini（Antigravity、gemini-3.8-flash）
@@ -44,4 +44,8 @@ v0.1.0 の利用者に渡す移行の手順書は、Git の外に置いている
 
 ## レビュー
 
-（未記入）
+PM がレビューした。Gemini は根拠に今の作業ツリーのファイルを挙げたので、PM が v0.1.0 のタグで照らし合わせた。設定のドメイン（`AppComposition.swift:16` の `UserDefaults.standard`、Release の bundle ID は `project.yml:45`）と、`~/Library/Application Support/io.github.koutyuke.capsaicin/resume-record.json`（輝度の記録も同じファイル）は合っていた。v0.1.0 のヘルパーが root で書く記録はなかった。PM が次を直した。
+
+- v0.1.0 の CLI との通信のソケットのフォルダー `/private/tmp/io.github.koutyuke.capsaicin-<uid>`（`IPCEndpoint.swift:13`）が抜けていたので足した。
+- 画面の名前を実装に合わせた。v0.1.0 の「Capsaicinを終了」「削除…」、新しい版の「ログイン時に起動」「システム設定での許可待ち」。
+- `pkill` で終了させる案内は、終了時の後片付けを経ないので外し、メニューから終了して確かめ直す案内にした。
