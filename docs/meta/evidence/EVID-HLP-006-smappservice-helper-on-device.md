@@ -4,14 +4,14 @@ id: EVID-HLP-006
 title: 公証した Debug ビルドで、SMAppService のヘルパーは承認・on と off・起動時の後片付け・削除・更新の後の登録し直しが仕様どおりに動いた
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、PR #15 の `702cb18` から作った Developer ID 署名・公証済みの Debug ビルド（`CFBundleVersion` 20261118011831 と 20261118052018）を /Applications に配置
-sources: ["https://github.com/koutyuke/Capsaicin/actions/runs/44243514126", "docs/manual/verification.md", "Sources/capsaicin-helper/boot.c", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Helper/HelperRegistration.swift", "Sources/Capsaicin/Settings/SettingsModel.swift"]
+sources: ["https://github.com/koutyuke/Capsaicin/actions/runs/44243514126", "702cb18:docs/manual/verification.md", "Sources/capsaicin-helper/boot.c", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Helper/HelperRegistration.swift", "Sources/Capsaicin/Settings/SettingsModel.swift"]
 ---
 
 # EVID-HLP-006 公証した Debug ビルドで、SMAppService のヘルパーは承認・on と off・起動時の後片付け・削除・更新の後の登録し直しが仕様どおりに動いた
 
 ## 確かめた事実
 
-オーナーが手順書の4節（4.1〜4.5、4.8）に沿って操作し、結果を `launchctl print`、`pmset -g`、`pmset -g log`、`sfltool dumpbtm`、`/usr/bin/log` と画面で確かめた。
+オーナーが手順書 `702cb18:docs/manual/verification.md` の4節（4.1〜4.5、4.8）に沿って操作し、結果を `launchctl print`、`pmset -g`、`pmset -g log`、`sfltool dumpbtm`、`/usr/bin/log` と画面で確かめた。
 
 ### 起動と設置（4.1）
 

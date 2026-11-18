@@ -4,7 +4,7 @@ id: TASK-108
 title: ログイン時の起動とクラッシュ時の再起動を SMAppService の agent と mainApp に移す
 status: in_review
 requirements: ["REQ-LCY-001", "REQ-LCY-003", "REQ-LCY-005"]
-depends_on: ["TASK-106", "TASK-107"]
+depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 ---
 
@@ -24,7 +24,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## やること
 
-1. agent の定義 `Contents/Library/LaunchAgents/<アプリの bundle ID>.plist` を、`TASK-106` で足したビルドフェーズと同じ仕組みで作る。キーは `Label`（アプリの bundle ID。今のラベルと同じ）、`BundleProgram`（`Contents/MacOS/Capsaicin`）、`RunAtLoad=false`、`KeepAlive={Crashed=true}`、`ProcessType=Interactive`、`LimitLoadToSessionType=Aqua`。
+1. agent の定義 `Contents/Library/LaunchAgents/<アプリの bundle ID>.plist` を、デーモンの定義を作るビルドフェーズと同じ仕組みで作る。キーは `Label`（アプリの bundle ID。今のラベルと同じ）、`BundleProgram`（`Contents/MacOS/Capsaicin`）、`RunAtLoad=false`、`KeepAlive={Crashed=true}`、`ProcessType=Interactive`、`LimitLoadToSessionType=Aqua`。
 2. `LaunchAgent` を `SMAppService.agent` の登録に置き換える。直接起動したときは、登録してから `launchctl kickstart gui/<uid>/<ラベル>` で引き渡す。引き渡せたかは `kickstart` の成否で決める（`EVID-LCY-002`）。launchd から起動されたかの判定（`XPC_SERVICE_NAME`）は今のまま。クラッシュ時の再起動の状態は agent の `status` で決める（`requiresApproval` なら無効）。
 3. 「ログイン時に起動する」を `SMAppService.mainApp` の register と unregister にする。`~/Library/LaunchAgents` に書かない。設定の保存値と mainApp の登録がずれていたら、起動時に保存値に合わせる。
 4. agent の登録し直しを、`SPEC-HLP-007` と同じ規則（前回登録した版と違うときだけ、unregister の完了を待ってから register、`EPERM` なら 3 秒待って最大 3 回）で行う。ヘルパーの実装と共有できるなら共有し、版の記録は agent とデーモンで分ける。
