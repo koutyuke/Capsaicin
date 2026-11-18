@@ -28,7 +28,7 @@
    /usr/bin/xcode-select -p
    /usr/bin/sw_vers
    /usr/bin/uname -m
-   /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
+   /usr/bin/pgrep -x Capsaicin
    ```
 
    期待: Developer ディレクトリが Xcode 内を指し、CPU は `arm64` である。最後の検索でアプリが見つからない。Xcode の選択は変更しない。
@@ -128,7 +128,7 @@
 ### 4. アプリと署名を確かめ、起動前の準備を終える
 
 1. 外観、アクセントカラー、アクセシビリティ、VoiceOver、バックグラウンド項目の開始値を画面写真で `B` に保存する。外付け機器の製品名と接続方式も記録する。
-2. ヘルパーや agent を確かめる場合は、オーナーが `S-Preview` 付き PR のコメントから、対象コミットの署名・公証済み Debug ビルドを取得する（`DEC-SYS-023`）。展開して `/Applications/Capsaicin.app` に置く。既存のアプリには上書きしない。
+2. `/Applications` の PR ビルドを使うファイルでは、オーナーが `S-Preview` 付き PR のコメントから、対象コミットの署名・公証済み Debug ビルドを取得する（`DEC-SYS-023`）。展開して `/Applications/Capsaicin.app` に置く。既存のアプリには上書きしない。
 
    ```sh
    APP='/Applications/Capsaicin.app'
@@ -144,17 +144,24 @@
 
    期待: bundle ID が `io.github.koutyuke.capsaicin.debug`、埋め込んだ実行ファイルが `capsaicin` と `capsaicin-helper` である。署名検査に成功し、`TeamIdentifier` がある。agent は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true`、デーモンは `BundleProgram = Contents/Helpers/capsaicin-helper`、`RunAtLoad = true`、`MachServices` のキーが `io.github.koutyuke.capsaicin.debug.helper` である。定義は `project.yml` のビルドフェーズが作る。
 
-   手元のビルドだけを使うファイルでは、代わりに次を実行する。`just build` は ad-hoc 署名なのでヘルパーには使えない。worktree 切り替えのファイルを除き、ログイン時やクラッシュ後の起動の合格にも使わない。
+   手元のビルドを使うファイルでは、代わりに次を実行する。agent、ヘルパー、ログイン時やクラッシュ後の起動を確かめるときは、`just build` の後に `just sign-debug` で署名し直す（`DEC-SYS-025`）。オーナーのキーチェーンに、配布物と同じ Team ID の「Apple Development」の証明書と鍵が必要である。別の証明書を選ぶ場合は `just sign-debug 'Developer ID Application'` のように名前を渡す。
+
+   `/Applications` の PR Debug ビルドと手元のビルドは bundle ID が同じで、BTM の agent の項目を共有する。手元のビルドを使う前に、PR ビルドをメニューの「Capsaicinを終了」で止める。`just stop` は `/Applications` の PR ビルドを対象にしない。この手順の開始時に動作中のアプリがあった場合は、操作1の条件どおり中止する。
 
    ```sh
    just build
+   just sign-debug
    APP="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app"
    printf '%s\n' "$APP" > "$B/app-path.txt"
    /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist"
+   /usr/bin/codesign -dv "$APP" 2>&1
+   /usr/bin/codesign --verify --strict --deep "$APP"
    /bin/ls -l "$APP/Contents/Helpers/"
+   /usr/bin/plutil -p "$APP/Contents/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"
+   /usr/bin/plutil -p "$APP/Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist"
    ```
 
-   bundle ID と実行ファイル2つが一致することを確かめる。PR ビルドの取得元・署名を確かめられない、既存アプリの上書きが要る場合は止める。
+   bundle ID が `io.github.koutyuke.capsaicin.debug`、実行ファイルが `capsaicin` と `capsaicin-helper` で、署名検査に成功し、`TeamIdentifier` が配布物と同じことを確かめる。agent は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true`、デーモンは `BundleProgram = Contents/Helpers/capsaicin-helper`、`RunAtLoad = true`、`MachServices` のキーが `io.github.koutyuke.capsaicin.debug.helper` である。PR ビルドの取得元・署名を確かめられない、手元で同じ Team ID の署名を用意できない、既存アプリの上書きが要る場合は止める。
 
 3. 結果用のメモ `"$B/result-prepare.txt"` を作り、実行日、macOS のビルド番号、Mac の機種、承認者を書く。認証情報や全プロセスの環境変数は保存しない。
 4. PM に、独立したプロセスから各対象キーボードへ `"Auto"` を書ける LED の復旧用実行ファイルと、その実行・成功判定の手順を用意してもらう。承認済みの手順を `B` に保管する。

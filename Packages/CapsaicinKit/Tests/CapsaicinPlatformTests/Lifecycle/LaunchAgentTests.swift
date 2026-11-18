@@ -6,13 +6,26 @@ import Testing
 
 @MainActor
 struct LaunchAgentTests {
-    @Test("SPEC-LCY-005 登録と版の保存の後、kickstart だけで引き渡す")
+    @Test("SPEC-LCY-005 kickstart が成功してもジョブが外されたら引き渡さない")
+    func removedJob() async {
+        let fixture = LaunchAgentFixture()
+        fixture.printError = true
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(fixture.commands.last == ["print", "gui/501/\(fixture.label)"])
+        #expect(!fixture.calls.contains("wait"))
+    }
+
+    @Test("SPEC-LCY-005 登録と版の保存の後、ジョブの実行ファイルを確かめて引き渡す")
     func registration() async {
         let fixture = LaunchAgentFixture()
         fixture.status = .notRegistered
         #expect(await fixture.agent().registerAndStart() == .ready)
-        #expect(fixture.calls == ["register", "save:2", "kickstart"])
-        #expect(fixture.commands == [["kickstart", "gui/501/\(fixture.label)"]])
+        #expect(fixture.calls == ["register", "save:2", "kickstart", "print"])
+        #expect(fixture.commands == [
+            ["kickstart", "gui/501/\(fixture.label)"], ["print", "gui/501/\(fixture.label)"],
+        ])
+        #expect(fixture.pathRequests == [42])
+        #expect(fixture.waits.isEmpty)
         #expect(fixture.savedVersion == "2")
     }
 
@@ -22,7 +35,7 @@ struct LaunchAgentTests {
         fixture.savedVersion = "2"
         fixture.errors = [NSError(domain: SMAppServiceErrorDomain, code: Int(kSMErrorAlreadyRegistered))]
         #expect(await fixture.agent().registerAndStart() == .ready)
-        #expect(fixture.calls == ["register", "save:2", "kickstart"])
+        #expect(fixture.calls == ["register", "save:2", "kickstart", "print"])
     }
 
     @Test("SPEC-LCY-005 登録と起動の失敗を区別し、登録失敗では引き渡さない", arguments: [false, true])
@@ -80,7 +93,7 @@ struct LaunchAgentTests {
         let fixture = LaunchAgentFixture()
         fixture.savedVersion = previous
         #expect(await fixture.agent().registerAndStart() == .ready)
-        #expect(fixture.calls == ["unregister-start", "unregister-end", "register", "save:2", "kickstart"])
+        #expect(fixture.calls == ["unregister-start", "unregister-end", "register", "save:2", "kickstart", "print"])
     }
 
     @Test("SPEC-HLP-007 SPEC-LCY-005 EPERM は3秒待って最大3回再試行する", arguments: [0, 1, 2])
@@ -96,7 +109,7 @@ struct LaunchAgentTests {
         #expect(await fixture.agent().registerAndStart() == .ready)
         #expect(fixture.calls == [
             "unregister-start", "unregister-end", "register", "wait", "register", "wait", "register", "wait",
-            "register", "save:2", "kickstart",
+            "register", "save:2", "kickstart", "print",
         ])
     }
 
@@ -192,6 +205,94 @@ struct LaunchAgentTests {
 }
 
 @MainActor
+struct LaunchAgentConfirmationTests {
+    @Test("SPEC-LCY-005 PID が現れ、exec 後の実行ファイルが一致したら待機を終える")
+    func delayedExec() async {
+        let fixture = LaunchAgentFixture()
+        fixture.outputs = ["state = waiting", "\tpid = 42\n", "\tpid = 42\n"]
+        fixture.paths = ["/usr/libexec/xpcproxy", fixture.executableURL?.path]
+        let started = fixture.instant
+        #expect(await fixture.agent().registerAndStart() == .ready)
+        #expect(fixture.pathRequests == [42, 42])
+        #expect(fixture.waits == [.milliseconds(100), .milliseconds(100)])
+        #expect(fixture.timeouts == [5, 2, 2, 2])
+        #expect(started.duration(to: fixture.instant) == .milliseconds(200))
+    }
+
+    @Test("SPEC-LCY-005 別の実行ファイルや取得不能なパスを引き渡しとみなさない", arguments: [
+        "/usr/libexec/xpcproxy", "/another-checkout/Capsaicin.app/Contents/MacOS/Capsaicin", nil,
+    ] as [String?])
+    func wrongExecutable(path: String?) async {
+        let fixture = LaunchAgentFixture()
+        fixture.paths = [path]
+        let started = fixture.instant
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(started.duration(to: fixture.instant) == .seconds(5))
+        #expect(fixture.waits == Array(repeating: .milliseconds(100), count: 50))
+        #expect(fixture.pathRequests.count == 50)
+    }
+
+    @Test("SPEC-LCY-005 ジョブに PID が現れなければ5秒で失敗する")
+    func missingPID() async {
+        let fixture = LaunchAgentFixture()
+        fixture.outputs = ["state = waiting"]
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(fixture.waits.count == 50)
+        #expect(fixture.pathRequests.isEmpty)
+    }
+
+    @Test("SPEC-LCY-005 自分自身の PID は実行ファイルが一致しても成功とみなさない")
+    func ownPID() async {
+        let fixture = LaunchAgentFixture()
+        fixture.outputs = ["pid = \(getpid())"]
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(fixture.pathRequests.isEmpty)
+        #expect(fixture.waits.count == 50)
+    }
+
+    @Test("SPEC-LCY-005 照会が期限をまたいでも、実行ファイルが一致したら agent は動いているので成功する",
+          arguments: [Duration.milliseconds(4900), .seconds(5), .seconds(6)])
+    func deadline(delay: Duration) async {
+        let fixture = LaunchAgentFixture()
+        fixture.printDelay = delay
+        #expect(await fixture.agent().registerAndStart() == .ready)
+        #expect(fixture.waits.isEmpty)
+        #expect(fixture.timeouts == [5, 2])
+    }
+
+    @Test("SPEC-LCY-005 起動確認の待機が取り消されたら失敗する")
+    func cancelledConfirmation() async {
+        let fixture = LaunchAgentFixture()
+        fixture.outputs = ["state = waiting"]
+        fixture.cancelWait = true
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(fixture.waits == [.milliseconds(100)])
+    }
+
+    @Test("SPEC-LCY-005 バンドルの実行ファイルが取得不能なら引き渡さない")
+    func missingBundleExecutable() async {
+        let fixture = LaunchAgentFixture()
+        fixture.executableURL = nil
+        #expect(await fixture.agent().registerAndStart() == .launchFailed)
+        #expect(fixture.commands.count == 1)
+    }
+
+    @Test("SPEC-LCY-005 print の PID 行だけから正の PID を読む", arguments: [
+        ("\tpid = 42\n", Int32(42)), ("parent pid = 42", nil), ("last exit code = 42", nil),
+        ("pid = 0", nil), ("pid = -42", nil), ("pid = 2147483648", nil), ("pid = invalid", nil),
+    ])
+    func jobPID(output: String, expected: pid_t?) {
+        #expect(LaunchAgent.jobPID(output) == expected)
+    }
+
+    @Test("SPEC-LCY-005 proc_pidpath は実在するプロセスの絶対パスを返す")
+    func processExecutablePath() {
+        #expect(LaunchAgent.processExecutablePath(getpid())?.hasPrefix("/") == true)
+        #expect(LaunchAgent.processExecutablePath(-1) == nil)
+    }
+}
+
+@MainActor
 private final class LaunchAgentFixture {
     let label = "io.github.koutyuke.capsaicin.debug"
     var status = SMAppService.Status.enabled
@@ -204,8 +305,17 @@ private final class LaunchAgentFixture {
     var errorAfterRegister: NSError?
     var unregisterError = false
     var launchError = false
+    var printError = false
     var loginError = false
     var cancelWait = false
+    var executableURL: URL? = URL(fileURLWithPath: "/Applications/Capsaicin.app/Contents/MacOS/Capsaicin")
+    var outputs = ["\tpid = 42\n"]
+    var paths: [String?] = ["/Applications/Capsaicin.app/Contents/MacOS/Capsaicin"]
+    var pathRequests: [pid_t] = []
+    var instant = ContinuousClock.now
+    var printDelay = Duration.zero
+    var waits: [Duration] = []
+    var timeouts: [TimeInterval] = []
 
     func agent() -> LaunchAgent {
         LaunchAgent(label: label, uid: 501, status: { self.status }, register: {
@@ -238,18 +348,35 @@ private final class LaunchAgentFixture {
         }, version: "2", registeredVersion: { self.savedVersion }, saveVersion: {
             self.calls.append("save:\($0)")
             self.savedVersion = $0
-        }, runLaunchctl: {
-            self.commands.append($0)
-            self.calls.append("kickstart")
-            if self.launchError {
-                throw CommandRunnerError.unsuccessfulExit(1)
-            }
-        }, wait: {
-            #expect($0 == .seconds(3))
-            self.calls.append("wait")
-            if self.cancelWait {
-                throw CancellationError()
-            }
-        })
+        }, executableURL: executableURL, executablePath: {
+            self.pathRequests.append($0)
+            return self.paths.count > 1 ? self.paths.removeFirst() : self.paths[0]
+        }, runLaunchctl: runLaunchctl, now: { self.instant }, wait: wait)
+    }
+
+    private func runLaunchctl(_ arguments: [String], timeout: TimeInterval) async throws -> String {
+        commands.append(arguments)
+        timeouts.append(timeout)
+        #expect(timeout > 0 && timeout <= 5)
+        let kickstart = arguments.first == "kickstart"
+        calls.append(kickstart ? "kickstart" : "print")
+        if kickstart ? launchError : printError {
+            throw CommandRunnerError.unsuccessfulExit(1)
+        }
+        if kickstart {
+            return ""
+        }
+        instant = instant.advanced(by: printDelay)
+        return outputs.count > 1 ? outputs.removeFirst() : outputs[0]
+    }
+
+    private func wait(_ duration: Duration) async throws {
+        #expect(duration == .seconds(3) || duration == .milliseconds(100))
+        calls.append("wait")
+        waits.append(duration)
+        if cancelWait {
+            throw CancellationError()
+        }
+        instant = instant.advanced(by: duration)
     }
 }

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-112
 title: 手元の Debug ビルドを署名し直すレシピを足し、app グループのレシピが Debug のプロセスを実行ファイルの絶対パスで見つけるようにする
-status: todo
+status: in_review
 requirements: []
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -59,3 +59,5 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 - 実機（オーナー）: `just build`、`just sign-debug`、`just stop`、`just start`、`just status`。
 
 ## レビュー
+
+PM がレビューした。`sign-debug` は内側の Mach-O とバンドルを深い順に署名し、最後にアプリを署名して検査する。`start`、`stop`、`status` は `pgrep -x` の候補を `lsof` の実行ファイルの絶対パスで絞る。`start` はジョブの PID の実行ファイルと PPID 1 を待ち、失敗時に署名し直しとログの確かめ方を示す。PM が2点を直した。3つのレシピに複製されていたプロセスを探す関数を `scripts/debug-app.sh` にまとめ、`sign-debug` の対象に `*.bundle` を加えた。手順書は README の決まりに沿う。`just check` は通る。レシピは実機で一度も実行していない。

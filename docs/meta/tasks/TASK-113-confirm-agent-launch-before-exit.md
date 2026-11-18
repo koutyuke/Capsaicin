@@ -2,7 +2,7 @@
 schema: task
 id: TASK-113
 title: 直接起動したアプリが、agent のジョブが動き出したことを確かめてから終了するようにする
-status: todo
+status: in_review
 requirements: ["REQ-LCY-005"]
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -48,3 +48,5 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 - 実機（オーナー）: ad-hoc 署名の手元のビルドを、PR のビルドが作った agent の項目が残る Mac で Finder から開くと、アプリは終了せずに動き、「一般」に再起動されないことが示される。`just sign-debug` で署名し直したビルドでは、agent に引き渡されて PPID 1 のプロセスが1つだけ動く。
 
 ## レビュー
+
+PM がレビューした。`kickstart` の後、`launchctl print` で現在のジョブの PID を読み直し、`proc_pidpath` の絶対パスがバンドルの実行ファイルと一致したら `.ready` を返す。exec 前の xpcproxy はパスが違い、exec に失敗したジョブは外されて `print` が失敗するので、誤って `.ready` にならない。PM が2点を直した。期限の後に一致した場合も `.ready` にした（agent が動いているのに `.launchFailed` を返すと、アプリが2つ残る）。`print` のタイムアウトを残り時間からの計算をやめて 2 秒にした。テストもこれに合わせた。`just check` は通る。

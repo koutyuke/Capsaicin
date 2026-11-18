@@ -43,7 +43,7 @@
 
 ヘルパーの設置と承認、on と off、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直し、Finder からの起動の引き渡しは `EVID-HLP-006` で確認済みなので、専用の検証ファイルは置かない。残る検証の前提を作るための設置・許可と、最後の削除は各ファイルに書く。承認待ちの新しいアラートと状態の文は `helper-approval-guidance.md`、ログイン時の起動とクラッシュ後の再起動は `login-and-crash-restart.md` で確かめる。
 
-ヘルパーやログイン・クラッシュ後の起動を確かめるファイルは、`prepare.md` で選んだ署名・公証済みの PR Debug ビルドを使う。`APP` を明記しないファイルと worktree 切り替えの検証は、手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使う。実行するファイルの対象に合わせて準備し、途中で PR ビルドと手元のビルドを混ぜない。対象を変えるときは先に `cleanup.md` を終える。
+`APP` を使うファイルでは、`prepare.md` で署名・公証済みの PR Debug ビルドか、同じ Team ID で署名し直した手元のビルドを選ぶ。`/Applications` の PR ビルドを対象に指定するファイルでは、PR ビルドを使う。`APP` を明記しないファイルと worktree 切り替えの検証は、手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使い、agent やヘルパーを確かめる前に `just sign-debug` で署名し直す。実行するファイルの対象に合わせて準備し、途中で PR ビルドと手元のビルドを混ぜない。対象を変えるときは先に `cleanup.md` を終える。
 
 ## 共通の決まり
 
@@ -80,9 +80,9 @@
 
 ### `just` の app レシピ
 
-- `just status`: agent のジョブの `program` がこのチェックアウトの実行ファイルを指すか、手元のビルド先で動く全チェックアウトの Debug プロセスの PID・開始時刻・パス、`SleepDisabled`、Capsaicin のアサーションを表示する。plist の有無や SMAppService の許可状態は調べない。終了コードは常に `0` なので、成否は表示で判断する。`/Applications` の PR ビルドはプロセス一覧の対象外なので、その不在の判定には使わない。
+- `just status`: agent のジョブの `state`・`pid` と、PID から引いた実行ファイルの絶対パスを `Job executable:` に表示する。`Job matches this checkout:` は、このチェックアウトの実行ファイルと一致すれば `yes`、異なれば `no`、ジョブが動いていなければ `unknown (job is not running)` になる。停止中はどのチェックアウトのジョブか判断しない。全チェックアウトの手元の Debug プロセスは、PID・開始時刻・PPID・実行ファイルの絶対パスを表示する。`SleepDisabled` と Capsaicin のアサーションも表示する。plist の有無や SMAppService の許可状態は調べない。終了コードは常に `0` なので、成否は表示で判断する。`/Applications` の PR ビルドはプロセス一覧の対象外なので、その不在の判定には使わない。
 - `just stop`: どのチェックアウトの Debug アプリにもまず quit を送る。10秒たっても残るプロセスだけに `SIGTERM` を送り、さらに5秒待つ。`SIGTERM` で止めたプロセスは後片付けを通らないので、抑止中に残ったときは `just status` で `SleepDisabled` とアサーションを確かめる。
-- `just start`: Debug アプリが動いていないことを確かめ、読み込み済みのジョブを外してからこのチェックアウトのビルドを開く。ジョブを残した起動を試す手順では使わない。
+- `just start`: 全チェックアウトの手元の Debug アプリが動いていないことを実行ファイルの絶対パスで確かめ、読み込み済みのジョブを外してからこのチェックアウトのビルドを開く。ジョブの PID の実行ファイルがこのチェックアウトと一致し、PPID が `1` になるまで最大10秒待つ。成功時は `Started Debug PID <PID>: <絶対パス>` を表示する。直接起動したアプリだけが動き続けている場合も失敗する。ジョブを残した起動を試す手順では使わない。
 - `just restart`: ビルドに成功してから `stop`、`start` の順に実行する。
 
 `/Applications` の PR ビルドは、`/usr/bin/open "$APP"` で起動し、メニューから終了する。登録の状態は、アプリの「ヘルパー」、システム設定の「一般 > ログイン項目と機能拡張」、`sfltool dumpbtm`、`launchctl print` の読み取りを照合する。`launchctl print-disabled` だけで SMAppService の許可状態を判断しない。agent とデーモンは、バックグラウンドの一覧では1つの Capsaicin の項目にまとまる。
@@ -94,10 +94,12 @@
 | 症状 | まず確かめること |
 | --- | --- |
 | Debug プロセスが0本、または2本以上 | `just status` でジョブの PID と全 Debug プロセスを読み直す。5秒待って再確認する |
+| `just start` が失敗する | 直接起動したアプリが残っていても成功に数えない。`just status` のジョブの PID・`Job executable:` と全 Debug プロセスを読む。署名の Team ID と次のログを照合し、起動を繰り返さない |
+| ログに `Launch Constraint Violation` がある | `/usr/bin/log show --last 5m --predicate 'process == "launchd"' \| grep 'Launch Constraint Violation'` で読む。同じ bundle ID の Team ID 付きビルドが登録した agent は ad-hoc 署名のビルドでは起動できない。手元のビルドを止め、`just sign-debug` で同じ Team ID の証明書を使って署名し直す（`DEC-SYS-025`） |
 | agent の登録や起動が失敗する | アプリの「一般」の警告、システム設定の許可、BTM の識別子とアプリのパス。手作業の登録で回避しない |
 | ログイン時に起動しない | 「ログイン時に起動」、mainApp の登録とシステム設定の「ログイン時に開く」、バックグラウンドの許可。agent の `RunAtLoad` は `false` のままである |
 | ヘルパーが「システム設定での許可待ち」になる | システム設定で Capsaicin の項目を許可する。agent も同じ項目なので両方の状態を見る |
-| ヘルパーが「このビルドでは使用不可」になる | ad-hoc 署名では使えない。署名に Team ID がある PR Debug ビルドを使う |
+| ヘルパーが「このビルドでは使用不可」になる | ad-hoc 署名では使えない。手元では停止後に `just sign-debug` で署名し直すか、署名に Team ID がある PR Debug ビルドを使う |
 | `SleepDisabled` が戻らない | 承認済みの復旧操作 `/usr/bin/sudo /usr/bin/pmset -a disablesleep 0` の直後に `/usr/bin/pmset -g` で読む。成功しても設定変更のコマンド自体は何も出力しない。戻らなければ PM に報告する |
 | LED が通常連動に戻らない | `B` にある承認済みの LED 復旧手順を実行する。読み戻した値だけで合格にしない |
 

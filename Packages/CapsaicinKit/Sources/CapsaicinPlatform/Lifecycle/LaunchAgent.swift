@@ -11,12 +11,15 @@ public enum LaunchAgentStatus: Equatable, Sendable {
     case unavailable
 }
 
-/// 登録と起動の要求だけを扱い、呼び出し元の終了やプロセスの管理は行わない。
+/// 呼び出し元の終了やプロセスの管理は行わない。
 @MainActor
 public final class LaunchAgent {
     public let label: String
     private let domain: String
-    private let runLaunchctl: ([String]) async throws -> Void
+    private let runLaunchctl: ([String], TimeInterval) async throws -> String
+    private let executableURL: URL?
+    private let executablePath: (pid_t) -> String?
+    private let now: () -> ContinuousClock.Instant
     private let serviceStatus: () -> SMAppService.Status
     private let registerService: () throws -> Void
     private let unregisterService: () async throws -> Void
@@ -39,19 +42,22 @@ public final class LaunchAgent {
                   version: bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "",
                   registeredVersion: { defaults.string(forKey: "agentRegisteredBundleVersion") },
                   saveVersion: { defaults.set($0, forKey: "agentRegisteredBundleVersion") },
-                  runLaunchctl: { arguments in
-                      let runner = CommandRunner(executable: "/bin/launchctl", arguments: arguments)
-                      _ = try await Task.detached { try runner.run(timeout: 5) }.value
+                  executableURL: bundle.executableURL, executablePath: Self.processExecutablePath,
+                  runLaunchctl: { arguments, timeout in
+                      let runner = CommandRunner(executable: "/bin/launchctl", arguments: arguments, outputLimit: 65536)
+                      let data = try await Task.detached { try runner.run(timeout: timeout) }.value
+                      return String(data: data, encoding: .utf8) ?? ""
                   })
     }
 
-    /// テストでは SMAppService、版の記録、コマンド実行、再試行の待機を差し替える。
     init(label: String, uid: uid_t, status: @escaping () -> SMAppService.Status,
          register: @escaping () throws -> Void, unregister: @escaping () async throws -> Void,
          loginStatus: @escaping () -> SMAppService.Status,
          registerLogin: @escaping () throws -> Void, unregisterLogin: @escaping () throws -> Void,
          version: String, registeredVersion: @escaping () -> String?, saveVersion: @escaping (String) -> Void,
-         runLaunchctl: @escaping ([String]) async throws -> Void,
+         executableURL: URL?, executablePath: @escaping (pid_t) -> String?,
+         runLaunchctl: @escaping ([String], TimeInterval) async throws -> String,
+         now: @escaping () -> ContinuousClock.Instant = { ContinuousClock.now },
          wait: @escaping (Duration) async throws -> Void = { try await Task.sleep(for: $0) })
     {
         self.label = label
@@ -66,6 +72,9 @@ public final class LaunchAgent {
         self.registeredVersion = registeredVersion
         self.saveVersion = saveVersion
         self.runLaunchctl = runLaunchctl
+        self.executableURL = executableURL?.resolvingSymlinksInPath()
+        self.executablePath = executablePath
+        self.now = now
         self.wait = wait
     }
 
@@ -117,12 +126,62 @@ public final class LaunchAgent {
         let status = restartStatus()
         guard status == .ready else { return status }
         do {
-            // 引き渡しの成否は許可状態ではなく、起動要求の成功で決める。
-            try await runLaunchctl(["kickstart", "\(domain)/\(label)"])
-            return .ready
+            _ = try await runLaunchctl(["kickstart", "\(domain)/\(label)"], 5)
         } catch {
+            Logger(subsystem: label, category: "LaunchAgent")
+                .error("Agent kickstart failed: \(String(describing: error), privacy: .private)")
             return .launchFailed
         }
+        return await confirmLaunch()
+    }
+
+    private func confirmLaunch() async -> LaunchAgentStatus {
+        let logger = Logger(subsystem: label, category: "LaunchAgent")
+        guard let executableURL else {
+            logger.error("Agent launch failed: bundle executable is unavailable")
+            return .launchFailed
+        }
+        let deadline = now().advanced(by: .seconds(5))
+        var reason = "Agent job has no PID"
+        var path: String?
+        while now() < deadline {
+            let output: String
+            do {
+                // kickstart の PID は exec 前のものになりうるので、現在のジョブを毎回読み直す。
+                output = try await runLaunchctl(["print", "\(domain)/\(label)"], 2)
+            } catch {
+                logger.error("Agent job is unavailable: \(String(describing: error), privacy: .private)")
+                return .launchFailed
+            }
+            path = nil
+            if let pid = Self.jobPID(output) {
+                if pid == getpid() {
+                    reason = "Agent job PID is the current process"
+                } else {
+                    path = executablePath(pid)
+                    reason = path == nil ? "Agent executable path is unavailable" : "Agent executable differs"
+                    // 期限の後でも、一致したら agent は動いているので、2つ目のアプリとして残らない。
+                    if let path, URL(fileURLWithPath: path).resolvingSymlinksInPath() == executableURL {
+                        return .ready
+                    }
+                }
+            } else {
+                reason = "Agent job has no PID"
+            }
+            do {
+                let remaining = now().duration(to: deadline)
+                guard remaining > .zero else { break }
+                try await wait(min(.milliseconds(100), remaining))
+            } catch {
+                logger.error("Agent launch confirmation cancelled: \(String(describing: error), privacy: .private)")
+                return .launchFailed
+            }
+        }
+        logger
+            .error(
+                "Agent launch timed out: \(reason, privacy: .public); executable: \(path ?? "", privacy: .private); expected: \(executableURL.path, privacy: .private)",
+            )
+        return .launchFailed
     }
 
     /// 許可状態の照会であり、プロセスの稼働やクラッシュ復旧の成功は保証しない。

@@ -63,15 +63,16 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 ## 検証
 
-変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。ad-hoc 署名のビルドではヘルパーを使えない。ヘルパーとログイン時の起動の実機での確認は、PR の Debug ビルド（`S-Preview`、`DEC-SYS-023`）で行う。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
+変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。手元で agent、ヘルパー、ログイン時の起動を確かめるときは、ビルド後に `just sign-debug` で配布物と同じ Team ID の証明書を使って署名し直す（`DEC-SYS-025`）。署名・公証済みの PR Debug ビルド（`S-Preview`、`DEC-SYS-023`）も使える。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
 
 | レシピ             | 実行すること                                                                                                                                        |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
 | `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
-| `status`           | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。Debug ジョブとこのチェックアウトの対応、全 Debug プロセス、スリープの状態を読む        |
+| `sign-debug`       | オーナーのキーチェーンの鍵で Debug アプリを署名し直す。既定は `Apple Development`。エージェントは承認を得て実行する（`DEC-SYS-025`）                |
+| `status`           | エージェントは承認を得て実行する（`DEC-SYS-024`）。Debug ジョブの state・PID・実行ファイルの絶対パス、全 Debug プロセス、スリープの状態を読む       |
 | `stop`             | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。すべてのチェックアウトの Debug アプリを終了する                                        |
-| `start`            | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。Debug アプリが動いていないことを確かめ、ジョブを外してこのチェックアウトのビルドを開く |
+| `start`            | エージェントは承認を得て実行する（`DEC-SYS-024`）。全 Debug アプリの停止を絶対パスで確かめ、ジョブを外して開き、このビルドの agent の起動を待つ     |
 | `restart`          | エージェントはオーナーの承認を得て実行する（`DEC-SYS-024`）。ビルドに成功してから `stop`、`start` の順に実行する                                    |
 | `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
 | `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
