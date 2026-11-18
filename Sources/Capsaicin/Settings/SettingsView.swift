@@ -76,28 +76,6 @@ struct SettingsView: View {
     private var general: some View {
         Section(SettingsSection.general.text("startup.group.title")) {
             toggle(.general, "launchAtLogin", \.launchesAtLogin, symbol: "power")
-            SettingsRow(
-                title: SettingsSection.general.text("resume.label"),
-                help: SettingsSection.general.text("resume.help"),
-                symbol: "arrow.clockwise",
-            ) {
-                Picker(SettingsSection.general.text("resume.label"), selection: binding(\.resumePolicy)) {
-                    Text(SettingsSection.general.text("resume.option.never")).tag(ResumePolicy.never)
-                    Text(SettingsSection.general.text("resume.option.app")).tag(ResumePolicy.afterAppRestart)
-                    Text(SettingsSection.general.text("resume.option.appAndMac")).tag(
-                        ResumePolicy.afterAppOrMacRestart,
-                    )
-                }.labelsHidden().pickerStyle(.menu)
-            }
-            if !model.app.willRestartAfterCrash {
-                let key =
-                    model.app.launchAgentStatus == .disabled ? "backgroundDisabled" : "restartUnavailable"
-                SettingsRow(
-                    title: SettingsSection.general.text(key + ".label"),
-                    help: SettingsSection.general.text(key + ".help"),
-                    symbol: "exclamationmark.triangle.fill",
-                ) {}
-            }
         }
         Section(SettingsSection.general.text("appearance.group.title")) {
             toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle")

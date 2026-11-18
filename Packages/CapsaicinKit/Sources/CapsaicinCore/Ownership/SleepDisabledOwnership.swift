@@ -1,6 +1,6 @@
 /// disablesleep を立てる必要が生じたときの扱い。
 public enum RaiseSleepDisabledAction: Hashable, Sendable {
-    /// 所有の「立てた」を保存できてから、ヘルパーの `on` を実行する。
+    /// メモリー上で所有を「立てた」にしてから、ヘルパーの `on` を実行する。
     case claimThenTurnOn
     /// 前に自分が立てたまま残ったものとみなし、`on` を実行せずに引き継ぐ。
     case adoptOwn

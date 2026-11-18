@@ -86,7 +86,7 @@ struct UpdateInstallationTests {
         #expect(SettingsUpdateState(isEnabled: true, lastChecked: nil,
                                     availableVersion: model.pendingUpdateVersion,
                                     installationVersion: model.pendingInstallationVersion) == .available("1.2.0"))
-        let status = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false)
+        let status = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:])
         let rows = try MenuContent.make(status: status, settings: Settings(), isOnACPower: false,
                                         hasInternalBattery: false, sleepRows: [],
                                         pendingUpdateVersion: model.pendingUpdateVersion,

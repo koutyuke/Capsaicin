@@ -77,7 +77,7 @@ extension SettingsTests {
     @Test("SPEC-SET-005 SPEC-BLK-009 反映失敗ではポップアップと2値をまとめて戻す")
     func lidCloseRollback() async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         fixture.system.failing = [.helperOn]
         let before = fixture.model.settings

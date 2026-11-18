@@ -10,7 +10,7 @@ struct QuickSettingsTests {
           arguments: [false, true], [false, true])
     func topLevel(active: Bool, timeEnabled: Bool) throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let model = settings(fixture.model)
         model.change(\.timerEnabled, to: timeEnabled)
         model.change(\.specifiedTimeEnabled, to: timeEnabled)

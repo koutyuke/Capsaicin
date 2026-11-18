@@ -161,7 +161,7 @@ public final class HelperRegistration {
     }
 }
 
-/// agent と daemon は同じ順序と待機で登録し直す。版の記録は呼び出し元ごとに持つ。
+/// デーモンの登録を外してから登録し直す。版の記録は呼び出し元が持つ。
 @MainActor
 enum AppServiceRegistration {
     static func replace(status: () -> SMAppService.Status, register: () throws -> Void,

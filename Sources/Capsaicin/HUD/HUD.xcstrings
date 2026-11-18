@@ -120,23 +120,6 @@
         }
       }
     },
-    "hud.reason.stateSaveFailedAtStart" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot save state"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "状態を保存できません"
-          }
-        }
-      }
-    },
     "hud.reason.time" : {
       "extractionState" : "manual",
       "localizations" : {

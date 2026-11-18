@@ -123,8 +123,11 @@ enum MenuContent {
         if status.misalignments[.led] != nil {
             rows.append(warning("menu.warning.unalignedLed.title"))
         }
-        if status.isRecordUnsaved {
-            rows.append(warning("menu.warning.stateSaveFailed.title"))
+        if status.brightnessWarnings.contains(.saveFailed) {
+            rows.append(warning("menu.warning.brightnessSaveFailed.title"))
+        }
+        if status.brightnessWarnings.contains(.deletionFailed) {
+            rows.append(warning("menu.warning.brightnessDeletionFailed.title"))
         }
         return rows
     }

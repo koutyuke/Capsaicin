@@ -494,6 +494,40 @@
         }
       }
     },
+    "menu.warning.brightnessDeletionFailed.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not delete the display brightness record"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディスプレイの明るさの記録を削除できていません"
+          }
+        }
+      }
+    },
+    "menu.warning.brightnessSaveFailed.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not save the display brightness record"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ディスプレイの明るさの記録を保存できませんでした"
+          }
+        }
+      }
+    },
     "menu.warning.remainingSleepSetting.helper.subtitle" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -524,23 +558,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "スリープを止める設定が残っています"
-          }
-        }
-      }
-    },
-    "menu.warning.stateSaveFailed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not save state"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "状態を保存できていません"
           }
         }
       }

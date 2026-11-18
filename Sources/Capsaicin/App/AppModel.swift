@@ -1,7 +1,9 @@
 import CapsaicinCore
 import CapsaicinIPC
 import CapsaicinPlatform
+import Foundation
 import Observation
+import OSLog
 
 enum AppAlert: Equatable {
     case settingsReverted(Set<Mechanism>)
@@ -16,11 +18,6 @@ final class AppModel {
     let capabilities: MachineCapabilities
     let updater: UpdateModel
     var hasVirtualKeyboard = false
-    var launchAgentStatus = LaunchAgentStatus.unavailable
-    var willRestartAfterCrash: Bool {
-        launchAgentStatus == .ready
-    }
-
     /// 出来事と、その直前のセッション（指定時刻で解除したときの表示に使う）。
     @ObservationIgnored var onEvent: ((BlockingEvent, BlockingSession?) -> Void)?
     @ObservationIgnored var onAlert: ((AppAlert) -> Void)?
@@ -62,9 +59,17 @@ final class AppModel {
         controller.lidOpened()
     }
 
-    func launch() {
-        controller.launch()
+    func restoreBrightnessAtLaunch() {
+        controller.restoreBrightnessAtLaunch()
+    }
+
+    func finishLaunching() {
+        controller.finishLaunching()
         refresh()
+    }
+
+    var nextBrightnessDeletionAttempt: Date? {
+        controller.nextBrightnessDeletionAttempt
     }
 
     @discardableResult
@@ -173,20 +178,16 @@ final class AppModel {
         return IPCResponse(outcome: outcome, status: status)
     }
 
-    func terminate(reason: TerminationReason) {
-        let needsAlert: Bool
-        switch reason {
-        case .userQuit: needsAlert = controller.quitByUser()
-        case .sessionEnd:
-            controller.endSession()
-            needsAlert = false
-        case .unknown:
-            controller.terminateForUnknownReason()
-            needsAlert = false
-        }
+    func terminate(isUserQuit: Bool) {
+        controller.terminate()
         refresh()
-        if needsAlert {
+        let misalignments = status.misalignments
+        guard !misalignments.isEmpty else { return }
+        if isUserQuit {
             onAlert?(.terminationIncomplete)
+        } else {
+            Logger(subsystem: "io.github.koutyuke.capsaicin", category: "App")
+                .error("終了時に合わせられていない制御: \(String(describing: misalignments), privacy: .public)")
         }
     }
 

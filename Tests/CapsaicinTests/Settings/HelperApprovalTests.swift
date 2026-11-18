@@ -10,7 +10,7 @@ struct HelperApprovalTests {
           arguments: [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
     func holdsSelectionUntilApproval(choice: SettingsLidCloseChoice) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         let session = fixture.model.status.session
         var state = HelperInstallationState.notInstalled

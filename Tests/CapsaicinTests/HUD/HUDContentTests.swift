@@ -4,7 +4,7 @@ import Testing
 
 struct HUDContentTests {
     private var status: BlockingStatus {
-        BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false)
+        BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:])
     }
 
     private var calendar: Calendar {
@@ -33,7 +33,7 @@ struct HUDContentTests {
             threshold: #require(BatteryThreshold(percent: 20)),
             ignoresOnACPower: true,
         )
-        let value = try content(.started(.user(.menu)), status: status)
+        let value = try content(.started(.menu), status: status)
         #expect(value.symbol == "custom.capsaicin.led.fill")
         #expect(value.tone == .normal)
         #expect(value.state == "スリープ防止 オン")
@@ -45,7 +45,7 @@ struct HUDContentTests {
     func startWithTime(source: TimeLimitSource) throws {
         var status = status
         status.session = BlockingSession(timeLimit: TimeLimit(date: Date(timeIntervalSince1970: 5400), source: source))
-        let value = try content(.started(.user(.hotkey)), status: status)
+        let value = try content(.started(.hotkey), status: status)
         #expect(value.symbol == "custom.capsaicin.led.fill")
         #expect(value.tone == .normal)
         #expect(value.detail == (source == .timer ? "1時間30分" : "1:30まで"))
@@ -60,7 +60,7 @@ struct HUDContentTests {
             date: Date(timeIntervalSince1970: seconds - 0.01),
             source: .timer,
         ))
-        let value = try content(.started(.user(.menu)), status: status)
+        let value = try content(.started(.menu), status: status)
         #expect(value.detail == (seconds == 3600 ? "1時間" : "2時間"))
     }
 
@@ -80,7 +80,7 @@ struct HUDContentTests {
         var status = status
         status.session = BlockingSession(timeLimit: TimeLimit(date: Date(timeIntervalSince1970: 5400), source: source))
         let replaced = try content(.timeLimitReplaced(.menu), status: status)
-        #expect(try replaced == content(.started(.user(.menu)), status: status))
+        #expect(try replaced == content(.started(.menu), status: status))
         #expect(replaced.detail == (source == .timer ? "1時間30分" : "1:30まで"))
         #expect(try replaced.announcement == "スリープ防止 オン、\(#require(replaced.detail))")
         status.session = BlockingSession(timeLimit: nil)
@@ -130,10 +130,9 @@ struct HUDContentTests {
             (.batteryBelowThreshold, "バッテリー残量不足"),
             (.helperNotInstalled, "ヘルパー未準備"),
             (.mechanismsFailed([.idleSleepAssertion]), "設定の適用に失敗"),
-            (.recordNotSaved, "状態を保存できません"),
         ]
         for (reason, expected) in cases {
-            let value = try content(.startRejected(.user(.menu), reason))
+            let value = try content(.startRejected(.menu, reason))
             #expect(value.symbol == "xmark.octagon.fill")
             #expect(value.tone == .error)
             #expect(value.state == "開始できません")
@@ -162,8 +161,7 @@ struct HUDContentTests {
     @Test("SPEC-HUD-002 警告だけの更新では内容を作らず、表示する場面の判断は呼び出し元に任せる")
     func warningAndOrigin() throws {
         #expect(HUDContent.make(for: .warningsChanged, status: status) == nil)
-        #expect(try content(.started(.user(.cli))).symbol == "custom.capsaicin.led.fill")
-        #expect(try content(.started(.resume)).symbol == "custom.capsaicin.led.fill")
+        #expect(try content(.started(.cli)).symbol == "custom.capsaicin.led.fill")
     }
 
     @Test("SPEC-HUD-005 SPEC-HUD-006 入る・留まる間の置き換えは待たず、出る途中なら0.15秒で戻す")

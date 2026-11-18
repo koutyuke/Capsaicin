@@ -86,7 +86,7 @@ targets:
           subpath: Contents/Helpers
     postBuildScripts:
       # CodeSign より前に生成し、構成ごとの定義もアプリの署名に含める。
-      - name: Generate bundled service definitions
+      - name: Generate bundled daemon definition
         script: |
           set -eu
           directory="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons"
@@ -99,21 +99,8 @@ targets:
           /usr/bin/plutil -insert MachServices -xml "<dict><key>$label</key><true/></dict>" "$plist"
           /usr/bin/plutil -insert RunAtLoad -bool true "$plist"
           /usr/bin/plutil -lint "$plist"
-          directory="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchAgents"
-          label="${PRODUCT_BUNDLE_IDENTIFIER}"
-          /bin/mkdir -p "$directory"
-          plist="$directory/$label.plist"
-          /usr/bin/plutil -create xml1 "$plist"
-          /usr/bin/plutil -insert Label -string "$label" "$plist"
-          /usr/bin/plutil -insert BundleProgram -string Contents/MacOS/Capsaicin "$plist"
-          /usr/bin/plutil -insert RunAtLoad -bool false "$plist"
-          /usr/bin/plutil -insert KeepAlive -xml '<dict><key>Crashed</key><true/></dict>' "$plist"
-          /usr/bin/plutil -insert ProcessType -string Interactive "$plist"
-          /usr/bin/plutil -insert LimitLoadToSessionType -string Aqua "$plist"
-          /usr/bin/plutil -lint "$plist"
         outputFiles:
           - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/$(PRODUCT_BUNDLE_IDENTIFIER).helper.plist
-          - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchAgents/$(PRODUCT_BUNDLE_IDENTIFIER).plist
   CapsaicinCLI:
     productName: capsaicin
     type: tool

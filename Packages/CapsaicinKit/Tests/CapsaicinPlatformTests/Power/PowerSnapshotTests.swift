@@ -98,39 +98,4 @@ struct PowerPlatformSnapshotTests {
         #expect(PowerSnapshot(sources: [], providingSource: "AC Power")
             .powerState == PowerState(batteryLevel: nil, isOnACPower: true))
     }
-
-    @Test("SPEC-LCY-007 起動時刻はマイクロ秒を含め、一度だけ読む")
-    func bootTime() {
-        var reads = 0
-        let provider = BootTimeProvider(read: { value, size in
-            reads += 1
-            #expect(size.pointee == MemoryLayout<timeval>.size)
-            value.pointee = timeval(tv_sec: 1_700_000_000, tv_usec: 123_456)
-            return 0
-        })
-        #expect(abs(provider.bootTime.timeIntervalSince1970 - 1_700_000_000.123456) < 0.000001)
-        _ = provider.bootTime
-        #expect(reads == 1)
-    }
-
-    @Test("SPEC-LCY-007 sysctl の失敗・サイズ違い・不正時刻は取得不能")
-    func invalidBootTime() {
-        let valid = timeval(tv_sec: 100, tv_usec: 0)
-        #expect(BootTimeProvider(read: { _, _ in -1 }).bootTime == .distantPast)
-        let cases: [(Int, timeval)] = [
-            (0, valid), (MemoryLayout<timeval>.size + 1, valid),
-            (MemoryLayout<timeval>.size, timeval(tv_sec: 0, tv_usec: 0)),
-            (MemoryLayout<timeval>.size, timeval(tv_sec: -1, tv_usec: 0)),
-            (MemoryLayout<timeval>.size, timeval(tv_sec: 100, tv_usec: -1)),
-            (MemoryLayout<timeval>.size, timeval(tv_sec: 100, tv_usec: 1_000_000)),
-        ]
-        for (size, value) in cases {
-            let provider = BootTimeProvider(read: { output, outputSize in
-                output.pointee = value
-                outputSize.pointee = size
-                return 0
-            })
-            #expect(provider.bootTime == .distantPast)
-        }
-    }
 }
