@@ -4,9 +4,9 @@ import CapsaicinCore
 enum MenuHUDRouting {
     static func shouldPresent(_ event: BlockingEvent) -> Bool {
         switch event {
-        case .started(.user(.menu)), .started(.user(.hotkey)),
+        case .started(.menu), .started(.hotkey),
              .timeLimitReplaced(.menu),
-             .startRejected(.user(.menu), _), .startRejected(.user(.hotkey), _),
+             .startRejected(.menu, _), .startRejected(.hotkey, _),
              .released(.user(.menu)), .released(.user(.hotkey)),
              .released(.timeLimit), .released(.batteryBelowThreshold): true
         default: false

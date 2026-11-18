@@ -1,30 +1,15 @@
 import AppKit
-import CapsaicinPlatform
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) var runtime: AppRuntime?
-    private var startup: Task<Bool, Never>?
+    private var startup: Task<Void, Never>?
     private var explicitUserQuit = false
 
     func applicationDidFinishLaunching(_: Notification) {
-        do {
-            let runtime = try AppComposition.make(quit: { [weak self] in self?.quitByUser() })
-            self.runtime = runtime
-            let startup = Task { await runtime.start() }
-            self.startup = startup
-            Task {
-                if await !startup.value {
-                    // 引き渡し済みで後片付けはない。Task の中で terminateLater を返すと、返答の Task が
-                    // メインキューで待たされて終了できないので、startup を外して terminateNow にする。
-                    self.startup = nil
-                    NSApplication.shared.terminate(nil)
-                }
-            }
-        } catch {
-            AppRuntime.log(error)
-            NSApplication.shared.terminate(nil)
-        }
+        let runtime = AppComposition.make(quit: { [weak self] in self?.quitByUser() })
+        self.runtime = runtime
+        startup = Task { await runtime.start() }
     }
 
     func quitByUser() {
@@ -41,13 +26,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let startup, let runtime else { return .terminateNow }
-        let reason = TerminationReasonDetector.classify(
-            explicitUserQuit: explicitUserQuit, appleEvent: NSAppleEventManager.shared().currentAppleEvent,
-        )
+        // 利用者の終了と分かるのは、アプリの終了操作を明示的に受けたときだけ。
+        let isUserQuit = explicitUserQuit
         Task {
-            if await startup.value {
-                await runtime.terminate(reason: reason)
-            }
+            await startup.value
+            await runtime.terminate(isUserQuit: isUserQuit)
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

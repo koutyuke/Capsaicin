@@ -2,7 +2,7 @@ import Foundation
 
 // コントローラーが OS に作用するためのポート。すべてメインスレッドから同期で呼ぶ。
 // 失敗する操作は throw で伝える。コントローラーは失敗を合わせられていない制御か開始の拒否にする。
-// 輝度は抑止の仕組みではないので、その失敗はログに残すだけにする。
+// 輝度の読み書きの失敗はログに残す。輝度の記録を保存・削除できない場合は警告も出す。
 
 /// オンラインの内蔵ディスプレイの輝度。外部ディスプレイは操作しない。
 @MainActor
@@ -49,19 +49,23 @@ public protocol PowerStateProviding {
     var powerState: PowerState { get }
 }
 
-/// Mac の起動時刻（kern.boottime）。
-@MainActor
-public protocol BootTimeProviding {
-    /// 読めないときは取得不能を示す `Date.distantPast` を返す。過去の起動時刻としては扱わない。
-    var bootTime: Date { get }
+public struct BrightnessRecord: Codable, Equatable, Sendable {
+    /// 前の版の記録には、輝度を含まないものもある。
+    public let savedBrightness: Float?
+
+    public init(savedBrightness: Float?) {
+        self.savedBrightness = savedBrightness
+    }
 }
 
 @MainActor
-public protocol ResumeRecordStoring {
+public protocol BrightnessRecordStoring {
     /// 記録がなければ nil。読めない（壊れている、形式が違う）ときも nil を返し、実装の側でログに残す。
-    func load() -> ResumeRecord?
-    /// ファイルを置き換えて書き、書きかけの状態を残さない。保存できたら true。
-    func save(_ record: ResumeRecord) -> Bool
+    func load() -> BrightnessRecord?
+    /// ファイルを置き換えて書き、書きかけの状態を残さない。失敗は実装の側でログに残す。
+    func save(_ brightness: Float) -> Bool
+    /// すでに記録がないときも成功とする。失敗は実装の側でログに残す。
+    func remove() -> Bool
 }
 
 @MainActor

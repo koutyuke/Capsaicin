@@ -11,7 +11,7 @@ struct AppSettingsTests {
           arguments: [false, true])
     func removalSucceeded(external: Bool) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.system.sleepDisabled = external
         var settings = fixture.model.settings
         settings.blocksManualSleep = true
@@ -32,7 +32,6 @@ struct AppSettingsTests {
         #expect(!fixture.model.settings.blocksManualSleep)
         #expect(fixture.savedSettings.count == 2)
         #expect(fixture.savedSettings.last == fixture.model.settings)
-        #expect(fixture.system.savedRecords.first?.ownsSleepDisabled == false)
         #expect(fixture.system.operations.contains(.helperOff) == !external)
         #expect(!fixture.system.operations.contains(.helperOn))
         #expect(fixture.system.sleepDisabled == external)
@@ -44,7 +43,7 @@ struct AppSettingsTests {
           arguments: [false, true])
     func removalFailed(unreadable: Bool) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         var settings = fixture.model.settings
         settings.blocksManualSleep = true
         fixture.model.changeSettings(settings)
@@ -61,7 +60,6 @@ struct AppSettingsTests {
         model.showError = { _, _ in errors += 1 }
         await model.manage(.remove)
         #expect(!fixture.system.operations.contains(.readSleepDisabled))
-        #expect(fixture.system.storedRecord?.ownsSleepDisabled == false)
         #expect(fixture.model.status.misalignments == [.systemSleepDisabled: .notApplied])
         #expect(fixture.model.settings == settings)
         #expect(fixture.savedSettings == [settings])
@@ -77,7 +75,7 @@ struct AppSettingsTests {
           arguments: [0, 1, 2, 3, 4])
     func liveRemovalOrder(scenario: Int) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let external = scenario == 0
         fixture.system.sleepDisabled = external
         var settings = fixture.model.settings
@@ -92,7 +90,6 @@ struct AppSettingsTests {
         }, unregister: {
             events.append("unregister")
             #expect(fixture.model.settings.blocksManualSleep)
-            #expect(fixture.system.storedRecord?.ownsSleepDisabled == false)
             #expect(fixture.system.sleepDisabled == external)
             if scenario == 4 {
                 status = .requiresApproval
@@ -115,7 +112,6 @@ struct AppSettingsTests {
         let restoreFailed = scenario == 1 || scenario == 2
         #expect(events == (restoreFailed ? ["restore"] : ["restore", "unregister"]))
         #expect(fixture.model.settings.blocksManualSleep == (restoreFailed || scenario == 4))
-        #expect(fixture.system.storedRecord?.ownsSleepDisabled == restoreFailed)
         #expect(errors == (restoreFailed || scenario == 4 ? 1 : 0))
         #expect(model.helperState == (restoreFailed ? .installed : scenario == 4 ? .requiresApproval : .notInstalled))
     }
@@ -124,7 +120,7 @@ struct AppSettingsTests {
           arguments: [HelperManagementOperation.install])
     func installationReconciles(operation: HelperManagementOperation) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         var settings = fixture.model.settings
         settings.blocksManualSleep = true
         fixture.model.changeSettings(settings)
@@ -151,7 +147,7 @@ struct AppSettingsTests {
     @Test("SPEC-HLP-001 設定からの設置は成功後に保存して抑止に反映する")
     func installationFromSetting() async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         fixture.system.isHelperInstalled = false
         let model = settingsModel(fixture) { operation in
@@ -171,7 +167,7 @@ struct AppSettingsTests {
           arguments: [HelperManagementOperation.install, .remove])
     func unsuccessfulManagement(operation: HelperManagementOperation) async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         let before = fixture.model.status
         let model = settingsModel(fixture) { _ in .cancelled }

@@ -15,23 +15,16 @@ public enum RequestOrigin: String, Hashable, Sendable, Codable {
     case cli
 }
 
-public enum StartTrigger: Hashable, Sendable {
-    case user(RequestOrigin)
-    case resume
-}
-
 public enum StartRejection: Hashable, Sendable, Codable {
     case batteryBelowThreshold
     case helperNotInstalled
     case mechanismsFailed(Set<Mechanism>)
-    case recordNotSaved
 }
 
 public enum ReleaseReason: Hashable, Sendable {
     case user(RequestOrigin)
     case timeLimit(TimeLimitSource)
     case batteryBelowThreshold
-    case quit
 }
 
 public enum BlockingRules {

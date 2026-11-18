@@ -63,7 +63,7 @@ struct HUDContent: Equatable {
                 result.detail = status.batteryCondition.map {
                     String(format: text("hud.reason.battery"), $0.threshold.percent)
                 } ?? text("hud.reason.batteryLowAtStart")
-            case .user, .quit: break
+            case .user: break
             }
             if !status.misalignments.isEmpty {
                 result.symbol = "exclamationmark.triangle.fill"
@@ -80,7 +80,6 @@ struct HUDContent: Equatable {
         case .batteryBelowThreshold: "hud.reason.batteryLowAtStart"
         case .helperNotInstalled: "hud.reason.helperUnavailableAtStart"
         case .mechanismsFailed: "hud.reason.applyFailedAtStart"
-        case .recordNotSaved: "hud.reason.stateSaveFailedAtStart"
         }
     }
 }

@@ -142,7 +142,7 @@ struct SettingsTests {
     @Test("SPEC-BLK-009 反映が戻されたら表示も戻し、エラーを1回通知する")
     func rollback() {
         let fixture = AppFixture(displayBlocked: false)
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         fixture.system.failing = [.createAssertion(.preventUserIdleDisplaySleep)]
         let model = SettingsModel(
@@ -334,7 +334,6 @@ extension SettingsTests {
                                                               hasInternalBattery: hasBattery,
                                                           ),
                                                           ports: system.ports), saveSettings: { _ in })
-        app.launchAgentStatus = .ready
         return SettingsModel(
             app: app,
             helper: SettingsHelperActions(state: { .installed }, perform: { _ in .cancelled }, completed: { _, _ in }),

@@ -14,7 +14,7 @@ struct ControllerHelperRemovalTests {
         #expect(controller.prepareHelperRemoval())
         #expect(!system.sleepDisabled)
         #expect(system.operations.filter { $0 == .helperOff }.count == 1)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-HLP-004 削除に成功したら、所有を外してから手動スリープをオフにし、off を実行しない")
@@ -22,16 +22,15 @@ struct ControllerHelperRemovalTests {
         let system = FakeSystem()
         let controller = makeController(system, settings: .premise { $0.blocksManualSleep = true })
         controller.requestStart(from: .menu)
+        #expect(controller.prepareHelperRemoval())
         system.clearHistory()
-        // 削除の処理が disablesleep を 0 に戻し、ヘルパーはなくなった。
-        system.sleepDisabled = false
         system.isHelperInstalled = false
         system.failing = [.helperOff, .helperOn]
         controller.helperRemovalSucceeded()
         #expect(!controller.settings.blocksManualSleep)
         #expect(controller.isBlocking)
         #expect(!system.operations.contains(.helperOff))
-        #expect(system.savedRecords.first?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
         #expect(controller.misalignments.isEmpty)
     }
 
@@ -47,7 +46,7 @@ struct ControllerHelperRemovalTests {
         system.sleepDisabled = false
         controller.helperRemovalFailed()
         #expect(controller.misalignments.isEmpty)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-HLP-004 SPEC-HLP-005 自分が立てた disablesleep を読めないときは削除せず所有を保つ")
@@ -59,7 +58,7 @@ struct ControllerHelperRemovalTests {
         system.clearHistory()
         #expect(!controller.prepareHelperRemoval())
         #expect(!system.operations.contains(.helperOff))
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-HLP-004 停止中に削除に成功したら、残っていた disablesleep を合わせられていない制御から外す")
@@ -70,10 +69,11 @@ struct ControllerHelperRemovalTests {
         system.failing = [.helperOff]
         controller.requestStop(from: .menu)
         #expect(controller.misalignments == [.systemSleepDisabled: .leftApplied])
-        system.sleepDisabled = false
+        system.failing = []
+        #expect(controller.prepareHelperRemoval())
         controller.helperRemovalSucceeded()
         #expect(controller.misalignments.isEmpty)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-HLP-004 削除に失敗して SleepDisabled が 1 のまま残れば、所有を保ち off しない")
@@ -86,7 +86,7 @@ struct ControllerHelperRemovalTests {
         system.clearHistory()
         controller.helperRemovalFailed()
         #expect(!system.operations.contains(.helperOff))
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.ownsSleepDisabled)
         #expect(controller.misalignments == [.systemSleepDisabled: .leftApplied])
     }
 
@@ -106,9 +106,8 @@ struct ControllerHelperRemovalTests {
         #expect(controller.session == session)
         #expect(controller.settings.blocksManualSleep)
         #expect(controller.misalignments == [.systemSleepDisabled: .notApplied])
-        #expect(system.storedRecord?.misalignments == controller.misalignments)
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
-        #expect(system.operations == [.readSleepDisabled, .saveRecord])
+        #expect(controller.ownsSleepDisabled)
+        #expect(system.operations == [.readSleepDisabled])
         #expect(events.events == [.warningsChanged])
 
         system.failing = []
@@ -120,8 +119,7 @@ struct ControllerHelperRemovalTests {
         #expect(system.sleepDisabled)
         #expect(controller.observed[.systemSleepDisabled] == true)
         #expect(controller.misalignments.isEmpty)
-        #expect(system.storedRecord?.misalignments.isEmpty == true)
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.ownsSleepDisabled)
         #expect(controller.session == session)
         #expect(events.events == [.warningsChanged, .warningsChanged])
     }
@@ -138,9 +136,8 @@ struct ControllerHelperRemovalTests {
         controller.helperRemovalFailed()
         #expect(controller.observed[.systemSleepDisabled] == nil)
         #expect(!controller.isBlocking)
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.ownsSleepDisabled)
         #expect(controller.misalignments == [.systemSleepDisabled: .leftApplied])
-        #expect(system.storedRecord?.misalignments == controller.misalignments)
 
         system.failing = []
         system.clearHistory()
@@ -148,8 +145,7 @@ struct ControllerHelperRemovalTests {
         controller.timePassed()
         #expect(!system.operations.contains(.helperOn))
         #expect(!system.operations.contains(.helperOff))
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
         #expect(controller.misalignments.isEmpty)
-        #expect(system.storedRecord?.misalignments.isEmpty == true)
     }
 }

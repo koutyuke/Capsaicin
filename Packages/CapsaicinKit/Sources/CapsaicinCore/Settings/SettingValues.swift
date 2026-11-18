@@ -81,9 +81,3 @@ public struct BatteryThreshold: Hashable, Sendable, Codable {
         try container.encode(percent)
     }
 }
-
-public enum ResumePolicy: String, Hashable, Sendable, Codable, CaseIterable {
-    case never
-    case afterAppRestart
-    case afterAppOrMacRestart
-}

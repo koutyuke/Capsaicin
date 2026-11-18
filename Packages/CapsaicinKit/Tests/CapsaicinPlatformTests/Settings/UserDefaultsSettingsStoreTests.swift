@@ -18,7 +18,6 @@ struct UserDefaultsSettingsStoreTests {
         try withDefaults { defaults, suite in
             var settings = Settings()
             settings.launchesAtLogin = false
-            settings.resumePolicy = .afterAppOrMacRestart
             settings.showsHUD = false
             settings.blocksDisplaySleep = false
             settings.blocksManualSleep = true

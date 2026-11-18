@@ -7,7 +7,7 @@ import Testing
 struct ControllerStartTests {
     private let manual = Settings.premise { $0.blocksManualSleep = true }
 
-    @Test("SPEC-BLK-010 開始では止めるスリープに必要な仕組みと LED を適用し、セッションを記録する")
+    @Test("SPEC-BLK-010 開始では止めるスリープに必要な仕組みと LED を適用し、セッションをメモリーに持つ")
     func startApplies() {
         let system = FakeSystem()
         let controller = makeController(system, settings: manual)
@@ -17,11 +17,11 @@ struct ControllerStartTests {
         #expect(system.sleepDisabled)
         #expect(system.heldAssertions == [.preventUserIdleSystemSleep])
         #expect(system.isLEDLit)
-        #expect(system.storedRecord?.session == BlockingSession(timeLimit: nil))
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.session == BlockingSession(timeLimit: nil))
+        #expect(controller.ownsSleepDisabled)
         #expect(controller.misalignments.isEmpty)
         #expect(system.redundantAssertionCalls == 0)
-        #expect(events.stateEvents == [.started(.user(.menu))])
+        #expect(events.stateEvents == [.started(.menu)])
     }
 
     @Test("SPEC-BLK-010 一部を適用できなければ開始を拒否し、適用したものを戻す")
@@ -34,11 +34,11 @@ struct ControllerStartTests {
         #expect(!controller.isBlocking)
         #expect(system.heldAssertions.isEmpty)
         #expect(!system.isLEDLit)
-        #expect(system.storedRecord?.session == nil)
         // on が失敗したので SleepDisabled は 0 のまま。下ろすときの規則で所有を外す。
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
+        #expect(!controller.ownsSleepDisabled)
         #expect(controller.misalignments.isEmpty)
-        #expect(events.stateEvents == [.startRejected(.user(.hotkey), .mechanismsFailed([.systemSleepDisabled]))])
+        #expect(events.stateEvents == [.startRejected(.hotkey, .mechanismsFailed([.systemSleepDisabled]))])
     }
 
     @Test("SPEC-BLK-010 SPEC-LED-001 LED を点灯できなくても開始し、LED を適用できていない制御にする")
@@ -48,7 +48,7 @@ struct ControllerStartTests {
         let controller = makeController(system)
         #expect(controller.requestStart(from: .menu) == .started)
         #expect(controller.misalignments == [.led: .notApplied])
-        #expect(system.storedRecord?.misalignments == [.led: .notApplied])
+        #expect(system.brightnessRecord == nil)
     }
 
     @Test("SPEC-LED-006 LED を制御できない環境では LED に触れず、合わせられていない制御にもしない")
@@ -95,46 +95,6 @@ struct ControllerStartTests {
         #expect(controller.requestStart(from: .menu) == .started)
     }
 
-    @Test("SPEC-LCY-007 SPEC-HLP-005 所有の「立てた」を保存してから on を実行し、セッションは仕組みを適用した後に書く")
-    func recordOrder() throws {
-        let system = FakeSystem()
-        let controller = makeController(system, settings: manual)
-        system.clearHistory()
-        controller.requestStart(from: .menu)
-        let ops = system.operations
-        let saveBeforeOn = try #require(ops.firstIndex(of: .saveRecord))
-        let turnOn = try #require(ops.firstIndex(of: .helperOn))
-        let createAssertion = try #require(ops.firstIndex(of: .createAssertion(.preventUserIdleSystemSleep)))
-        #expect(saveBeforeOn < turnOn)
-        #expect(system.savedRecords.first?.ownsSleepDisabled == true)
-        #expect(system.savedRecords.first?.session == nil)
-        let sessionSave = try #require(system.savedRecords.firstIndex { $0.session != nil })
-        let sessionSaveOp = ops.indices.filter { ops[$0] == .saveRecord }[sessionSave]
-        #expect(sessionSaveOp > createAssertion)
-    }
-
-    @Test("SPEC-LCY-007 SPEC-HLP-005 所有を保存できなければ on を実行せず、状態を保存できないことを理由に拒否する")
-    func ownershipNotSaved() {
-        let system = FakeSystem()
-        let controller = makeController(system, settings: manual)
-        system.failing = [.saveRecord]
-        #expect(controller.requestStart(from: .cli) == .rejected(.recordNotSaved))
-        #expect(!system.operations.contains(.helperOn))
-        #expect(!system.sleepDisabled)
-        #expect(controller.isRecordUnsaved)
-    }
-
-    @Test("SPEC-LCY-007 仕組みを適用した後にセッションを保存できなければ、拒否して戻す")
-    func sessionNotSaved() {
-        let system = FakeSystem()
-        let controller = makeController(system)
-        system.failing = [.saveRecord]
-        #expect(controller.requestStart(from: .menu) == .rejected(.recordNotSaved))
-        #expect(system.heldAssertions.isEmpty)
-        #expect(!system.isLEDLit)
-        #expect(!controller.isBlocking)
-    }
-
     @Test("SPEC-HLP-005 SleepDisabled が外部の 1 なら on を実行せずに開始し、解除でも下ろさない")
     func externalSleepDisabled() {
         let system = FakeSystem()
@@ -178,7 +138,7 @@ struct ControllerStartTests {
         #expect(controller.isBlocking)
         controller.toggleByHotkey()
         #expect(!controller.isBlocking)
-        #expect(events.stateEvents == [.started(.user(.hotkey)), .released(.user(.hotkey))])
+        #expect(events.stateEvents == [.started(.hotkey), .released(.user(.hotkey))])
     }
 
     @Test("SPEC-BLK-003 SPEC-BLK-005 開始の時点の暦とタイムゾーンで指定時刻の解除の時刻を決める")

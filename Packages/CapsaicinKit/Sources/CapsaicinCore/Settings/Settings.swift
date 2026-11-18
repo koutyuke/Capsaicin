@@ -7,7 +7,6 @@ public struct Settings: Hashable, Sendable {
     // MARK: 一般
 
     public var launchesAtLogin = true
-    public var resumePolicy = ResumePolicy.never
     public var showsHUD = true
     public var showsMenuBarIcon = true
     public var showsDockIcon = false
@@ -43,7 +42,7 @@ public struct Settings: Hashable, Sendable {
 /// 保存の形式。未知のキーは無視し、欠けたキーと読めない値は既定値で補う。
 extension Settings: Codable {
     private enum CodingKeys: String, CodingKey {
-        case launchesAtLogin, resumePolicy, showsHUD, showsMenuBarIcon, showsDockIcon
+        case launchesAtLogin, showsHUD, showsMenuBarIcon, showsDockIcon
         case blocksDisplaySleep, blocksManualSleep, lidCloseDisplay
         case timerEnabled, timerDuration, specifiedTimeEnabled, specifiedTime
         case batteryConditionEnabled, batteryThreshold, ignoresBatteryOnACPower
@@ -57,7 +56,6 @@ extension Settings: Codable {
         }
         let defaults = Settings()
         launchesAtLogin = value(.launchesAtLogin, or: defaults.launchesAtLogin)
-        resumePolicy = value(.resumePolicy, or: defaults.resumePolicy)
         showsHUD = value(.showsHUD, or: defaults.showsHUD)
         showsMenuBarIcon = value(.showsMenuBarIcon, or: defaults.showsMenuBarIcon)
         showsDockIcon = value(.showsDockIcon, or: defaults.showsDockIcon)

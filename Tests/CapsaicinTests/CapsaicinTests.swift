@@ -125,30 +125,12 @@ func bundledDaemonDefinition() throws {
     #expect(plist["RunAtLoad"] as? Bool == true)
 }
 
-@Test("SPEC-LCY-001 SPEC-LCY-003 SPEC-LCY-005 agent はログイン時には起動せず、クラッシュ時だけ再起動する")
-func bundledAgentDefinition() throws {
+@Test("SPEC-LCY-003 クラッシュ時にアプリを起動し直す agent の定義をバンドルに含めない")
+func noBundledAgentDefinition() throws {
     let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
     let app = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))
-    let identifier = try #require(app.bundleIdentifier)
     let directory = app.bundleURL.appending(path: "Contents/Library/LaunchAgents")
-    #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path) == [identifier + ".plist"])
-    let plist = try #require(PropertyListSerialization.propertyList(
-        from: Data(contentsOf: directory.appending(path: identifier + ".plist")), format: nil,
-    ) as? [String: Any])
-    #expect(Set(plist.keys) == [
-        "Label",
-        "BundleProgram",
-        "RunAtLoad",
-        "KeepAlive",
-        "ProcessType",
-        "LimitLoadToSessionType",
-    ])
-    #expect(plist["Label"] as? String == identifier)
-    #expect(plist["BundleProgram"] as? String == "Contents/MacOS/Capsaicin")
-    #expect(plist["RunAtLoad"] as? Bool == false)
-    #expect(plist["KeepAlive"] as? [String: Bool] == ["Crashed": true])
-    #expect(plist["ProcessType"] as? String == "Interactive")
-    #expect(plist["LimitLoadToSessionType"] as? String == "Aqua")
+    #expect(!FileManager.default.fileExists(atPath: directory.path))
 }
 
 @Test("埋め込んだ実行ファイルの署名識別子は固定される")
