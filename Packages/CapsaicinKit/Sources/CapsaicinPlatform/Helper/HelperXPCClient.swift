@@ -1,3 +1,4 @@
+import CapsaicinCore
 import Dispatch
 import Foundation
 import OSLog
@@ -14,12 +15,58 @@ protocol HelperXPCConnecting {
     func cancel()
 }
 
-struct HelperXPCClient {
-    var connect: () throws -> any HelperXPCConnecting = { try HelperXPCConnection() }
+@MainActor
+final class HelperXPCClient {
+    typealias LossHandler = @Sendable (HelperConnectionLoss) -> Void
+    typealias Connect = (@escaping LossHandler) throws -> any HelperXPCConnecting
+
+    private let connect: Connect
+    private var retained: (id: UUID, connection: any HelperXPCConnecting)?
+    var onConnectionLost: ((HelperConnectionLoss) -> Void)?
+
+    init(connect: @escaping Connect = { try HelperXPCConnection(onLoss: $0) }) {
+        self.connect = connect
+    }
+
+    isolated deinit {
+        closeConnection()
+    }
+
+    func closeConnection() {
+        let connection = retained?.connection
+        retained = nil
+        connection?.cancel()
+    }
 
     func request(_ command: String, timeout: TimeInterval = 5) throws {
-        let connection = try connect()
-        defer { connection.cancel() }
+        let link = try retained ?? makeConnection()
+        var keep = false
+        defer {
+            if !keep {
+                retained = nil
+                link.connection.cancel()
+            }
+        }
+        try send(command, over: link.connection, timeout: timeout)
+        if command == "on" {
+            keep = true
+            retained = link
+        }
+    }
+
+    private func makeConnection() throws -> (id: UUID, connection: any HelperXPCConnecting) {
+        let id = UUID()
+        return try (id, connect { [weak self] loss in
+            DispatchQueue.main.async { [weak self] in
+                guard let self, retained?.id == id else { return }
+                // 自分で閉じた接続の invalid や、前の接続から遅れて届く通知を捨てる。
+                closeConnection()
+                onConnectionLost?(loss)
+            }
+        })
+    }
+
+    private func send(_ command: String, over connection: any HelperXPCConnecting, timeout: TimeInterval) throws {
         let completed = DispatchSemaphore(value: 0)
         let result = Mutex<Result<Void, HelperXPCError>?>(nil)
         // コアの同期ポートを保つため、応答はメインキューとは別のキューで受ける。
@@ -30,9 +77,9 @@ struct HelperXPCClient {
                 completed.signal()
             }
         }
-        _ = completed.wait(timeout: .now() + timeout)
+        let wait = completed.wait(timeout: .now() + timeout)
         try result.withLock { value in
-            if value == nil {
+            if wait == .timedOut {
                 value = .failure(.timedOut)
             }
             try value?.get()
@@ -44,12 +91,18 @@ private struct HelperXPCConnection: HelperXPCConnecting {
     let connection: xpc_connection_t
     let queue = DispatchQueue(label: "Capsaicin.helper.reply")
 
-    init() throws {
+    init(onLoss: @escaping HelperXPCClient.LossHandler) throws {
         let connection = xpc_connection_create_mach_service(
             HelperIdentity.serviceName, queue, UInt64(XPC_CONNECTION_MACH_SERVICE_PRIVILEGED),
         )
         self.connection = connection
-        xpc_connection_set_event_handler(connection) { _ in }
+        xpc_connection_set_event_handler(connection) { event in
+            if event === XPC_ERROR_CONNECTION_INTERRUPTED {
+                onLoss(.interrupted)
+            } else if event === XPC_ERROR_CONNECTION_INVALID {
+                onLoss(.invalid)
+            }
+        }
         let error = xpc_connection_set_peer_team_identity_requirement(connection, HelperIdentity.signingIdentifier)
         if error != 0 {
             xpc_connection_cancel(connection)

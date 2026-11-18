@@ -8,7 +8,7 @@ enum MenuHUDRouting {
              .timeLimitReplaced(.menu),
              .startRejected(.menu, _), .startRejected(.hotkey, _),
              .released(.user(.menu)), .released(.user(.hotkey)),
-             .released(.timeLimit), .released(.batteryBelowThreshold): true
+             .released(.timeLimit), .released(.batteryBelowThreshold), .released(.helperApprovalRevoked): true
         default: false
         }
     }

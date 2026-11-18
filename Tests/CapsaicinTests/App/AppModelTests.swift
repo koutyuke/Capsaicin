@@ -113,6 +113,31 @@ struct AppModelTests {
         #expect(!fixture.model.status.isBlocking)
     }
 
+    @Test("SPEC-HLP-004 ヘルパーの許可を外した解除は画面に通知し、設定を保存し直さない")
+    func helperApprovalRevocation() {
+        let fixture = AppFixture()
+        var settings = fixture.model.settings
+        settings.blocksManualSleep = true
+        #expect(fixture.model.changeSettings(settings) == .applied)
+        #expect(fixture.model.requestStart(from: .menu) == .started)
+        var events: [BlockingEvent] = []
+        var alerts: [AppAlert] = []
+        fixture.model.onEvent = { event, _ in events.append(event) }
+        fixture.model.onAlert = { alerts.append($0) }
+        fixture.system.isHelperInstalled = false
+        fixture.system.isHelperAwaitingApproval = true
+        fixture.system.closeConnection()
+        fixture.system.sleepDisabled = false
+
+        fixture.controller.helperConnectionLost(.invalid)
+
+        #expect(!fixture.model.status.isBlocking)
+        #expect(fixture.model.settings == settings)
+        #expect(fixture.savedSettings == [settings])
+        #expect(events == [.released(.helperApprovalRevoked)])
+        #expect(alerts.isEmpty)
+    }
+
     @Test("SPEC-CLI-001 SPEC-BLK-011 抑止中の on --for と on --until は期限を置き換え、終了コード0と新しい時刻を返す",
           arguments: ["--for", "--until"])
     func cliReplacesTime(option: String) throws {
@@ -248,12 +273,14 @@ final class AppFixture {
         initialSettings = settings
     }
 
+    lazy var controller = BlockingController(
+        settings: initialSettings,
+        capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true),
+        ports: system.ports,
+    )
+
     lazy var model = AppModel(
-        controller: BlockingController(
-            settings: initialSettings,
-            capabilities: MachineCapabilities(hasLid: true, hasInternalBattery: true),
-            ports: system.ports,
-        ),
+        controller: controller,
         saveSettings: { [unowned self] in savedSettings.append($0) },
     )
 }

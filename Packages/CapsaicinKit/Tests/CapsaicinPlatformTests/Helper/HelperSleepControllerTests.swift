@@ -26,16 +26,17 @@ struct HelperSleepControllerTests {
 
     @Test("SPEC-HLP-002 on と off だけを XPC に渡し、応答の失敗を返す")
     func fixedCommands() throws {
-        var calls: [String] = []
-        let controller = HelperSleepController(request: { calls.append($0) }, run: { _, _, _ in
+        let connection = FakeConnection(response: .success(()))
+        let controller = HelperSleepController(client: HelperXPCClient(connect: { _ in connection }), run: { _, _, _ in
             Issue.record("XPC の操作で子プロセスを起動した")
             return Data()
         })
         try controller.turnOn()
         try controller.turnOff()
-        #expect(calls == ["on", "off"])
+        #expect(connection.commands == ["on", "off"])
         for failure in [HelperXPCError.connectionFailed, .requestFailed, .timedOut, .invalidReply] {
-            let failing = HelperSleepController(request: { _ in throw failure }, run: { _, _, _ in Data() })
+            let client = HelperXPCClient(connect: { _ in FakeConnection(response: .failure(failure)) })
+            let failing = HelperSleepController(client: client, run: { _, _, _ in Data() })
             #expect(throws: failure) { try failing.turnOn() }
             #expect(throws: failure) { try failing.turnOff() }
         }
@@ -58,6 +59,7 @@ struct HelperSleepControllerTests {
         let controller = HelperSleepController(state: { state }, run: { _, _, _ in Data() })
         #expect(controller.installationState == state)
         #expect(controller.isHelperInstalled == (state == .installed))
+        #expect(controller.isHelperAwaitingApproval == (state == .requiresApproval))
     }
 
     @Test("SPEC-HLP-005 読み取りの期限後は子プロセスを見届け、次の読み取りを断る")

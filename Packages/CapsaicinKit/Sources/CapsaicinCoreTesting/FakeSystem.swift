@@ -29,8 +29,10 @@ public final class FakeSystem {
 
     public var powerState = PowerState(batteryLevel: 80, isOnACPower: false)
     public var isHelperInstalled = true
+    public var isHelperAwaitingApproval = false
     public var isLEDAvailable = true
     public var sleepDisabled = false
+    public private(set) var hasHelperConnection = false
     public var brightness: Float? = 0.5
     public var isKnownUnavailable = false
     public private(set) var heldAssertions: Set<AssertionKind> = []
@@ -102,11 +104,17 @@ extension FakeSystem: HelperSleepControlling {
     public func turnOn() throws {
         try perform(.helperOn)
         sleepDisabled = true
+        hasHelperConnection = true
     }
 
     public func turnOff() throws {
+        defer { closeConnection() }
         try perform(.helperOff)
         sleepDisabled = false
+    }
+
+    public func closeConnection() {
+        hasHelperConnection = false
     }
 }
 

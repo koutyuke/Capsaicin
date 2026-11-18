@@ -11,21 +11,20 @@ typealias HelperCommand = @Sendable (String, [String], TimeInterval) throws -> D
 public final class HelperSleepController: HelperSleepControlling {
     private let state: () -> HelperInstallationState
     private let run: HelperCommand
-    private let request: (String) throws -> Void
+    private let client: HelperXPCClient
 
     public convenience init(registration: HelperRegistration = HelperRegistration()) {
         let runner = CommandRunner(executable: "/usr/bin/pmset", arguments: ["-g"], outputLimit: 65536)
-        let client = HelperXPCClient()
-        self.init(state: { registration.state }, request: { try client.request($0) },
+        self.init(state: { registration.state },
                   run: { try runner.run(executable: $0, arguments: $1, timeout: $2) })
     }
 
     init(state: @escaping () -> HelperInstallationState = { .notInstalled },
-         request: @escaping (String) throws -> Void = { _ in throw HelperXPCError.connectionFailed },
+         client: HelperXPCClient = HelperXPCClient(),
          run: @escaping HelperCommand)
     {
         self.state = state
-        self.request = request
+        self.client = client
         self.run = run
     }
 
@@ -35,6 +34,15 @@ public final class HelperSleepController: HelperSleepControlling {
 
     public var isHelperInstalled: Bool {
         installationState == .installed
+    }
+
+    public var isHelperAwaitingApproval: Bool {
+        installationState == .requiresApproval
+    }
+
+    public var onConnectionLost: ((HelperConnectionLoss) -> Void)? {
+        get { client.onConnectionLost }
+        set { client.onConnectionLost = newValue }
     }
 
     public func readSleepDisabled() throws -> Bool {
@@ -48,10 +56,14 @@ public final class HelperSleepController: HelperSleepControlling {
     }
 
     public func turnOn() throws {
-        try request("on")
+        try client.request("on")
     }
 
     public func turnOff() throws {
-        try request("off")
+        try client.request("off")
+    }
+
+    public func closeConnection() {
+        client.closeConnection()
     }
 }

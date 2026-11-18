@@ -68,18 +68,24 @@ extension BlockingController {
         switch SleepDisabledOwnership.raiseAction(sleepDisabled: reading, owned: ownsSleepDisabled) {
         case .failUnreadable:
             return false
-        case .adoptOwn, .leaveExternal:
+        case .leaveExternal:
             return true
         case .claimThenTurnOn:
             ownsSleepDisabled = true
-            do {
-                try ports.helper.turnOn()
-            } catch {
-                return false
-            }
-            observed[.systemSleepDisabled] = true
-            return true
+            return sendSleepDisabledOn()
         }
+    }
+
+    func sendSleepDisabledOn() -> Bool {
+        do {
+            try ports.helper.turnOn()
+        } catch {
+            helperCleanupLost = true
+            return false
+        }
+        helperCleanupLost = false
+        observed[.systemSleepDisabled] = true
+        return true
     }
 
     func lowerSleepDisabled() -> Bool {
@@ -90,17 +96,29 @@ extension BlockingController {
         case .failUnreadable:
             return false
         case .releaseOwnership:
-            ownsSleepDisabled = false
+            releaseSleepDisabledOwnership()
             return true
         case .turnOff:
+            // 承認が戻るまでデーモンは起動できない。値が残っていれば合わせ直しに残す。
+            guard !ports.helper.isHelperAwaitingApproval else { return false }
             do {
                 try ports.helper.turnOff()
             } catch {
+                // 設定変更や削除が失敗して抑止を続けるなら、閉じた接続の役目も戻す。
+                if isBlocking {
+                    helperCleanupLost = true
+                }
                 return false
             }
-            ownsSleepDisabled = false
+            releaseSleepDisabledOwnership()
             observed[.systemSleepDisabled] = false
             return true
         }
+    }
+
+    func releaseSleepDisabledOwnership() {
+        ownsSleepDisabled = false
+        helperCleanupLost = false
+        ports.helper.closeConnection()
     }
 }

@@ -1,9 +1,8 @@
 /// disablesleep を立てる必要が生じたときの扱い。
 public enum RaiseSleepDisabledAction: Hashable, Sendable {
     /// メモリー上で所有を「立てた」にしてから、ヘルパーの `on` を実行する。
+    /// 自分が立てたまま残った 1 にも送り、デーモンに後片付けの役目を持たせる。
     case claimThenTurnOn
-    /// 前に自分が立てたまま残ったものとみなし、`on` を実行せずに引き継ぐ。
-    case adoptOwn
     /// 外部のものとみなし、`on` を実行しない。所有は「立てていない」にする。
     case leaveExternal
     /// `SleepDisabled` を読めなかった。`on` の失敗と同じに扱う。
@@ -26,7 +25,7 @@ public enum SleepDisabledOwnership {
         switch sleepDisabled {
         case nil: .failUnreadable
         case false: .claimThenTurnOn
-        case true: owned ? .adoptOwn : .leaveExternal
+        case true: owned ? .claimThenTurnOn : .leaveExternal
         }
     }
 

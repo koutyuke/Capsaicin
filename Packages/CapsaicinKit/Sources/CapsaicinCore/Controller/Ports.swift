@@ -23,15 +23,23 @@ public protocol PowerAssertionControlling {
     func releaseAssertion(_ kind: AssertionKind) throws
 }
 
-/// どの操作も実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
+public enum HelperConnectionLoss: Sendable {
+    case interrupted, invalid
+}
+
+/// 読み取りと要求は実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
 /// XPC の期限切れは接続を取り消す。読み取りの子プロセスは終わるまで見届け、その間の読み取りは throw する。
 @MainActor
 public protocol HelperSleepControlling {
     /// 署名に Team ID があり、ヘルパーが登録・許可されているか。
     var isHelperInstalled: Bool { get }
+    var isHelperAwaitingApproval: Bool { get }
     func readSleepDisabled() throws -> Bool
+    /// 成功した on の接続を保つ。off はその接続があれば使い、応答結果によらず閉じる。
     func turnOn() throws
     func turnOff() throws
+    /// 要求を送らずに接続を閉じる。保っていなければ何もしない。
+    func closeConnection()
 }
 
 /// Caps Lock の LED。入力状態は変えない。

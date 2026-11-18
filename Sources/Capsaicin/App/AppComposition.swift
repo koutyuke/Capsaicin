@@ -37,6 +37,10 @@ enum AppComposition {
             prepareRemoval: model.prepareHelperRemoval,
             completed: model.helperManagementCompleted,
         ))
+        helper.onConnectionLost = { [weak controller, weak settings] loss in
+            controller?.helperConnectionLost(loss)
+            settings?.refreshHelper()
+        }
         let services = AppServices(
             model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
             virtualKeyboard: VirtualKeyboardMonitor(), display: DisplaySleep(),

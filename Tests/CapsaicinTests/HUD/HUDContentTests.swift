@@ -124,6 +124,20 @@ struct HUDContentTests {
         #expect(value.detail == "バッテリー20%")
     }
 
+    @Test("SPEC-HUD-001 SPEC-HUD-002 バックグラウンド項目をオフにした解除は、両言語で理由を表示する",
+          arguments: ["en", "ja"])
+    func helperApprovalRevocation(language: String) throws {
+        let event = BlockingEvent.released(.helperApprovalRevoked)
+        let bundle = try localizedAppBundle(language)
+        let value = try #require(HUDContent.make(for: event, status: status, bundle: bundle))
+        #expect(MenuHUDRouting.shouldPresent(event))
+        #expect(value.symbol == "custom.capsaicin.led")
+        #expect(value.tone == .normal)
+        #expect(value.state == (language == "ja" ? "スリープ防止 オフ" : "Sleep prevention off"))
+        #expect(value.detail == (language == "ja"
+                ? "バックグラウンド項目オフ（システム設定）" : "Background item off (System Settings)"))
+    }
+
     @Test("SPEC-HUD-002 開始拒否は理由を区別する")
     func rejectionReasons() throws {
         let cases: [(StartRejection, String)] = [
@@ -149,6 +163,7 @@ struct HUDContentTests {
             .timeLimit(.timer),
             .timeLimit(.specifiedTime),
             .batteryBelowThreshold,
+            .helperApprovalRevoked,
         ] {
             let value = try content(.released(reason), status: status)
             #expect(value.detail == "一部を戻せません")
