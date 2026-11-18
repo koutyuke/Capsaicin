@@ -347,13 +347,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, options other than “System sleep” also prevent sleep from the Apple menu; macOS cannot control these separately. They require the helper and approval in System Settings. With “Set brightness to 0”, closing the display only dims it and does not lock your Mac; if automatic display sleep is allowed, the display may later turn off and your Mac may lock."
+            "value" : "Controls what your Mac and display do when you close the display while sleep prevention is on. Options other than “System sleep” require the helper and approval in System Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicinがオンの間は、「システムスリープ」以外なら、ディスプレイを閉じても、アップルメニューの「スリープ」などを選んでもスリープしません。OSの仕組み上、この2つは個別に設定できず、ヘルパーとシステム設定での許可が必要です。「明るさを0」では、閉じている間も画面は暗いだけでロックされません。「ディスプレイを自動でオフにしない」がオフなら、時間が来るとディスプレイがオフになり、ロックされることがあります。"
+            "value" : "スリープ防止中に、ディスプレイを閉じたときのMacとディスプレイの動作を制御します。「システムスリープ」以外の設定では、ヘルパーのインストールと、システム設定での許可が必要です。"
           }
         }
       }
@@ -449,13 +449,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when you choose Sleep from the Apple menu. Requires the helper and approval in System Settings."
+            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when selecting Sleep from the Apple menu. Requires installing the helper and approval in System Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicinがオンの間は、アップルメニューの「スリープ」などを選んでもスリープしません。ヘルパーとシステム設定での許可が必要です。"
+            "value" : "スリープ防止中は、アップルメニューの「スリープ」などを選んでもMacをスリープさせません。ヘルパーのインストールと、システム設定での許可が必要です。"
           }
         }
       }
