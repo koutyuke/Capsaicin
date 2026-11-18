@@ -83,17 +83,10 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 
 ## Uninstallation
 
-1. If you installed the helper, open Capsaicin's settings, go to **Helper**, and click **Remove…**. The helper is installed under `/Library` and `/etc`, so it remains even after you delete the app.
+1. If you installed the helper, open Capsaicin's settings, go to **Helper**, and click **Remove…**. This turns sleep back on if Capsaicin turned it off, then unregisters the helper from macOS.
 2. Quit Capsaicin from the menu bar.
-3. In Terminal, remove the LaunchAgent that Capsaicin uses to launch at login and to restart after a crash. If `launchctl` reports that the service is not found, it is already unloaded; continue to the next command.
-
-   ```bash
-   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
-   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
-   ```
-
-4. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
-5. To also remove your settings and records, run:
+3. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
+4. To also remove your settings and records, run:
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin

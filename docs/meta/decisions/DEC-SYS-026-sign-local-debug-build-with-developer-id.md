@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-026
 title: 手元の Debug ビルドで agent とヘルパーを確かめるときは Developer ID で署名し直し、Debug のプロセスは実行ファイルの絶対パスで見つける
-status: accepted
+status: superseded
 supersedes: ["DEC-SYS-025"]
-superseded_by: []
+superseded_by: ["DEC-SYS-027"]
 requirements: []
 based_on: ["DEC-SYS-021", "DEC-SYS-024", "DEC-HLP-005", "DEC-LCY-008", "EVID-LCY-004", "EVID-LCY-005"]
 ---

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-024
 title: オーナーが承認したら、エージェントは Debug アプリの起動と状態の読み取りまでを実機で行う
-status: accepted
+status: superseded
 supersedes: ["DEC-SYS-020"]
-superseded_by: []
+superseded_by: ["DEC-SYS-027"]
 requirements: []
 based_on: ["DEC-SYS-008", "DEC-LCY-002"]
 ---
