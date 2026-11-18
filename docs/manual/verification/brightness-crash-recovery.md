@@ -20,13 +20,13 @@ B='控えた退避先の絶対パスに置き換える'
 test "$(cat "$B/repository-path.txt")" = "$PWD" && echo OK
 ```
 
-試作 `spike/daemon-cleanup-probe` の `1b42313` をビルドし、オーナーのキーチェーンで署名する。各コマンドの成功を確認する。
+試作 `spike/daemon-cleanup-probe` の `d76d393` をビルドし、オーナーのキーチェーンで署名する。各コマンドの成功を確認する。
 
 ```sh
 (
   cd /Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe &&
   git rev-parse --short HEAD &&
-  nix develop --command just build &&
+  HELPER_LABEL_SUFFIX= nix develop --command just build &&
   nix develop --command just sign-debug
 )
 APP='/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe/.build/xcode/Build/Products/Debug/Capsaicin.app'
@@ -37,7 +37,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 /usr/bin/pgrep -x Capsaicin
 ```
 
-コミット `1b42313`、bundle ID `io.github.koutyuke.capsaicin.debug`、`Authority` の先頭が `Developer ID Application:`、Team ID あり、`SleepDisabled 0`、アプリの PID なしを確認する。違えば起動しない。
+コミット `d76d393`、ヘルパーの plist `Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist`（接尾辞なし）、bundle ID `io.github.koutyuke.capsaicin.debug`、`Authority` の先頭が `Developer ID Application:`、Team ID あり、`SleepDisabled 0`、アプリの PID なしを確認する。違えば起動しない。
 
 別のターミナルで起動前からログを記録する。
 

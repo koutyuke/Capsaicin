@@ -185,7 +185,7 @@
   cd /Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe &&
   git branch --show-current &&
   git rev-parse --short HEAD &&
-  nix develop --command just build &&
+  HELPER_LABEL_SUFFIX= nix develop --command just build &&
   nix develop --command just sign-debug
 )
 APP='/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe/.build/xcode/Build/Products/Debug/Capsaicin.app'
@@ -197,7 +197,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 /usr/bin/plutil -p "$APP/Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist"
 ```
 
-ブランチが `spike/daemon-cleanup-probe`、コミットが `1b42313`、bundle ID が `io.github.koutyuke.capsaicin.debug`、最初の `Authority` が `Developer ID Application:` で始まり、Team ID が配布物と同じであることを確かめる。agent の plist はバンドルに残すが、試作は登録せず、起動時に残った登録を一度だけ unregister する。クラッシュ後の自動再起動はない。「一般」の「クラッシュ時に自動再起動できませんでした」は試作の想定どおりである。
+ブランチが `spike/daemon-cleanup-probe`、コミットが `d76d393`、ヘルパーの plist が接尾辞なしの `io.github.koutyuke.capsaicin.debug.helper.plist`、bundle ID が `io.github.koutyuke.capsaicin.debug`、最初の `Authority` が `Developer ID Application:` で始まり、Team ID が配布物と同じであることを確かめる。agent の plist はバンドルに残すが、試作は登録せず、起動時に残った登録を一度だけ unregister する。クラッシュ後の自動再起動はない。「一般」の「クラッシュ時に自動再起動できませんでした」は試作の想定どおりである。
 
 残った agent がなければ、準備ではまだアプリを起動しない。操作4の結果の記録を終えてから、選んだ検証へ進む。試作に `just start`・`just restart` は使わない。これらは agent の起動を待つ通常版向けの手順である。
 

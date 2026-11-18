@@ -8,7 +8,7 @@
 
 - 実行者はオーナーである。確認用の Debug agent とヘルパーの登録・登録解除、復旧用の `/usr/bin/sudo /usr/bin/pmset -a disablesleep 0` を承認し、管理者認証を用意する。
 - `prepare.md` の退避と起動前ゲートを終え、開始時の `SleepDisabled` は `0`、Release・Debug とも停止、既存の登録なしである。このファイル内で確認用の登録を作る。使用中の登録を流用しない。
-- 通常版は文書の worktree の `feature/smappservice`、試作は別 worktree の `spike/daemon-cleanup-probe`、コミット `1b42313` である。どちらもオーナーのキーチェーンの同じ Team ID の Developer ID で署名する。
+- 通常版は文書の worktree の `feature/smappservice`、試作は別 worktree の `spike/daemon-cleanup-probe`、コミット `d76d393` である。どちらもオーナーのキーチェーンの同じ Team ID の Developer ID で署名する。
 
 文書の worktree で devShell に入り、`B` を入れる。`OK` が出なければ止める。
 
@@ -32,7 +32,7 @@ OLD_APP="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app"
 (
   cd /Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe &&
   git rev-parse --short HEAD &&
-  nix develop --command just build &&
+  HELPER_LABEL_SUFFIX= nix develop --command just build &&
   nix develop --command just sign-debug
 )
 APP='/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe/.build/xcode/Build/Products/Debug/Capsaicin.app'
@@ -45,7 +45,7 @@ printf '%s\n' "$OLD_APP" > "$B/agent-unregister.old-app-path.txt"
 /usr/bin/pgrep -x Capsaicin
 ```
 
-試作のコミットが `1b42313`、両アプリの bundle ID が `io.github.koutyuke.capsaicin.debug`、最初の `Authority` が `Developer ID Application:` で始まり、同じ Team ID であることを確認する。試作には agent の plist が残っている。`SleepDisabled 0`、アプリの PID なしである。違えば起動しない。
+試作のコミットが `d76d393`、ヘルパーの plist が接尾辞なしの `io.github.koutyuke.capsaicin.debug.helper.plist`、両アプリの bundle ID が `io.github.koutyuke.capsaicin.debug`、最初の `Authority` が `Developer ID Application:` で始まり、同じ Team ID であることを確認する。試作には agent の plist が残っている。`SleepDisabled 0`、アプリの PID なしである。違えば起動しない。
 
 ## 操作と期待
 

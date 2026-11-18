@@ -8,7 +8,7 @@
 
 - 実行者はオーナーである。ヘルパーの登録、Debug デーモンだけへの `sudo kill -9`、アプリへの `kill -9`、復旧用の `/usr/bin/sudo /usr/bin/pmset -a disablesleep 0` を承認し、管理者認証を用意する。未保存の作業を保存する。
 - `prepare.md` の退避と起動前ゲートを終え、開始時の `SleepDisabled` は `0` である。Release・Debug ともアプリは停止し、既存の登録はない。
-- 対象は試作 `spike/daemon-cleanup-probe` の `1b42313` だけである。アプリとデーモンの PID を取り違えない。
+- 対象は試作 `spike/daemon-cleanup-probe` の `d76d393` だけである。アプリとデーモンの PID を取り違えない。
 
 文書の worktree で devShell に入り、`B` を入れる。`OK` が出なければ止める。
 
@@ -25,7 +25,7 @@ test "$(cat "$B/repository-path.txt")" = "$PWD" && echo OK
 (
   cd /Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe &&
   git rev-parse --short HEAD &&
-  nix develop --command just build &&
+  HELPER_LABEL_SUFFIX= nix develop --command just build &&
   nix develop --command just sign-debug
 )
 APP='/Users/koutyuke/Developer/github.com/koutyuke/capsaicin-daemon-cleanup-probe/.build/xcode/Build/Products/Debug/Capsaicin.app'
@@ -36,7 +36,7 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 /usr/bin/pgrep -x Capsaicin
 ```
 
-コミット `1b42313`、bundle ID `io.github.koutyuke.capsaicin.debug`、`Authority` の先頭が `Developer ID Application:`、Team ID あり、`SleepDisabled 0`、アプリの PID なしを確認する。違えば起動しない。
+コミット `d76d393`、ヘルパーの plist `Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist`（接尾辞なし）、bundle ID `io.github.koutyuke.capsaicin.debug`、`Authority` の先頭が `Developer ID Application:`、Team ID あり、`SleepDisabled 0`、アプリの PID なしを確認する。違えば起動しない。
 
 別のターミナルで起動前からログを記録する。
 
