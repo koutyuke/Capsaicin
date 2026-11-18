@@ -18,7 +18,13 @@ sources: ["justfile", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle
 - `launchctl kickstart` の後、xpcproxy は `OS_REASON_CODESIGNING | Launch Constraint Violation … (Constraint not matched)` で終わった。launchd は `Requesting LWCR update on next spawn` を記録し、`job state = spawn failed` にした。
 - アプリは 5 秒後に `Agent launch timed out: Agent job has no PID` を記録し、終了せずに動き続けた（PID 51418、PPID 1、実行ファイルは worktree の絶対パス）。`just start` は 10 秒待って失敗し、署名し直しとログの確かめ方を表示した。
 
-`EVID-LCY-004` では、同じ項目のまま「Developer ID Application」で署名し直したビルドの agent は起動した。
+その後、オーナーが同じビルドを `just stop`、`a2e9e53` の `just sign-debug`（既定の「Developer ID Application」。`Authority=Developer ID Application: …`、TeamIdentifier GG7W7F3CTU）、`just start` の順で動かした。
+
+- 18:00:29 に、動いていたアプリ（PID 51418）は終了した。
+- 18:00:30.878 に `just start` がジョブを外し、直接起動したアプリ（PID 54873）が起動した。18:00:31.228 に agent が `Successfully spawned Capsaicin[54876] because non-ipc demand` で起動し、直接起動したアプリは 18:00:31.325 に終了した。
+- agent のアプリ（PID 54876）は PPID 1 で、`lsof` の実行ファイルは worktree の絶対パスだった。オーナーは `just start` と `just status` の結果を「良さそう」と報告した。
+
+`EVID-LCY-004` でも、同じ項目のまま「Developer ID Application」で署名し直したビルドの agent は起動した。
 
 ## 確かめ方
 
@@ -26,7 +32,7 @@ sources: ["justfile", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle
 
 ## 適用範囲
 
-- 使ってよい: Developer ID で署名したビルドが作った agent の項目が残る Mac で、手元のビルドをどの証明書で署名し直すかを判断するとき。`DEC-LCY-009` の、起動を確かめられないときにアプリが動き続ける実装が働いたことの根拠。
+- 使ってよい: Developer ID で署名したビルドが作った agent の項目が残る Mac で、手元のビルドをどの証明書で署名し直すかを判断するとき。`just sign-debug` と `just start` で、手元のビルドの agent が起動することの根拠。`DEC-LCY-009` の、起動を確かめられないときにアプリが動き続ける実装が働いたことの根拠。
 - 使ってはいけない: Apple Development の署名で agent が使えないことの一般の根拠。`EVID-LCY-003` の試作では、項目のない状態から Apple Development の署名で登録し、agent は起動した。
 
 ## 未確認のこと
