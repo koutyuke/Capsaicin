@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-009
 title: バックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行でき、アプリはそれを検知できる
-status: open
+status: supported
 affects: ["SPEC-HLP-004", "SPEC-BLK-007", "SPEC-LCY-005"]
-evidence: []
+evidence: ["EVID-HLP-012"]
 ---
 
 # HYP-HLP-009 バックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行でき、アプリはそれを検知できる
@@ -27,4 +27,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+実機で支持された（`EVID-HLP-012`）。項目をオフにすると、デーモンは `SIGTERM` を受けて `off` を実行し、`SleepDisabled` は 0 になった。アプリは同じ PID のまま `interrupted` と `invalid` を受け、どちらでも `SMAppService.daemon` は `requiresApproval` だった。macOS 27.2.1 の画面の名前は「一般」の「ログイン項目」だった。

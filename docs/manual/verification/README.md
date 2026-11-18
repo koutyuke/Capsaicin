@@ -39,7 +39,6 @@
 | [`localization.md`](localization.md) | 英語・日本語の表示と時刻の表記 | システム設定 |
 | [`login-and-crash-restart.md`](login-and-crash-restart.md) | mainApp によるログイン時の起動と agent によるクラッシュ後の再起動 | 登録、ログアウト |
 | [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の下の状態の文 | ヘルパーの登録、システム設定 |
-| [`background-off-while-blocking.md`](background-off-while-blocking.md) | 試作で許可を外したときのデーモンの `SIGTERM` による `off` とアプリの検知 | ヘルパーの登録、システム設定、管理者権限 |
 | [`daemon-reconnect-cleanup.md`](daemon-reconnect-cleanup.md) | 試作のデーモンだけを強制終了した後の `on` の再送と後片付け | ヘルパーの登録、管理者権限 |
 | [`agent-unregister-cleanup.md`](agent-unregister-cleanup.md) | 試作の起動時に Debug agent の登録だけを外す | agent とヘルパーの登録、管理者権限 |
 | [`debug-agent-worktree-switch.md`](debug-agent-worktree-switch.md) | `just start` による worktree 間の Debug agent の切り替え | agent の登録 |
