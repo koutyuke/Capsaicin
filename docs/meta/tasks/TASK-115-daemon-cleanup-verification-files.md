@@ -2,7 +2,7 @@
 schema: task
 id: TASK-115
 title: デーモンによる後片付けの試作を確かめる手順書を作る
-status: todo
+status: done
 requirements: []
 depends_on: ["TASK-114"]
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -48,4 +48,6 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## レビュー
 
-（未記入）
+PM がレビューした。5本（`app-crash-daemon-cleanup.md`、`brightness-crash-recovery.md`、`background-off-while-blocking.md`、`daemon-reconnect-cleanup.md`、`agent-unregister-cleanup.md`）と `prepare.md`、`README.md` を読んだ。画面の名前は String Catalog の値どおりで、ログの文言は `TASK-114` の試作と一致し、期待は仮説の主張どおりに書かれている。対象のプロセスを PID と実行ファイルのパスで確かめてから止め、`SleepDisabled` の戻し方を各ファイルに書いている。
+
+`prepare.md` の既存の条件（アプリと別のプロセスで LED を戻す手段がなければ、どの検証もしない）のままでは、5本とも始められなかった（`EVID-HLP-006` でも同じ理由で見送った）。オーナーが 2026-11-18 に、アプリの起動し直し、`hidutil property --matching keyboard --set '{"HIDCapsLockLED":"Auto"}'`、Mac の再起動の順で戻すことを承認した。PM がこの順を `prepare.md` の操作4と、LED を点ける3本の「LED が点いたまま残ったとき」に書いた。`hidutil` で点灯を戻せるかは未確認である。
