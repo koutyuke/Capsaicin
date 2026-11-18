@@ -4,7 +4,7 @@ id: HYP-HLP-008
 title: デーモンは、on を送ったアプリの強制終了による XPC 接続の切断を受け取り、off を実行できる
 status: supported
 affects: ["REQ-LCY-003", "SPEC-LCY-003", "SPEC-HLP-002", "DEC-LCY-008"]
-evidence: ["EVID-HLP-010"]
+evidence: ["EVID-HLP-010", "EVID-BLK-015"]
 ---
 
 # HYP-HLP-008 デーモンは、on を送ったアプリの強制終了による XPC 接続の切断を受け取り、off を実行できる

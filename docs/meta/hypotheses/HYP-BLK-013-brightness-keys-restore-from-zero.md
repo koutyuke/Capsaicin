@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-BLK-013
 title: 「明るさを0」で暗くしたままアプリが終了しても、輝度のキーで輝度を戻せる
-status: open
+status: supported
 affects: ["SPEC-BLK-013", "REQ-LCY-003"]
-evidence: []
+evidence: ["EVID-BLK-015"]
 ---
 
 # HYP-BLK-013 「明るさを0」で暗くしたままアプリが終了しても、輝度のキーで輝度を戻せる
@@ -26,4 +26,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+実機で支持された（`EVID-BLK-015`）。`SIGKILL` と `SIGSEGV` のどちらでも、開いた画面は最低限の明るさで見え、輝度のキーとスライダーで戻せた。その後にアプリを起動すると、記録した輝度に戻して記録を消した。「輝度を自動調節」がオフの場合は確かめていない。
