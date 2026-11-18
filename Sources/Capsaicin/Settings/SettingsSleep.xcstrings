@@ -205,6 +205,23 @@
         }
       }
     },
+    "helperNotEnabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helper is not enabled"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが有効になっていません"
+          }
+        }
+      }
+    },
     "helperNotInstalled" : {
       "extractionState" : "manual",
       "localizations" : {

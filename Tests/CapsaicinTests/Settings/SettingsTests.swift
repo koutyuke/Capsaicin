@@ -259,6 +259,7 @@ extension SettingsTests {
         let helperKeys = [
             "status.notInstalled", "status.requiresApproval", "status.usable", "status.unavailable",
             "openSystemSettings.button", "status.help", "helperInstall.message",
+            "helperApproval.title", "helperApproval.message",
             "helperRemove.message", "helperRemove.manual.message",
             "error.helperUnavailable.title", "error.helperUnavailable.message",
             "error.helperTranslocated.title", "error.helperTranslocated.message",
@@ -297,7 +298,7 @@ extension SettingsTests {
                     "battery.ignoreOnAdapter.label",
                     "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.zeroBrightness",
                     "lidClose.keepOn",
-                    "lidClose.help", "brightnessUnavailable", "brightnessUnavailable.a11y"]
+                    "lidClose.help", "brightnessUnavailable", "brightnessUnavailable.a11y", "helperNotEnabled"]
         {
             #expect(japanese.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
             #expect(SettingsSection.sleep.text(key) == app.localizedString(

@@ -4,6 +4,22 @@ import CapsaicinPlatform
 import Testing
 
 extension SettingsTests {
+    @Test("SPEC-SET-003 SPEC-SET-005 状態の文は保存値がヘルパーを必要とし、ヘルパーを使えない行だけに出す",
+          arguments: [false, true], [HelperInstallationState.notInstalled, .requiresApproval, .unavailable, .installed])
+    func helperStatusSubtitle(hasLid: Bool, helper: HelperInstallationState) {
+        var settings = CapsaicinCore.Settings()
+        let capabilities = MachineCapabilities(hasLid: hasLid, hasInternalBattery: hasLid)
+        let disabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
+                                             brightnessUnavailable: false)
+        #expect(disabled.allSatisfy { $0.subtitle == nil })
+        settings.blocksManualSleep = true
+        let enabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
+                                            brightnessUnavailable: false)
+        #expect(enabled[0].subtitle == nil)
+        #expect(enabled[1].subtitle == (helper == .installed ? nil : SettingsSection.sleep.text("helperNotEnabled")))
+        #expect((enabled[1].subtitle != nil) == !enabled[1].warningLabel.isEmpty)
+    }
+
     @Test("SPEC-SET-005 ポップアップは保存値の4通りを表示し、オフの間はディスプレイの保存値を隠す",
           arguments: [false, true], LidCloseDisplay.allCases)
     func lidCloseSelection(manual: Bool, display: LidCloseDisplay) {
@@ -122,6 +138,8 @@ extension SettingsTests {
             state: { helper }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let row = unavailable.sleepRows[1]
+        #expect(row.subtitle == (choice != .sleep && helper != .installed
+                ? SettingsSection.sleep.text("helperNotEnabled") : nil))
         var keys: [String] = []
         if choice != .sleep, helper != .installed {
             let key = switch helper {

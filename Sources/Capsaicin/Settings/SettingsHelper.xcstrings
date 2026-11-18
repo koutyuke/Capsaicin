@@ -222,6 +222,40 @@
         }
       }
     },
+    "helperApproval.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Capsaicin in System Settings > General > Login Items & Extensions to enable the selected setting."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可すると、選んだ設定が有効になります。"
+          }
+        }
+      }
+    },
+    "helperApproval.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To use this setting, allow the helper in System Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この設定を使うには、システム設定でヘルパーの許可が必要です"
+          }
+        }
+      }
+    },
     "helperInstall.button" : {
       "extractionState" : "manual",
       "localizations" : {

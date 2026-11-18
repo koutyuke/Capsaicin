@@ -210,6 +210,10 @@ final class SettingsModel {
                 return
             }
             if helperState == .requiresApproval {
+                if fromSetting, await !confirm(operation, fromSetting) {
+                    discardPendingSelection()
+                    return
+                }
                 helper.openSystemSettings()
                 return
             }

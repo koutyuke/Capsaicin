@@ -2,7 +2,7 @@
 schema: task
 id: TASK-110
 title: ヘルパーを使えない行に状態の文を出し、承認待ちのときの選び直しで許可を案内するアラートを出す
-status: todo
+status: in_review
 requirements: ["REQ-HLP-001", "REQ-SET-003", "REQ-SET-005"]
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -52,3 +52,7 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 - `nix develop --command just check`
 - 実機（オーナー）: PR の Debug ビルドで、承認待ちの間の状態の文と、承認待ちのときの選び直しのアラートを確かめる。
+
+## レビュー
+
+PM がレビューした。状態の文は行の状態が「ヘルパーなしで要る値」のときだけ、既存の `SettingsRow` の副題で出す。許可の案内は既存の確認のシートを使い、シートを閉じてからシステム設定を開く。「ヘルパー」セクションからは今のまま直接開く。既存のテスト `AppRuntimeTests` の1行は、案内で開くを選ぶ応答を足すもので、PM が許可した。指摘なし。`just check` は通る（アプリ 175）。

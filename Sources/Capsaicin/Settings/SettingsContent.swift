@@ -57,6 +57,10 @@ struct SettingsSleepRow: Identifiable {
         key
     }
 
+    var subtitle: String? {
+        state == .onWithoutHelper ? SettingsSection.sleep.text("helperNotEnabled") : nil
+    }
+
     var isOn: Bool {
         switch state {
         case let .editable(value): value

@@ -54,6 +54,7 @@ struct AppRuntimeTests {
         let settings = SettingsModel(app: fixture.app.model, helper: .init(
             state: { .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
+        settings.confirm = { _, _ in true }
         fixture.stopSettings = { settings.settingsWindowClosed() }
         let record = fixture.app.system.storedRecord
         await settings.changeLidClose(to: .keepOn)
