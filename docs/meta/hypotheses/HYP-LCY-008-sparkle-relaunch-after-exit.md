@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LCY-008
 title: Sparkle は、更新の後に古いプロセスが終了してから新しい版を起動する
-status: open
+status: supported
 affects: ["SPEC-LCY-008", "SPEC-LCY-005"]
-evidence: []
+evidence: ["EVID-LCY-006"]
 ---
 
 # HYP-LCY-008 Sparkle は、更新の後に古いプロセスが終了してから新しい版を起動する
@@ -23,4 +23,4 @@ Sparkle がアップデートをインストールしてアプリを起動し直
 
 ## 結果
 
-未確認。
+ソースで支持された（`EVID-LCY-006`）。インストーラーは、元のアプリのプロセスの終了を待ってから最後のインストールと起動し直しを行う。実機の更新の流れでは、まだ確かめていない。

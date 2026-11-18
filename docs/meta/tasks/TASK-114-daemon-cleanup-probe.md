@@ -2,7 +2,7 @@
 schema: task
 id: TASK-114
 title: デーモンによるクラッシュ後の後片付けと、agent をやめた起動を試作する
-status: todo
+status: done
 requirements: []
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -65,4 +65,11 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## レビュー
 
-（未記入）
+PM がレビューした。`spike/daemon-cleanup-probe` の `just check` は通る（スクリプト45件、パッケージ344件、アプリ175件）。
+
+- デーモンは、`on` が成功した接続に後片付けの役目を持たせ、その接続の `XPC_ERROR_CONNECTION_INVALID` と `SIGTERM` で `off` を実行する。役目を持つ接続がある間は無操作で終了しない。要求は `on` と `off` のままで、相手の照合も変わらない。
+- アプリは `HelperXPCClient` で `on` の接続を保ち、同じ接続で `off` を送ってから閉じる。`on` と `off` はどちらも `@MainActor` の `HelperSleepController` から呼ばれるので、保持している接続の読み書きは直列になる。中断を受けたら `on` を送り直し、中断と無効化のときに `SMAppService.daemon` の状態をログに残す。
+- 起動は agent に引き渡さず、残った agent を一度だけ unregister する。同じ bundle ID の別のプロセスがあれば終了する。
+- 試作では `launchAgentStatus` が `.unavailable` になり、設定の「一般」に再起動できない旨の警告が出る。手順書でそのことを伝える。
+- 前の起動で所有を「立てた」と記録したまま `SleepDisabled` が 1 で起動すると、`on` を送らずに引き継ぐので、後片付けの役目を持つ接続ができない。試作では確かめる対象にしないが、本実装では所有をメモリだけに持つ方針（Q1.5）で解消する。
+- Sparkle の報告は、PM が引用の行を読み直して確かめ、`EVID-LCY-006` に残した。
