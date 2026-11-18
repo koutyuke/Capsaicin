@@ -23,11 +23,7 @@
 | [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の表示と説明 | なし |
 | [`manual-and-lid-sleep.md`](manual-and-lid-sleep.md) | 手動のスリープとディスプレイを閉じたときのスリープを止める | ヘルパーの設置 |
 | [`disablesleep-persistence.md`](disablesleep-persistence.md) | デーモンがないときの `disablesleep` の永続性 | 管理者権限、再起動 |
-| [`app-crash-cleanup.md`](app-crash-cleanup.md) | アプリの強制終了後にデーモンが抑止を戻し、アプリが再起動しない | ヘルパーの設置、復旧時のみ管理者権限 |
-| [`daemon-restart-resend.md`](daemon-restart-resend.md) | デーモンの強制終了後に `on` を送り直し、後片付けの役目が戻る | ヘルパーの設置、管理者権限 |
 | [`background-off-release.md`](background-off-release.md) | バックグラウンドの許可を外すと、設定値を保ったまま抑止が解除され、HUD が出る | ヘルパーの設置、システム設定、復旧時のみ管理者権限 |
-| [`brightness-at-launch.md`](brightness-at-launch.md) | 手動で開き直すと、現在の輝度が 0 のときだけ元の輝度に戻し、記録を消す | ヘルパーの設置、システム設定、復旧時のみ管理者権限 |
-| [`single-instance.md`](single-instance.md) | 同じ bundle ID のコピーを開いても、動作中のアプリだけが残る。`just start` は起動を拒む | なし |
 | [`led-remapper.md`](led-remapper.md) | キー配列を変更するアプリの案内の出し入れ | なし |
 | [`cli-launch.md`](cli-launch.md) | 停止したアプリを CLI から起動し、出力と終了コードを見る | なし |
 | [`cli-invalid-input.md`](cli-invalid-input.md) | CLI の不正な引数と、CLI を許可しない設定 | なし |
@@ -44,9 +40,9 @@
 
 ヘルパーの設置と承認、`on` と `off`、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直しの実測は `EVID-HLP-006` にある。設定を選んだときの承認待ちのアラートは [`helper-approval-guidance.md`](helper-approval-guidance.md) で確かめる。
 
-試作で確かめたのは、アプリの強制終了後の `off` と LED の残り方（`EVID-HLP-010`、`EVID-LCY-007`）、許可を外したときの `SIGTERM` での後片付け（`EVID-HLP-012`）、デーモンを終了させた後の送り直し（`EVID-HLP-013`）、輝度を手で戻せること（`EVID-BLK-015`）である。一覧の手順では、これらを踏まえて製品ビルドの挙動を確かめる。HUD による解除理由と、起動前に変えた輝度を保つ挙動は試作の結果で代用しない。`EVID-HLP-011` と `EVID-LCY-008` は古い登録を片付けた環境での記録であり、本手順で登録解除を繰り返さない。
+製品のビルドでの、アプリの強制終了後の `off` は `EVID-HLP-014`、デーモンが落ちた後の送り直しは `EVID-HLP-015`、バックグラウンドの項目のオフでの解除は `EVID-HLP-016`、起動時の輝度は `EVID-BLK-016`、単一インスタンスは `EVID-LCY-009` にある。試作での実測（`EVID-HLP-010`〜`013`、`EVID-LCY-007`、`EVID-BLK-015`）は、これらの前提になった記録である。
 
-`APP` を使うファイルでは、`prepare.md` で署名・公証済みの PR Debug ビルドか、Developer ID で署名し直した手元のビルドを選ぶ。`/Applications` の PR ビルドを対象に指定するファイルでは、PR ビルドを使う。`APP` を明記しないファイルは手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使い、ヘルパーを確かめる前に `just sign-debug` で署名し直す。検証中は選んだビルドを入れ替えない。`single-instance.md` だけは `APP` のコピーも使う。対象を変えるときは先に `cleanup.md` を終える。
+`APP` を使うファイルでは、`prepare.md` で署名・公証済みの PR Debug ビルドか、Developer ID で署名し直した手元のビルドを選ぶ。`/Applications` の PR ビルドを対象に指定するファイルでは、PR ビルドを使う。`APP` を明記しないファイルは手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使い、ヘルパーを確かめる前に `just sign-debug` で署名し直す。検証中は選んだビルドを入れ替えない。対象を変えるときは先に `cleanup.md` を終える。
 
 製品の振る舞いは `DEC-LCY-010` と `DEC-LCY-011` に従う。検証用ビルドとスクリプトがその仕様に対応しているかは、実行前にソースで確かめる。`prepare.md` と `cleanup.md` では、暗くする前の輝度の記録 `resume-record.json` を退避・復元する。抑止のセッションや `disablesleep` の所有は保存しない。準備で古い agent が見つかった場合は、登録を変えずに中止し、PM に相談する。
 
