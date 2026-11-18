@@ -7,7 +7,7 @@ struct OwnershipAndAlignmentTests {
         arguments: [
             (false as Bool?, false, RaiseSleepDisabledAction.claimThenTurnOn),
             (false, true, .claimThenTurnOn),
-            (true, true, .adoptOwn),
+            (true, true, .claimThenTurnOn),
             (true, false, .leaveExternal),
             (nil, true, .failUnreadable),
         ],

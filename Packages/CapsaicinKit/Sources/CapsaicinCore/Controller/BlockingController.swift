@@ -43,6 +43,8 @@ public final class BlockingController {
 
     let ports: Ports
     var ownsSleepDisabled = false
+    /// SleepDisabled の値が残っていても、後片付けの役目があるとは限らない。
+    var helperCleanupLost = false
     var savedBrightness: Float?
     var brightnessSaveFailed = false
     public internal(set) var nextBrightnessDeletionAttempt: Date?

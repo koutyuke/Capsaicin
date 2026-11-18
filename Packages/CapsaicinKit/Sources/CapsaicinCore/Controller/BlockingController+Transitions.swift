@@ -46,6 +46,7 @@ extension BlockingController {
         session = nil
         endBrightnessControl()
         alignStopped()
+        ports.helper.closeConnection()
     }
 
     func alignStopped() {
@@ -111,6 +112,9 @@ extension BlockingController {
             ownsSleepDisabled: ownsSleepDisabled,
             controllable: controllableMechanisms,
         )
+        if helperCleanupLost, targets.contains(.systemSleepDisabled) {
+            misalignments[.systemSleepDisabled] = .notApplied
+        }
     }
 
     @discardableResult

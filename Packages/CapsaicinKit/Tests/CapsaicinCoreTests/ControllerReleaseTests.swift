@@ -64,16 +64,18 @@ struct ControllerReleaseTests {
         #expect(!system.sleepDisabled)
     }
 
-    @Test("SPEC-BLK-007 SPEC-HLP-005 解除で下ろせなかった disablesleep は、次の開始で on を実行せずに引き継ぐ")
+    @Test("SPEC-BLK-007 SPEC-HLP-005 解除で下ろせなかった disablesleep は、次の開始で on を送って後片付けの役目を戻す")
     func nextStartAdopts() {
         let system = FakeSystem()
         let controller = makeController(system, settings: manual)
         controller.requestStart(from: .menu)
         system.failing = [.helperOff]
         controller.requestStop(from: .menu)
+        #expect(!system.hasHelperConnection)
         system.clearHistory()
         #expect(controller.requestStart(from: .menu) == .started)
-        #expect(!system.operations.contains(.helperOn))
+        #expect(system.operations.contains(.helperOn))
+        #expect(system.hasHelperConnection)
         #expect(controller.misalignments.isEmpty)
         system.failing = []
         system.advance(by: 120)

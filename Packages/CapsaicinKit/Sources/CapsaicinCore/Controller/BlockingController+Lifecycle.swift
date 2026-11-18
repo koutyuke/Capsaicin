@@ -21,6 +21,32 @@ public extension BlockingController {
         notifyingWarnings { restoreStopped() }
     }
 
+    func helperConnectionLost(_ loss: HelperConnectionLoss) {
+        guard ownsSleepDisabled else { return }
+        helperCleanupLost = true
+        let targets = currentTargets
+        guard targets.contains(.systemSleepDisabled) else { return }
+        notifyingWarnings {
+            if ports.helper.isHelperAwaitingApproval {
+                release(.helperApprovalRevoked)
+                return
+            }
+            if loss == .interrupted {
+                // 値が 1 のままでも、後片付けを任せるには新しい接続に on を送る。
+                let restored = sendSleepDisabledOn()
+                if misalignments.keys.allSatisfy({ $0 == .systemSleepDisabled }) {
+                    lastAlignment = ports.time.now
+                }
+                // 再送を待つ間に利用者が許可を外すこともある。
+                if !restored, ports.helper.isHelperAwaitingApproval {
+                    release(.helperApprovalRevoked)
+                    return
+                }
+            }
+            reevaluateMisalignments(targets: targets)
+        }
+    }
+
     func prepareHelperRemoval() -> Bool {
         notifyingWarnings {
             let lowered = lowerSleepDisabled()
@@ -46,7 +72,7 @@ public extension BlockingController {
                 let reading = try? ports.helper.readSleepDisabled()
                 observed[.systemSleepDisabled] = reading
                 if reading == false {
-                    ownsSleepDisabled = false
+                    releaseSleepDisabledOwnership()
                 }
             }
             reevaluateMisalignments(targets: currentTargets)

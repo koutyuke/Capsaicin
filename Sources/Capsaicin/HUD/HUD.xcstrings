@@ -103,6 +103,23 @@
         }
       }
     },
+    "hud.reason.helperApprovalRevoked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background item off (System Settings)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックグラウンド項目オフ（システム設定）"
+          }
+        }
+      }
+    },
     "hud.reason.helperUnavailableAtStart" : {
       "extractionState" : "manual",
       "localizations" : {

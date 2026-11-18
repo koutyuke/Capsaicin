@@ -31,15 +31,8 @@ struct HUDContent: Equatable {
         let off = Self(symbol: "custom.capsaicin.led", state: text("hud.state.off"), bundle: bundle)
         switch event {
         case .started, .timeLimitReplaced:
-            let detail = status.session?.timeLimit.map { limit in
-                if limit.source == .specifiedTime {
-                    return String(format: text("hud.condition.until"),
-                                  DisplayFormat.time(limit.date, calendar: calendar, locale: locale))
-                }
-                // 開始から HUD を作るまでの遅れで端数の分が切り捨てられ、1分少なく出ないよう分に丸める。
-                let minutes = max(1, (limit.date.timeIntervalSince(now) / 60).rounded())
-                return String(format: text("hud.condition.for"),
-                              DisplayFormat.duration(minutes * 60, calendar: calendar, locale: locale))
+            let detail = status.session?.timeLimit.map {
+                timeCondition($0, now: now, calendar: calendar, locale: locale, text: text)
             }
             return Self(
                 symbol: "custom.capsaicin.led.fill",
@@ -63,6 +56,7 @@ struct HUDContent: Equatable {
                 result.detail = status.batteryCondition.map {
                     String(format: text("hud.reason.battery"), $0.threshold.percent)
                 } ?? text("hud.reason.batteryLowAtStart")
+            case .helperApprovalRevoked: result.detail = text("hud.reason.helperApprovalRevoked")
             case .user: break
             }
             if !status.misalignments.isEmpty {
@@ -73,6 +67,19 @@ struct HUDContent: Equatable {
             return result
         case .warningsChanged: return nil
         }
+    }
+
+    private static func timeCondition(
+        _ limit: TimeLimit, now: Date, calendar: Calendar, locale: Locale, text: (String) -> String,
+    ) -> String {
+        if limit.source == .specifiedTime {
+            return String(format: text("hud.condition.until"),
+                          DisplayFormat.time(limit.date, calendar: calendar, locale: locale))
+        }
+        // 開始から HUD を作るまでの遅れで端数の分が切り捨てられ、1分少なく出ないよう分に丸める。
+        let minutes = max(1, (limit.date.timeIntervalSince(now) / 60).rounded())
+        return String(format: text("hud.condition.for"),
+                      DisplayFormat.duration(minutes * 60, calendar: calendar, locale: locale))
     }
 
     private static func rejectionKey(_ reason: StartRejection) -> String {

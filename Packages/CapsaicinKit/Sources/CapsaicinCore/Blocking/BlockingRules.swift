@@ -25,6 +25,7 @@ public enum ReleaseReason: Hashable, Sendable {
     case user(RequestOrigin)
     case timeLimit(TimeLimitSource)
     case batteryBelowThreshold
+    case helperApprovalRevoked
 }
 
 public enum BlockingRules {
