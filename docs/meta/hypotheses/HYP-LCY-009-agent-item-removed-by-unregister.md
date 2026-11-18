@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LCY-009
 title: agent の plist を持つビルドから unregister すると、SMAppService の agent の項目はシステム設定から消える
-status: open
+status: supported
 affects: ["DEC-LCY-008"]
-evidence: []
+evidence: ["EVID-LCY-008"]
 ---
 
 # HYP-LCY-009 agent の plist を持つビルドから unregister すると、SMAppService の agent の項目はシステム設定から消える
@@ -26,4 +26,4 @@ agent をやめた版に移った Mac に、使われない agent の項目が�
 
 ## 結果
 
-未確認。
+主張1と2は実機の1回の試行で支持された（`EVID-LCY-008`）。別のビルドが登録した agent は `notRegistered` になり、`launchctl print` は失敗した。デーモンの登録とスイッチは変わらなかった。ただし、題の「システム設定から消える」はそのとおりではない。BTM の agent の項目は `disabled` で残り、デーモンと1つの行にまとまっているシステム設定の「Capsaicin.app」の行も残った。

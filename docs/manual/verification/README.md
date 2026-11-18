@@ -39,7 +39,6 @@
 | [`localization.md`](localization.md) | 英語・日本語の表示と時刻の表記 | システム設定 |
 | [`login-and-crash-restart.md`](login-and-crash-restart.md) | mainApp によるログイン時の起動と agent によるクラッシュ後の再起動 | 登録、ログアウト |
 | [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の下の状態の文 | ヘルパーの登録、システム設定 |
-| [`agent-unregister-cleanup.md`](agent-unregister-cleanup.md) | 試作の起動時に Debug agent の登録だけを外す | agent とヘルパーの登録、管理者権限 |
 | [`debug-agent-worktree-switch.md`](debug-agent-worktree-switch.md) | `just start` による worktree 間の Debug agent の切り替え | agent の登録 |
 
 ヘルパーの設置と承認、on と off、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直し、Finder からの起動の引き渡しは `EVID-HLP-006` で確認済みなので、専用の検証ファイルは置かない。残る検証の前提を作るための設置・許可と、最後の削除は各ファイルに書く。承認待ちの新しいアラートと状態の文は `helper-approval-guidance.md`、ログイン時の起動とクラッシュ後の再起動は `login-and-crash-restart.md` で確かめる。
