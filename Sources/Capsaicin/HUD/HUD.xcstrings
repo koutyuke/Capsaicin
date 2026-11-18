@@ -109,13 +109,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Background item off (System Settings)"
+            "value" : "Background item off"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バックグラウンド項目オフ（システム設定）"
+            "value" : "バックグラウンド項目オフ"
           }
         }
       }
