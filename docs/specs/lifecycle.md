@@ -142,9 +142,9 @@ domain: LCY
 
 アプリは、launchd が起動したものだけが動く。Finder、CLI、ログイン時の起動などから直接起動しても、動き続けるアプリは agent から起動されたものになる（方式は `DEC-LCY-008`）。
 
-agent は、アプリのバンドルの `Contents/Library/LaunchAgents/` の定義（`RunAtLoad` なし、クラッシュしたときだけ起動し直す）を `SMAppService.agent` で常に登録したものである。`~/Library/LaunchAgents` には書かない。直接起動したアプリは、agent を登録してから `launchctl kickstart` で agent からの起動を求め、成功したら自分は終了する。更新の後の登録し直しは、ヘルパーと同じ規則で行う（`SPEC-HLP-007`）。
+agent は、アプリのバンドルの `Contents/Library/LaunchAgents/` の定義（`RunAtLoad` なし、クラッシュしたときだけ起動し直す）を `SMAppService.agent` で常に登録したものである。`~/Library/LaunchAgents` には書かない。直接起動したアプリは、agent を登録してから `launchctl kickstart` で agent からの起動を求める。agent のジョブのプロセスが動いていて、その実行ファイルがこのバンドルのものだと確かめたら、自分は終了する。5 秒の間に確かめられなければ、agent の起動の失敗として扱う。`kickstart` のコマンドの成功だけでは終了しない（`DEC-LCY-009`）。更新の後の登録し直しは、ヘルパーと同じ規則で行う（`SPEC-HLP-007`）。
 
-agent の登録か起動に失敗したとき（利用者がシステム設定で Capsaicin のバックグラウンドの項目をオフにした場合など）は、アプリをそのまま動かし、クラッシュ時に再起動されないことを設定画面の「一般」に示す。その項目をオフにすると、ヘルパーも使えなくなる（`SPEC-HLP-004`）。
+agent の登録か起動に失敗したとき（利用者がシステム設定で Capsaicin のバックグラウンドの項目をオフにした場合や、launchd が起動の制約で agent を止めた場合など）は、アプリをそのまま動かし、クラッシュ時に再起動されないことを設定画面の「一般」に示す。その項目をオフにすると、ヘルパーも使えなくなる（`SPEC-HLP-004`）。
 
 ### 受け入れ例: Finder から起動しても launchd の管理下になる
 
