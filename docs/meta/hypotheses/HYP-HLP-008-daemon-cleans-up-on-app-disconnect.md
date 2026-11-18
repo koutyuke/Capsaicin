@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-008
 title: デーモンは、on を送ったアプリの強制終了による XPC 接続の切断を受け取り、off を実行できる
-status: open
+status: supported
 affects: ["REQ-LCY-003", "SPEC-LCY-003", "SPEC-HLP-002", "DEC-LCY-008"]
-evidence: []
+evidence: ["EVID-HLP-010"]
 ---
 
 # HYP-HLP-008 デーモンは、on を送ったアプリの強制終了による XPC 接続の切断を受け取り、off を実行できる
@@ -27,4 +27,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+実機で支持された（`EVID-HLP-010`）。`SIGKILL` の2回と `SIGSEGV` の1回のどれでも、デーモンは役目を持つ間アイドルで終了せず、切断を受けて `off` を実行した。`SleepDisabled` は終了の約1秒後に 0 で、アプリは再起動しなかった。

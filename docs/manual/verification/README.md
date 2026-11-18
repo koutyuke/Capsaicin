@@ -39,7 +39,6 @@
 | [`localization.md`](localization.md) | 英語・日本語の表示と時刻の表記 | システム設定 |
 | [`login-and-crash-restart.md`](login-and-crash-restart.md) | mainApp によるログイン時の起動と agent によるクラッシュ後の再起動 | 登録、ログアウト |
 | [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の下の状態の文 | ヘルパーの登録、システム設定 |
-| [`app-crash-daemon-cleanup.md`](app-crash-daemon-cleanup.md) | 試作のアプリを強制終了した後のデーモンの `off` と LED の点灯の残存 | ヘルパーの登録、管理者権限 |
 | [`brightness-crash-recovery.md`](brightness-crash-recovery.md) | 試作のアプリが暗い画面で終了した後の輝度のキーと手動起動による復元 | ヘルパーの登録、管理者権限 |
 | [`background-off-while-blocking.md`](background-off-while-blocking.md) | 試作で許可を外したときのデーモンの `SIGTERM` による `off` とアプリの検知 | ヘルパーの登録、システム設定、管理者権限 |
 | [`daemon-reconnect-cleanup.md`](daemon-reconnect-cleanup.md) | 試作のデーモンだけを強制終了した後の `on` の再送と後片付け | ヘルパーの登録、管理者権限 |

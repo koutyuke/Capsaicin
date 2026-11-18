@@ -4,7 +4,7 @@ id: HYP-HLP-012
 title: Mac の起動のとき、BTM は URL にアプリのない UID -2 のアプリの項目を消し、そのデーモンの項目は親を失う
 status: open
 affects: ["DEC-HLP-005", "SPEC-HLP-001", "SPEC-HLP-004", "SPEC-HLP-007"]
-evidence: ["EVID-HLP-007", "EVID-HLP-008", "EVID-HLP-009"]
+evidence: ["EVID-HLP-007", "EVID-HLP-008", "EVID-HLP-009", "EVID-HLP-011"]
 ---
 
 # HYP-HLP-012 Mac の起動のとき、BTM は URL にアプリのない UID -2 のアプリの項目を消し、そのデーモンの項目は親を失う
@@ -36,4 +36,4 @@ SMAppService でデーモンを登録したアプリの、UID -2 の記録のア
 
 ## 結果
 
-未確認。コピーをゴミ箱へ移しただけの状態では、再起動の後もアプリの項目と親は残った（`EVID-HLP-009`）。
+未確認。コピーをゴミ箱へ移しただけの状態では、再起動の後もアプリの項目と親は残った（`EVID-HLP-009`）。主張4の後半（親のない項目が消えた後は、元のラベルを登録してもヘルパーが起動する）は確かめた（`EVID-HLP-011`）。
