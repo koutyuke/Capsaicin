@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-010
 title: 抑止中にデーモンが落ちても、アプリは接続を張り直して on を送り直し、後片付けの役目を戻せる
-status: open
+status: supported
 affects: ["SPEC-HLP-002", "SPEC-HLP-005", "SPEC-BLK-007"]
-evidence: []
+evidence: ["EVID-HLP-013"]
 ---
 
 # HYP-HLP-010 抑止中にデーモンが落ちても、アプリは接続を張り直して on を送り直し、後片付けの役目を戻せる
@@ -27,4 +27,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+実機の1回の試行で支持された（`EVID-HLP-013`）。デーモンを `SIGKILL` で終了させると、アプリは `interrupted` を受け、約 37 ミリ秒後に送り直した `on` が、launchd が起動した新しいデーモンで成功した。`SleepDisabled` は 1 のままだった。その後にアプリを `kill -9` で終了させると、新しいデーモンが `off` を実行した。
