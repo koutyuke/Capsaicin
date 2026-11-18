@@ -18,7 +18,7 @@ assignee: OpenCode openai/gpt-6.2-sol（high）
 
 変更してよいもの: `Packages/CapsaicinKit/`（ソースとテスト）、`Sources/Capsaicin/`（`.xcstrings` を含む）、`Sources/capsaicin-cli/`、`Tests/`、`project.yml`。
 
-変更してはいけないもの: `Sources/capsaicin-helper/`（TASK-120 が並行して変える）、`docs/`、`AGENTS.md`、`justfile`、`scripts/`。必要だと分かったら変更せずに報告する。
+変更してはいけないもの: `Sources/capsaicin-helper/`（後片付けの役目は `57ab25a` で実装済み）、`docs/`、`AGENTS.md`、`justfile`、`scripts/`。必要だと分かったら変更せずに報告する。
 
 この作業に含めないもの（後の作業で行う）: デーモンへの接続を保つこと、`on` の送り直し、バックグラウンドの項目のオフの検知と HUD（`SPEC-HLP-004`、`SPEC-HLP-005` の送り直しの段落）、単一インスタンス（`SPEC-LCY-009`）、justfile と `scripts/debug-app.sh` の整理。
 
