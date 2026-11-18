@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-011
 title: SMAppService のデーモンを登録したアプリのコピーを消すか動かすと、BTM のデーモンの項目は親を失い、以後の登録ではヘルパーが起動しない
-status: open
+status: refuted
 affects: ["DEC-HLP-005", "SPEC-HLP-001", "SPEC-HLP-004", "SPEC-HLP-007"]
-evidence: ["EVID-HLP-007"]
+evidence: ["EVID-HLP-007", "EVID-HLP-008"]
 ---
 
 # HYP-HLP-011 SMAppService のデーモンを登録したアプリのコピーを消すか動かすと、BTM のデーモンの項目は親を失い、以後の登録ではヘルパーが起動しない
@@ -30,4 +30,4 @@ evidence: ["EVID-HLP-007"]
 
 ## 結果
 
-未確認。
+外れた（`EVID-HLP-008`）。主張1は成り立った。主張2は成り立たず、登録したコピーを消しても動かしても、デーモンの項目は親を保ち、別のコピーからヘルパーが起動した。主張3と4は、親を失った項目を作れなかったので判定できなかった。親のない項目は、UID -2 の記録からアプリの項目がなくなった状態で生じていたと見られ、その条件は `HYP-HLP-012` で確かめる。
