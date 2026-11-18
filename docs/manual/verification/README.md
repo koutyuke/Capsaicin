@@ -76,7 +76,16 @@
 
 ### `just` の app レシピ
 
-`just start` と `just restart` は、起動の成功を agent のジョブで判定する実装のままなら、agent を使わないビルドの検証には使わない。試作は `prepare.md` の対象を確認し、`/usr/bin/open "$APP"` で起動してメニューの「Capsaicinを終了」で終了する。ほかのファイルが app レシピを指定していても、対象のビルドに対応していなければ実行せず、PM に報告する。
+対象は bundle ID が `io.github.koutyuke.capsaicin.debug` のアプリである。別の worktree や `/Applications` の PR Debug ビルドも含む。Release は対象にしない。
+
+| レシピ | 動作 |
+| --- | --- |
+| `just status` | Debug の PID、開始時刻、実行ファイルの絶対パスと、このチェックアウトのものかを表示する。`SleepDisabled` と Capsaicin のアサーションも読む |
+| `just stop` | すべての Debug アプリに終了を要求し、待っても残ったものだけに `SIGTERM` を送る |
+| `just start` | Debug が1つでも動いていれば起動しない。停止済みなら、このチェックアウトのビルドを直接開き、その実行ファイルの起動を確かめる |
+| `just restart` | ビルドが成功してから `just stop`、`just start` の順に行う |
+
+これらのレシピは agent のジョブを確認せず、古い登録も外さない。残った Debug agent はオーナーが [`prepare.md`](prepare.md) の手順で片付ける。PR ビルドや試作を検証対象に選んだ場合は、そのファイルの手順どおり `/usr/bin/open "$APP"` で対象を開く。
 
 登録の状態は、アプリの「ヘルパー」、システム設定の「一般 > ログイン項目と機能拡張」、`sfltool dumpbtm`、デーモンの `launchctl print` の読み取りを照合する。`launchctl print-disabled` だけで SMAppService の許可状態を判断しない。macOS の項目名は検証時の画面で照合する。
 

@@ -48,9 +48,10 @@ if [ -f "$B/app-path.txt" ]; then APP="$(cat "$B/app-path.txt")"; printf 'APP=%s
 3. 「一般」の「ログイン時に起動」をオフにし、システム設定の「ログイン時に開く」から外れたことを確かめる。メニューの「Capsaicinを終了」で終了し、状態を読む。Capsaicin のアサーションがなく、LED が通常の Caps Lock 連動に戻ったことを目で確かめる。
 
    ```sh
-   /usr/bin/pmset -g assertions
-   /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
+   just status
    ```
+
+   `No Debug processes.` が出ることを確かめる。`just status` は PR Debug ビルドも表示するが、Release のプロセスは表示しない。想定外のコピーが動いていたら、`just stop` で一括終了せず、パスを記録して中止する。
 
 4. `SleepDisabled` が開始値と違う場合だけ、開始値を読み直して戻す。
 
@@ -76,7 +77,7 @@ if [ -f "$B/app-path.txt" ]; then APP="$(cat "$B/app-path.txt")"; printf 'APP=%s
 1. プロセスがないことを確かめ、試験後の設定と試作の状態記録を保存する。
 
    ```sh
-   /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
+   just status
    if [ -f "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then cp -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" "$B/resume-record.after.json"; fi
    /usr/bin/defaults export io.github.koutyuke.capsaicin.debug "$B/defaults.after.plist"
    ```
