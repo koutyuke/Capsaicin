@@ -16,7 +16,8 @@ enum AppComposition {
         let store = UserDefaultsSettingsStore(defaults: .standard)
         let power = PowerStateMonitor()
         let led = CapsLockLEDController()
-        let helper = HelperSleepController()
+        let registration = HelperRegistration()
+        let helper = HelperSleepController(registration: registration)
         let brightness = DisplayServicesBrightness()
         let controller = try BlockingController(
             settings: store.load(), capabilities: PowerMachineCapabilities.detect(),
@@ -32,11 +33,11 @@ enum AppComposition {
                              updater: UpdateModel(bundle: bundle))
         model.onAlert = showAlert
         let settings = SettingsModel(app: model, helper: .live(
-            helper: helper, installer: HelperInstaller(),
-            restoreSleep: model.resetsSleepDisabledOnHelperRemoval,
+            registration: registration,
+            prepareRemoval: model.prepareHelperRemoval,
             completed: model.helperManagementCompleted,
         ))
-        let agent = try LaunchAgent(executableURL: executableURL(in: bundle), isDebug: isDebug)
+        let agent = LaunchAgent(bundle: bundle, isDebug: isDebug)
         let services = AppServices(
             model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
             virtualKeyboard: VirtualKeyboardMonitor(), display: DisplaySleep(),
@@ -46,17 +47,15 @@ enum AppComposition {
         return AppRuntime(
             model: model,
             launchedByLaunchd: agent.wasLaunchedByLaunchd(environment: ProcessInfo.processInfo.environment),
-            registerAndStart: { await agent.registerAndStart(launchAtLogin: $0) },
+            registerAndStart: { await agent.registerAndStart() },
             restartStatus: { agent.restartStatus() },
             updateLaunchAtLogin: { try agent.updateLaunchAtLogin($0) },
+            reregisterHelper: {
+                await registration.reregisterIfNeeded()
+            },
             startServices: { await services.start() }, stopServices: { await services.stop() },
             openSettings: { services.openSettings() },
         )
-    }
-
-    private static func executableURL(in bundle: Bundle) throws -> URL {
-        guard let url = bundle.executableURL else { throw CocoaError(.fileNoSuchFile) }
-        return url
     }
 
     private static func showAlert(_ alert: AppAlert) {
@@ -153,6 +152,7 @@ private final class AppServices {
     }
 
     func start() async {
+        settings.refreshHelper()
         prepareSettingsWindow()
         model.onStatusChange = { [weak self] in self?.refresh($0) }
         model.onEvent = { [weak self] event, previous in
@@ -207,6 +207,7 @@ private final class AppServices {
     }
 
     func stop() async {
+        settings.settingsWindowClosed()
         minuteTimer?.invalidate()
         releaseTimer?.invalidate()
         model.onStatusChange = nil

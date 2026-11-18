@@ -5,7 +5,7 @@ title: ヘルパーは C の小さな実行ファイルにし、検証してか�
 status: superseded
 supersedes: []
 superseded_by: ["DEC-HLP-003"]
-requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-003", "REQ-HLP-005", "REQ-HLP-006"]
+requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-005", "REQ-HLP-006"]
 based_on: ["DEC-HLP-001", "EVID-HLP-001"]
 ---
 
@@ -27,7 +27,7 @@ based_on: ["DEC-HLP-001", "EVID-HLP-001"]
 
 ## 背景
 
-root で動くコードは小さく、環境の影響を受けないものにしたい。sudoers の書式を誤ると sudo 全体が使えなくなる（`REQ-HLP-003`）。開発用の Mac では、Capsaicin と関係なく `SleepDisabled` が 1 になっていたことがある（`EVID-BLK-003`）。
+root で動くコードは小さく、環境の影響を受けないものにしたい。sudoers の書式を誤ると sudo 全体が使えなくなる。開発用の Mac では、Capsaicin と関係なく `SleepDisabled` が 1 になっていたことがある（`EVID-BLK-003`）。
 
 ## 選択肢
 

@@ -1,8 +1,8 @@
 # 実機で Capsaicin を確認して元に戻す手順
 
-オーナーが承認済みの検証用 Mac で、Debug アプリの起動、抑止、復旧、画面を確認する手順である。システム設定と管理者権限を使い、ログアウト・再起動で作業を中断する。全項目の所要時間は未実測である。
+オーナーが承認済みの検証用 Mac で、Debug アプリの起動、抑止、復旧、画面を確認する手順である。ヘルパーとログイン時の起動は、`S-Preview` のラベルで作る署名・公証済みの PR Debug ビルド（`DEC-SYS-023`）を `/Applications` に置いて確認する。システム設定の許可を変更し、一部の試験では `sudo pmset` でスリープの設定を変える。ログアウト・再起動で作業を中断する。全項目の所要時間は未実測である。
 
-本文のコマンドはまだ実行しておらず、ソースとの静的照合だけを行っている。実際に走らせた記録が残るまでは、ここに書いた期待値を「確かめた事実」として扱わない。独立した LED 復旧手段がない場合は、1節の起動前ゲートで止める。
+本文のコマンドはまだ実行しておらず、ソースとの静的照合だけを行っている。実際に走らせた記録が残るまでは、ここに書いた期待値を「確かめた事実」として扱わない。独立した LED 復旧手段がない場合は1.4で止める。
 
 実行するのはオーナーだけである。justfile の `app` グループ（`start`、`stop`、`restart`、`status`）は、エージェントもオーナーの承認を得て実行できる（`DEC-SYS-024`）が、この手順書の操作はオーナーが行う。
 
@@ -20,11 +20,14 @@
 
 | 言葉 | この手順での意味 |
 | --- | --- |
-| ジョブ | `~/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist` を launchd に読み込ませたもの。`just status` で状態を見る |
-| 引き渡し | 手で起動したアプリが plist を書いて `bootstrap` と `kickstart` を投げ、成功したら自分は終了して launchd 起動の個体にバトンを渡す仕組み |
-| `RunAtLoad` | plist の中の値。`true` ならログイン時に起動する。設定画面の「ログイン起動」がこれを書く |
+| agent のジョブ | バンドル内の定義を `SMAppService.agent` で登録したもの。Debug のラベルは `io.github.koutyuke.capsaicin.debug`。クラッシュ時にアプリを起動し直す |
+| 引き渡し | 直接起動したアプリが agent を登録して `kickstart` で起動を求め、成功したら終了する仕組み。動き続けるのは agent から起動した個体である |
+| mainApp | `SMAppService.mainApp` によるログイン時の起動の登録。「ログイン時に起動する」で切り替える。agent の登録とは別である |
+| デーモン | バンドル内の定義を `SMAppService.daemon` で登録したヘルパー。Debug のラベルと Mach サービス名は `io.github.koutyuke.capsaicin.debug.helper` |
+| `APP` | 今回確認するアプリの絶対パス。署名付きの PR Debug ビルドでは `/Applications/Capsaicin.app` を使う |
+| BTM の記録 | `sfltool dumpbtm` が示す、ログイン項目とバックグラウンドの登録の記録 |
 | `SleepDisabled` | `pmset -g` に出るシステム全体の値。`1` ならスリープしない。この手順では開始時は `0` を前提にする |
-| `B` | 1.2 で作る退避先。設定、記録、plist、画面写真、結果をここに置く。最後まで消さない |
+| `B` | 1.2 で作る退避先。設定、再開用の記録、登録状態の読み取り結果、画面写真、結果をここに置く。最後まで消さない |
 
 「期待」と実測が違ったら、まず実測をそのまま残す。そのうえで、期待の書き方が悪いのか、製品が期待と違うのかを切り分ける。判断がつかなければ、その項目を判定不能として PM に渡す。
 
@@ -52,7 +55,7 @@
 
 ## 0. 毎回の始め方
 
-1節は最初の1回だけ行う。1節を終えていれば、リポジトリのルートで devShell に入り、メモした退避先の絶対パスを `B` に入れる。ログアウトや再起動の後も同じ手順で戻す。
+1節は最初の1回だけ行う。1節を終えていれば、リポジトリのルートで devShell に入り、メモした退避先の絶対パスを `B` に入れる。`APP` も保存したパスから戻す。ログアウトや再起動の後も同じ手順で戻す。
 
 ```sh
 cd <リポジトリのルート>
@@ -60,28 +63,33 @@ nix develop
 B='メモした退避先の絶対パスに置き換える'
 test -f "$B/repository-path.txt"
 test "$(cat "$B/repository-path.txt")" = "$PWD"
+APP="$(cat "$B/app-path.txt")"
 ```
 
 どちらかの `test` が失敗したら、退避先かチェックアウトが違うので止める。各小節を始める前に、次で足場を確かめる。アプリを起動するかどうかは各小節の前提に従う。2.2、4.4、4.6など、起動していないことが条件の試験では起動しない。
 
 ```sh
 printf 'B=%s\n' "$B"
-just status
+printf 'APP=%s\n' "$APP"
+/bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+/bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
+/usr/bin/pmset -g
+/usr/bin/pmset -g assertions | /usr/bin/grep -i capsaicin
 ```
 
-- `just status` は、ジョブと plist がこのチェックアウトの実行ファイルを指すか、すべての Debug プロセスの PID・開始時刻・パス、`SleepDisabled`、Capsaicin のアサーションを表示する。起動中なら、ジョブが `state = running` で、プロセスが1つだけ動き、その PID がジョブの `pid` と一致することを確かめる。終了コードは常に `0` なので、成否は表示内容で判断する。
-- `just stop` は、どのチェックアウトの Debug アプリにもまず quit を送る。この終了は「終了理由を判定できない」終了になり、抑止を停止中の状態に戻してから終わる（`SPEC-LCY-002`）。10秒たっても残るプロセスだけに `SIGTERM` を送り、さらに5秒待つ。`SIGTERM` で止めたプロセスは後片付けを通らない。そのため、抑止中に残ったときは `just status` で `SleepDisabled` とアサーションを確かめる。
-- `just start` は Debug アプリが動いていないことを確かめ、読み込み済みのジョブを外してからこのチェックアウトのビルドを開く。ジョブを残した起動を試す箇所では使わない。
-- コードを直してもらった後は、各小節の前提が許す場合だけ `just restart` で入れ替える。ビルドに成功してから `stop`、`start` の順に実行する。
+- 起動中なら、agent が `state = running` で、`program` が `$APP/Contents/MacOS/Capsaicin` を指し、プロセスが1つだけで、その PID がジョブの `pid` と一致することを確かめる。検索で行が出ないことと、照会自体の失敗を区別する。
+- PR Debug ビルドの起動には `/usr/bin/open "$APP"`、終了にはメニューを使う。ログアウトや再起動の試験では、メニューから先に終了せず、各節の操作に従う。
+- justfile の `app` グループはチェックアウト内の手元のビルド用で、`/Applications` のビルドには使わない。`just status` は agent の `program` とチェックアウトのパスを比較するが、プロセスの一覧はビルド先のパスだけが対象である。PR Debug ビルドの不在を判断する用途には使わない。
+- 手元のビルドで `just start` を使うと、読み込み済みの Debug ジョブを外してからアプリを開き、SMAppService の登録と引き渡しはアプリに任せる。`just restart` はビルド後に `stop`、`start` の順に実行する。`just stop` の `SIGTERM` では後片付けが行われないので、残留は上のスリープ状態の照会で確認する。
 
 ## 1. 準備し、開始前の状態を保存する
 
-この節で「元に戻せる状態」を作る。ここを通せない環境では、2節以降を実施しない。1.1〜1.3 は状態を読むだけで、1.4 でビルドし、起動前ゲートを通る。
+この節で「元に戻せる状態」を作る。前提を満たせない環境では2節以降を実施しない。1.1〜1.3 で状態を読み取って退避し、1.4 でビルドと署名を確認して起動前の準備を終える。
 
 ### 1.1 実行者と検証環境を固定する
 
 - **目的**: `SPEC-LCY-005`、`SPEC-LCY-007`、`SPEC-HLP-005` の確認で既存環境を失わない。
-- **前提**: 実行者はオーナーである。エージェントは本文のコマンドを実行しない。Apple Silicon、macOS 26 以上、Xcode 27.2、Nix の flakes、有効な管理者認証を用意する。未保存の作業を保存する。
+- **前提**: 実行者はオーナーである。エージェントは本文のコマンドを実行しない。Apple Silicon、macOS 26 以上、Xcode 27.2、Nix の flakes を用意する。`sudo pmset` を使う試験では、その操作の承認と認証手段も用意する。未保存の作業を保存する。
 - **操作**:
   1. Release と Debug の Capsaicin が両方停止している検証用 Mac を使う。既存のアプリが動作中なら、本手順では終了させず中止する。Release を検証中に起動しない。
   2. ターミナルでリポジトリのルートを開き、`nix develop` で devShell の Bash に入る。以後のコマンドはこのシェルで実行する。
@@ -125,18 +133,21 @@ just status
      /bin/launchctl print-disabled "gui/$(id -u)" > "$B/disabled.before.txt"
      /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin" > "$B/release-agent.before.txt" 2>&1
      printf '%s\n' "$?" > "$B/release-agent-print.exit.txt"
+     /bin/launchctl print system/io.github.koutyuke.capsaicin.debug.helper > "$B/helper.before.txt" 2>&1
+     /bin/launchctl print system/io.github.koutyuke.capsaicin.helper > "$B/release-helper.before.txt" 2>&1
+     /usr/bin/sfltool dumpbtm > "$B/btm.before.txt"
      /usr/sbin/sysctl kern.boottime > "$B/boottime.before.txt"
      /bin/date '+%Y-%m-%dT%H:%M:%S%z' > "$B/date.before.txt"
      /usr/bin/awk '$1 == "SleepDisabled" {print $2}' "$B/pmset.before.txt" > "$B/sleep-disabled.before.txt"
      cat "$B/sleep-disabled.before.txt" "$B/agent-print.exit.txt" "$B/agent.before.txt"
      ```
 
-- **期待**: `SleepDisabled` は1行の `0` または `1`。LaunchAgent の照会は「サービスが見つからない」旨で失敗する。
-- **中止**: `SleepDisabled` が欠落・重複・不明の場合。Debug・Release いずれかの LaunchAgent が読み込み済みの場合も止める。`release-agent.before.txt` と終了コードを読み、`~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist` が存在する場合も、ログイン時の同時起動を避けるため止める。読み込み済みジョブは plist だけでは完全復元できないので、この手順で `bootout` しない。権限不足を「存在しない」とみなさない。
+- **期待**: `SleepDisabled` は1行の `0` または `1`。agent とデーモンの照会は「サービスが見つからない」旨で失敗する。システム設定の「一般 > ログイン項目と機能拡張」と `btm.before.txt` の Capsaicin の項目に、使用中の登録がない。
+- **中止**: `SleepDisabled` が欠落・重複・不明の場合。Debug・Release いずれかのジョブが読み込み済み、ログイン時に開く登録がある、バックグラウンドの登録を既存のものと区別できない場合も止める。既存の登録はこの手順で外さず、別の検証用 Mac を PM と選ぶ。権限不足を「存在しない」とみなさない。`sfltool dumpbtm` の `[disabled, allowed, …]` は過去の OS の記録として残りうるので、それだけで現在の登録や稼働を判断しない（`EVID-LCY-003`）。
 - **復元**: 読み取りと退避先の作成だけなので、システムの復元は不要である。開始値が `1` の場合も、この時点では下ろさない。
-- **記録**: `SleepDisabled` の開始値、2つの `launchctl print` の終了値と本文、`boottime`、`date` を写す。文言は macOS の版で変わるので、終了値と本文の両方を残し、片方だけで判断しない。
+- **記録**: `SleepDisabled` の開始値、agent の照会の終了値と本文、デーモンの照会結果、`boottime`、`date`、Capsaicin の BTM の項目を写す。システム設定の「ログイン時に開く」とバックグラウンドの一覧を画面写真で保存する。文言は macOS のバージョンで変わるので、終了値と本文の両方を残す。
 
-### 1.3 設定、再開用の記録、未読込の plist を退避する
+### 1.3 設定と再開用の記録を退避する
 
 - **目的**: `SPEC-SET-002`、`SPEC-LCY-007` の既存データを保存する。
 - **前提**: アプリとジョブが停止している。次の対象がシンボリックリンクなら止める。
@@ -162,51 +173,51 @@ just status
      touch "$B/defaults.absent"
      ```
 
-  2. 再開用の記録と plist を、存在しなかったことも含めて保存する。
+  2. 再開用の記録を、存在しなかったことも含めて保存する。
 
      ```sh
-     if [ -L "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ] || [ -L "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" ]; then
+     if [ -L "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then
        printf '%s\n' '中止: シンボリックリンクがある'
      else
        if [ -f "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then cp -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" "$B/resume-record.before.json"; else touch "$B/record.absent"; fi
-       if [ -f "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" ]; then cp -p "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" "$B/agent.before.plist"; else touch "$B/agent.absent"; fi
      fi
      ```
 
   3. 既存の記録があれば、`cat "$B/resume-record.before.json"` で `session`、`ownsSleepDisabled`、`isRunning`、`misalignments` を読む。抑止・所有・実行中・未復元の制御が残っていたら、そのまま保管して止める。壊れた記録も消さない。
-  4. Release・Debug 両方のヘルパー構成を読む。
+  4. v0.1.0 の方式のファイルが残っていないか、Finder の「フォルダへ移動」で次の配置先を読む。見つかっても、この手順では移動・削除しない。
 
-     ```sh
-     /bin/ls -ld /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper{,.debug}
-     /bin/ls -ld /etc/sudoers.d/capsaicin{,_debug}
-     /bin/ls -ld /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper{,.debug}.plist
-     ```
+     対象は `/etc/sudoers.d/capsaicin` と `capsaicin_debug`、`/Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper` と同名末尾に `.debug` が付くファイル、`/Library/LaunchDaemons/` のそれぞれに対応する `.plist`、`~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist` と `io.github.koutyuke.capsaicin.debug.plist` である。
 
-- **期待**: 退避に成功し、ヘルパー構成6ファイルはすべて存在しない。既存 plist があっても読み込まれておらず、元ファイルを保存できている。
-- **中止**: ヘルパー構成が1つでも存在する、アクセス拒否、退避失敗、既存記録の意味を判断できない場合。既存ヘルパーは修復・削除せず、構成のない別の検証用 Mac を PM と選ぶ。
+- **期待**: 設定と記録の退避に成功し、v0.1.0 の方式のファイルがない。
+- **中止**: 旧方式のファイルが1つでも存在する、アクセス拒否、退避失敗、既存記録の意味を判断できない場合。旧方式の片付けは Git の外の専用手順書で済ませてから最初からやり直すか、残っていない別の検証用 Mac を PM と選ぶ。
 - **復元**: 元ファイルは変更していない。`B` を残す。以降で消すのは今回の検証で作ったデータだけとする。
-- **記録**: `defaults` の終了値、`record.absent`／`agent.absent`／`defaults.absent` のどれができたか、ヘルパー構成6ファイルの有無。既存データがあった場合は、その中身を要約して写す（認証情報は写さない）。
+- **記録**: `defaults` の終了値、`record.absent`／`defaults.absent` のどちらができたか、旧方式のファイルの有無。既存データがあった場合は、その中身を要約して写す（認証情報は写さない）。
 
-### 1.4 ビルドし、起動前ゲートを通る
+### 1.4 ビルドと署名を確認し、起動前の準備を終える
 
 - **目的**: `SPEC-LCY-005`、`SPEC-LED-001` の確認を、復旧可能な状態で始める。
 - **前提**: 1.3 が完了している。外観、アクセントカラー、アクセシビリティ、VoiceOver、バックグラウンド項目の開始値を画面写真で `B` に保存する。外付け機器の製品名と接続方式も記録する。
 - **操作**:
-  1. リポジトリのルートからビルドする。
+  1. ヘルパーとログイン時の起動を確認する場合は、オーナーが `S-Preview` 付き PR のコメントから対象コミットの Debug ビルドを取得し、展開して `/Applications/Capsaicin.app` に置く。既存のアプリに上書きしない。パスと署名を確認する。
 
      ```sh
-     nix develop --command just build
-     /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' .build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Info.plist
-     /bin/ls -l .build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/
+     APP='/Applications/Capsaicin.app'
+     printf '%s\n' "$APP" > "$B/app-path.txt"
+     /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist"
+     /usr/bin/codesign -dv --verbose=4 "$APP" 2>&1
+     /usr/bin/codesign --verify --deep --strict "$APP"
+     /bin/ls -l "$APP/Contents/Helpers/"
      ```
+
+     手元の `nix develop --command just build` は ad-hoc 署名で、ヘルパーには使えない。このビルドの確認だけを行う場合は `APP="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app"` を `app-path.txt` に保存し、1.4 の準備後に起動して「ヘルパー」が「このビルドでは使用不可」、管理ボタンなしになることを確認する。ヘルパーが要る選択肢を選んでも登録されず、エラー後に保存値の表示へ戻ることを確認したら終了し、9節へ進む。2節と4節の成功には数えない。
 
   2. 結果用メモを `B` に置き、実行日、macOS のビルド番号、Mac の機種、承認者、各手順の実測値を書く。認証情報や全プロセスの環境変数は保存しない。
   3. PM に、独立したプロセスから各対象キーボードへ `"Auto"` を書ける復旧用実行ファイルと、その実行・成功判定の手順を用意してもらう。承認済みの手順を `B` に保管する。
 
-- **期待**: bundle ID が `io.github.koutyuke.capsaicin.debug`、埋め込み実行ファイルが `capsaicin` と `capsaicin-helper` である。独立した LED 復旧手段と実行者が決まっている。
-- **中止**: 復旧手段がない場合はここで止め、2〜8節を実施しない。リポジトリには独立した復旧 CLI がない。LED 設定をオフにするだけでは、起動時の `"Auto"` 書き込みを防げない。既存の LED 上書きモードを保つ必要がある環境でも止める。
+- **期待**: bundle ID が `io.github.koutyuke.capsaicin.debug`、埋め込み実行ファイルが `capsaicin` と `capsaicin-helper` である。PR Debug ビルドでは署名検査に成功し、`TeamIdentifier` がある。独立した LED 復旧手段と実行者が決まっている。
+- **中止**: PR Debug ビルドの署名や取得元を確認できない、既存のアプリを上書きする必要がある、復旧手段がない場合はここで止め、2〜8節を実施しない。リポジトリには独立した復旧 CLI がない。LED 設定をオフにするだけでは起動時の `"Auto"` 書き込みを防げない。既存の LED 上書きモードを保つ必要がある環境でも止める。
 - **復元**: ビルドだけならシステムの復元は不要である。動的確認を始めなかったことを結果に書く。
-- **記録**: bundle ID、埋め込み実行ファイル2つ、承認済み復旧手順の置き場所。
+- **記録**: PR とコミット、アプリの絶対パス、ビルド番号、bundle ID、署名の Team ID、埋め込み実行ファイル2つ、承認済み復旧手順の置き場所。
 
 ここから先は、各節の前提がそろった項目だけを上から順に実行する。飛ばした項目は判定不能にする。
 
@@ -214,53 +225,53 @@ just status
 
 ## 2. 起動と LaunchAgent を確認する
 
-この節では、手で開いても最終的に launchd の管理下で動くこと（2.1）、ログイン起動の設定が効くこと（2.2）、クラッシュしたときだけ起こし直されること（2.2）、バックグラウンド項目を無効にしたときの表示（2.3）を見る。
+この節では、Finder から開いても agent の管理下で動くこと（2.1）、mainApp によるログイン時の起動とクラッシュ後の再起動（2.2）、バックグラウンド項目を無効にしたときの表示（2.3）を見る。
 
-2.1 と 2.2 は `RunAtLoad` とシステム設定を変える。2.3 の後で元に戻す。
+ログイン時の起動は mainApp の登録で切り替える。agent は常に登録し、バンドル内の定義の `RunAtLoad = false` と `KeepAlive.Crashed = true` は切り替えない。システム設定の変更は2.3の後で戻す。
 
 ### 2.1 Finder 起動から引き渡しを確認する
 
 - **目的**: `HYP-LCY-003`、`SPEC-LCY-005`。
-- **前提**: 1.4 のゲートを通った。`SleepDisabled` の開始値が `0` である。開始値が `1` なら変更せず、動的確認を中止する。
+- **前提**: 1.4 の準備を終え、`APP` は署名付きの PR Debug ビルドを指す。`SleepDisabled` の開始値が `0` である。開始値が `1` なら変更せず、動的確認を中止する。
 - **操作**:
-  1. 次を実行する。`open` は、Finder のダブルクリックと同じ経路でアプリを起動する。この節では起動経路自体を確認するので、ジョブを外す `just start` は使わない。
+  1. 次を実行する。`open` は Finder のダブルクリックと同じ経路でアプリを起動する。バンドル内の定義も読む。
 
      ```sh
-     just build
-     /usr/bin/open .build/xcode/Build/Products/Debug/Capsaicin.app
+     /usr/bin/open "$APP"
      sleep 5
      ```
 
   2. 出力された状態を読む。
 
      ```sh
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
-     /usr/bin/plutil -p "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"
+     /usr/bin/plutil -p "$APP/Contents/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"
      ```
 
   3. メニューから終了し、ジョブとプロセスを別々に見る。ジョブは読み込まれたままで、実行だけが止まるのが正しい。
 
      ```sh
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
-  4. `open .build/xcode/Build/Products/Debug/Capsaicin.app` でもう一度起動し、5秒待ってから2と同じ照会を行う。終了した後にもう一度開けることも、この手順で確かめる。
+  4. もう一度起動し、5秒待ってから2と同じ照会を行う。終了した後にもう一度開けることも、この手順で確かめる。
 
      ```sh
-     /usr/bin/open .build/xcode/Build/Products/Debug/Capsaicin.app
+     /usr/bin/open "$APP"
      sleep 5
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
-     /usr/bin/plutil -p "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"
+     /usr/bin/sfltool dumpbtm
      ```
 
-  5. 期待から外れたら、もう一度だけ `just status` で読み直す。それでも外れていれば中止する。
+  5. 設定の「ヘルパー」の状態と、システム設定の「ログイン時に開く」「アプリのバックグラウンドでのアクティビティ」の Capsaicin の項目を撮る。期待から外れたら、もう一度だけ2の照会で読み直す。それでも外れていれば中止する。
 
-- **期待**: Debug ジョブが実行中で、その `pid` のアプリだけが残る。`ProgramArguments` がこのチェックアウトの `.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/MacOS/Capsaicin` の絶対パスを指す。3のあとは `pid` がなく、プロセスも残らない。
+- **期待**: Debug の agent が実行中で、その `pid` のアプリだけが残り、`program` が `$APP/Contents/MacOS/Capsaicin` を指す。定義は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true` である。3のあとは `pid` がなく、プロセスも残らない。ヘルパーは未インストールである。設定の既定値なら mainApp の登録もあり、ログイン時の一覧に出る。
 - **中止**: 複数起動、引き渡しの繰り返し、Release の起動、登録失敗の場合。
-- **復元**: メニューの終了操作で止める。ジョブと plist の除去は9節で行う。
-- **記録**: 起動経路、各段階の `state` と `pid`、プロセスの本数、`ProgramArguments`、`KeepAlive`、`RunAtLoad`。
+- **復元**: メニューの終了操作で止める。登録とアプリの片付けは9節で行う。
+- **記録**: 起動経路、各段階の `state` と `pid`、プロセスの本数、`program` と `BundleProgram`、`KeepAlive`、`RunAtLoad`、BTM の Capsaicin の項目、ヘルパーの状態とシステム設定の画面。
 
 起動した直後の一瞬だけ2プロセスが見えることがある。手で開いた個体が引き渡してから終了するまでの間であり、数秒後に1本へ戻れば正常である。5秒たっても2本残るときは、引き渡しの失敗として扱う。
 
@@ -271,38 +282,37 @@ just status
 - **目的**: `HYP-LCY-002`、`SPEC-LCY-001`、`SPEC-LCY-003`。
 - **前提**: 停止中で、「一般」の再開設定は「再開しない」である。以後、画面の項目は機能名で指す。文言は `Sources/Capsaicin/Settings/` の String Catalog を正本とする。
 - **操作**:
-  1. 「一般」のログイン起動をオフにし、次で `RunAtLoad = false` と `KeepAlive.Crashed = true` を確かめる。
+  1. 「一般」のログイン起動をオフにする。動作中のアプリが終了しないことと、システム設定の「ログイン時に開く」から Capsaicin が外れることを見る。BTM の Capsaicin の mainApp と agent の項目を読む。
 
      ```sh
-     /usr/bin/plutil -p "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" | /usr/bin/grep -E 'RunAtLoad|KeepAlive'
+     /usr/bin/sfltool dumpbtm
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      ```
 
-  2. メニューから終了し、`just status` でプロセスが消えたことを確かめてから、ジョブを外して読み込み直す。
+  2. メニューから終了し、プロセスが消えたことを確かめる。agent は登録したままにし、手作業で外したり読み込み直したりしない。
 
      ```sh
-     just status
-     /bin/launchctl bootout "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
-     /bin/launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"
-     just status
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
   3. ジョブに実行中の `pid` がないことを、次のコマンドで確かめる。
 
      ```sh
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^\s*(state|pid|runs|last exit code) ='
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^[[:space:]]*(state|pid|runs|last exit code) ='
      ```
 
-     Apple メニューからログアウトして再ログインする。0節で退避先を入れ直し、同じ照会を行う。アプリは起動しない。
+     Apple メニューからログアウトするときに「再ログイン時にウインドウを再度開く」のチェックを外し、再ログインする。以後のログアウト・再起動でも同じ条件にする。0節で退避先を入れ直し、同じ照会を行う。アプリは起動しない。
 
      ```sh
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^\s*(state|pid|runs|last exit code) ='
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^[[:space:]]*(state|pid|runs|last exit code) ='
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
-  4. 次の `kickstart` で起動し、ジョブの PID を得る。`PID` はこの照合とクラッシュの間だけ使う。
+  4. Finder 経由で手動起動し、引き渡し後の agent の PID を得る。`PID` はこの照合とクラッシュの間だけ使う。
 
      ```sh
-     /bin/launchctl kickstart "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+     /usr/bin/open "$APP"
+     sleep 5
      PID="$(/bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/awk '$1 == "pid" && $2 == "=" {print $3}')"
      /bin/ps -p "$PID" -ww -o pid=,comm=
      ```
@@ -316,33 +326,29 @@ just status
   5. 30秒を観測の上限として待ち、次の照会で別の PID になったことを記録する。
 
      ```sh
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^\s*(state|pid|runs|last exit code) ='
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^[[:space:]]*(state|pid|runs|last exit code) ='
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
-  6. ログイン起動をオンにし、ログアウト・再ログインする。オンにした直後に plist を確かめる。
+  6. ログイン起動をオンにし、システム設定の「ログイン時に開く」に Capsaicin が出ることと、BTM の mainApp の登録を見る。ログアウトして再ログインする。
 
      ```sh
-     /usr/bin/plutil -p "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" | /usr/bin/grep -E 'RunAtLoad|KeepAlive'
+     /usr/bin/sfltool dumpbtm
      ```
 
      再ログイン後は0節で退避先を入れ直し、次でジョブが実行中でプロセスが1本だけであることを確かめる。
 
      ```sh
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
-- **期待**: 2・3では起動しない。4ではクラッシュ後に別の PID で起動する。6ではメニューバーに表示される。
+- **期待**: 1の登録解除ではアプリも agent も止まらない。2・3ではアプリは停止し、再ログインしても起動しない。agent は読み込み済みで `pid` がない。4のクラッシュ後には別の PID で起動する。6では mainApp によりログイン時に起動し、agent へ引き渡され、メニューバーに表示される。
 - **中止**: PID が空・複数・別アプリの場合はシグナルを送らない。再起動しない場合も連続して送らない。3でジョブ自体が見つからない場合も、起動しなかったと混ぜずに中止する。
 - **復元**: ログイン起動を次の試験に必要な値へ戻す。最終的な開始値の復元は9節で行う。
-- **記録**: `RunAtLoad` の前後、2・3での `state` と `pid` の有無、4で撃った PID と5で戻った PID、`runs`、`last exit code`。
+- **記録**: mainApp の登録とシステム設定の前後、2・3での `state` と `pid` の有無、4でシグナルを送った PID と5で戻った PID、`runs`、`last exit code`、ウインドウを再度開くチェックを外したこと。
 
-読み方の補足を4つ置く。
-
-- ログイン起動の切り替えは plist を書き換えるだけで、読み込み済みのジョブを外さない。オフにしても今動いているアプリは止まらないのが正しい。効くのは次のログインからである。
-- 2の `bootout` はジョブを外すだけで、plist は消さない。アプリが動いたままだと後片付けを通らずに終わるので、必ず先に終了して `just status` でプロセスがないことを確かめる。`bootstrap` が失敗したときは、同じコマンドを繰り返さず `just status` で残存を確かめる。
-- 3のあと、ジョブは「読み込まれているが実行されていない」が期待である。`launchctl print` が「見つからない」と答えるのは別の異常であり、起動しなかったこととは区別する。
-- 5の30秒はこの手順の中止基準であり、製品の保証時間ではない。
+3のあと、agent は「読み込まれているが実行されていない」が期待である。`launchctl print` が「見つからない」と答えるのは別の異常であり、アプリが起動しなかったこととは区別する。5の30秒はこの手順の中止基準であり、製品の保証時間ではない。
 
 `KeepAlive` は `Crashed` だけなので、メニューからの終了や `SIGTERM` では再起動しない。これも 2.1 の3と合わせて確認できる。
 
@@ -351,40 +357,41 @@ just status
 - **目的**: `SPEC-LCY-005`。
 - **前提**: システム設定の「一般」→「ログイン項目と機能拡張」で Debug の項目を識別できる。
 - **操作**:
-  1. メニューから終了し、`just status` でプロセスがないことを確かめる。
+  1. 抑止を解除し、メニューから終了してプロセスがないことを確かめる。
 
      ```sh
-     just status
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
   2. 該当項目を無効にする。アプリの終了を求められたら従う。
   3. Finder から起動する。
 
      ```sh
-     /usr/bin/open .build/xcode/Build/Products/Debug/Capsaicin.app
+     /usr/bin/open "$APP"
      sleep 3
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      ```
 
   4. アプリの設定ウィンドウで「一般」を開いて表示を撮る。警告の行が出ていたら、その文言をそのまま写す。システム設定の「一般」には警告は出ない。
-  5. 確認後は該当項目を元の許可状態に戻し、アプリを終了して次の `open` で起動し直す。ジョブが実行中に戻り、アプリの設定ウィンドウの「一般」で警告の行が消えたことを確かめる。3と5はバックグラウンド項目とジョブの状態を保って試すため、`just start` は使わない。
+  5. 確認後は該当項目を元の許可状態に戻し、アプリを終了して次の `open` で起動し直す。agent が実行中に戻り、アプリの「一般」で警告の行が消えたことを確かめる。
 
      ```sh
-     /usr/bin/open .build/xcode/Build/Products/Debug/Capsaicin.app
+     /usr/bin/open "$APP"
      sleep 3
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+     /usr/bin/sfltool dumpbtm
      ```
 
-- **期待**: アプリは動作し、アプリの設定ウィンドウの「一般」に、バックグラウンド項目が無効、またはクラッシュ時の自動再起動が使えない旨の警告の行が出る。
+- **期待**: アプリは動作し、「一般」にバックグラウンド項目が無効、またはクラッシュ時の自動再起動が使えない旨の警告が出る。無効な間はクラッシュ時の自動再起動を期待しない。許可を戻して起動し直すと、agent が実行中になり警告が消える。
 - **中止**: Release や別アプリの項目と区別できない場合は無効にしない。5で警告が消えない場合は、再起動試験へ進まない。
 - **復元**: 開始前の写真と `disabled.before.txt` を参照し、同じ項目だけを戻す。
 - **記録**: 無効にした項目の表示名、アプリが動いたこと、`launchctl print` の結果、アプリの設定ウィンドウの「一般」に出た警告の行の文言、戻したあとに警告が消えたこと。
 
-項目の見分けがつかないときは、無効にしないで止める。Debug と Release は表示名が同じ "Capsaicin" になりうる。1.3 の6ファイル照会で Release の構成がないことを確認済みでも、システム設定の一覧に他のアプリの項目が並ぶため、名前だけで決めない。
+項目の見分けがつかないときは無効にしないで止める。Debug と Release は表示名が同じ "Capsaicin" になりうる。`sfltool dumpbtm` の識別子とパスを開始前の記録と比較し、名前だけで決めない。ヘルパーと agent は、バックグラウンドの一覧では1つの Capsaicin の項目にまとまる（`EVID-LCY-003`）。
 
-警告の行は2種類ある。コード上は、LaunchAgent の状態が `ready` のときだけ「再起動される」とみなす。無効にしてから `open` しても登録と起動は成功しうる。実測では `launchctl print-disabled` に項目が現れず、ジョブは実行中のまま `runs` が増えた。その場合は launchd から起動された個体が承認待ちを返すため「バックグラウンド項目が無効です」が出る。「クラッシュ時に自動再起動できません」は、登録か起動が実際に失敗したときに出る。どちらが出たかを結果に残し、期待の「または」を実測で具体化する。
+agent の許可状態が `requiresApproval` なら「バックグラウンド項目が無効です」、登録や起動の失敗なら自動再起動が使えない旨の警告になる。`launchctl print-disabled` だけでは SMAppService の許可状態を判断せず、システム設定、アプリの表示、BTM の記録を照合する。
 
-**結果欄**: 成功／失敗／判定不能: ____。起動経路・RunAtLoad・PID の前後: ____。未実施項目と理由・気づいたこと: ____。
+**結果欄**: 成功／失敗／判定不能: ____。起動経路・agent と mainApp の登録・PID の前後: ____。未実施項目と理由・気づいたこと: ____。
 
 ## 3. 抑止の基本とハードウェア検出を確認する
 
@@ -409,7 +416,7 @@ just status
 - **復元**: メニューで解除する。「ディスプレイを自動でオフにしない」を開始前の値に戻す。残留があれば9節で復旧する。
 - **記録**: 各段階の Capsaicin の行を丸ごと写す（アサーションの種類と数を後から比較する）。他のアプリの行は数だけ数える。
 
-他のアプリの行を数えるときは、`just status` には出ないので `/usr/bin/pmset -g assertions` で全体を読む。
+他のアプリの行を数えるときは、`/usr/bin/pmset -g assertions` で全体を読む。
 
 アサーションの存在だけでは実際のスリープ抑止の合格にしない。システム設定の画面消灯までの既存の時間を `/usr/bin/pmset -g custom | /usr/bin/grep -i displaysleep` で記録し、その時間を超えて操作せずに待つ。「ディスプレイを自動でオフにしない」がオフなら画面は消灯でき、オンなら消灯しないことを比較する。OS 側の自動スリープ条件を特定できない場合、実際の自動スリープは判定不能とし、`pmset` のタイマー設定を変更しない。
 
@@ -445,86 +452,76 @@ just status
 
 - **目的**: `SPEC-SET-002`、`SPEC-SET-005`、`SPEC-SET-006`。
 - **前提**: 抑止を解除している。MacBook を使い、ヘルパーの状態を確認してある。ヘルパーの設置やディスプレイを閉じる試験は4節で行う。
-- **操作**: 「スリープ」を開き、「ディスプレイを閉じたとき」の選択肢と (i) を見る。ヘルパーが設置済みなら「システムスリープ（標準）」「ディスプレイスリープ」「明るさを0」「オンのまま」を順に選ぶ。ヘルパーが正しく設置されていない状態で、それを要する設定が保存されている場合は、表示と (i) の先頭を記録する。その状態を安全に用意できなければ注意の表示の確認だけ判定不能にする。
-- **期待**: 独立した子の行がなく、1つのポップアップに4つの選択肢がある。ヘルパーが要る設定が保存されているのに正しく設置されていないときは、ポップアップは無効にならず、保存した選択肢を表示し、アイコンが注意の記号に替わる。(i) の先頭から、この設定を適用できない理由と「ヘルパー」の修復先を読める。通常の説明には、ディスプレイを閉じる操作とアップルメニューの「スリープ」などを個別に設定できないこと、ヘルパーと管理者パスワードが要ることがある。
-- **中止**: 「スリープ」以外を選ぶ操作が設置・修復を求めたら、その場では承認せず、取り消して「スリープ」のままになることを確かめ、4節の設置手順に進む。
+- **操作**: 「スリープ」を開き、「ディスプレイを閉じたとき」の選択肢と (i) を見る。ヘルパーが有効なら「スリープ（標準）」「ディスプレイをオフ」「明るさを0」「オンのまま」を順に選ぶ。ヘルパーが使えないのに、それを要する設定が保存されている場合は、表示と (i) の先頭を記録する。その状態は4.3で確認し、安全に用意できなければ注意の表示だけ判定不能にする。
+- **期待**: 独立した子の行がなく、1つのポップアップに4つの選択肢がある。ヘルパーが使えなくてもポップアップは操作でき、保存した選択肢を表示する。ヘルパーが要る保存値には注意の記号が付き、(i) の先頭で適用できない理由と、未インストールなら「ヘルパー」から設置すること、許可待ちならシステム設定で許可することを読める。通常の説明は、ディスプレイを閉じる操作とアップルメニューの「スリープ」などを個別に設定できないこと、ヘルパーとシステム設定での許可が要ることを伝える。
+- **中止**: 「スリープ」以外を選んで設置確認が出たら、その場では承認せず、取り消して保存値の表示に戻ることを確かめ、4.1へ進む。許可待ちでシステム設定が開いた場合も、ここでは許可せず4.1へ進む。
 - **復元**: 試した設定を開始前の値に戻す。ヘルパーの状態は変えない。
 - **記録**: ポップアップの表示・選択肢・(i) の内容、注意の記号の有無、ヘルパーの状態、元の設定値。
 
 **結果欄**: 成功／失敗／判定不能: ____。設定とアサーション・機種別の検出値: ____。未実施項目と理由・気づいたこと: ____。
 
-## 4. ヘルパーを設置し、抑止・修復・削除を確認する
+## 4. ヘルパーを設置し、抑止・許可・削除を確認する
 
-この節では、管理者認証の取り消しと設置（4.1）、ヘルパーの on・off（4.2）、部分欠落からの修復（4.3）、起動時の後片付け（4.4）、削除のときの扱い（4.5）、Daemon のない状態での値の永続性（4.6）を見る。
+この節では、設置確認の取り消しとシステム設定での許可（4.1）、XPC 経由の on・off（4.2）、許可を外したときの表示（4.3）、起動時の後片付け（4.4）、削除と所有の扱い（4.5）、デーモンのない状態での値の永続性（4.6）を見る。ディスプレイの輝度は4.7、更新後の登録し直しは4.8で確認する。
 
-この節だけはシステム領域に3ファイルを置く。**設置したことを示すマーカー `B/helper-created` は、所有者・権限・plist がすべて期待どおりだと確かめてから作る。** マーカーがない状態で削除の操作をしない。
+この節は Team ID のある署名付きの PR Debug ビルドでだけ行う。ヘルパーはバンドル内のデーモンを SMAppService に登録し、システム設定で許可して使う。**今回の登録を示す `B/helper-created` は、登録後に「ヘルパー」が許可待ちか有効になったことを確認してから作る。** 登録を外すのは今回のものだけにする。
 
-3ファイルの意味は次のとおり。
+確認する構成と登録は次のとおり。
 
-| パス | 役割 |
+| 構成・登録 | 役割 |
 | --- | --- |
-| `/Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug` | root で `pmset disablesleep` を呼ぶ実行ファイル |
-| `/etc/sudoers.d/capsaicin_debug` | このヘルパーだけを `sudo -n` で許可するルール |
-| `/Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist` | 起動時に `off` を1回実行する LaunchDaemon |
+| `$APP/Contents/Helpers/capsaicin-helper` | XPC で on・off だけを受け付けるデーモン |
+| `$APP/Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist` | `BundleProgram`、Mach サービス、`RunAtLoad = true` を持つバンドル内の定義 |
+| システム設定の Capsaicin のバックグラウンド項目 | ヘルパーと agent の両方の許可。片方だけのスイッチではない |
 
-### 4.1 管理者認証の取り消しと設置を確認する
+### 4.1 設置確認の取り消しとシステム設定での許可を確認する
 
 - **目的**: `SPEC-HLP-001`、`SPEC-HLP-004`、`SPEC-HLP-005`。
-- **前提**: 1節で Release・Debug の既存ヘルパーがないことを確認済みで、`SleepDisabled = 0` である。
+- **前提**: 1節で既存の登録と旧方式のファイルがないことを確認済みで、`SleepDisabled = 0` である。アプリは起動済みで抑止は停止中、ヘルパーは未インストールである。
 - **操作**:
-  1. 停止中に「ディスプレイを閉じたとき」で「ディスプレイをオフ」を選ぶ（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）。設置確認を一度取り消し、ポップアップが「スリープ」（MacBook 以外の Mac ではスイッチがオフ）のままであることを確かめる。同じ操作をして設置確認を承認し、OS の管理者認証ではキャンセルする。
-  2. ポップアップが「スリープ」（MacBook 以外の Mac ではスイッチがオフ）に戻り、「ヘルパー」が未インストールであることを確かめる。3ファイルが作られていないことも見る。
+  1. 「ディスプレイを閉じたとき」で「ディスプレイをオフ」を選ぶ（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）。設置確認を取り消し、ポップアップが「スリープ」（MacBook 以外の Mac ではオフ）に戻り、ヘルパーが未インストールのままであることを確かめる。
+  2. 同じ操作で確認の「インストール」を選ぶ。システム設定が開いても、まだ許可しない。アプリの「ヘルパー」が「システム設定での許可待ち」になり、「システム設定を開く」と「削除」が出ることを確かめ、`touch "$B/helper-created"` で今回の登録を記録する。状態と保存値を読む。登録直後に有効になった場合もマーカーを作り、3と4の許可待ちの確認は判定不能として飛ばす。
 
      ```sh
-     /bin/ls -l /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug /etc/sudoers.d/capsaicin_debug /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
+     /usr/bin/defaults export io.github.koutyuke.capsaicin.debug - | python3 -c 'import json, plistlib, sys; print(json.dumps(json.loads(plistlib.load(sys.stdin.buffer).get("capsaicin.settings", b"{}")), ensure_ascii=False, indent=2))'
+     /usr/bin/sfltool dumpbtm
      ```
 
-  3. 同じ操作を繰り返し、今度は管理者認証を承認する。
-
-     **この承認でシステム領域に3ファイルを設置する。既存ファイルが現れていたら承認せず止める。**
-
-  4. 次を実行する。
+  3. 許可待ちの間、選んだ値は表示されるが保存値は変わらず、注意の記号と (i) に許可の案内が出ることを見る。設定ウインドウを閉じて開き直し、表示が保存値に戻ってもヘルパーの許可待ちは残ることを確かめる。もう一度同じ値を選ぶと、設置確認なしでシステム設定が開くことを見る。
+  4. **この許可でヘルパーと agent の両方を有効にする。** Capsaicin の項目だと識別できた場合だけ許可し、アプリの設定ウインドウに戻る。許可後の状態と保存値、定義を読む。
 
      ```sh
-     /bin/ls -l /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug /etc/sudoers.d/capsaicin_debug /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
-     /usr/bin/plutil -p /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
+     /usr/bin/defaults export io.github.koutyuke.capsaicin.debug - | python3 -c 'import json, plistlib, sys; print(json.dumps(json.loads(plistlib.load(sys.stdin.buffer).get("capsaicin.settings", b"{}")), ensure_ascii=False, indent=2))'
+     /usr/bin/plutil -p "$APP/Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist"
+     /usr/bin/sfltool dumpbtm
      ```
 
-- **期待**: 取り消しでは設定が保存されず、3ファイルとも作られない。設置後は選んだ動作（MacBook 以外の Mac ではオン）が保存され、ヘルパーが `root:wheel`・755、sudoers が `root:wheel`・440、plist が `root:wheel`・644 である。plist のラベルは `io.github.koutyuke.capsaicin.helper.debug`、引数はヘルパーの絶対パスと `off` である。
-- 所有者・権限・plist がすべて期待どおりの場合だけ、`touch "$B/helper-created"` を実行する。
-- **中止**: 認証を取り消しても設定やファイルが残る、設置失敗、所有者・権限が異なる場合。設置成功を確認できるまでマーカーを作らない。
-- **復元**: 設置した3ファイルは4.5か9節でアプリの削除操作により除去する。sudoers を手で編集しない。
-- **記録**: 取り消し時の3ファイルの有無、設置後の3行の所有者・権限、`plutil` のラベルと引数、マーカーを作ったかどうか。
+- **期待**: 1では登録も保存値も変わらない。2・3では許可待ちになり、選択した値は許可が済むまで保留される。4では状態が「有効」になり、保留していた選択肢（MacBook 以外の Mac ではオン）が保存される。保存値の読み取りでは `blocksManualSleep` と `lidCloseDisplay` を見る。`{}` は設定の保存がまだなく、既定値を使う状態である。状態は前面に戻ったときに読み直され、許可待ちで設定ウインドウを開いている間は2秒ごとにも読み直される。定義のラベルと Mach サービスは `io.github.koutyuke.capsaicin.debug.helper`、`BundleProgram` は `Contents/Helpers/capsaicin-helper` である。
+- **中止**: 取り消しても登録や保存値が変わる、許可前に保存される、対象を識別できない、登録に失敗する場合。初回登録がそのまま有効になり許可待ちを観測できなかった場合は、その項目だけ判定不能とし、過去の許可記録の有無を残す。
+- **復元**: 今回の登録は4.5か9節で「ヘルパー」の削除から外す。許可待ちで中止した場合も登録が残るので片付ける。「ヘルパー」から直接インストールした場合は、ほかの設定を変えないことも確認する。
+- **記録**: 確認の取り消し、許可前後とウインドウを開き直した後の表示・保存値、BTM の Capsaicin の項目、定義の内容、マーカーの有無。
 
 ### 4.2 on・off と手動・ディスプレイを閉じたときのスリープを確認する
 
 - **目的**: `SPEC-HLP-002`、`HYP-BLK-006`、`SPEC-BLK-001`、`SPEC-BLK-002`、`HYP-BLK-008`。
-- **前提**: 今回設置したヘルパーだけがある。アプリは起動済みで抑止は停止中、`SleepDisabled = 0`。MacBook は電源接続、外部ディスプレイなしで机上に置く。閉じた Mac をかばんに入れない。
+- **前提**: 今回登録したヘルパーが有効である。アプリは起動済みで抑止は停止中、`SleepDisabled = 0`。MacBook は電源接続、外部ディスプレイなしで机上に置く。閉じた Mac をかばんに入れない。
 - **操作**:
-  1. ヘルパーを直接呼び、各呼び出しの終了値と状態を読む。
+  1. 「ディスプレイを閉じたとき」を「オンのまま」にし（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）、メニューから開始する。アプリから XPC で `on` が送られ、`SleepDisabled = 1` になることを読む。
 
      ```sh
-     /usr/bin/sudo -n /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug on
-     printf 'exit=%s\n' "$?"
-     just status
-     /usr/bin/sudo -n /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug off
-     printf 'exit=%s\n' "$?"
-     just status
+     /usr/bin/pmset -g
      ```
 
-  2. 不正引数は、sudoers が許可しないので、未設置のバンドル内コピーを権限なしで呼ぶ。
+  2. メニューで解除し、`off` の後に `SleepDisabled = 0` になることを読む。デーモンは引数付きで直接実行する CLI ではないので、バンドル内の実行ファイルも直接呼ばない。
 
      ```sh
-     .build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsaicin-helper invalid
-     printf 'exit=%s\n' "$?"
-     .build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsaicin-helper on extra
-     printf 'exit=%s\n' "$?"
+     /usr/bin/pmset -g
      ```
 
   3. 「ディスプレイを閉じたとき」を「ディスプレイをオフ」にし（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）、メニューで開始する。状態を読んでから、Apple メニューのスリープを選び、MacBook では続けてディスプレイを1分閉じてから開く。
 
      ```sh
-     just status
+     /usr/bin/pmset -g
      ```
 
   4. 開く前後の時刻と `pmset -g log` の該当区間を記録する。閉じている間の消灯を安全に目視できなければ、消灯は判定不能とする。「ディスプレイを閉じたとき」を「オンのまま」にした場合とも比較する。
@@ -534,94 +531,92 @@ just status
      /usr/bin/pmset -g log | /usr/bin/grep -iE 'sleep|wake'
      ```
 
-  5. メニューで解除し、`just status` で `SleepDisabled` を読む。もう一度ディスプレイを閉じてスリープし、開くと復帰することを確かめる。
+  5. メニューで解除し、`SleepDisabled` を読む。もう一度ディスプレイを閉じてスリープし、開くと復帰することを確かめる。
 
      ```sh
-     just status
+     /usr/bin/pmset -g
      ```
 
-- **期待**: 1では終了値 `0`、`SleepDisabled` が `1`→`0`。2は終了値 `64` で状態を変えない。3は `SleepDisabled = 1` で手動・ディスプレイを閉じたときのスリープを止める。5では `0` に戻る。
-- **中止**: `sudo -n` が認証を要求する、状態が不明、異常発熱、解除後もスリープできない場合。
-- **復元**: まずメニューで解除する。直接 `on` したものはアプリの所有ではないので、直接 `off` して `0` を確認する。戻せなければ9.1の緊急復旧を使う。
-- **記録**: 各呼び出しの終了値と `SleepDisabled`、`pmset -g log` の該当行、ディスプレイを閉じていた時刻、復帰にかかった時間。
+- **期待**: 1・2で `SleepDisabled` が `1`→`0` になる。3は `SleepDisabled = 1` で手動・ディスプレイを閉じたときのスリープを止める。5では `0` に戻る。
+- **中止**: 状態が不明、異常発熱、解除後もスリープできない場合。
+- **復元**: メニューで解除して `0` を確認する。戻せなければ9.1の緊急復旧を使う。
+- **記録**: 各段階の `SleepDisabled`、`pmset -g log` の該当行、ディスプレイを閉じていた時刻、復帰にかかった時間。
 
-`sudo -n` が「パスワードが必要」と言ったら、sudoers のルールが効いていない。認証を求められた時点で止め、パスワードを入れて続けない。`sudo -n` の失敗は、ヘルパーの不具合とルールの不備を区別する材料になる。
+不正な XPC の要求（別の値、余分なキー、型違い）の拒否は `CHelperContractTests` の自動テストで確認する。正規でない相手の拒否は任意の確認とし、別途承認済みの接続試験を行った場合だけ、デーモンのログと `SleepDisabled` が変わらないことを照合する。この手順では ad-hoc 署名の試験プログラムを用意しないので、ログがなければ判定不能とする。通常のアプリ操作だけで拒否ログが出ることを期待しない。
+
+```sh
+/usr/bin/log show --last 10m --style compact --predicate 'process == "capsaicin-helper" AND eventMessage CONTAINS[c] "code signing requirement"'
+/usr/bin/pmset -g
+```
 
 ネットワーク応答はスリープの断定に使わない。別端末から ping を使う場合は、ディスプレイを開いているときに疎通する宛先 IP を記録してから `ping -c 3 IP_ADDRESS` を使う。`IP_ADDRESS` は記録した検証 Mac の IP に置き換える。応答だけで、または無応答だけで判定せず、スリープログと突き合わせる。`HYP-BLK-006` の「片方だけは指定できない」という仕組みの主張は、実測とは別のソース調査である。
 
-### 4.3 部分欠落から修復する
+### 4.3 システム設定で許可を外したときの表示を確認する
 
-- **目的**: `SPEC-HLP-004`。
-- **前提**: 抑止を解除し、`SleepDisabled = 0`。`B/helper-created` があり、3ファイルとも今回作ったものと分かる。
+- **目的**: `SPEC-HLP-004`、`SPEC-SET-005`、`SPEC-LCY-005`。
+- **前提**: 抑止を解除し、`SleepDisabled = 0`。`B/helper-created` があり、ヘルパーは有効である。ヘルパーが要る設定を保存しておき、開始値とシステム設定の項目を記録する。
 - **操作**:
-  1. sudoers のルールだけを削除せず退避する。
+  1. 設定の「ヘルパー」を開いたまま、システム設定の「一般 > ログイン項目と機能拡張」で Capsaicin のバックグラウンド項目をオフにし、アプリの設定ウインドウに戻る。
+  2. 「ヘルパー」の状態とボタン、「スリープ」の保存値と注意の記号、(i) の先頭、「一般」の自動再起動の警告を読む。ヘルパーと agent の許可が同時に外れることを確認する。この状態では抑止を開始しない。
+  3. 「ヘルパー」の「システム設定を開く」から同じ項目をオンに戻し、アプリの設定ウインドウに戻る。状態と注意の記号を再確認する。
 
      ```sh
-     /usr/bin/sudo /bin/mv /etc/sudoers.d/capsaicin_debug "${B:?}/sudoers.test-backup"
+     /usr/bin/sfltool dumpbtm
+     /usr/bin/pmset -g
      ```
 
-  2. 「ヘルパー」を開き、部分欠落の表示と「修復」「削除」を記録する。「スリープ」で保存した選択肢（MacBook 以外の Mac ではオンのスイッチ）が表示されたまま、アイコンが注意の記号に替わり、(i) の先頭で適用できない理由と修復先を読めることを確かめる。MacBook では「ディスプレイを閉じたとき」を「スリープ」にしてから「オンのまま」を選び、修復の確認と管理者認証を承認する。MacBook 以外の Mac では「ヘルパー」の「修復」から管理者認証を承認する。
-  3. 3ファイルが戻ったことを確かめる。
-
-     ```sh
-     /bin/ls -l /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug /etc/sudoers.d/capsaicin_debug /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
-     ```
-
-- **期待**: 修復前は一部だけ残る表示、修復後はインストール済みの表示になる。MacBook では「オンのまま」が保存され、行の注意の表示がなくなる。
-- **中止**: 退避先が既にある、別プロセスがルールを作り直した、修復に失敗した場合。
-- **復元**: 修復に成功すれば今回のルールは再生成される。失敗し、`/etc/sudoers.d/capsaicin_debug` が存在しない場合だけ `sudo /bin/mv "${B:?}/sudoers.test-backup" /etc/sudoers.d/capsaicin_debug` で戻す。既存ファイルに上書きしない。退避物の処分は9節まで行わない。
-- **記録**: 修復前の画面の文言、認証の結果、修復後の所有者・権限。ルールを戻したかどうか。
-
-退避先が既にあるかどうかは、実行前に `ls -l "$B/sudoers.test-backup"` で確かめる。前回の実行が残っている場合は、上書きせずに止める。
+- **期待**: 2では「システム設定での許可待ち」と「システム設定を開く」「削除」が表示される。保存した選択肢（MacBook 以外の Mac ではオン）は残り、注意の記号と (i) で許可が必要と分かる。「一般」には自動再起動できない旨が出る。3ではヘルパーが有効に戻り、ヘルパーに関する注意が消える。いずれも `SleepDisabled = 0` のままである。
+- **中止**: 別アプリや Release の項目と区別できない、許可を戻しても有効にならない、保存値が勝手に変わる場合。
+- **復元**: 許可を戻し、2.3の5と同じく終了・起動して agent が実行中に戻ることを確かめる。設定を開始値へ戻す。許可を戻せないときは、登録と記録を残して9節へ進む。
+- **記録**: 項目の表示名、許可前後の状態・ボタン・警告、保存値と (i)、BTM の Capsaicin の項目、`SleepDisabled`。
 
 ### 4.4 起動時の後片付けを確認する
 
 - **目的**: `SPEC-HLP-003`。
-- **前提**: 今回設置したヘルパーがある。ログイン起動をオフにして `just stop` でアプリを終了する。開始前の `SleepDisabled = 0` を再確認する。
+- **前提**: 今回登録したヘルパーが有効で、4.2の on・off に成功している。ログイン起動をオフにしてメニューでアプリを終了し、プロセスがないことを0節の照会で確認する。開始前の `SleepDisabled = 0` を再確認する。外部から値を変える操作もオーナーが承認済みである。
 - **操作**:
-  1. アプリの終了後に、次でヘルパーの `on` を実行し、`just status` で `SleepDisabled = 1` を記録する。
+  1. アプリの終了後に外部から値を立て、`SleepDisabled = 1` を記録する。**再起動後も残りうる設定なので、9.1の復旧コマンドを別のメモに控えてから実行する。**
 
      ```sh
-     /usr/bin/sudo -n /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug on
-     printf 'exit=%s\n' "$?"
-     just status
+     /usr/bin/sudo /usr/bin/pmset -a disablesleep 1
+     /usr/bin/pmset -g
      ```
 
   2. Apple メニューから再起動する。再ログイン後、アプリを起動せず0節で退避先を入れ直して次を実行する。
 
      ```sh
-     just status
-     /usr/bin/sudo /bin/launchctl print system/io.github.koutyuke.capsaicin.helper.debug
+     /usr/bin/pmset -g
+     /usr/bin/log show --last boot --style compact --predicate 'process == "capsaicin-helper" OR (process == "launchd" AND eventMessage CONTAINS "io.github.koutyuke.capsaicin.debug.helper")'
      ```
 
-- **期待**: `SleepDisabled = 0` で、LaunchDaemon が実行され終了値が `0` である。インストーラーは plist を置くだけなので、再起動前の未読込だけでは不合格にしない。
+- **期待**: `SleepDisabled = 0` で、ログに今回の起動でのデーモンの起動があり、後片付けの失敗がない。デーモンは使われていなければ終了するため、常駐や `state = running` は要求しない。初回設置では起動の記録だけを書き、別の Mac の起動になったときだけ `off` を行う。同じ起動中の要求で `off` を繰り返さないことは4.2の開始が保たれることと自動テストで確認する。
 - **中止**: `1` が残る場合はアプリを起動せず、9.1で戻す。
-- **復元**: `0` を確認し、Finder からアプリを起動する。ログイン起動は後続の試験に合わせる。
-- **記録**: 再起動前の `SleepDisabled`、再起動後の `SleepDisabled`、LaunchDaemon の `last exit code`、再起動にかかった時刻。
+- **復元**: `0` を確認し、Finder から `APP` のアプリを起動する。ログイン起動は後続の試験に合わせる。
+- **記録**: 再起動前後の `SleepDisabled`、デーモンの起動と失敗の有無が分かるログ、再起動の時刻。実装には成功した `off` の回数を出すログがないため、「1回だけ実行」の直接測定は判定不能とし、値とログによる間接確認と区別する。
 
 ### 4.5 削除と外部の disablesleep の保持を確認する
 
 - **目的**: `SPEC-HLP-004`、`SPEC-HLP-005`。
-- **前提**: ヘルパーは今回設置したものだけで、再開用の記録を保存できる。
+- **前提**: ヘルパーは今回設置したものだけで、再開用の記録を保存できる。外部から `disablesleep` を変更する試験と9.1の復旧手順も承認済みである。
 - **操作**:
   1. 「ディスプレイを閉じたとき」を「オンのまま」にし（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）、開始して `SleepDisabled = 1` を確かめる。「ヘルパー」の削除を承認する。
 
      ```sh
-     just status
+     /usr/bin/pmset -g
      ```
 
-  2. 状態が未インストール、該当設定が「スリープ」（MacBook 以外の Mac ではオフ）、`SleepDisabled = 0`、3ファイルがないことを確かめる。
+  2. 状態が未インストール、該当設定が「スリープ」（MacBook 以外の Mac ではオフ）、`SleepDisabled = 0` になり、デーモンの登録が外れることを確かめる。バンドル内の実行ファイルと定義は残る。
 
      ```sh
-     just status
-     /bin/ls -l /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug /etc/sudoers.d/capsaicin_debug /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
+     /usr/bin/pmset -g
+     /usr/bin/sfltool dumpbtm
      ```
 
-  3. 4.1で再設置する。抑止を解除し、アプリが所有を持たない状態で次を実行する。
+  3. 4.1で再設置する。抑止を解除し、アプリが所有を持たない状態で次を実行する。再起動後も残りうる値を立てるので、9.1の復旧コマンドを別のメモに控えてから実行する。
 
      ```sh
      /usr/bin/sudo /usr/bin/pmset -a disablesleep 1
-     just status
+     /usr/bin/pmset -g
      ```
 
   4. 「ディスプレイを閉じたとき」を「オンのまま」にし（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオンにする）、開始して再開用の記録の `ownsSleepDisabled` が `false` であることを読む。そのままヘルパーを削除する。
@@ -630,36 +625,38 @@ just status
      /usr/bin/plutil -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" | /usr/bin/grep ownsSleepDisabled
      ```
 
-  5. `SleepDisabled = 1` のままで3ファイルだけが消えることを確かめ、直後に戻す。
+  5. 未インストールになっても `SleepDisabled = 1` のままであることを確かめ、直後に戻す。
 
      ```sh
      /usr/bin/sudo /usr/bin/pmset -a disablesleep 0
-     just status
+     /usr/bin/pmset -g
      ```
 
-- **期待**: 自分の所有は削除で下ろし、外部の値は削除で下ろさない。
-- **中止**: 4で所有が `true` なら外部の試験条件を満たさない。削除せず解除し、`0` へ戻して PM に報告する。
-- **復元**: 最後にメニューで解除し、「ディスプレイを閉じたとき」を「スリープ」にする（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオフにする）。3ファイルが残った場合は9節で、今回設置分だけを除去する。
-- **記録**: 1と4の `SleepDisabled`、`ownsSleepDisabled` の値、削除後の3ファイルの有無、5で外部値を戻したこと。
+- **期待**: 自分の所有は登録を外す前に下ろし、外部の値は削除で下ろさない。削除してもバックグラウンドの一覧に Capsaicin が許可済みで残ることはある。agent と OS の記録が残るため、一覧から消えることをヘルパー削除の成功条件にしない。
+- **中止**: 4で所有が `true` なら外部の試験条件を満たさない。削除せず解除し、`0` へ戻して PM に報告する。自分の所有を下ろせない場合はエラーが出て登録・所有・設定が残るのが期待であり、削除を繰り返さず9.1へ進む。
+- **復元**: 最後にメニューで解除し、「ディスプレイを閉じたとき」を「スリープ」にする（MacBook 以外の Mac では「メニューから選んでもスリープさせない」をオフにする）。登録が残った場合は9節で今回の分だけを外す。
+- **記録**: 1と4の `SleepDisabled`、`ownsSleepDisabled`、削除後の状態と BTM の Capsaicin の項目、5で外部値を戻したこと。削除に失敗した場合はエラーと保存値も残す。
 
 3で `disablesleep` を外部から立てるのは、アプリが「自分の所有ではない値」を見分けられるかを試すためである。4で `ownsSleepDisabled` が `true` になるなら、アプリは外部の値を自分のものと誤認している。その場合は削除の試験を続けず、状態を戻して報告する。
 
-### 4.6 Daemon のない状態で値の永続性を確認する
+自分の所有を下ろせない条件は、実機の署名や権限を壊して作らない。`AppSettingsTests.liveRemovalOrder` などの偽物を使う自動テストで、`off` または読み取りに失敗すると登録を外さないことを確認し、実機での失敗時の確認とは分けて記録する。
 
-- **目的**: `HYP-BLK-007`。4.4では Daemon が値を下ろすため、永続性は別に測る。
-- **前提**: 4.5の削除が完了し、`just stop` でアプリを終了している。1.3の6ファイルの照会で、Release・Debug 両構成のヘルパー・Daemon・sudoers がない。`SleepDisabled = 0` である。
+### 4.6 デーモンのない状態で値の永続性を確認する
+
+- **目的**: `HYP-BLK-007`。4.4ではデーモンが値を下ろすため、永続性は別に測る。
+- **前提**: 4.5の削除が完了して未インストールになり、ログイン起動をオフにしてメニューでアプリを終了している。Release の登録もないことを開始前の記録で確認済みである。`SleepDisabled = 0` で、9.1の復旧手順が承認済みである。
 - **操作**:
   1. **再起動後も残る設定を変更する。9.1の復旧コマンドと退避先を別のメモに残してから実行する。**
 
      ```sh
      /usr/bin/sudo /usr/bin/pmset -a disablesleep 1
-     just status
+     /usr/bin/pmset -g
      ```
 
-  2. Apple メニューから再起動し、アプリを起動せず0節で退避先を入れ直して `just status` で `SleepDisabled` を読む。
+  2. Apple メニューから再起動し、アプリを起動せず0節で退避先を入れ直して `SleepDisabled` を読む。
 
      ```sh
-     just status
+     /usr/bin/pmset -g
      ```
 
 - **期待**: 再起動前後とも `SleepDisabled = 1` なら仮説を支持し、再起動後 `0` なら支持しない。
@@ -668,14 +665,16 @@ just status
 
   ```sh
   /usr/bin/sudo /usr/bin/pmset -a disablesleep 0
-  just status
+  /usr/bin/pmset -g
   ```
 
 - **記録**: 再起動前後それぞれの `SleepDisabled`、再起動の時刻、9.1の復旧コマンドを控えた場所。
 
 この項目だけは、終わった直後に必ず戻す。値が `1` のまま次の試験へ進まない。
 
-**結果欄**: 成功／失敗／判定不能: ____。各認証・所有・SleepDisabled・Daemon 終了値: ____。未実施項目と理由・気づいたこと: ____。
+ヘルパーを削除しても、起動の記録 `/Library/Application Support/io.github.koutyuke.capsaicin.debug/boot-session-uuid` は残る。この試験の後に設置し直すと、記録と Mac の起動が違うため、その場で外部の `disablesleep` も下ろす制約がある（`SPEC-HLP-003`）。必ず上の復元で `0` を確認してから再設置する。起動の記録は手で消さない。
+
+**結果欄**: 成功／失敗／判定不能: ____。許可・登録・所有・SleepDisabled・デーモンのログ: ____。未実施項目と理由・気づいたこと: ____。
 
 ### 4.7 「明るさを0」の開閉・解除・利用者の変更を確認する
 
@@ -683,12 +682,40 @@ just status
 - **前提**: オーナーが操作する。未保存の作業を片付け、ヘルパーを設置済みにする（4.6まで終えていたら4.1で再設置する）。MacBook を電源接続・外部ディスプレイなしで机上に置く。開始前の輝度、自動輝度調節、True Tone、「スリープ」画面と再開の設定を控える。自動輝度調節をオフにし、明るさのキーで画面を十分明るくする。「ディスプレイを閉じたとき」は「明るさを0」、「ディスプレイを自動でオフにしない」はオン、バッテリーと指定時刻の解除条件はオフにする。**暗いだけの画面はロックされないので、席を離れない。** 輝度の判定は目視で行い、`ioreg` の値は使わない（`EVID-BLK-008`）。
 - **操作**:
   1. 秒表示の時計を映して画面収録を始め、タイマーをオフにして抑止を開始する。ディスプレイを1分閉じ、隙間から光が漏れるかを見る。開いた直後の明るさ、ロック画面の有無、すぐ操作できるかを確かめる。収録を停止して再生し、閉じた区間も時計が進んでいることを見る。再開用の記録を `plutil -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"` で読み、`savedBrightness` が残っていないことを確かめる。
-  2. 一度解除し、タイマーを1分にして開始する。ディスプレイを閉じたまま期限が過ぎるのを待ち、開いて明るさと停止中の表示を確かめる。記録に `savedBrightness` が残っていないことと、`just status` の `SleepDisabled` が `0` に戻ったことを読む。
+  2. 一度解除し、タイマーを1分にして開始する。ディスプレイを閉じたまま期限が過ぎるのを待ち、開いて明るさと停止中の表示を確かめる。記録に `savedBrightness` が残っていないことと、`/usr/bin/pmset -g` の `SleepDisabled` が `0` に戻ったことを読む。
   3. タイマーをオフにして開始し、ディスプレイを閉じる。閉じている間に、接続した外付けキーボードの明るさのキーで画面を明るくする。隙間の光で変化を確認し、1分以内に光が消えるかを見る。明るくしてから1分以上待ってディスプレイを開き、閉じる前の明るさに戻るかを見る。記録に `savedBrightness` が残っていないことを読む。閉じたまま明るさを変える手段がなければ、この操作は未実施として理由を残す。
 - **期待**: 1は閉じている間に光が漏れず、開けると元と同じくらいの明るさになり、ロックされずすぐ操作できる。収録の描画は続く。2は閉じたまま解除され、開けても暗い画面が残らない。3は明るくしてから1分以内に輝度が0に戻って隙間の光が消え、開けると閉じる前と同じくらいの明るさになる。いずれも復元後に輝度の記録は残らない。`disablesleep` より先に戻す呼び出し順は自動テストで確かめ、目視だけで順序を断定しない。
 - **中止**: 異常発熱、解除後も暗いまま、収録停止、予期しないロックがある場合。安全に隙間を見られなければ光漏れは判定不能とする。
 - **復元**: ディスプレイを開いて抑止を解除する。暗いままなら明るさのキーで戻す。収録中なら停止し、輝度・自動輝度調節・True Tone・「スリープ」画面と再開の設定を控えた値へ戻す。この節のために再設置したヘルパーは4.5で削除する。戻らなければ後続を止め、記録を保管して PM に渡す。
 - **記録**: Mac と macOS の版、各回の設定、閉じた時刻と開いた時刻、目視の明るさと光漏れ、ロックの有無、収録ファイルと該当区間、復元後の記録と `SleepDisabled`、未実施・判定不能の項目と理由。
+
+### 4.8 更新後の登録し直しを確認する
+
+- **目的**: `SPEC-HLP-007`、`SPEC-LCY-005`。
+- **前提**: 署名付きの PR Debug ビルドを2つ用意し、後のビルドの `CFBundleVersion` が大きいことを確認してある。PR Debug ビルドの `CFBundleVersion` はビルドした UTC の時刻（`YYYYMMDDhhmmss`）なので、同じ PR に push し直すか `S-Preview` を付け直して作った後のビルドが大きくなる。同じ Team ID と bundle ID を持ち、同じ `APP` のパスで入れ替える。ヘルパーは今回登録したものが有効で、抑止は解除済み、`SleepDisabled = 0` である。4.7の復元で削除した場合は、4.1で再設置してから行う。
+- **操作**:
+  1. 入れ替える前の版と登録時の版を記録し、メニューから終了してプロセスがないことを0節の照会で確かめる。
+
+     ```sh
+     /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Contents/Info.plist"
+     /usr/bin/defaults read io.github.koutyuke.capsaicin.debug helperRegisteredBundleVersion
+     /usr/bin/defaults read io.github.koutyuke.capsaicin.debug agentRegisteredBundleVersion
+     ```
+
+  2. Finder で今回の古いアプリだけをゴミ箱に移し、署名付きの新しいビルドを同じパスに置く。バンドルを手で書き換えて版を上げない。1.4と同じ署名検査を行ってから `/usr/bin/open "$APP"` で起動し、引き渡しを待つ。
+  3. 「ヘルパー」の状態を読み、1と同じ3つの値を記録する。ヘルパーが要る設定で開始・解除し、各段階の `SleepDisabled` を読む。agent の `program` と PID も2.1の照会で確認する。
+
+     ```sh
+     /usr/bin/pmset -g
+     /usr/bin/log show --last 10m --style compact --predicate 'subsystem == "io.github.koutyuke.capsaicin.debug" AND (category == "Helper" OR category == "LaunchAgent")'
+     ```
+
+- **期待**: 許可を求められず、ヘルパーは有効のまま、開始・解除で `SleepDisabled` が `1`→`0` になる。ヘルパーと agent の登録時の版が新しい `CFBundleVersion` になる。登録解除の完了を待ってから登録し、`EPERM` の場合は3秒おきに最大3回試し直す。同じ Mac の起動の中では起動時の後片付けを繰り返さない。
+- **中止**: 署名・bundle ID が違う、別のアプリを置き換えるおそれがある、許可を再度求められる、登録時の版が更新されない、抑止できない場合。再登録の失敗はダイアログではなくログと状態で判断し、入れ替えを繰り返さない。
+- **復元**: 抑止を解除し、今回の新旧ビルドと登録は9節で片付ける。ゴミ箱の古いアプリも OS の項目が残る原因になるため、所在を記録しておく。
+- **記録**: 新旧ビルドの PR・コミット・版、登録時の版の前後、許可要求の有無、ヘルパーと agent の状態、`SleepDisabled`、再登録に関するログ。`off` の実行回数は成功ログがないので自動テストによる確認と区別する。
+
+**結果欄**: 成功／失敗／判定不能: ____。更新前後の版・登録時の版・許可・抑止: ____。未実施項目と理由・気づいたこと: ____。
 
 ## 5. LED と Caps Lock の入力状態を確認する
 
@@ -746,15 +773,16 @@ just status
      ```sh
      cat "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"
      cp -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" "$B/record.user-quit.json"
-     just status
+     /usr/bin/pmset -g assertions
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
   3. Finder から起動する。停止中を確かめる。
 
      ```sh
-     /usr/bin/open .build/xcode/Build/Products/Debug/Capsaicin.app
+     /usr/bin/open "$APP"
      sleep 3
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      ```
 
   4. 再開を「アプリの再起動時だけ」にし、タイマーを10分にして開始する。開始前後の記録を保存する。
@@ -790,7 +818,7 @@ just status
 ### 6.2 ログアウト・再起動・連続クラッシュを確認する
 
 - **目的**: `HYP-LCY-004`、`HYP-LCY-005`、`SPEC-LCY-004`、`SPEC-LCY-006`、`SPEC-LCY-007`。
-- **前提**: 6.1が成功し、ログイン起動をオンにしている。LED とヘルパーを使わない。
+- **前提**: 6.1が成功し、ログイン起動をオンにしている。LED とヘルパーを使わない。ログアウト・再起動の確認では「再ログイン時にウインドウを再度開く」のチェックを外す。
 - **操作**:
   1. 次の表の各行で新しく抑止を開始し、記載の終了操作を行う。再ログイン後、状態と再開用の記録を保存する。各行の間に解除する。
 
@@ -804,7 +832,7 @@ just status
      再ログイン後は0節で退避先を入れ直し、次で状態と記録を保存する。
 
      ```sh
-     just status
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
      /usr/bin/plutil -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" | /usr/bin/grep -E 'isRunning|exitReason|lastUpdated|crashLaunches'
      ```
 
@@ -822,7 +850,7 @@ just status
      /bin/ps -p "$PID" -ww -o pid=,comm=
      /bin/kill -SEGV "$PID"
      sleep 5
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^\s*(state|pid|runs|last exit code) ='
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^[[:space:]]*(state|pid|runs|last exit code) ='
      ```
 
 - **期待**: 表のとおりである。同じ Mac 起動中の `kern.boottime` は変わらず、Mac 再起動後は保存した更新時刻より後になる。連続クラッシュは1・2回目だけ再開し、3回目は停止中となる。`crashLaunches` に3件が残る。
@@ -843,7 +871,7 @@ just status
 この節で使う試験対象のパスだけを定義する。7節の外では使わない。
 
 ```sh
-CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsaicin"
+CLI="$APP/Contents/Helpers/capsaicin"
 ```
 
 終了コードの意味は次のとおり。数字だけを覚えるより、どの状態を表すかで読む。
@@ -1002,10 +1030,10 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 - **操作**:
   1. 設定を開き、6セクションを順に選ぶ。幅720 pt・高さ500 pt、サイドバー200 pt、固定サイズ、最小化・ズーム無効を仕様と比較する。計測できない寸法は目視合格にしない。上端を横切るタイトルバーの帯がなく、サイドバーが上端まで伸び、右側の最上段にセクション名が出るか見る。「ヘルパー」と「このアプリについて」がサイドバーの下端に寄っているかを、システム設定の「外観」の「サイドバーのアイコンのサイズ」を小・中・大に変えて見る（変更前の値を記録し、終わったら戻す）。↑↓ で6項目を通して移動し、上下の境目でも選択が続くか見る。
   2. (i) をポインタ、Tab と Space の両方で開く。ツールチップと同じ説明か読む。「スリープ」では「ディスプレイを自動でオフにしない」、ヘルパーが要る行、「指定時刻」にだけ (i) があるか、説明の内容が `SPEC-SET-002` の表と一致するかを見る。LED セクションで閉じて開き直し、選択が保たれるか見る。⌘W で閉じる。開き直して各セクションのカード・見出し・アイコンを `SPEC-SET-002` の表と比較する。「スリープ」が「スリープとディスプレイ」「スリープ防止の自動解除」「バッテリー」の3グループに分かれ、タイマーと指定時刻が自動解除、残量の条件とその子の行がバッテリーにあることを見る。内蔵バッテリーがない Mac では、バッテリーのグループ全体がないことを見る。子の行の項目名が親とそろうかを見る。「スリープ」は下端までスクロールして、すべての行を操作できるか見る。「一般」は案内を含めてスクロールせずに収まるか記録する（`HYP-UI-004`）。案内を表示する安全な条件を用意できなければ、その項目だけ判定不能とする。
-  3. 「ディスプレイを閉じたとき」に4つの選択肢があり、独立した子の行がないことを確かめる。ヘルパーが正しく設置されていない状態でそれを要する設定が保存されている場合は、保存した選択肢（MacBook 以外の Mac ではオンのスイッチ）が表示されたまま、行のアイコンが注意の記号に替わり、(i) の先頭で適用できない理由と修復先を読めることを見る。安全に用意できなければ注意の表示の確認だけ判定不能にする。バッテリー残量の条件のスイッチは、オンにすると残量が少なくなったらスリープ防止をオフにすると項目名だけで分かるか読む。タイマー・指定時刻・バッテリー残量をオフ・オンし、継続時間、時刻、しきい値、電源アダプタの子の行が、オフの間は字下げとグレーで無効と分かり、(i) がなく、オンに戻すと値を保持しているかを見る。
+  3. 「ディスプレイを閉じたとき」に4つの選択肢があり、独立した子の行がないことを確かめる。4.3で許可を外した場合は、保存した選択肢（MacBook 以外の Mac ではオンのスイッチ）が表示されたまま、行のアイコンが注意の記号に替わり、(i) の先頭で適用できない理由とシステム設定での許可の案内を読めることを見る。安全に用意できなければ注意の表示だけ判定不能にする。バッテリー残量の条件のスイッチは、オンにすると残量が少なくなったらスリープ防止をオフにすると項目名だけで分かるか読む。タイマー・指定時刻・バッテリー残量をオフ・オンし、継続時間、時刻、しきい値、電源アダプタの子の行が、オフの間は字下げとグレーで無効と分かり、(i) がなく、オンに戻すと値を保持しているかを見る。
   4. 「このアプリについて」でバージョンとビルド番号をコピーする。
   5. システム設定でライト、ダーク、アクセントカラーを切り替え、各画面を撮る。変更のたびに値を記録する。文字の大きさを変更できる環境では変更前を記録してから比較する。
-   6. 抑止を解除し、アプリの「メニューバーにアイコンを表示する」をオフにする。設定画面を閉じて Finder から開き直し、「このアプリについて」のバージョンの下にある「Capsaicin を終了」ボタンを押す。試験後は `just start` でアプリを起動し直し、アイコンの設定を開始値に戻す。
+   6. 抑止を解除し、アプリの「メニューバーにアイコンを表示する」をオフにする。設定画面を閉じて Finder から開き直し、「このアプリについて」の「Capsaicin を終了」ボタンを押す。試験後は `/usr/bin/open "$APP"` でアプリを起動し直し、アイコンの設定を開始値に戻す。
    7. 「スリープ」でタイマーをオンにし、継続時間の時間・分それぞれに `Stepper` があることを見る。8.1の2と同じ増減とキー操作、不正な入力を試し、保存値の前後を記録する。試した値とタイマーのオン・オフを開始前に戻す。
 - **期待**: ウインドウは幅720 pt × 高さ500 pt、サイドバー200 pt の固定で、最小化とズームが無効である。上端を横切るタイトルバーの帯がなく、サイドバーが上端まで伸び、右側の最上段に選んだセクション名が出る。サイドバーの上の4項目と下端の2項目が並び、「ヘルパー」と「このアプリについて」は下端からシステム既定の余白だけ離れている。カード・見出し・アイコンは [設定仕様](../specs/settings.md) の表と一致し、子の行にはアイコンがなく、項目名が親とそろう。「スリープ」はスクロールで全項目を操作できる。設定の切り替えで行が動かず、親がオフの子の行は字下げとグレーで無効と分かり、(i) はない。情報はコピーでき、外観に追従して読める。既定値は設定仕様の表と一致する。終了ボタンは標準の枠付きで色が付かず、押すとアプリが終了する。7の継続時間の増減は8.1と同じ結果になり、不正な入力は別の値に直らず、確定もできず、最後の有効な保存値が変わらない。
 - **中止**: 元の OS 設定が分からない、他アプリへ影響する変更を避けられない場合。
@@ -1065,7 +1093,7 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 この小節で使う試験対象のパスを定義する。7節で定義した値には依存しない。
 
 ```sh
-CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsaicin"
+CLI="$APP/Contents/Helpers/capsaicin"
 ```
 
 - **目的**: `SPEC-BLK-003`、`SPEC-BLK-011`、`SPEC-MENU-002`、`SPEC-MENU-003`、`SPEC-HUD-001`、`SPEC-HUD-002`。
@@ -1083,17 +1111,17 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 ### 8.6 メニューからスリープとディスプレイの設定を切り替える
 
 - **目的**: `SPEC-MENU-008`、`SPEC-SET-005`、`SPEC-SET-006`、`SPEC-BLK-009`。
-- **前提**: 停止中である。対象の設定の開始値、ヘルパーの状態、VoiceOver の開始値を控える。時間・バッテリーの解除条件はオフにする。ヘルパーの設置や修復は4節の安全条件で承認できる場合だけ行い、既存ファイルを壊して注意を作らない。
+- **前提**: 停止中である。対象の設定の開始値、ヘルパーの状態、VoiceOver の開始値を控える。時間・バッテリーの解除条件はオフにする。ヘルパーの登録やシステム設定での許可の変更は4節の安全条件で承認できる場合だけ行い、バンドルやシステムのファイルを壊して注意を作らない。
 - **操作**:
    1. メニューを開き、トップレベルにクイック設定のサブメニューが1つだけあり、チェックの付く項目と左のチェック用の余白がないことを見る。クイック設定を1回開き、項目・選択肢・区切りを `SPEC-MENU-008` と比べる。見出しは「ディスプレイを閉じたとき」だけで、閉じたときの選択肢の前後が区切りで囲まれ、どの項目も字下げされていないかを見る。項目名・選択肢・順序が設定画面と同じで、さらにサブメニューを開かずに選べ、チェックが保存値で有効な項目・選択肢を示すか見る。MacBook と MacBook 以外の Mac の出し分けは、用意できる機種でそれぞれ確認する。
    2. 停止中にメニューでディスプレイスリープの項目を切り替え、設定画面とメニューを開き直す。続けて抑止を開始し、同じ項目を切り替える。3.1のアサーションの読み取りで、その場で反映されたか比較する。
-   3. 未インストールの環境でヘルパーが要る選択肢を選び、設置の確認を取り消す。保存値とチェックが元のままか見る。設置・修復・認証の取り消し・失敗時の確認を安全に行える場合は、4節と同じ条件でメニューからも試す。用意できなければ該当する確認を判定不能にする。
-   4. ヘルパーが要る保存値のまま部分欠落している環境を4.3で用意できる場合だけ、クイック設定の行の注意アイコンを見る。サブメニューを開き、MacBook では保存値の選択肢、MacBook 以外の Mac ではオン・オフの項目に注意の記号と副題があり、チェックを保ったまま操作できることを見る。
+   3. 未インストールの環境でヘルパーが要る選択肢を選び、設置の確認を取り消す。保存値とチェックが元のままか見る。登録とシステム設定での許可の前後も、安全に確認できる場合は4.1と同じ条件でメニューから試す。用意できなければ該当する確認を判定不能にする。
+   4. ヘルパーが要る保存値のまま、4.3でシステム設定の許可を外せる場合だけ、クイック設定の行の注意アイコンを見る。サブメニューを開き、MacBook では保存値の選択肢、MacBook 以外の Mac ではオン・オフの項目に注意の記号と副題があり、チェックを保ったまま操作できることを見る。
    5. MacBook で VoiceOver をオンにし、クイック設定を開いて、ディスプレイを閉じたときの各選択肢へ順に移る。読み上げだけで何の動作の選択肢か分かるか確かめ、VoiceOver を開始値に戻す。
-- **期待**: 1はサブメニュー1回で設定を選べ、トップレベルにチェック用の余白がない。停止中と抑止中で同じ形で、設定画面と同じ保存値を示す。2の抑止中の変更はその場で効き、ほかの設定値は変わらない。3の確認・エラー・巻き戻しは設定画面と同じである。4はクイック設定の行にも注意の記号があり、保存値の項目・選択肢の副題から、適用できない理由と設定の「ヘルパー」の修復先が読める。5はディスプレイを閉じたときの動作の選択だと読み上げで分かる。
-- **中止**: 保存値とチェックが食い違う、取り消しても変更が残る、反映に失敗しても巻き戻らない場合。承認範囲を超える設置・修復は進めない。
+- **期待**: 1はサブメニュー1回で設定を選べ、トップレベルにチェック用の余白がない。停止中と抑止中で同じ形で、設定画面と同じ保存値を示す。2の抑止中の変更はその場で反映され、ほかの設定値は変わらない。3の確認・エラー・巻き戻しは設定画面と同じである。4はクイック設定の行にも注意の記号があり、保存値の項目・選択肢の副題から、適用できない理由とシステム設定での許可の案内が読める。5はディスプレイを閉じたときの動作の選択だと読み上げで分かる。
+- **中止**: 保存値とチェックが食い違う、取り消しても変更が残る、反映に失敗しても巻き戻らない場合。承認範囲を超える登録・許可の変更は進めない。
 - **復元**: メニューで解除し、試した設定と VoiceOver を開始値へ戻す。ヘルパーに触れた場合は4節の対応する復元手順に従う。
-- **記録**: 機種別の項目と選択肢、サブメニューを開いた回数、トップレベルの左の余白、チェックと保存値の前後、アサーションの前後、設置・修復の確認と取り消しの結果、注意の位置と副題、閉じたときの選択肢の読み上げ、安全に用意できず判定不能にした項目。
+- **記録**: 機種別の項目と選択肢、サブメニューを開いた回数、トップレベルの左の余白、チェックと保存値の前後、アサーションの前後、設置確認の取り消しと登録・許可の結果、注意の位置と副題、閉じたときの選択肢の読み上げ、安全に用意できず判定不能にした項目。
 
 ### 8.7 メニューからバッテリー残量の条件を切り替える
 
@@ -1118,21 +1146,21 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 ### 8.8 英語と日本語の表示と時刻の表記を確認する
 
 - **目的**: `SPEC-UI-011`、`SPEC-UI-012`。
-- **前提**: オーナーがシステム設定を操作する。停止中で、ヘルパーを使う設定・LED・時間とバッテリーの解除条件はオフ、HUD はオンにする。アプリ設定の開始値を `B` の結果用メモに控える。起動・停止には `just` を使い、表示は画面の操作と目視で確かめる。
+- **前提**: オーナーがシステム設定を操作する。停止中で、ヘルパーを使う設定・LED・時間とバッテリーの解除条件はオフ、HUD はオンにする。アプリ設定の開始値を `B` の結果用メモに控える。起動には `/usr/bin/open "$APP"`、終了にはメニューを使い、表示は画面の操作と目視で確かめる。
 - **操作**:
    1. システム設定の「一般」→「言語と地域」で地域の開始値を、「一般」→「日付と時刻」で「24時間表示」の開始値を `B` に記録する。「アプリケーション」に Capsaicin の言語の指定があればその値を、なければ指定がないことを記録する。
-   2. `just stop` で Capsaicin を終了する。「アプリケーション」で Capsaicin の項目を編集し、言語を English にする。項目がなければ「＋」から検証中の Debug アプリを選んで追加する。「一般」→「日付と時刻」で「24時間表示」をオフにし、Finder からそのアプリを起動する。
+   2. メニューで Capsaicin を終了する。「アプリケーション」で Capsaicin の項目を編集し、言語を English にする。項目がなければ「＋」から検証中の Debug アプリを選んで追加する。「一般」→「日付と時刻」で「24時間表示」をオフにし、Finder からそのアプリを起動する。
    3. メニューとサブメニュー、設定の6セクションと (i) を開いて読む。時間の入力パネルで1時間30分を入力し、確定したらオフになる時刻を控えて開始し、HUD とメニューの残り時間を見る。解除して時刻の入力パネルを開き、午後の時刻を指定して開始し、HUD とメニューの解除の時刻を見る。見終わったら解除する。設置確認のアラートは8.6の3と同じ条件で開き、必ず取り消す。安全に開けなければ、アラートだけ判定不能として記録する。
-   4. `just stop` で Capsaicin を終了し、「日付と時刻」で「24時間表示」をオンにする。English のまま `just start` でアプリを起動し直し、3を繰り返す。
-   5. `just stop` で Capsaicin を終了し、「アプリケーション」の Capsaicin の言語を日本語にする。時刻の24時間表示はオンのまま `just start` で起動し直し、3を繰り返す。
+   4. メニューで Capsaicin を終了し、「日付と時刻」で「24時間表示」をオンにする。English のまま `/usr/bin/open "$APP"` でアプリを起動し直し、3を繰り返す。
+   5. メニューで Capsaicin を終了し、「アプリケーション」の Capsaicin の言語を日本語にする。時刻の24時間表示はオンのまま `/usr/bin/open "$APP"` で起動し直し、3を繰り返す。
 - **期待**:
    1. 言語の指定の有無、地域、時刻の24時間表示の開始値が記録される。
    2. アプリが英語で表示される。
    3. メニュー、入力パネル、HUD、設定画面、開けたアラートが英語で表示される。入力する時刻と、確定したらオフになる時刻、メニューと HUD の解除の時刻が OS の地域に合った12時間制で表示され、午前・午後を区別できる。期間は英語の時間と分の単位で表示される。アプリ名とコマンドの書式は変わらない。
    4. 画面と期間は英語のまま、入力パネル、メニュー、HUD の時刻が OS の地域に合った24時間制になる。
    5. 画面と期間が日本語になり、時刻は OS の地域に合った24時間制になる。
-- **中止**: Debug アプリを識別できない、開始前の設定が分からない、言語や時刻の設定を元に戻せない場合。ヘルパーの設置や管理者認証には進まない。
-- **復元**: パネルを Esc で閉じ、メニューで解除して `just stop` でアプリを終了する。「一般」→「言語と地域」→「アプリケーション」で Capsaicin の言語を記録した開始値に戻す。開始時に指定がなかった場合は、今回追加した Capsaicin の項目だけを「−」で削除する。「日付と時刻」の「24時間表示」を開始値に戻し、地域が開始値のままであることを確かめる。`just start` でアプリを起動し直し、試したアプリ設定も開始値に戻す。
+- **中止**: Debug アプリを識別できない、開始前の設定が分からない、言語や時刻の設定を元に戻せない場合。ヘルパーの登録やシステム設定での許可には進まない。
+- **復元**: パネルを Esc で閉じ、メニューで解除してアプリを終了する。「一般」→「言語と地域」→「アプリケーション」で Capsaicin の言語を記録した開始値に戻す。開始時に指定がなかった場合は、今回追加した Capsaicin の項目だけを「−」で削除する。「日付と時刻」の「24時間表示」を開始値に戻し、地域が開始値のままであることを確かめる。`/usr/bin/open "$APP"` でアプリを起動し直し、試したアプリ設定も開始値に戻す。
 - **記録**: 3つの組み合わせでの表示言語、入力パネル・メニュー・HUD の時刻、期間の単位、アラートの確認の可否、画面写真の絶対パス、言語と時刻の設定を戻したこと。
 
 **結果欄**: 成功／失敗／判定不能: ____。英語・12時間制、英語・24時間制、日本語・24時間制の結果: ____。未実施項目と理由・復元した値: ____。
@@ -1147,16 +1175,17 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 - **前提**: `B` と開始前の記録が読める。既存ヘルパーのある環境では動的確認を開始していない。
 - **操作**:
   1. 動的確認を始めなかった場合は、変更した OS 設定だけを写真に合わせて戻し、9.4へ進む。以降の削除コマンドを実行しない。
-  2. アプリが動作中ならメニューで解除する。今回設置したヘルパーが残る場合は「ヘルパー」の削除を承認する。残留は次で確認する。
+  2. 4.4などでアプリを起動せず復旧するよう指定された場合は、先に4の緊急復旧を行う。アプリが停止していれば `/usr/bin/open "$APP"` で起動し、メニューで抑止を解除する。起動できなければ片付けを止め、PM に渡す。`B/helper-created` があり、今回のヘルパーが有効または許可待ちなら「ヘルパー」の削除を承認する。未インストールになったことと BTM の Capsaicin の項目を確認する。自分の `disablesleep` を戻せず削除に失敗したときは、登録を残したまま4の復旧を行い、戻せた後で削除をやり直す。
 
      ```sh
-     /bin/ls -l /Library/PrivilegedHelperTools/io.github.koutyuke.capsaicin.helper.debug /etc/sudoers.d/capsaicin_debug /Library/LaunchDaemons/io.github.koutyuke.capsaicin.helper.debug.plist
+     /usr/bin/sfltool dumpbtm
      ```
 
-  3. アプリのメニューから終了し、`just status` を読む。Capsaicin のアサーションがなく、LED が通常連動に戻ったことを確かめる。
+  3. 「一般」でログイン起動をオフにし、システム設定の「ログイン時に開く」から外れたことを見る。アプリのメニューから終了し、Capsaicin のアサーションとプロセスがなく、LED が通常連動に戻ったことを確かめる。
 
      ```sh
-     just status
+     /usr/bin/pmset -g assertions
+     /bin/ps -axo pid,ppid,comm | /usr/bin/grep '[C]apsaicin.app/Contents/MacOS/Capsaicin'
      ```
 
   4. 緊急復旧: 外部値の試験や失敗で `SleepDisabled` が残った場合、開始値を読み直して戻す。
@@ -1167,48 +1196,38 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
        1) /usr/bin/sudo /usr/bin/pmset -a disablesleep 1 ;;
        *) printf '%s\n' '中止: 開始値が不明。pmset を変更しない' ;;
      esac
-     just status
+     /usr/bin/pmset -g
      ```
 
-- **期待**: 開始時の `SleepDisabled` と一致し、今回のヘルパー3ファイルがない。開始値が `1` の場合には動的確認を始めていないため、本来ここで変更は不要である。
-- **中止**: 3ファイルが残る、`SleepDisabled` が戻らない、LED が通常連動に戻らない場合。記録と設定を消さずに PM へ渡す。
-- **復元**: LED は承認済みの独立復旧手順を使う。ヘルパー削除が失敗した場合の手作業によるシステムファイル削除は本手順に含めない。今回の構成・エラー・残留値を PM に渡し、個別の復旧手順を決める。
-- **記録**: 3ファイルの有無、`SleepDisabled` の開始値と現在値、アサーションの有無、LED の戻り。
+- **期待**: 開始時の `SleepDisabled` と一致し、今回のヘルパーが未インストールで、ログイン時の起動もオフである。ad-hoc 署名の確認だけを行った場合は、「このビルドでは使用不可」で登録していない状態でよい。バックグラウンドの一覧の項目が残っていても、この段階では失敗としない。開始値が `1` の場合には動的確認を始めていないため、本来ここで変更は不要である。
+- **中止**: 登録を外せない、`SleepDisabled` が戻らない、LED が通常連動に戻らない場合。登録・アプリ・記録・設定を残して PM へ渡す。値を戻す手段が残るように、アプリの削除へ進まない。
+- **復元**: LED は承認済みの独立復旧手順を使う。ヘルパーの登録を手作業で消す操作は本手順に含めない。今回の状態・エラー・残留値を PM に渡し、個別の復旧手順を決める。
+- **記録**: ヘルパーの状態、ログイン起動と BTM の項目、`SleepDisabled` の開始値と現在値、アサーションの有無、LED の戻り。
 
-### 9.2 今回の LaunchAgent と設定・記録を取り除く
+### 9.2 今回のアプリと設定・記録を取り除く
 
 - **目的**: `SPEC-LCY-005`、`SPEC-LCY-007`、`SPEC-SET-002`。
-- **前提**: アプリが停止し、ヘルパー・LED・抑止を戻せている。開始時はジョブ未読込だった。`trash` が使える。
+- **前提**: アプリが停止し、ヘルパー・LED・抑止を戻せている。mainApp の登録を外している。開始時に既存の登録はなく、`APP` と4.8でゴミ箱に移したアプリを今回のものと識別できる。`trash` が使える。
 - **操作**:
-  1. 読み込み済みなら、今回の Debug ジョブだけを外す。
+  1. 試験後の設定と再開用の記録を保存する。
 
      ```sh
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
-     /bin/launchctl bootout "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
-     ```
-
-     最初の照会でサービスが見つからない場合は、`bootout` を省く。別のエラーなら止める。
-  2. 次の `launchctl print` がサービスなしを示し、`just status` に Debug プロセスがないことを確かめてから、試験後のデータを保存する。照会が別のエラーなら先へ進まない。
-
-     ```sh
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
-     just status
      if [ -f "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then cp -p "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" "$B/resume-record.after.json"; fi
      /usr/bin/defaults export io.github.koutyuke.capsaicin.debug "$B/defaults.after.plist"
      ```
 
+  2. Finder で `APP` の今回のアプリをゴミ箱に移す。agent の登録はアプリの削除により片付ける。4.8の古いビルドも含め、今回使ったアプリがゴミ箱に残っているとシステム設定の項目が消えないことがある（`EVID-LCY-003`）。**ゴミ箱を空にすると、中身は元に戻せない。** 既存のゴミ箱の中身を保存し、オーナーが空にしてよいと判断した場合だけ Finder から空にする。空にできなければ削除の確認は未完了として、残っているアプリの所在を PM に渡す。
   3. **以下は今回の設定と再開用の記録を消す。退避物が読めることを先に確かめ、失敗したら実行しない。**
 
      ```sh
-     if [ -f "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist" ]; then trash "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"; fi
      if [ -f "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json" ]; then trash "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"; fi
      /usr/bin/defaults delete io.github.koutyuke.capsaicin.debug
      ```
 
-- **期待**: ジョブは未読込で、今回の plist・再開記録・Debug 設定が消える。ドメインが既にない旨だけなら `defaults delete` の失敗は削除済みとして記録する。
-- **中止**: プロセスが残る、ヘルパーが残る、退避が失敗する、パスが想定と違う場合。Release のドメインや IPC の共有ディレクトリには触れない。
-- **復元**: 消した開始前のデータは9.3で戻す。ゴミ箱を空にしない。再開記録を含む Application Support ディレクトリ全体は削除しない。
-- **記録**: ジョブを外す前後の `print`、`ps` の結果、`trash` した3つのパス、`defaults delete` の終了値。
+- **期待**: 今回のアプリがなくなり、agent のジョブとシステム設定の Capsaicin の項目が消える。今回の再開記録・Debug 設定が消える。ドメインが既にない旨だけなら `defaults delete` の失敗は削除済みとして記録する。
+- **中止**: プロセスやヘルパーの登録が残る、退避が失敗する、パスが想定と違う場合。Release のアプリ・ドメインや IPC の共有ディレクトリには触れない。
+- **復元**: 開始前のデータは9.3で戻す。再開記録を含む Application Support ディレクトリ全体や、デーモンの起動の記録は削除しない。システム設定の項目を消すための `sfltool resetbtm` は、ほかのアプリの登録も消すので使わない。
+- **記録**: 削除したアプリの絶対パス、ゴミ箱を空にしたかと残したもの、設定・記録の退避先、`defaults delete` の終了値、9.4での登録の読み取り結果。
 
 ### 9.3 既存のデータと OS 設定を戻す
 
@@ -1220,40 +1239,40 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
      ```sh
      if [ -f "$B/defaults.before.plist" ]; then /usr/bin/defaults import io.github.koutyuke.capsaicin.debug "$B/defaults.before.plist"; fi
      if [ -f "$B/resume-record.before.json" ]; then cp -p "$B/resume-record.before.json" "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"; fi
-     if [ -f "$B/agent.before.plist" ]; then cp -p "$B/agent.before.plist" "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"; fi
      ```
 
   2. 復元したファイルを `cmp` で比較する。
 
      ```sh
      if [ -f "$B/resume-record.before.json" ]; then cmp "$B/resume-record.before.json" "$HOME/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"; fi
-     if [ -f "$B/agent.before.plist" ]; then cmp "$B/agent.before.plist" "$HOME/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist"; fi
      /usr/bin/defaults read io.github.koutyuke.capsaicin.debug
      ```
 
-  3. 初めから存在しなかった対象は、`record.absent`、`agent.absent`、`defaults.absent` に照らし、存在しないことを確かめる。設定があった場合は `defaults.before.txt` と読み戻しを比較する。
+  3. 初めから存在しなかった対象は、`record.absent`、`defaults.absent` に照らし、存在しないことを確かめる。設定があった場合は `defaults.before.txt` と読み戻しを比較する。
   4. OS の外観、アクセントカラー、文字、VoiceOver、アクセシビリティ、バックグラウンド項目、機器接続を開始前の写真と一致させる。変更していない項目は触れない。
-- **期待**: `cmp` は出力なしで終了値 `0`。設定の内容が開始前と一致する。開始時はジョブ未読込なので、復元した plist を `bootstrap` しない。
+- **期待**: `cmp` は出力なしで終了値 `0`。設定の内容が開始前と一致する。開始時に登録はなかったので、SMAppService の登録を作り直さない。
 - **中止**: 退避物が壊れている、ファイルが再作成される、OS の開始値が不明な場合。
-- **復元**: データを追加削除せず、開始前・試験後の両方を PM に渡す。`sudoers.test-backup` は今回の試験用の退避物なので、ヘルパーが完全にないことを確認した後だけ `trash "${B:?}/sudoers.test-backup"` で処分する。既存ヘルパーの復元には使わない。
+- **復元**: データを追加削除せず、開始前・試験後の両方を PM に渡す。
 - **記録**: `cmp` の結果、`defaults` の読み戻し、`absent` マーカーとの照合、OS 設定を戻した項目。
 
 ### 9.4 残留と結果を確認して PM に渡す
 
 - **目的**: `SPEC-HLP-005`、`SPEC-LCY-002` の復元と、全節の判定を完了する。
-- **前提**: 起動前ゲートで止めたか、9.1〜9.3を完了した。
+- **前提**: 1.4で起動前に止めたか、9.1〜9.3を完了した。
 - **操作**:
-  1. 次の結果を開始前と比較する。ほかのアプリのアサーションと `runs` も読むので、ここでは直接照会する。開始前からある他アプリのアサーションを消さない。
+  1. 次の結果とシステム設定の一覧を開始前と比較する。開始前からある他アプリのアサーションを消さない。起動前に止めた場合は、1節で判明した既存の登録が変わっていないことを確認する。
 
      ```sh
      /usr/bin/pmset -g
      /usr/bin/pmset -g assertions
-     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug" | /usr/bin/grep -E '^\s*(state|pid|runs) ='
+     /bin/launchctl print "gui/$(id -u)/io.github.koutyuke.capsaicin.debug"
+     /bin/launchctl print system/io.github.koutyuke.capsaicin.debug.helper
+     /usr/bin/sfltool dumpbtm
      ```
 
   2. 節末の結果欄ごとに、実行日・環境・成功／失敗／判定不能・観測値・画像やログの絶対パス・復元結果を記入する。
   3. PM に結果と `B` の所在を渡す。新しい根拠 ID の採番と仮説の更新は PM に任せ、この手順の実行だけで仮説を確認済みにしない。
-- **期待**: 状態が開始前に戻り、未実施を成功扱いしていない。起動前ゲートで止めた場合は「動的確認は未実施」と分かる。
+- **期待**: スリープ・設定・登録が開始前に戻り、未実施を成功扱いしていない。今回の agent とデーモンの照会はサービスなしになる。1.4で止めた場合は「動的確認は未実施」と分かる。デーモンの起動の記録は仕様どおり残るため、残留として記録するが、削除の失敗には数えない。
 - **中止**: 復元が1つでも未完了なら「検証完了」とせず、残留対象・開始値・現在値を PM に報告する。
 - **復元**: `B` は結果と復元材料なので PM の受領・復元確認まで残す。受領後、オーナーが保存不要と判断した場合だけ、その絶対パスを確かめて `trash "${B:?}"` を実行する。`rm`、Git の変更、Release データの削除は行わない。
 - **記録**: 全節の結果欄を埋め、未実施の項目とその理由を一覧にする。復元した対象、残留した対象、`B` の絶対パスを1か所にまとめる。
@@ -1266,10 +1285,11 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 
 | 症状 | まず確かめること |
 | --- | --- |
-| プロセスが0本、または2本以上 | `just status` でジョブの PID と全 Debug プロセスを読み直す。5秒待って再確認 |
-| `launchctl bootstrap` が失敗する | `print` で残存ジョブを確認する。同じコマンドを繰り返さない |
-| ログイン後にジョブが見つからない | plist の有無、`launchctl print-disabled` の該当行、`RunAtLoad` の値 |
-| `sudo -n` がパスワードを要求する | sudoers のルールの有無。認証を入れずに中止 |
+| プロセスが0本、または2本以上 | 0節の `launchctl print` と `ps` で agent の PID とアプリのパスを読み直す。5秒待って再確認 |
+| agent の登録や起動が失敗する | 「一般」の警告、システム設定の許可、BTM の Capsaicin の項目、LaunchAgent のログ。手作業の登録で回避しない |
+| ログイン時に起動しない | 「ログイン時に起動する」、mainApp の登録と「ログイン時に開く」の一覧、バックグラウンドの許可 |
+| ヘルパーが許可待ちになる | システム設定で Capsaicin の項目を許可する。agent も同じ項目なので両方の状態を確認 |
+| ヘルパーがこのビルドでは使用不可になる | ad-hoc 署名では使えない。1.4の署名付きの PR Debug ビルドを使う |
 | `SleepDisabled` が戻らない | 9.1の緊急復旧。戻らなければ 9.4 で報告 |
 | LED が通常連動に戻らない | 承認済みの独立復旧手順。読み戻し値で合格にしない |
 | 設定画面の警告行が消えない | アプリを終了して `open` で起動し直す。それでも消えなければ 2.3 で止める |
@@ -1282,7 +1302,7 @@ CLI="$PWD/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/Helpers/capsa
 成功／失敗／判定不能: 成功（2.2-4のクラッシュ再起動まで）
 観測値: kickstart→pid 2345、SEGV→pid 2456（runs 2、last exit code -11）
       再ログイン後 state=not running、pid なし
-復元: SleepDisabled 0、ヘルパー3ファイルなし、LED 通常連動
+復元: SleepDisabled 0、ヘルパー未インストール、ログイン起動オフ、アプリと登録の削除を確認、LED 通常連動
 未実施と理由: HYP-LCY-003 は経路別の環境記録機能がないため判定不能
 気づいたこと: 2.2-3 のログイン後は loaded/not running で期待どおり
 写真・ログ: /Users/<user>/Capsaicin-verification.ab12cd/general-warning.png

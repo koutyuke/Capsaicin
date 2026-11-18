@@ -5,7 +5,7 @@ title: root ヘルパーを、アプリに入れた SMAppService のデーモン
 status: accepted
 supersedes: ["DEC-HLP-001", "DEC-HLP-003", "DEC-HLP-004"]
 superseded_by: []
-requirements: ["REQ-SYS-005", "REQ-SYS-006", "REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-003", "REQ-HLP-004", "REQ-HLP-005", "REQ-HLP-006"]
+requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-004", "REQ-HLP-005", "REQ-HLP-006"]
 based_on: ["DEC-HLP-004", "DEC-SYS-021", "EVID-HLP-004", "EVID-HLP-005", "EVID-LCY-003", "EVID-BLK-014", "HYP-HLP-005", "HYP-HLP-006", "HYP-HLP-007", "HYP-BLK-007"]
 ---
 
@@ -23,9 +23,9 @@ based_on: ["DEC-HLP-004", "DEC-SYS-021", "EVID-HLP-004", "EVID-HLP-005", "EVID-L
 - **更新**: アプリの入れ替えだけで、次に起動したデーモンは新しい版になり、承認も保たれる（`EVID-HLP-005`）。それでもアプリは起動時に、前回登録したときの版と今の版を比べ、違えば unregister の完了を待ってから register し直す。plist の変更を確実に反映するためである。直後の register が EPERM で失敗したら、数秒待って数回まで試し直す。Sparkle による更新と手での入れ替えを、同じ経路で扱う。
 - **失敗の扱い**: デーモンへの要求には時間の上限を付け、応答がなければ接続を取り消す。デーモンが起動を拒まれている間、保留中の接続があると launchd は起動を試し続けるためである。起動を拒まれた後は承認が外れることがあるので、失敗したら状態を読み直して示す。
 - **削除**: 設定の「ヘルパー」の削除は、Capsaicin が立てた `disablesleep` を戻してから unregister する。unregister の後も、システム設定にはアプリの項目が「許可済み」のまま残る（`EVID-LCY-003`）。設定画面の説明で補う。
-- **署名**: Release は Developer ID で署名して公証する（`DEC-SYS-021`）。手元の Debug ビルドは Apple Development の証明書で署名し、タイムスタンプは付けない。CI のテストは ad-hoc 署名のままにし、デーモンを使わない。ad-hoc 署名のビルドでは、XPC の条件で接続が落ちるので、ヘルパーを使えない。設定画面はそれを「使えない」と示す。
+- **署名**: Release は Developer ID で署名して公証する（`DEC-SYS-021`）。`just build` と CI のテストは ad-hoc 署名のままにし、デーモンを使わない。ad-hoc 署名のビルドでは、XPC の条件で接続が落ちるので、ヘルパーを使えない。設定画面はそれを「このビルドでは使えない」と示す。手元でヘルパーを試すときは、Apple Development の証明書でタイムスタンプを付けずに署名したビルドか、PR の Debug ビルド（`DEC-SYS-023`）を使う。`DEC-SYS-021` の「アプリの機能を署名の種類に依存させない」は、ヘルパーについてはこの判断で改める。
 - **なくすもの**: sudoers のルール、`/Library/PrivilegedHelperTools` への複写、`/Library/LaunchDaemons` の plist、`osascript` による設置と削除のスクリプト、`visudo` による検証。
-- **要件**: 実装する変更で、`REQ-SYS-005` と `REQ-SYS-006` を取り下げる。`REQ-HLP-001` は「システム設定の許可で設置できる」に書き換え、`REQ-HLP-003`（設置で sudo を壊さない）は sudoers を扱わなくなるので取り下げる。`REQ-HLP-002`、`REQ-HLP-004`、`REQ-HLP-005`、`REQ-HLP-006` は保ち、根拠をこの判断に移す。`disablesleep` の所有の規則（`SPEC-HLP-005`）は変えない。
+- **要件**: 実装する変更で、「Apple Developer Program なしでビルドして使える」と「コード署名に依存しない」の2つのシステムの要件を削除する。ヘルパーの要件のうち、「必要になったときに一度の管理者認証で設置できる」は「システム設定の許可で設置できる」に書き換え、「設置で sudo を壊さない」は sudoers を扱わなくなるので削除する。削除した要件の文面は Git の履歴にある。`REQ-HLP-002`、`REQ-HLP-004`、`REQ-HLP-005`、`REQ-HLP-006` は保ち、根拠をこの判断に移す。`disablesleep` の所有の規則（`SPEC-HLP-005`）は変えない。
 - **規則**: `AGENTS.md` の「root で動くコードを増やさない」を、実装する変更で「root で行う処理を増やさない」に改める。root で動く C のコードは、接続の受け付け、相手の照合、起動ごとの記録の分だけ増える。root で行う処理は `on` と `off` のまま変えない。
 - **移行**: v0.1.0 で設置した sudoers、ヘルパー、LaunchDaemon、LaunchAgent は、アプリで片付けない。Git に入れない手順書をオーナーが利用者に渡す。
 

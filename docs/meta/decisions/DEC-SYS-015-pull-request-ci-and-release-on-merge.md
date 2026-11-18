@@ -5,7 +5,7 @@ title: CI を PR で必須にし、main へのリリース用の PR のマージ
 status: accepted
 supersedes: ["DEC-SYS-013"]
 superseded_by: []
-requirements: ["REQ-SYS-005", "REQ-SYS-006"]
+requirements: []
 based_on: ["DEC-SYS-004", "DEC-SYS-006", "DEC-SYS-008", "DEC-SYS-014", "HYP-HLP-003"]
 ---
 

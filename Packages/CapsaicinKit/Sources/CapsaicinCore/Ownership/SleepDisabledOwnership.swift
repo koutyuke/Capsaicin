@@ -38,10 +38,4 @@ public enum SleepDisabledOwnership {
         case true: .turnOff
         }
     }
-
-    /// ヘルパーの削除の処理の最初に `pmset -a disablesleep 0` を実行するか。
-    /// 削除で起動時の LaunchDaemon も消えるので、自分が立てたものは、読めなくても戻す。
-    public static func resetsOnHelperRemoval(owned: Bool, sleepDisabled: Bool?) -> Bool {
-        owned && sleepDisabled != false
-    }
 }

@@ -28,7 +28,9 @@ dist-debug pr sha: gen
     pr="$1"
     sha="$2"
     [[ "$pr" =~ ^[0-9]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Invalid PR number or commit SHA' >&2; exit 1; }
-    /usr/bin/xcodebuild {{ xcode_args }} ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO build
+    # 更新の後の登録し直しを確かめられるよう、確認用のビルドごとに増える版番号を付ける。Debug は配信先を持たない。
+    build="$(date -u +%Y%m%d%H%M%S)"
+    /usr/bin/xcodebuild {{ xcode_args }} ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO CURRENT_PROJECT_VERSION="$build" build
     if find '{{ debug_app }}' -type f \( -name '*.debug.dylib' -o -name '__preview.dylib' \) -print | grep -q .; then
         echo 'Unexpected Debug or preview dylib in the app' >&2
         exit 1
@@ -102,15 +104,11 @@ status:
     echo '--- LaunchAgent job'
     if job="$(/bin/launchctl print "gui/$UID/{{ debug_id }}" 2>/dev/null)"; then
         /usr/bin/grep -E '^[[:space:]]*(state|pid|program) =' <<< "$job" || true
-        program="$(/usr/bin/awk -F ' = ' '/^[[:space:]]*program = / {print $2}' <<< "$job")"
+        program="$(/usr/bin/awk -F ' = ' '/^[[:space:]]*program = / {print $2; exit}' <<< "$job")"
         [[ "$program" == "$exe" ]] && echo 'Job matches this checkout: yes' || echo 'Job matches this checkout: no'
     else
         echo 'Job is not loaded or could not be read.'
     fi
-    echo '--- LaunchAgent plist: ProgramArguments[0]'
-    program="$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:0' "$HOME/Library/LaunchAgents/{{ debug_id }}.plist" 2>/dev/null)" || program=''
-    printf '%s\n' "${program:-Plist is missing or could not be read.}"
-    [[ "$program" == "$exe" ]] && echo 'Plist matches this checkout: yes' || echo 'Plist matches this checkout: no'
     printf 'This checkout: %s\n' "$exe"
     echo '--- All Debug processes: PID, start time, executable path'
     pids="$(/usr/bin/pgrep -f '{{ debug_process }}' | /usr/bin/paste -sd, -)" || pids=''
@@ -158,7 +156,7 @@ start:
         /bin/launchctl bootout "gui/$UID/{{ debug_id }}"
     fi
     /usr/bin/open '{{ debug_app }}'
-    # 直接起動した個体は launchd に引き渡して終わるので、ジョブが動かす実行ファイルで判定する。
+    # SMAppService の登録はアプリに任せ、引き渡し後のジョブが動かす実行ファイルで判定する。
     for ((i = 0; i < 10; i++)); do
         /bin/sleep 1
         job="$(/bin/launchctl print "gui/$UID/{{ debug_id }}" 2>/dev/null)" || continue

@@ -54,7 +54,7 @@ struct MenuBarTests {
             + [.durationPanel, nil, .timePanel, nil, .start(.noTimeLimit)])
     }
 
-    @Test("SPEC-MENU-004 制御の向きとヘルパーの修復を区別する", arguments: [MisalignmentDirection.leftApplied, .notApplied])
+    @Test("SPEC-MENU-004 制御の向きとヘルパーで直せることを区別する", arguments: [MisalignmentDirection.leftApplied, .notApplied])
     func helperWarning(direction: MisalignmentDirection) {
         let status = BlockingStatus(session: nil, batteryCondition: nil,
                                     misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
@@ -63,7 +63,7 @@ struct MenuBarTests {
                                     now: Date(timeIntervalSince1970: 0), calendar: calendar,
                                     locale: Locale(identifier: "ja_JP"), bundle: bundle())
         #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
-        #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
+        #expect(rows[1].subtitle == "設定の「ヘルパー」で直せます")
     }
 
     @Test("SPEC-MENU-003 時間は1分から24時間、設定がオフなら初期値を使う")

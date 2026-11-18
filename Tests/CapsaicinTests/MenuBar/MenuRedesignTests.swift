@@ -108,7 +108,7 @@ struct MenuRedesignTests {
         let fixture = AppFixture()
         var installed = true
         let model = SettingsModel(app: fixture.model, helper: .init(
-            state: { installed ? .installed : .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { installed ? .installed : .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         await model.changeLidClose(to: .zeroBrightness)
         fixture.system.isKnownUnavailable = true
@@ -123,7 +123,7 @@ struct MenuRedesignTests {
         }
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
-        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperNotReady")) == true)
+        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")) == true)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("brightnessUnavailable")) == true)
         #expect(lid.state == .on && lid.submenu == nil)
         installed = true

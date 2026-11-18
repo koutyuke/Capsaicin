@@ -96,7 +96,7 @@ extension BlockingController {
         }
     }
 
-    private func lowerSleepDisabled() -> AlignmentFailure? {
+    func lowerSleepDisabled() -> AlignmentFailure? {
         guard record.ownsSleepDisabled else { return nil }
         let reading = try? ports.helper.readSleepDisabled()
         observed[.systemSleepDisabled] = reading

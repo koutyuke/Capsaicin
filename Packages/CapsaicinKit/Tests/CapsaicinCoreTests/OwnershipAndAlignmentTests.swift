@@ -23,15 +23,6 @@ struct OwnershipAndAlignmentTests {
         #expect(SleepDisabledOwnership.lowerAction(sleepDisabled: nil) == .failUnreadable)
     }
 
-    @Test("SPEC-HLP-005 ヘルパーの削除で disablesleep を戻すのは、所有が立てたで 1 か読めなかったときだけ")
-    func resetOnRemoval() {
-        #expect(SleepDisabledOwnership.resetsOnHelperRemoval(owned: true, sleepDisabled: true))
-        #expect(SleepDisabledOwnership.resetsOnHelperRemoval(owned: true, sleepDisabled: nil))
-        #expect(!SleepDisabledOwnership.resetsOnHelperRemoval(owned: true, sleepDisabled: false))
-        #expect(!SleepDisabledOwnership.resetsOnHelperRemoval(owned: false, sleepDisabled: true))
-        #expect(!SleepDisabledOwnership.resetsOnHelperRemoval(owned: false, sleepDisabled: nil))
-    }
-
     private func misalignments(
         targets: Set<Mechanism>,
         observed: [Mechanism: Bool],

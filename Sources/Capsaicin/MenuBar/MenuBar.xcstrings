@@ -500,13 +500,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repair it in Helper settings"
+            "value" : "You can address this in Helper settings"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定の「ヘルパー」で修復できます"
+            "value" : "設定の「ヘルパー」で直せます"
           }
         }
       }
@@ -568,13 +568,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repair it in Helper settings"
+            "value" : "You can address this in Helper settings"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定の「ヘルパー」で修復できます"
+            "value" : "設定の「ヘルパー」で直せます"
           }
         }
       }

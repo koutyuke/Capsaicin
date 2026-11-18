@@ -84,6 +84,36 @@ targets:
         copy:
           destination: wrapper
           subpath: Contents/Helpers
+    postBuildScripts:
+      # CodeSign より前に生成し、構成ごとの定義もアプリの署名に含める。
+      - name: Generate bundled service definitions
+        script: |
+          set -eu
+          directory="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons"
+          label="${PRODUCT_BUNDLE_IDENTIFIER}.helper"
+          /bin/mkdir -p "$directory"
+          plist="$directory/$label.plist"
+          /usr/bin/plutil -create xml1 "$plist"
+          /usr/bin/plutil -insert Label -string "$label" "$plist"
+          /usr/bin/plutil -insert BundleProgram -string Contents/Helpers/capsaicin-helper "$plist"
+          /usr/bin/plutil -insert MachServices -xml "<dict><key>$label</key><true/></dict>" "$plist"
+          /usr/bin/plutil -insert RunAtLoad -bool true "$plist"
+          /usr/bin/plutil -lint "$plist"
+          directory="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchAgents"
+          label="${PRODUCT_BUNDLE_IDENTIFIER}"
+          /bin/mkdir -p "$directory"
+          plist="$directory/$label.plist"
+          /usr/bin/plutil -create xml1 "$plist"
+          /usr/bin/plutil -insert Label -string "$label" "$plist"
+          /usr/bin/plutil -insert BundleProgram -string Contents/MacOS/Capsaicin "$plist"
+          /usr/bin/plutil -insert RunAtLoad -bool false "$plist"
+          /usr/bin/plutil -insert KeepAlive -xml '<dict><key>Crashed</key><true/></dict>' "$plist"
+          /usr/bin/plutil -insert ProcessType -string Interactive "$plist"
+          /usr/bin/plutil -insert LimitLoadToSessionType -string Aqua "$plist"
+          /usr/bin/plutil -lint "$plist"
+        outputFiles:
+          - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/$(PRODUCT_BUNDLE_IDENTIFIER).helper.plist
+          - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchAgents/$(PRODUCT_BUNDLE_IDENTIFIER).plist
   CapsaicinCLI:
     productName: capsaicin
     type: tool
@@ -116,6 +146,19 @@ targets:
         GCC_C_LANGUAGE_STANDARD: c17
         GCC_WARN_INHIBIT_ALL_WARNINGS: NO
         GCC_TREAT_WARNINGS_AS_ERRORS: YES
+        CLANG_ENABLE_MODULES: YES
+        OTHER_CFLAGS: ["$(inherited)", "-fblocks"]
+      configs:
+        Debug:
+          GCC_PREPROCESSOR_DEFINITIONS:
+            - $(inherited)
+            - HELPER_APP_IDENTIFIER=\"io.github.koutyuke.capsaicin.debug\"
+            - HELPER_SERVICE_NAME=\"io.github.koutyuke.capsaicin.debug.helper\"
+        Release:
+          GCC_PREPROCESSOR_DEFINITIONS:
+            - $(inherited)
+            - HELPER_APP_IDENTIFIER=\"io.github.koutyuke.capsaicin\"
+            - HELPER_SERVICE_NAME=\"io.github.koutyuke.capsaicin.helper\"
   CapsaicinTests:
     type: bundle.unit-test
     platform: macOS

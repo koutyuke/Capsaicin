@@ -5,7 +5,7 @@ title: CLI とアプリは利用者専用の Unix ドメインソケットで通
 status: accepted
 supersedes: []
 superseded_by: []
-requirements: ["REQ-CLI-001", "REQ-CLI-002", "REQ-CLI-003", "REQ-CLI-004", "REQ-SYS-006"]
+requirements: ["REQ-CLI-001", "REQ-CLI-002", "REQ-CLI-003", "REQ-CLI-004"]
 based_on: []
 ---
 

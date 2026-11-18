@@ -5,7 +5,7 @@ title: XcodeGen でプロジェクトを生成し、ロジックはローカル�
 status: accepted
 supersedes: []
 superseded_by: []
-requirements: ["REQ-SYS-005"]
+requirements: []
 based_on: []
 ---
 

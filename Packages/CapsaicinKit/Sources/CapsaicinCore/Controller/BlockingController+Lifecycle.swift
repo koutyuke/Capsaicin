@@ -79,11 +79,13 @@ public extension BlockingController {
         }
     }
 
-    func resetsSleepDisabledOnHelperRemoval() -> Bool {
-        SleepDisabledOwnership.resetsOnHelperRemoval(
-            owned: record.ownsSleepDisabled,
-            sleepDisabled: try? ports.helper.readSleepDisabled(),
-        )
+    func prepareHelperRemoval() -> Bool {
+        notifyingWarnings {
+            let failure = lowerSleepDisabled()
+            reevaluateMisalignments(targets: currentTargets)
+            let saved = saveRecord()
+            return failure == nil && saved
+        }
     }
 
     /// アプリは、この後の `settings` を保存する。

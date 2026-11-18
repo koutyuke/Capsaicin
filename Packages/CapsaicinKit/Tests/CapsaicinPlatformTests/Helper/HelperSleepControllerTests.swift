@@ -1,6 +1,5 @@
 @testable import CapsaicinPlatform
 import Foundation
-import Synchronization
 import Testing
 
 @MainActor
@@ -25,50 +24,43 @@ struct HelperSleepControllerTests {
         #expect(throws: HelperError.invalidSleepDisabled) { try controller.readSleepDisabled() }
     }
 
-    @Test("SPEC-HLP-002 SPEC-HLP-005 固定パスを sudo -n と5秒期限で呼ぶ")
+    @Test("SPEC-HLP-002 on と off だけを XPC に渡し、応答の失敗を返す")
     func fixedCommands() throws {
-        for debug in [false, true] {
-            let paths = HelperPaths(debug: debug)
-            let calls = Mutex<[[String]]>([])
-            let controller = HelperSleepController(paths: paths, run: { executable, arguments, timeout in
-                #expect(executable == "/usr/bin/sudo")
-                calls.withLock { $0.append(arguments) }
-                #expect(timeout == 5)
-                return Data()
-            })
-            try controller.turnOn()
-            try controller.turnOff()
-            calls.withLock { #expect($0 == [["-n", paths.helper, "on"], ["-n", paths.helper, "off"]]) }
+        var calls: [String] = []
+        let controller = HelperSleepController(request: { calls.append($0) }, run: { _, _, _ in
+            Issue.record("XPC の操作で子プロセスを起動した")
+            return Data()
+        })
+        try controller.turnOn()
+        try controller.turnOff()
+        #expect(calls == ["on", "off"])
+        for failure in [HelperXPCError.connectionFailed, .requestFailed, .timedOut, .invalidReply] {
+            let failing = HelperSleepController(request: { _ in throw failure }, run: { _, _, _ in Data() })
+            #expect(throws: failure) { try failing.turnOn() }
+            #expect(throws: failure) { try failing.turnOff() }
         }
     }
 
-    @Test("SPEC-HLP-005 通信の失敗と見届け中の拒否をそのまま返す")
+    @Test("SPEC-HLP-005 読み取りの失敗と見届け中の拒否をそのまま返す")
     func commandFailures() {
         for failure in [CommandRunnerError.timedOut, .alreadyRunning, .unsuccessfulExit(1), .outputTooLarge] {
             let controller = HelperSleepController(run: { _, _, _ in throw failure })
-            #expect(throws: failure) { try controller.turnOn() }
-            #expect(throws: failure) { try controller.turnOff() }
             #expect(throws: failure) { try controller.readSleepDisabled() }
         }
         let invalidUTF8 = HelperSleepController(run: { _, _, _ in Data([0xFF]) })
         #expect(throws: HelperError.invalidSleepDisabled) { try invalidUTF8.readSleepDisabled() }
     }
 
-    @Test("SPEC-HLP-004 3ファイルの全組み合わせで状態と利用可否を判定する")
-    func installationStates() {
-        let paths = HelperPaths(debug: true)
-        for mask in 0 ..< 8 {
-            let existing = Set(paths.files.enumerated().compactMap { index, path in
-                mask & (1 << index) != 0 ? path : nil
-            })
-            let controller = HelperSleepController(paths: paths, exists: { existing.contains($0) },
-                                                   run: { _, _, _ in Issue.record("状態判定でコマンドを起動した"); return Data() })
-            #expect(controller.installationState == (mask == 0 ? .notInstalled : mask == 7 ? .installed : .partial))
-            #expect(controller.isHelperInstalled == (mask == 7))
-        }
+    @Test("SPEC-HLP-004 許可済みの状態だけが利用できる", arguments: [
+        HelperInstallationState.notInstalled, .requiresApproval, .installed, .unavailable,
+    ])
+    func installationStates(state: HelperInstallationState) {
+        let controller = HelperSleepController(state: { state }, run: { _, _, _ in Data() })
+        #expect(controller.installationState == state)
+        #expect(controller.isHelperInstalled == (state == .installed))
     }
 
-    @Test("SPEC-HLP-005 共有 runner の見届け中は読み取りと on/off を断る（起動先は echo に差し替える）")
+    @Test("SPEC-HLP-005 読み取りの期限後は子プロセスを見届け、次の読み取りを断る")
     func sharedRunner() throws {
         let gate = ProcessGate()
         let runner = CommandRunner(executable: "/bin/sh", arguments: gate.arguments, outputLimit: 65536)
@@ -76,8 +68,6 @@ struct HelperSleepControllerTests {
         let controller = HelperSleepController(run: { _, _, timeout in
             try runner.run(executable: "/bin/echo", arguments: [], timeout: timeout)
         })
-        #expect(throws: CommandRunnerError.alreadyRunning) { try controller.turnOn() }
-        #expect(throws: CommandRunnerError.alreadyRunning) { try controller.turnOff() }
         #expect(throws: CommandRunnerError.alreadyRunning) { try controller.readSleepDisabled() }
         gate.open()
     }

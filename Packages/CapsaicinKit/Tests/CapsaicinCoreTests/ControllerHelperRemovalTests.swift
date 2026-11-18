@@ -5,13 +5,16 @@ import Testing
 
 @MainActor
 struct ControllerHelperRemovalTests {
-    @Test("SPEC-HLP-004 SPEC-HLP-005 ヘルパーの削除では、自分が立てた 1 のときだけ pmset で戻す")
+    @Test("SPEC-HLP-004 SPEC-HLP-005 ヘルパーの削除では、自分が立てた 1 のときだけ off で戻す")
     func helperRemovalReset() {
         let system = FakeSystem()
         let controller = makeController(system, settings: .premise { $0.blocksManualSleep = true })
-        #expect(!controller.resetsSleepDisabledOnHelperRemoval())
+        #expect(controller.prepareHelperRemoval())
         controller.requestStart(from: .menu)
-        #expect(controller.resetsSleepDisabledOnHelperRemoval())
+        #expect(controller.prepareHelperRemoval())
+        #expect(!system.sleepDisabled)
+        #expect(system.operations.filter { $0 == .helperOff }.count == 1)
+        #expect(system.storedRecord?.ownsSleepDisabled == false)
     }
 
     @Test("SPEC-HLP-004 削除に成功したら、所有を外してから手動スリープをオフにし、off を実行しない")
@@ -47,13 +50,16 @@ struct ControllerHelperRemovalTests {
         #expect(system.storedRecord?.ownsSleepDisabled == false)
     }
 
-    @Test("SPEC-HLP-004 SPEC-HLP-005 自分が立てた disablesleep を読めないときも、ヘルパーの削除で pmset を実行する")
+    @Test("SPEC-HLP-004 SPEC-HLP-005 自分が立てた disablesleep を読めないときは削除せず所有を保つ")
     func helperRemovalResetsUnreadable() {
         let system = FakeSystem()
         let controller = makeController(system, settings: .premise { $0.blocksManualSleep = true })
         controller.requestStart(from: .menu)
         system.failing = [.readSleepDisabled]
-        #expect(controller.resetsSleepDisabledOnHelperRemoval())
+        system.clearHistory()
+        #expect(!controller.prepareHelperRemoval())
+        #expect(!system.operations.contains(.helperOff))
+        #expect(system.storedRecord?.ownsSleepDisabled == true)
     }
 
     @Test("SPEC-HLP-004 停止中に削除に成功したら、残っていた disablesleep を合わせられていない制御から外す")

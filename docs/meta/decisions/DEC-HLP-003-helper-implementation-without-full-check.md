@@ -5,7 +5,7 @@ title: ヘルパーは C の小さな実行ファイルにし、自分の sudoer
 status: superseded
 supersedes: ["DEC-HLP-002"]
 superseded_by: ["DEC-HLP-005"]
-requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-003", "REQ-HLP-005", "REQ-HLP-006"]
+requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-005", "REQ-HLP-006"]
 based_on: ["DEC-HLP-001", "EVID-HLP-001", "EVID-HLP-002"]
 ---
 
@@ -27,7 +27,7 @@ based_on: ["DEC-HLP-001", "EVID-HLP-001", "EVID-HLP-002"]
 
 ## 背景
 
-root で動くコードは小さく、環境の影響を受けないものにしたい。sudoers の書式を誤ると sudo 全体が使えなくなる（`REQ-HLP-003`）。開発用の Mac では、Capsaicin と関係なく `SleepDisabled` が 1 になっていたことがある（`EVID-BLK-003`）。
+root で動くコードは小さく、環境の影響を受けないものにしたい。sudoers の書式を誤ると sudo 全体が使えなくなる。開発用の Mac では、Capsaicin と関係なく `SleepDisabled` が 1 になっていたことがある（`EVID-BLK-003`）。
 
 `DEC-HLP-002` は、sudoers のルールを置いた後に `visudo -c` で全体を確かめる手順を持っていた。パスを指定しない `visudo -c` は、ほかのツールが置いた sudoers のファイルのモードが 0440 でないだけで失敗する。sudo 本体はそれらのファイルを受け入れる（`EVID-HLP-002`）。オーナーの Mac では、この検査で設置も削除も途中で止まり、ヘルパーの実行ファイルだけが残った。
 

@@ -30,16 +30,16 @@ struct SettingsTests {
         #expect(display.state == .editable(isOn: false))
         #expect(!display.isOn)
         settings.lidCloseDisplay = .keepOn
-        let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .partial,
+        let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .requiresApproval,
                                             brightnessUnavailable: false)
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
-        #expect(missing[1].help == SettingsSection.sleep.text("helperNotReady")
+        #expect(missing[1].help == SettingsSection.sleep.text("helperRequiresApproval")
             + "\n" + SettingsSection.sleep.text("lidClose.help"))
     }
 
-    @Test("SPEC-SET-005 SPEC-SET-006 蓋のある Mac はポップアップ、ない Mac はスイッチの行になる", arguments: [true, false])
+    @Test("SPEC-SET-005 SPEC-SET-006 ディスプレイを開閉できる Mac はポップアップ、それ以外はスイッチの行になる", arguments: [true, false])
     func hardware(laptop: Bool) {
         let settings = CapsaicinCore.Settings()
         let capabilities = MachineCapabilities(hasLid: laptop, hasInternalBattery: laptop)
@@ -55,7 +55,7 @@ struct SettingsTests {
     }
 
     @Test("SPEC-SET-005 SPEC-HLP-001 設置中は選択を表示して保存せず、成功後だけ2値を1回で保存する",
-          arguments: [HelperInstallationState.notInstalled, .partial],
+          arguments: [HelperInstallationState.notInstalled],
           [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
     func installation(state: HelperInstallationState, choice: SettingsLidCloseChoice) async {
         let fixture = AppFixture()
@@ -64,7 +64,7 @@ struct SettingsTests {
         let model = SettingsModel(
             app: fixture.model,
             helper: SettingsHelperActions(state: { installed }, perform: { operation in
-                #expect(operation == (state == .partial ? .repair : .install))
+                #expect(operation == .install)
                 #expect(!fixture.model.settings.blocksManualSleep)
                 #expect(fixture.savedSettings.isEmpty)
                 installed = .installed
@@ -92,8 +92,8 @@ struct SettingsTests {
         #expect(!model.pendingManual && !model.isBusy)
     }
 
-    @Test("SPEC-SET-005 SPEC-HLP-001 確認取り消し・認証取り消し・失敗は2値を保存せずスリープに戻す",
-          arguments: [0, 1, 2], [HelperInstallationState.notInstalled, .partial])
+    @Test("SPEC-SET-005 SPEC-HLP-001 確認取り消し・登録取り消し・失敗は2値を保存せずスリープに戻す",
+          arguments: [0, 1, 2], [HelperInstallationState.notInstalled])
     func installationCancellation(outcome: Int, state: HelperInstallationState) async {
         let fixture = AppFixture()
         var errors = 0
@@ -101,7 +101,7 @@ struct SettingsTests {
         let model = SettingsModel(
             app: fixture.model,
             helper: SettingsHelperActions(state: { state }, perform: { operation in
-                #expect(operation == (state == .partial ? .repair : .install))
+                #expect(operation == .install)
                 performed = true
                 return outcome == 1 ? .cancelled : .failure(
                     operation: operation,
@@ -134,9 +134,8 @@ struct SettingsTests {
         )
         model.confirm = { _, fromSetting in #expect(!fromSetting); return true }
         await model.manage(.install)
-        await model.manage(.repair)
         await model.manage(.remove)
-        #expect(operations == [.install, .repair, .remove])
+        #expect(operations == [.install, .remove])
         #expect(fixture.savedSettings.isEmpty)
     }
 
@@ -253,6 +252,40 @@ struct SettingsTests {
 }
 
 extension SettingsTests {
+    @Test("SPEC-HLP-004 SPEC-HLP-006 SPEC-SET-005 4状態とエラーの文言を英日で持ち、古い状態と修復のキーを残さない",
+          arguments: ["en", "ja"])
+    func helperResources(language: String) throws {
+        let bundle = try localizedAppBundle(language)
+        let helperKeys = [
+            "status.notInstalled", "status.requiresApproval", "status.usable", "status.unavailable",
+            "openSystemSettings.button", "status.help", "helperInstall.message",
+            "helperRemove.message", "helperRemove.manual.message",
+            "error.helperUnavailable.title", "error.helperUnavailable.message",
+            "error.helperTranslocated.title", "error.helperTranslocated.message",
+            "error.helperRestore.title", "error.helperRestore.message",
+        ]
+        for key in helperKeys {
+            let text = bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper")
+            #expect(!text.isEmpty && text != key)
+            #expect(!text.localizedCaseInsensitiveContains("password") && !text.contains("パスワード"))
+        }
+        for key in ["status.partial", "status.installed", "helperRepair.button", "helperRepair.confirm",
+                    "helperRepair.title", "helperRepair.message", "error.helperRepair.title",
+                    "error.helperRepair.message"]
+        {
+            #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
+        }
+        for key in ["helperNotInstalled", "helperRequiresApproval", "helperApprovalPending", "helperUnavailable"] {
+            for suffix in ["", ".a11y"] {
+                #expect(bundle
+                    .localizedString(forKey: key + suffix, value: nil, table: "SettingsSleep") != key + suffix)
+            }
+        }
+        for key in ["helperNotReady", "helperNotReady.a11y"] {
+            #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") == key)
+        }
+    }
+
     @Test("SPEC-SET-002 SPEC-SYS-004 統合した条件の文言を同じテーブルから引き、ディスプレイの表記をそろえる")
     func sleepResources() throws {
         let app = try appBundle()

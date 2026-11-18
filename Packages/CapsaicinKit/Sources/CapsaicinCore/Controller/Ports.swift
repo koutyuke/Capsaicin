@@ -24,10 +24,10 @@ public protocol PowerAssertionControlling {
 }
 
 /// どの操作も実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
-/// 期限を過ぎた子プロセスは止めずに終わるまで見届け、その間の読み取りと操作は子プロセスを起動せずに throw する。
+/// XPC の期限切れは接続を取り消す。読み取りの子プロセスは終わるまで見届け、その間の読み取りは throw する。
 @MainActor
 public protocol HelperSleepControlling {
-    /// ヘルパーの3つの構成要素がそろっているか。
+    /// 署名に Team ID があり、ヘルパーが登録・許可されているか。
     var isHelperInstalled: Bool { get }
     func readSleepDisabled() throws -> Bool
     func turnOn() throws

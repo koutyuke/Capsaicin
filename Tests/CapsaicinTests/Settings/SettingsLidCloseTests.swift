@@ -35,7 +35,7 @@ extension SettingsTests {
         #expect(fixture.savedSettings.count == 2)
     }
 
-    @Test("SPEC-SET-005 壊れたヘルパーでも保存した選択を表示し、設置せずスリープへ戻せる",
+    @Test("SPEC-SET-005 承認待ちでも保存した選択を表示し、設置せずスリープへ戻せる",
           arguments: LidCloseDisplay.allCases)
     func brokenHelperLidClose(display: LidCloseDisplay) async {
         let fixture = AppFixture()
@@ -45,12 +45,12 @@ extension SettingsTests {
         fixture.model.changeSettings(settings)
         fixture.savedSettings.removeAll()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
-            state: { .partial }, perform: { _ in Issue.record("スリープへ戻すのに設置を要求した"); return .cancelled },
+            state: { .requiresApproval }, perform: { _ in Issue.record("スリープへ戻すのに設置を要求した"); return .cancelled },
             completed: { _, _ in },
         ))
         #expect(model.lidCloseChoice.rawValue == display.rawValue)
         #expect(model.sleepRows[1].state == .onWithoutHelper)
-        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperNotReady")))
+        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")))
         await model.changeLidClose(to: .sleep)
         #expect(model.sleepRows[1].state == .editable(isOn: false))
         #expect(model.lidCloseChoice == .sleep)
@@ -76,7 +76,7 @@ extension SettingsTests {
         #expect(fixture.savedSettings.isEmpty && errors == 1)
     }
 
-    @Test("SPEC-SET-005 SPEC-HLP-001 蓋のない Mac のスイッチも設置成功後だけ保存する",
+    @Test("SPEC-SET-005 SPEC-HLP-001 MacBook以外のスイッチも設置成功後だけ保存する",
           arguments: [false, true])
     func desktopManual(accepts: Bool) async throws {
         let system = FakeSystem()
@@ -104,7 +104,12 @@ extension SettingsTests {
     }
 
     @Test("SPEC-SET-005 明るさを0を選んだときだけ輝度の注意を出し、ヘルパーの注意を先頭に置く",
-          arguments: SettingsLidCloseChoice.allCases, [HelperInstallationState.installed, .partial, .notInstalled])
+          arguments: SettingsLidCloseChoice.allCases, [
+              HelperInstallationState.installed,
+              .requiresApproval,
+              .notInstalled,
+              .unavailable,
+          ])
     func brightnessWarning(choice: SettingsLidCloseChoice, helper: HelperInstallationState) async throws {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
@@ -119,7 +124,13 @@ extension SettingsTests {
         let row = unavailable.sleepRows[1]
         var keys: [String] = []
         if choice != .sleep, helper != .installed {
-            keys.append("helperNotReady")
+            let key = switch helper {
+            case .notInstalled: "helperNotInstalled"
+            case .requiresApproval: "helperRequiresApproval"
+            case .unavailable: "helperUnavailable"
+            case .installed: ""
+            }
+            keys.append(key)
         }
         if choice == .zeroBrightness {
             keys.append("brightnessUnavailable")

@@ -5,7 +5,7 @@ title: root ヘルパーとバックグラウンド項目を SMAppService に移
 status: superseded
 supersedes: []
 superseded_by: ["DEC-HLP-005"]
-requirements: ["REQ-SYS-005", "REQ-SYS-006", "REQ-HLP-002", "REQ-HLP-004", "REQ-LCY-001", "REQ-LCY-003"]
+requirements: ["REQ-HLP-002", "REQ-HLP-004", "REQ-LCY-001", "REQ-LCY-003"]
 based_on: ["DEC-SYS-021", "DEC-HLP-001", "DEC-HLP-003", "DEC-LCY-002", "HYP-BLK-007", "HYP-HLP-005", "HYP-HLP-006", "HYP-HLP-007", "HYP-LCY-006", "HYP-LCY-007"]
 ---
 
@@ -21,7 +21,7 @@ based_on: ["DEC-SYS-021", "DEC-HLP-001", "DEC-HLP-003", "DEC-LCY-002", "HYP-BLK-
 - sudoers のルール、`/Library/PrivilegedHelperTools` への複写、`osascript` による設置と削除のスクリプトをなくす。
 - ログイン時の起動は `SMAppService.mainApp` で切り替える。クラッシュ時の再起動は、`KeepAlive` の `Crashed` を持つ `SMAppService.agent` で行い、直接起動したアプリはその agent に引き渡す。
 - アプリは起動時に、前回登録した版と今の版を比べ、違えばデーモンと agent を登録し直す。Sparkle による更新と手での入れ替えを、同じ経路で扱う。
-- `REQ-SYS-005`（Developer Program なしでソースからビルドして使える）と `REQ-SYS-006`（コード署名に依存しない）は、この構成を実装する変更で取り下げる。手元の Debug ビルドは Apple Development の証明書で署名する。CI のテストは ad-hoc 署名のままにする。
+- Developer Program なしでソースからビルドして使える要件と、コード署名に依存しない要件は、この構成を実装する変更で取り下げる。手元の Debug ビルドは Apple Development の証明書で署名する。CI のテストは ad-hoc 署名のままにする。
 - v0.1.0 で設置した sudoers、ヘルパー、LaunchDaemon、LaunchAgent は、アプリで片付けない。Git に入れない手順書をオーナーが利用者に渡す。
 
 実装に入る前に、`HYP-BLK-007`、`HYP-HLP-005`、`HYP-HLP-006`、`HYP-HLP-007`、`HYP-LCY-006`、`HYP-LCY-007` をオーナーが実機の試作で確かめる。結果を受けて、`DEC-HLP-001`、`DEC-HLP-003`、`DEC-LCY-002` を置き換える判断を作り、要件と仕様を直す。
@@ -38,7 +38,7 @@ based_on: ["DEC-SYS-021", "DEC-HLP-001", "DEC-HLP-003", "DEC-LCY-002", "HYP-BLK-
 - (b) (a) に、plist の `AssociatedBundleIdentifiers` を足して表示をまとめる。費用は小さい。ただし、同じ利用者のほかのプロセスもヘルパーを呼べるままで、root で動く設置と削除のスクリプトも残る（試作で (c) の前提が崩れたときの代わりの案）。
 - (c) `SMAppService.daemon` と XPC に移り、ログイン時の起動とクラッシュ時の再起動も SMAppService に移す（採用）。
 
-2つのアドバイザーの意見は分かれた。片方は、root で動くコードを増やさない規則（`AGENTS.md`）と `REQ-SYS-005` を重く見て (b) を推した。もう片方は、版のずれと呼び出し元の制限を重く見て (c) を推した。`REQ-SYS-005` を取り下げると決めた後に、オーナーは (c) を選んだ。
+2つのアドバイザーの意見は分かれた。片方は、root で動くコードを増やさない規則（`AGENTS.md`）と、Developer Program なしでビルドして使える要件を重く見て (b) を推した。もう片方は、版のずれと呼び出し元の制限を重く見て (c) を推した。その要件を取り下げると決めた後に、オーナーは (c) を選んだ。
 
 ## 理由
 

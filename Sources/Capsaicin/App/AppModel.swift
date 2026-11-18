@@ -84,8 +84,10 @@ final class AppModel {
         refresh()
     }
 
-    func resetsSleepDisabledOnHelperRemoval() -> Bool {
-        controller.resetsSleepDisabledOnHelperRemoval()
+    func prepareHelperRemoval() -> Bool {
+        let result = controller.prepareHelperRemoval()
+        refresh()
+        return result
     }
 
     func helperRemovalSucceeded() {

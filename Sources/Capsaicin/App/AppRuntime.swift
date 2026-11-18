@@ -6,17 +6,19 @@ final class AppRuntime {
     let model: AppModel
     let openSettings: @MainActor () -> Void
     private let launchedByLaunchd: Bool
-    private let registerAndStart: @MainActor (Bool) async -> LaunchAgentStatus
+    private let registerAndStart: @MainActor () async -> LaunchAgentStatus
     private let restartStatus: () -> LaunchAgentStatus
     private let updateLaunchAtLogin: (Bool) throws -> Void
+    private let reregisterHelper: @MainActor () async -> Void
     private let startServices: @MainActor () async -> Void
     private let stopServices: @MainActor () async -> Void
 
     init(
         model: AppModel, launchedByLaunchd: Bool,
-        registerAndStart: @escaping @MainActor (Bool) async -> LaunchAgentStatus,
+        registerAndStart: @escaping @MainActor () async -> LaunchAgentStatus,
         restartStatus: @escaping () -> LaunchAgentStatus,
         updateLaunchAtLogin: @escaping (Bool) throws -> Void,
+        reregisterHelper: @escaping @MainActor () async -> Void,
         startServices: @escaping @MainActor () async -> Void,
         stopServices: @escaping @MainActor () async -> Void,
         openSettings: @escaping @MainActor () -> Void,
@@ -26,6 +28,7 @@ final class AppRuntime {
         self.registerAndStart = registerAndStart
         self.restartStatus = restartStatus
         self.updateLaunchAtLogin = updateLaunchAtLogin
+        self.reregisterHelper = reregisterHelper
         self.startServices = startServices
         self.stopServices = stopServices
         self.openSettings = openSettings
@@ -37,11 +40,12 @@ final class AppRuntime {
         if launchedByLaunchd {
             model.launchAgentStatus = restartStatus()
         } else {
-            model.launchAgentStatus = await registerAndStart(model.settings.launchesAtLogin)
+            model.launchAgentStatus = await registerAndStart()
             if model.launchAgentStatus == .ready {
                 return false
             }
         }
+        await reregisterHelper()
         model.launch()
         updateLoginSetting(model.settings.launchesAtLogin)
         await startServices()
