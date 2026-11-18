@@ -31,7 +31,7 @@ evidence: []
 
 1. 環境: 対応環境の Mac。v0.1.0 を入れ、ヘルパーを設置した状態から始める。
 2. 主張1〜3: Developer ID の署名を入れた最初のリリース用の PR で、確認用のビルドを PR のコメントからダウンロードする。`codesign -dv --verbose=2` で Authority が Developer ID Application、`spctl --assess -vv` で `source=Notarized Developer ID` を確かめる。v0.1.0 と入れ替えて開き、主張2の機能を1つずつ操作する。Mac を再起動し、ログイン後に起動することとヘルパーの LaunchDaemon が動いたことを確かめる。
-3. 主張4: Developer ID で署名した版を2つ公開した後に確かめる。前の版を入れたまま「アップデートを確認」を選び、更新の後に Gatekeeper の画面が出ず、新しい版が LaunchAgent の管理下で1つだけ動くことを確かめる。
+3. 主張4: Developer ID で署名した版を2つ公開した後に確かめる。前の版を入れたまま、設定の「このアプリについて」で「今すぐ確認」を選び、更新の後に Gatekeeper の画面が出ず、新しい版が LaunchAgent の管理下で1つだけ動くことを確かめる。
 4. 結果と未確認の項目を根拠に記録する。
 
 ## 結果

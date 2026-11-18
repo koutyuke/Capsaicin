@@ -83,7 +83,7 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 
 ## Uninstallation
 
-1. If you installed the helper, open Capsaicin's settings, go to **ヘルパー** (Helper), and click **削除** (Delete). Capsaicin's interface is in Japanese only. The helper is installed under `/Library` and `/etc`, so it remains even after you delete the app.
+1. If you installed the helper, open Capsaicin's settings, go to **Helper**, and click **Remove…**. The helper is installed under `/Library` and `/etc`, so it remains even after you delete the app.
 2. Quit Capsaicin from the menu bar.
 3. In Terminal, remove the LaunchAgent that Capsaicin uses to launch at login and to restart after a crash. If `launchctl` reports that the service is not found, it is already unloaded; continue to the next command.
 
