@@ -23,7 +23,6 @@
 | [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の表示と説明 | なし |
 | [`manual-and-lid-sleep.md`](manual-and-lid-sleep.md) | 手動のスリープとディスプレイを閉じたときのスリープを止める | ヘルパーの設置 |
 | [`disablesleep-persistence.md`](disablesleep-persistence.md) | デーモンがないときの `disablesleep` の永続性 | 管理者権限、再起動 |
-| [`background-off-release.md`](background-off-release.md) | バックグラウンドの許可を外すと、設定値を保ったまま抑止が解除され、HUD が出る | ヘルパーの設置、システム設定、復旧時のみ管理者権限 |
 | [`led-remapper.md`](led-remapper.md) | キー配列を変更するアプリの案内の出し入れ | なし |
 | [`cli-launch.md`](cli-launch.md) | 停止したアプリを CLI から起動し、出力と終了コードを見る | なし |
 | [`cli-invalid-input.md`](cli-invalid-input.md) | CLI の不正な引数と、CLI を許可しない設定 | なし |
