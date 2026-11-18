@@ -2,7 +2,7 @@
 schema: task
 id: TASK-117
 title: 試作のヘルパーのラベルを、ビルドのときの環境変数で変えられるようにする
-status: todo
+status: done
 requirements: []
 depends_on: []
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -54,4 +54,4 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## レビュー
 
-（未記入）
+PM がレビューした。`spike/daemon-cleanup-probe` で `just check` が通る。ヘルパーのターゲットのビルド前の処理が `HELPER_LABEL_SUFFIX` を英小文字と数字だけか確かめ（違えばビルドが失敗する）、Debug の `HELPER_SERVICE_NAME` をヘッダーで定義する。アプリのビルドの処理が、同じラベルを daemon の plist のファイル名・`Label`・`MachServices` と `Info.plist` の `CapsaicinHelperServiceName` に入れ、`HelperIdentity.serviceName` はその値を読む。`r1` を指定したビルドと指定しないビルド、不正な値、Release で接尾辞が無視されることを、Codex の報告の出力で確かめた。

@@ -2,7 +2,7 @@
 schema: task
 id: TASK-118
 title: BTM のデーモンの項目が親を失う条件を確かめる手順書を作る
-status: todo
+status: done
 requirements: []
 depends_on: ["TASK-117"]
 assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
@@ -48,4 +48,4 @@ assignee: Codex（OpenCode 経由、openai/gpt-6.1-sol）
 
 ## レビュー
 
-（未記入）
+PM がレビューした。`helper-orphan-reproduction.md` は、実験1（A を消す）と実験2（A を動かす）で、A の終了、削除・移動、各コピーの起動、登録し直し、登録解除の段階ごとに BTM の UUID と親、`SleepDisabled`、launchd の `Invalid path` を記録し、仮説の 1〜4 を別々に判定できる。コピーの削除は表示したパスを確かめてから `/bin/rm -rf` で行い、ゴミ箱は空にしない。最初の登録の時点で親が既に `Unknown Developer` なら判定不能として止める。親を失った項目が残りうることを、実施前の承認事項にしている。`TASK-117` の成果物の plist の名前と `Label` が、手順書の `$LABEL` と一致することを確かめた。
