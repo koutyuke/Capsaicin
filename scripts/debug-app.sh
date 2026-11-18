@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
-# justfile の app レシピが読み込む。agent から起動したアプリはコマンドラインが相対パスになるので、
-# Debug のプロセスは PID から引いた実行ファイルの絶対パスで見つける（DEC-SYS-026）。
+# justfile の app レシピが読み込む。
 
-executable_path() {
-  /usr/sbin/lsof -a -p "$1" -d txt -Fn 2>/dev/null | /usr/bin/awk '/^n/ && !found {print substr($0, 2); found = 1}'
+# 単一インスタンスの判定と同じ API で探す。終了要求は bundle ID で開かず、各プロセスに直接送る。
+debug_processes() {
+  /usr/bin/osascript -l JavaScript - "${1:-list}" <<'JXA'
+ObjC.import('AppKit');
+
+function run(argv) {
+    const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier('io.github.koutyuke.capsaicin.debug');
+    const rows = [];
+    for (let i = 0; i < apps.count; i++) {
+        const app = apps.objectAtIndex(i);
+        const pid = app.processIdentifier;
+        if (pid <= 0 || app.terminated) continue;
+        const url = app.executableURL;
+        const path = url.isNil() ? '' : ObjC.unwrap(url.path);
+        if (argv[0] === 'quit') app.terminate;
+        rows.push(pid + '\t' + path);
+    }
+    return rows.join('\n');
 }
-
-# どのチェックアウトの手元の Debug ビルドにも一致する。/Applications の PR ビルドと Release は含めない。
-debug_pids() {
-  local pid path
-  for pid in $(/usr/bin/pgrep -x Capsaicin || true); do
-    path="$(executable_path "$pid")" || continue
-    case "$path" in
-    /*/.build/xcode/Build/Products/Debug/Capsaicin.app/Contents/MacOS/Capsaicin) printf '%s\n' "$pid" ;;
-    esac
-  done
+JXA
 }

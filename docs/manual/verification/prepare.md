@@ -149,7 +149,7 @@
 
    手元のビルドを使うファイルでは、代わりに次を実行する。`TASK-115` の試作や残った Debug agent の片付けでは、この通常版のビルドを使わず、後掲の「試作のビルドを選ぶ」のコマンドを実行する。agent、ヘルパー、ログイン時やクラッシュ後の起動を確かめるときは、`just build` の後に `just sign-debug` で署名し直す（`DEC-SYS-026`）。オーナーのキーチェーンに「Developer ID Application」の証明書と鍵が必要である。PR の Debug ビルドが agent の項目を作った Mac では、ad-hoc や「Apple Development」で署名したビルドの agent は起動の制約で止まる（`EVID-LCY-005`）。
 
-   `/Applications` の PR Debug ビルドと手元のビルドは bundle ID が同じで、BTM の agent の項目を共有する。手元のビルドを使う前に、PR ビルドをメニューの「Capsaicinを終了」で止める。`just stop` は `/Applications` の PR ビルドを対象にしない。この手順の開始時に動作中のアプリがあった場合は、操作1の条件どおり中止する。
+    `/Applications` の PR Debug ビルドと手元のビルドは bundle ID が同じで、どちらも `just status` と `just stop` の対象である。どちらかが動いていれば `just start` は起動しない。この手順の開始時に動作中のアプリがあった場合は、`just stop` で終了させず、操作1の条件どおり中止する。
 
    ```sh
    just build
@@ -200,11 +200,11 @@ printf '%s\n' "$APP" > "$B/app-path.txt"
 
 ブランチが `spike/daemon-cleanup-probe`、コミットが `d76d393`、ヘルパーの plist が接尾辞なしの `io.github.koutyuke.capsaicin.debug.helper.plist`、bundle ID が `io.github.koutyuke.capsaicin.debug`、最初の `Authority` が `Developer ID Application:` で始まり、Team ID が配布物と同じであることを確かめる。agent の plist はバンドルに残すが、試作は登録せず、起動時に残った登録を一度だけ unregister する。クラッシュ後の自動再起動はない。「一般」の「クラッシュ時に自動再起動できませんでした」は試作の想定どおりである。
 
-残った agent がなければ、準備ではまだアプリを起動しない。操作4の結果の記録を終えてから、選んだ検証へ進む。試作に `just start`・`just restart` は使わない。これらは agent の起動を待つ通常版向けの手順である。
+残った agent がなければ、準備ではまだアプリを起動しない。操作4の結果の記録を終えてから、選んだ検証へ進む。`just start` と `just restart` はコマンドを実行したチェックアウトのビルドを開く。別 worktree の試作を使うときは、選んだ検証の手順どおり `/usr/bin/open "$APP"` で開く。
 
 ### 残った Debug agent の登録を片付ける
 
-これは、起動時に agent を unregister する試作を使った、オーナー向けの片付けである。製品のアプリはこの登録解除を行わない（`DEC-LCY-010`）。解除の実測と、BTM の無効な項目が残ることは `EVID-LCY-008` にある。システム設定のスイッチをオフにするだけでは、SMAppService の登録解除にはならない。`~/Library/LaunchAgents` のファイル削除や `sfltool resetbtm` は行わない。
+これは、起動時に agent を unregister する試作を使った、オーナー向けの片付けである。製品のアプリも `just` の app レシピも、この登録解除を行わない（`DEC-LCY-010`）。解除の実測と、BTM の無効な項目が残ることは `EVID-LCY-008` にある。システム設定のスイッチをオフにするだけでは、SMAppService の登録解除にはならない。`~/Library/LaunchAgents` のファイル削除や `sfltool resetbtm` は行わない。
 
 1. この節に進めるのは、操作2の例外の対象だけである。`B` に設定と試作の状態記録の退避、開始前の登録の記録があり、起動できる署名の試作を用意し、操作4の LED の戻し方を記録していることを確認する。アプリを起動するため、通常は「ログイン時に起動」の保存値に応じて mainApp も登録される。今回の一時的な mainApp の登録解除もオーナーが承認する。
 
