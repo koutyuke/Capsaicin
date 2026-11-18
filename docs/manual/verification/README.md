@@ -43,7 +43,7 @@
 
 ヘルパーの設置と承認、on と off、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直し、Finder からの起動の引き渡しは `EVID-HLP-006` で確認済みなので、専用の検証ファイルは置かない。残る検証の前提を作るための設置・許可と、最後の削除は各ファイルに書く。承認待ちの新しいアラートと状態の文は `helper-approval-guidance.md`、ログイン時の起動とクラッシュ後の再起動は `login-and-crash-restart.md` で確かめる。
 
-`APP` を使うファイルでは、`prepare.md` で署名・公証済みの PR Debug ビルドか、同じ Team ID で署名し直した手元のビルドを選ぶ。`/Applications` の PR ビルドを対象に指定するファイルでは、PR ビルドを使う。`APP` を明記しないファイルと worktree 切り替えの検証は、手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使い、agent やヘルパーを確かめる前に `just sign-debug` で署名し直す。実行するファイルの対象に合わせて準備し、途中で PR ビルドと手元のビルドを混ぜない。対象を変えるときは先に `cleanup.md` を終える。
+`APP` を使うファイルでは、`prepare.md` で署名・公証済みの PR Debug ビルドか、Developer ID で署名し直した手元のビルドを選ぶ。`/Applications` の PR ビルドを対象に指定するファイルでは、PR ビルドを使う。`APP` を明記しないファイルと worktree 切り替えの検証は、手元の `.build/xcode/Build/Products/Debug/Capsaicin.app` を使い、agent やヘルパーを確かめる前に `just sign-debug` で署名し直す。実行するファイルの対象に合わせて準備し、途中で PR ビルドと手元のビルドを混ぜない。対象を変えるときは先に `cleanup.md` を終える。
 
 ## 共通の決まり
 
@@ -94,12 +94,12 @@
 | 症状 | まず確かめること |
 | --- | --- |
 | Debug プロセスが0本、または2本以上 | `just status` でジョブの PID と全 Debug プロセスを読み直す。5秒待って再確認する |
-| `just start` が失敗する | 直接起動したアプリが残っていても成功に数えない。`just status` のジョブの PID・`Job executable:` と全 Debug プロセスを読む。署名の Team ID と次のログを照合し、起動を繰り返さない |
-| ログに `Launch Constraint Violation` がある | `/usr/bin/log show --last 5m --predicate 'process == "launchd"' \| grep 'Launch Constraint Violation'` で読む。同じ bundle ID の Team ID 付きビルドが登録した agent は ad-hoc 署名のビルドでは起動できない。手元のビルドを止め、`just sign-debug` で同じ Team ID の証明書を使って署名し直す（`DEC-SYS-025`） |
+| `just start` が失敗する | 直接起動したアプリが残っていても成功に数えない。`just status` のジョブの PID・`Job executable:` と全 Debug プロセスを読む。署名の `Authority` と次のログを照合し、起動を繰り返さない |
+| ログに `Launch Constraint Violation` がある | `/usr/bin/log show --last 5m --predicate 'process == "launchd"' \| grep 'Launch Constraint Violation'` で読む。同じ bundle ID の Developer ID 署名のビルドが登録した agent は、ad-hoc や「Apple Development」で署名したビルドでは起動できない（`EVID-LCY-005`）。手元のビルドを止め、`just sign-debug` で「Developer ID Application」の証明書を使って署名し直す（`DEC-SYS-026`） |
 | agent の登録や起動が失敗する | アプリの「一般」の警告、システム設定の許可、BTM の識別子とアプリのパス。手作業の登録で回避しない |
 | ログイン時に起動しない | 「ログイン時に起動」、mainApp の登録とシステム設定の「ログイン時に開く」、バックグラウンドの許可。agent の `RunAtLoad` は `false` のままである |
 | ヘルパーが「システム設定での許可待ち」になる | システム設定で Capsaicin の項目を許可する。agent も同じ項目なので両方の状態を見る |
-| ヘルパーが「このビルドでは使用不可」になる | ad-hoc 署名では使えない。手元では停止後に `just sign-debug` で署名し直すか、署名に Team ID がある PR Debug ビルドを使う |
+| ヘルパーが「このビルドでは使用不可」になる | ad-hoc 署名では使えない。手元では停止後に `just sign-debug` で Developer ID で署名し直すか、署名に Team ID がある PR Debug ビルドを使う |
 | `SleepDisabled` が戻らない | 承認済みの復旧操作 `/usr/bin/sudo /usr/bin/pmset -a disablesleep 0` の直後に `/usr/bin/pmset -g` で読む。成功しても設定変更のコマンド自体は何も出力しない。戻らなければ PM に報告する |
 | LED が通常連動に戻らない | `B` にある承認済みの LED 復旧手順を実行する。読み戻した値だけで合格にしない |
 

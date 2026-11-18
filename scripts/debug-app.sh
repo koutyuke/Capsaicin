@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # justfile の app レシピが読み込む。agent から起動したアプリはコマンドラインが相対パスになるので、
-# Debug のプロセスは PID から引いた実行ファイルの絶対パスで見つける（DEC-SYS-025）。
+# Debug のプロセスは PID から引いた実行ファイルの絶対パスで見つける（DEC-SYS-026）。
 
 executable_path() {
   /usr/sbin/lsof -a -p "$1" -d txt -Fn 2>/dev/null | /usr/bin/awk '/^n/ && !found {print substr($0, 2); found = 1}'

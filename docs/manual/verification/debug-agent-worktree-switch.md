@@ -6,7 +6,7 @@
 
 ## 始める前に
 
-- オーナーが2つの worktree の Debug アプリの起動と終了、agent・mainApp の登録、Debug ジョブの切り替えを承認している。署名し直す操作にも承認があり、配布物と同じ Team ID の「Apple Development」の証明書と鍵がオーナーのキーチェーンにある（`DEC-SYS-025`）。`just stop` は全チェックアウトの手元の Debug アプリを対象にするため、ほかの検証を同時に行わない。
+- オーナーが2つの worktree の Debug アプリの起動と終了、agent・mainApp の登録、Debug ジョブの切り替えを承認している。署名し直す操作にも承認があり、「Developer ID Application」の証明書と鍵がオーナーのキーチェーンにある（`DEC-SYS-026`）。`just stop` は全チェックアウトの手元の Debug アプリを対象にするため、ほかの検証を同時に行わない。
 - 2つの worktree はオーナーが用意済みで、それぞれの `.build/xcode/Build/Products/Debug/Capsaicin.app` をビルド済みである。このファイルでは worktree を作らず、コードも変更しない。
 - 1つ目の worktree で `prepare.md` を手元のビルド用に終え、`B` の絶対パスを控えている。`/Applications` の PR ビルドと Release は動かさない。
 - ヘルパーは使わず、`SleepDisabled = 0` である。このファイルでは worktree 間の切り替えだけを確かめ、ヘルパーやログイン時の起動の検証には数えない。
@@ -26,7 +26,7 @@ printf '%s\n' "$W2" > "$B/second-worktree-path.txt"
 /usr/bin/pgrep -x Capsaicin
 ```
 
-アプリが動いていないことを確かめてから、両方のビルドを同じ Team ID で署名し直す。再ビルドした場合は、そのビルドも署名し直してから起動する。
+アプリが動いていないことを確かめてから、両方のビルドを `just sign-debug` で「Developer ID Application」の証明書を使って署名し直す。再ビルドした場合は、そのビルドも署名し直してから起動する。
 
 ```sh
 just sign-debug
@@ -39,7 +39,7 @@ just status
 /usr/bin/pgrep -x Capsaicin
 ```
 
-期待: bundle ID は両方 `io.github.koutyuke.capsaicin.debug`、`TeamIdentifier` は両方とも配布物と同じである。署名し直しや検査が失敗したら起動しない。対象外のアプリのプロセスがあれば止める。起動先の判定は `just status` の `Job executable:` が示す、ジョブの PID から引いた実行ファイルの絶対パスで行う。バンドル内の定義の存在だけで合格にしない。定義は `project.yml` のビルドフェーズが `Contents/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist` に作る。
+期待: bundle ID は両方 `io.github.koutyuke.capsaicin.debug`、最初の `Authority` は両方とも `Developer ID Application:` で始まり、`TeamIdentifier` は両方とも配布物と同じである。署名し直しや検査が失敗したら起動しない。対象外のアプリのプロセスがあれば止める。起動先の判定は `just status` の `Job executable:` が示す、ジョブの PID から引いた実行ファイルの絶対パスで行う。バンドル内の定義の存在だけで合格にしない。定義は `project.yml` のビルドフェーズが `Contents/Library/LaunchAgents/io.github.koutyuke.capsaicin.debug.plist` に作る。
 
 ## 操作と期待
 
@@ -112,14 +112,14 @@ just status
 /usr/bin/log show --last 5m --predicate 'process == "launchd"' | grep 'Launch Constraint Violation' > "$B/launch-constraint.switch-aborted.txt"
 ```
 
-該当する記録があれば、ad-hoc 署名のビルドが同じ bundle ID の Team ID 付きビルドの agent の項目を使っていないか、署名の `TeamIdentifier` を記録して照合する。
+該当する記録があれば、Developer ID 以外で署名したビルドが、同じ bundle ID の Developer ID 署名のビルドが作った agent の項目を使っていないか、署名の `Authority` と `TeamIdentifier` を記録して照合する。
 
 ```sh
 /usr/bin/codesign -dv "$W1/.build/xcode/Build/Products/Debug/Capsaicin.app" > "$B/signature-first.switch-aborted.txt" 2>&1
 /usr/bin/codesign -dv "$W2/.build/xcode/Build/Products/Debug/Capsaicin.app" > "$B/signature-second.switch-aborted.txt" 2>&1
 ```
 
-直接起動したアプリだけが動き続けていても、agent への引き渡しが確かめられなければ失敗である。アプリを止めてから `just sign-debug` で同じ Team ID の署名を用意し、PM と再試行を決める。ログに該当する記録がないだけでは、起動の成功とみなさない。
+直接起動したアプリだけが動き続けていても、agent への引き渡しが確かめられなければ失敗である。アプリを止めてから `just sign-debug` で Developer ID の署名を用意し、PM と再試行を決める。ログに該当する記録がないだけでは、起動の成功とみなさない。
 
 複数起動、対象外のパス、`just start` の失敗、切り替え後の不一致、`SleepDisabled` の変化があれば止める。起動を繰り返さず、動いている対象のメニューで抑止を解除してから、いずれかの worktree の devShell で停止する。
 
@@ -154,7 +154,7 @@ just status
 
 `"$B/result-debug-agent-worktree-switch.txt"` に次を書く。
 
-- 2つの worktree と Debug アプリの絶対パス、bundle ID、ビルド番号、署名の `TeamIdentifier`
+- 2つの worktree と Debug アプリの絶対パス、bundle ID、ビルド番号、署名の最初の `Authority` と `TeamIdentifier`
 - 各起動・停止後の `Job executable:`、`pid`、PPID、プロセスの本数、`Job matches this checkout` の値。停止中の起動先は判定不能とする
 - 1つ目→2つ目→1つ目の切り替えの結果、`just start` の出力と終了コード
 - `SIGTERM` の有無、`SleepDisabled` とアサーション、戻した設定と片付け対象のアプリ

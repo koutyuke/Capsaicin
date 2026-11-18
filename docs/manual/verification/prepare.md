@@ -144,7 +144,7 @@
 
    期待: bundle ID が `io.github.koutyuke.capsaicin.debug`、埋め込んだ実行ファイルが `capsaicin` と `capsaicin-helper` である。署名検査に成功し、`TeamIdentifier` がある。agent は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true`、デーモンは `BundleProgram = Contents/Helpers/capsaicin-helper`、`RunAtLoad = true`、`MachServices` のキーが `io.github.koutyuke.capsaicin.debug.helper` である。定義は `project.yml` のビルドフェーズが作る。
 
-   手元のビルドを使うファイルでは、代わりに次を実行する。agent、ヘルパー、ログイン時やクラッシュ後の起動を確かめるときは、`just build` の後に `just sign-debug` で署名し直す（`DEC-SYS-025`）。オーナーのキーチェーンに、配布物と同じ Team ID の「Apple Development」の証明書と鍵が必要である。別の証明書を選ぶ場合は `just sign-debug 'Developer ID Application'` のように名前を渡す。
+   手元のビルドを使うファイルでは、代わりに次を実行する。agent、ヘルパー、ログイン時やクラッシュ後の起動を確かめるときは、`just build` の後に `just sign-debug` で署名し直す（`DEC-SYS-026`）。オーナーのキーチェーンに「Developer ID Application」の証明書と鍵が必要である。PR の Debug ビルドが agent の項目を作った Mac では、ad-hoc や「Apple Development」で署名したビルドの agent は起動の制約で止まる（`EVID-LCY-005`）。
 
    `/Applications` の PR Debug ビルドと手元のビルドは bundle ID が同じで、BTM の agent の項目を共有する。手元のビルドを使う前に、PR ビルドをメニューの「Capsaicinを終了」で止める。`just stop` は `/Applications` の PR ビルドを対象にしない。この手順の開始時に動作中のアプリがあった場合は、操作1の条件どおり中止する。
 
@@ -161,7 +161,7 @@
    /usr/bin/plutil -p "$APP/Contents/Library/LaunchDaemons/io.github.koutyuke.capsaicin.debug.helper.plist"
    ```
 
-   bundle ID が `io.github.koutyuke.capsaicin.debug`、実行ファイルが `capsaicin` と `capsaicin-helper` で、署名検査に成功し、`TeamIdentifier` が配布物と同じことを確かめる。agent は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true`、デーモンは `BundleProgram = Contents/Helpers/capsaicin-helper`、`RunAtLoad = true`、`MachServices` のキーが `io.github.koutyuke.capsaicin.debug.helper` である。PR ビルドの取得元・署名を確かめられない、手元で同じ Team ID の署名を用意できない、既存アプリの上書きが要る場合は止める。
+   bundle ID が `io.github.koutyuke.capsaicin.debug`、実行ファイルが `capsaicin` と `capsaicin-helper` で、署名検査に成功し、最初の `Authority` が `Developer ID Application:` で始まり、`TeamIdentifier` が配布物と同じことを確かめる。agent は `BundleProgram = Contents/MacOS/Capsaicin`、`RunAtLoad = false`、`KeepAlive.Crashed = true`、デーモンは `BundleProgram = Contents/Helpers/capsaicin-helper`、`RunAtLoad = true`、`MachServices` のキーが `io.github.koutyuke.capsaicin.debug.helper` である。PR ビルドの取得元・署名を確かめられない、手元で同じ Team ID の署名を用意できない、既存アプリの上書きが要る場合は止める。
 
 3. 結果用のメモ `"$B/result-prepare.txt"` を作り、実行日、macOS のビルド番号、Mac の機種、承認者を書く。認証情報や全プロセスの環境変数は保存しない。
 4. PM に、独立したプロセスから各対象キーボードへ `"Auto"` を書ける LED の復旧用実行ファイルと、その実行・成功判定の手順を用意してもらう。承認済みの手順を `B` に保管する。

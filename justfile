@@ -17,7 +17,7 @@ build: gen
 
 # オーナーのキーチェーンの鍵で、このチェックアウトの Debug アプリを署名し直す（エージェントは承認が必要）。
 [positional-arguments]
-sign-debug identity="Apple Development":
+sign-debug identity="Developer ID Application":
     #!/usr/bin/env bash
     set -euo pipefail
     identity="$1"
@@ -39,7 +39,7 @@ sign-debug identity="Apple Development":
     done < <(/usr/bin/find "$app/Contents" -depth \( -type f -o -type d \) -print0)
     "${sign[@]}" "$app"
     /usr/bin/codesign --verify --strict --deep "$app"
-    /usr/bin/codesign -dv "$app" 2>&1 | /usr/bin/grep -E '^(Identifier|TeamIdentifier)='
+    /usr/bin/codesign -dvv "$app" 2>&1 | /usr/bin/awk '/^(Identifier|TeamIdentifier)=/ || (/^Authority=/ && !seen++)'
 
 build-release: gen
     /usr/bin/xcodebuild {{ xcode_base }} -configuration Release build
@@ -216,8 +216,8 @@ start:
     done
     echo 'The Debug job did not start within 10 seconds.' >&2
     echo 'A directly opened app may still be running without a confirmed agent handoff; this is not a successful start.' >&2
-    echo 'An ad-hoc build cannot launch an agent registered by a build with the same bundle ID and a Team ID.' >&2
-    echo 'Re-sign this build with the same Team ID using just sign-debug.' >&2
+    echo 'A build not signed with Developer ID cannot launch an agent registered by a Developer ID build with the same bundle ID.' >&2
+    echo 'Re-sign this build with Developer ID using just sign-debug.' >&2
     echo "Check launch constraints: /usr/bin/log show --last 5m --predicate 'process == \"launchd\"' | grep 'Launch Constraint Violation'" >&2
     exit 1
 
