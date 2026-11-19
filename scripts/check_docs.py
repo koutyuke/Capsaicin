@@ -2,6 +2,7 @@
 
 import argparse
 import re
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -70,6 +71,8 @@ STATUSES = {
     "task": {"todo", "in_progress", "in_review", "done"},
 }
 ID = re.compile(r"(?:TASK-[0-9]{3}|(?:REQ|SPEC|DEC|Q|HYP|EVID|PLAN)-([A-Z]+)-[0-9]{3})")
+# 削除した資料を指す根拠の sources（例: `d6cb7b3:docs/requirements.md`）。
+SOURCE_COMMIT = re.compile(r"([0-9a-f]{7,40}):(.+)")
 MENTION = re.compile(
     r"(?<![A-Za-z0-9_-])(?:TASK|REQ|SPEC|DEC|Q|HYP|EVID|PLAN)-(?:[A-Z]+-)?[0-9]+(?![A-Za-z0-9_])"
 )
@@ -103,6 +106,7 @@ class Checker:
         self.references = []
         self.requirements = {}
         self.specifications = {}
+        self.commit_sources = []
 
     def error(self, path, message):
         self.errors.append(f"{path.relative_to(self.root)}: {message}")
@@ -124,6 +128,12 @@ class Checker:
             return False
         self.ids[identifier] = path
         return True
+
+    def git(self, *arguments):
+        result = subprocess.run(
+            ["git", "-C", str(self.root), *arguments], capture_output=True
+        )
+        return result.returncode == 0
 
     def required(self, path, data, fields):
         for field in sorted(fields - data.keys()):
@@ -317,6 +327,12 @@ class Checker:
                     field,
                     kinds if field == "depends_on" else REFERENCE_KINDS[field],
                 )
+        if schema == "evidence" and isinstance(data.get("sources"), list):
+            self.commit_sources.extend(
+                (path, source)
+                for source in data["sources"]
+                if isinstance(source, str) and SOURCE_COMMIT.fullmatch(source)
+            )
         # 運用規則自体の説明用 ID は対象外。記録・製品の本文の参照は検査する。
         for identifier in set(MENTION.findall(body)):
             self.references.append((path, identifier))
@@ -334,6 +350,15 @@ class Checker:
         for path, identifier in sorted(set(self.references)):
             if identifier not in self.ids:
                 self.error(path, f"Referenced ID does not exist: {identifier}.")
+        # マージしないブランチのコミットは、ブランチを消すと読めなくなる。
+        for path, source in self.commit_sources:
+            commit, file = SOURCE_COMMIT.fullmatch(source).groups()
+            if not self.git("merge-base", "--is-ancestor", commit, "HEAD"):
+                self.error(
+                    path, f"Source commit is not in the history of HEAD: {source}."
+                )
+            elif not self.git("cat-file", "-e", f"{commit}:{file}"):
+                self.error(path, f"Source path does not exist in its commit: {source}.")
         for requirement, (path, specs) in self.requirements.items():
             for spec in specs & self.specifications.keys():
                 if requirement not in self.specifications[spec][1]:

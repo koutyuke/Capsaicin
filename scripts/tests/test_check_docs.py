@@ -384,6 +384,43 @@ class CheckDocsTests(unittest.TestCase):
         self.write("README.md", "参照: `REQ-MENU-999`。")
         self.assert_error("README.md: Referenced ID does not exist: REQ-MENU-999")
 
+    def test_evidence_source_commits_must_be_in_head_history(self):
+        def git(*arguments):
+            # 開発機の署名やフックの設定に左右されないよう、一時リポジトリだけの設定で実行する。
+            return subprocess.run(
+                ["git", "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null"]
+                + ["-c", "user.name=test", "-c", "user.email=test@example.com"]
+                + ["-C", str(self.root), *arguments],
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip()
+
+        git("init", "-q", "-b", "main")
+        self.write("old.md", "削除した資料")
+        git("add", "-A")
+        git("commit", "-q", "-m", "base")
+        base = git("rev-parse", "--short", "HEAD")
+        git("switch", "-q", "-c", "spike")
+        self.write("probe.md", "試作")
+        git("add", "-A")
+        git("commit", "-q", "-m", "probe")
+        spike = git("rev-parse", "--short", "HEAD")
+        git("switch", "-q", "main")
+        self.record(
+            "evidence",
+            sources=[f"{base}:old.md", "docs/current.md", "https://example.com"],
+        )
+        self.assertEqual(check_docs(self.root), [])
+        self.record("evidence", sources=[f"{base}:missing.md"])
+        self.assert_error(
+            f"Source path does not exist in its commit: {base}:missing.md"
+        )
+        self.record("evidence", sources=[f"{spike}:probe.md"])
+        self.assert_error(
+            f"Source commit is not in the history of HEAD: {spike}:probe.md"
+        )
+
     def test_cli_exit_codes_and_missing_root(self):
         script = Path(__file__).resolve().parents[1] / "check_docs.py"
         result = subprocess.run(
