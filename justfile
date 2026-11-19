@@ -3,10 +3,7 @@ set shell := ["bash", "-euo", "pipefail", "-c"]
 xcode_base := "-project Capsaicin.xcodeproj -scheme Capsaicin -sdk macosx -destination 'platform=macOS,arch=arm64' -derivedDataPath .build/xcode -clonedSourcePackagesDirPath .build/spm"
 xcode_args := xcode_base + " -configuration Debug"
 version := `sed -n 's/^ *MARKETING_VERSION: "\(.*\)"$/\1/p' project.yml`
-debug_id := "io.github.koutyuke.capsaicin.debug"
 debug_app := justfile_directory() / ".build/xcode/Build/Products/Debug/Capsaicin.app"
-# どのチェックアウトの Debug ビルドにも一致する、実行ファイルのコマンドライン。
-debug_process := "/Build/Products/Debug/Capsaicin[.]app/Contents/MacOS/Capsaicin$"
 
 default:
     @just --list
@@ -17,10 +14,36 @@ gen:
 build: gen
     /usr/bin/xcodebuild {{ xcode_args }} build
 
+# Re-sign the Debug app with a key in the owner's keychain so it can use the helper (agents need owner approval).
+[positional-arguments]
+sign-debug identity="Developer ID Application":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    identity="$1"
+    app='{{ debug_app }}'
+    [[ -d "$app" ]] || { echo 'Debug app is missing. Run just build first.' >&2; exit 1; }
+    sign=(/usr/bin/codesign --force --timestamp=none --preserve-metadata=identifier,entitlements,flags --sign "$identity")
+    # シンボリックリンクはたどらず、内側の Mach-O を先に、入れ物のバンドルを後に署名する。
+    while IFS= read -r -d '' path; do
+        if [[ -f "$path" ]]; then
+            [[ "$(/usr/bin/file -b "$path")" == *Mach-O* ]] || continue
+        else
+            case "$path" in
+                *.framework|*.xpc|*.app|*.bundle) ;;
+                *) continue ;;
+            esac
+        fi
+        printf 'Signing: %s\n' "$path"
+        "${sign[@]}" "$path"
+    done < <(/usr/bin/find "$app/Contents" -depth \( -type f -o -type d \) -print0)
+    "${sign[@]}" "$app"
+    /usr/bin/codesign --verify --strict --deep "$app"
+    /usr/bin/codesign -dvv "$app" 2>&1 | /usr/bin/awk '/^(Identifier|TeamIdentifier)=/ || (/^Authority=/ && !seen++)'
+
 build-release: gen
     /usr/bin/xcodebuild {{ xcode_base }} -configuration Release build
 
-# 確認用 Debug の追加 dylib を作らず、PR とコミットを名前に含む zip を作る。
+# Build a Debug app for checks without extra dylibs, and zip it with the PR number and commit in the name.
 [positional-arguments]
 dist-debug pr sha: gen
     #!/usr/bin/env bash
@@ -28,7 +51,9 @@ dist-debug pr sha: gen
     pr="$1"
     sha="$2"
     [[ "$pr" =~ ^[0-9]+$ && "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Invalid PR number or commit SHA' >&2; exit 1; }
-    /usr/bin/xcodebuild {{ xcode_args }} ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO build
+    # 更新の後の登録し直しを確かめられるよう、確認用のビルドごとに増える版番号を付ける。Debug は配信先を持たない。
+    build="$(date -u +%Y%m%d%H%M%S)"
+    /usr/bin/xcodebuild {{ xcode_args }} ENABLE_DEBUG_DYLIB=NO ENABLE_PREVIEWS=NO CURRENT_PROJECT_VERSION="$build" build
     if find '{{ debug_app }}' -type f \( -name '*.debug.dylib' -o -name '__preview.dylib' \) -print | grep -q .; then
         echo 'Unexpected Debug or preview dylib in the app' >&2
         exit 1
@@ -93,85 +118,97 @@ lint: lint-code lint-docs lint-build-tools
 
 check: fmt-check lint test
 
-# Show the Debug job, paths, processes, and sleep state (agents need owner approval).
+[doc("Show all Debug processes and sleep state (agents need owner approval).")]
 [group('app')]
 status:
     #!/usr/bin/env bash
     set -euo pipefail
-    exe='{{ debug_app }}/Contents/MacOS/Capsaicin'
-    echo '--- LaunchAgent job'
-    if job="$(/bin/launchctl print "gui/$UID/{{ debug_id }}" 2>/dev/null)"; then
-        /usr/bin/grep -E '^[[:space:]]*(state|pid|program) =' <<< "$job" || true
-        program="$(/usr/bin/awk -F ' = ' '/^[[:space:]]*program = / {print $2}' <<< "$job")"
-        [[ "$program" == "$exe" ]] && echo 'Job matches this checkout: yes' || echo 'Job matches this checkout: no'
-    else
-        echo 'Job is not loaded or could not be read.'
-    fi
-    echo '--- LaunchAgent plist: ProgramArguments[0]'
-    program="$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:0' "$HOME/Library/LaunchAgents/{{ debug_id }}.plist" 2>/dev/null)" || program=''
-    printf '%s\n' "${program:-Plist is missing or could not be read.}"
-    [[ "$program" == "$exe" ]] && echo 'Plist matches this checkout: yes' || echo 'Plist matches this checkout: no'
+    source {{ quote(justfile_directory() / "scripts/debug-app.sh") }}
+    exe={{ quote(debug_app / "Contents/MacOS/Capsaicin") }}
     printf 'This checkout: %s\n' "$exe"
-    echo '--- All Debug processes: PID, start time, executable path'
-    pids="$(/usr/bin/pgrep -f '{{ debug_process }}' | /usr/bin/paste -sd, -)" || pids=''
-    /bin/ps -ww -o pid=,lstart=,args= -p "$pids" 2>/dev/null || echo 'No Debug processes.'
+    echo '--- All Debug processes: PID, start time, executable path, checkout match'
+    running="$(debug_processes)"
+    if [[ -n "$running" ]]; then
+        while IFS=$'\t' read -r pid path; do
+            started="$(/bin/ps -o lstart= -p "$pid" 2>/dev/null)" || started=unknown
+            if [[ "$path" == "$exe" ]]; then
+                match=yes
+            elif [[ -n "$path" ]]; then
+                match=no
+            else
+                match=unknown
+            fi
+            printf '%s  %s  %s  (this checkout: %s)\n' "$pid" "$started" "${path:-unknown}" "$match"
+        done <<< "$running"
+    else
+        echo 'No Debug processes.'
+    fi
     echo '--- SleepDisabled'
-    /usr/bin/pmset -g | /usr/bin/awk '$1 == "SleepDisabled" {print $2}' || echo 'Could not read SleepDisabled.'
+    /usr/bin/pmset -g | /usr/bin/awk '$1 == "SleepDisabled" {print $2; found = 1} END {if (!found) exit 1}' || echo 'Could not read SleepDisabled.'
     echo '--- Capsaicin assertions'
     /usr/bin/pmset -g assertions | /usr/bin/grep -i capsaicin || echo 'No Capsaicin assertions, or could not read them.'
-    exit 0
 
-# Quit all Debug apps, then send SIGTERM only to remaining processes (agents need owner approval).
+[doc("Quit all Debug apps, then send SIGTERM only to remaining processes (agents need owner approval).")]
 [group('app')]
 stop:
     #!/usr/bin/env bash
     set -euo pipefail
-    pids() { /usr/bin/pgrep -f '{{ debug_process }}' || true; }
-    wait_stopped() {
-        for ((i = 0; i < $1; i++)); do
-            [[ -z "$(pids)" ]] && return 0
+    source {{ quote(justfile_directory() / "scripts/debug-app.sh") }}
+    wait_for_exit() {
+        local i running
+        for ((i = 0; ; i++)); do
+            running="$(debug_processes)" || return
+            if [[ -z "$running" || "$i" -eq "$1" ]]; then
+                printf '%s' "$running"
+                return
+            fi
             /bin/sleep 1
         done
-        [[ -z "$(pids)" ]]
     }
-    [[ -n "$(pids)" ]] || { echo 'No Debug apps are running.'; exit 0; }
-    /usr/bin/osascript -e 'tell application id "{{ debug_id }}" to quit' >/dev/null 2>&1 || true
-    if wait_stopped 10; then echo 'Debug apps stopped.'; exit 0; fi
-    remaining="$(pids)"
+    requested="$(debug_processes quit)"
+    [[ -n "$requested" ]] || { echo 'No Debug apps are running.'; exit 0; }
+    remaining="$(wait_for_exit 10)"
     if [[ -n "$remaining" ]]; then
-        printf 'Sending SIGTERM to remaining Debug PIDs:\n%s\n' "$remaining"
-        /usr/bin/xargs /bin/kill -TERM <<< "$remaining" || true
+        while IFS= read -r process; do
+            # 待機中に起動した別のプロセスには SIGTERM を送らない。
+            /usr/bin/grep -Fxq -- "$process" <<< "$requested" || continue
+            pid="${process%%$'\t'*}"
+            printf 'Sending SIGTERM to Debug PID %s.\n' "$pid"
+            kill -TERM "$pid" || true
+        done <<< "$remaining"
+        remaining="$(wait_for_exit 5)"
     fi
-    if wait_stopped 5; then echo 'Debug apps stopped.'; exit 0; fi
-    printf 'Debug PIDs still running:\n%s\n' "$(pids)" >&2
-    exit 1
+    if [[ -n "$remaining" ]]; then
+        printf 'Debug processes still running:\n%s\n' "$remaining" >&2
+        exit 1
+    fi
+    echo 'Debug apps stopped.'
 
-# Open this checkout's Debug app after unloading its job (agents need owner approval).
+[doc("Open this checkout's Debug app if no Debug app is running (agents need owner approval).")]
 [group('app')]
 start:
     #!/usr/bin/env bash
     set -euo pipefail
-    exe='{{ debug_app }}/Contents/MacOS/Capsaicin'
-    ! /usr/bin/pgrep -f '{{ debug_process }}' >/dev/null || { echo 'Debug apps are running. Run just stop first.' >&2; exit 1; }
-    [[ -d '{{ debug_app }}' ]] || { echo 'Debug app is missing. Run just build first.' >&2; exit 1; }
-    if /bin/launchctl print "gui/$UID/{{ debug_id }}" >/dev/null 2>&1; then
-        /bin/launchctl bootout "gui/$UID/{{ debug_id }}"
-    fi
-    /usr/bin/open '{{ debug_app }}'
-    # 直接起動した個体は launchd に引き渡して終わるので、ジョブが動かす実行ファイルで判定する。
+    source {{ quote(justfile_directory() / "scripts/debug-app.sh") }}
+    app={{ quote(debug_app) }}
+    exe="$app/Contents/MacOS/Capsaicin"
+    running="$(debug_processes)"
+    [[ -z "$running" ]] || { echo 'Debug apps are running. Run just stop first.' >&2; exit 1; }
+    [[ -x "$exe" ]] || { echo 'Debug app is missing. Run just build first.' >&2; exit 1; }
+    /usr/bin/open "$app"
+    # 同じ bundle ID の別のコピーではなく、このチェックアウトのビルドを開けたことを確かめる。
     for ((i = 0; i < 10; i++)); do
         /bin/sleep 1
-        job="$(/bin/launchctl print "gui/$UID/{{ debug_id }}" 2>/dev/null)" || continue
-        pid="$(/usr/bin/awk -F ' = ' '/^[[:space:]]*pid = / {print $2; exit}' <<< "$job")"
-        [[ -n "$pid" ]] || continue
-        program="$(/usr/bin/awk -F ' = ' '/^[[:space:]]*program = / {print $2; exit}' <<< "$job")"
-        [[ "$program" == "$exe" ]] || { printf 'The Debug job runs another executable: %s\n' "$program" >&2; exit 1; }
-        printf 'Started Debug PID %s: %s\n' "$pid" "$program"
+        running="$(debug_processes)"
+        [[ "$running" != *$'\n'* ]] || continue
+        IFS=$'\t' read -r pid path <<< "$running"
+        [[ "$path" == "$exe" ]] || continue
+        printf 'Started Debug PID %s: %s\n' "$pid" "$path"
         exit 0
     done
-    echo 'The Debug job did not start within 10 seconds.' >&2
+    echo 'Could not confirm that this checkout is the only running Debug app. Run just status.' >&2
     exit 1
 
-# Build, stop, and start this checkout's Debug app, in that order (agents need owner approval).
+[doc("Build this checkout, stop all Debug apps, then start this checkout's app (agents need owner approval).")]
 [group('app')]
 restart: build stop start

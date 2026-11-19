@@ -5,7 +5,7 @@ title: 設定はアプリの UserDefaults だけが持ち、型と既定値は 1
 status: accepted
 supersedes: []
 superseded_by: []
-requirements: ["REQ-SET-001", "REQ-LCY-004"]
+requirements: ["REQ-SET-001"]
 based_on: []
 ---
 

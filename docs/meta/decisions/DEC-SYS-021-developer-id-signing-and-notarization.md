@@ -5,7 +5,7 @@ title: 配布物だけを Developer ID で署名して公証し、手元のビ�
 status: accepted
 supersedes: ["DEC-SYS-004"]
 superseded_by: []
-requirements: ["REQ-SYS-005", "REQ-SYS-006", "REQ-SYS-008"]
+requirements: ["REQ-SYS-008"]
 based_on: ["DEC-SYS-015", "DEC-SYS-019", "EVID-SYS-001", "HYP-SYS-004"]
 ---
 
@@ -16,7 +16,7 @@ based_on: ["DEC-SYS-015", "DEC-SYS-019", "EVID-SYS-001", "HYP-SYS-004"]
 オーナーは Apple Developer Program に個人で加入した。GitHub Releases で配る zip を、次のように作る。
 
 - リリース用の PR の確認用のビルドと、公開する zip の両方を、Developer ID Application 証明書で署名する。Hardened Runtime と secure timestamp を付け、Apple の公証を通し、公証のチケットをアプリに staple する。
-- Debug ビルド、`just build`、`just dist`、CI のテストは ad-hoc 署名のままにする。ソースからビルドする人に証明書を求めず、アプリの機能を署名の種類に依存させない（`REQ-SYS-005`、`REQ-SYS-006`）。
+- Debug ビルド、`just build`、`just dist`、CI のテストは ad-hoc 署名のままにする。ソースからビルドする人に証明書を求めず、アプリの機能を署名の種類に依存させない。
 - 署名は、`just dist` が作った ad-hoc 署名の zip を受け取り、リポジトリを checkout しない macOS のジョブで、内側から順に署名し直す。順序は、`Contents/Helpers` の2つの実行ファイル、`Sparkle.framework` の中身（Sparkle の文書が示す順）、`Sparkle.framework`、アプリ本体である。`--deep` は使わない。entitlements は付けず、Sparkle の `Downloader.xpc` だけは既存の entitlements を保つ。
 - 公証は `notarytool` に App Store Connect の Team Key（ロールは Developer）を渡して行い、結果を待つ。公証、`stapler validate`、`spctl --assess` のどれかが通らなければ、artifact を作らずに止める。
 - Sparkle の appcast の EdDSA 署名、`SHA256SUMS.txt`、ビルドの来歴の attestation は、staple した後の zip に対して作る。
@@ -74,4 +74,4 @@ based_on: ["DEC-SYS-015", "DEC-SYS-019", "EVID-SYS-001", "HYP-SYS-004"]
 - メンバーシップを更新しないと決めたら、`DEC-SYS-004` の方式に戻すかを決める。
 - `HYP-SYS-004` が外れ、Hardened Runtime か署名の変更で機能が動かないと分かったら、entitlements の例外を足すか、署名のしかたを見直す。
 - 公証の要件が変わり、ビルドの後に署名し直す方式が通らなくなったら、ビルドで署名する方式を比べ直す。
-- `SMAppService.daemon` などへの移行を決めたら、手元のビルドを ad-hoc 署名のままにできるか（`REQ-SYS-006`）を見直す。
+- `SMAppService.daemon` などへの移行を決めたら、手元のビルドを ad-hoc 署名のままにできるかを見直す。

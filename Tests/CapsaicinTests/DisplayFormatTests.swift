@@ -47,14 +47,14 @@ struct DisplayFormatTests {
         for source in [TimeLimitSource.timer, .specifiedTime] {
             let session = BlockingSession(timeLimit: TimeLimit(date: end, source: source))
             let status = BlockingStatus(session: session, batteryCondition: nil,
-                                        misalignments: [:], isRecordUnsaved: false)
+                                        misalignments: [:])
             let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false,
                                         hasInternalBattery: false, sleepRows: [], now: now,
                                         calendar: calendar, locale: locale, bundle: bundle)
             let menu = try #require(rows.first { $0.id == "menu.status.until" })
             #expect(menu
                 .title == (language == "en" ? "Until \(time) (\(remaining) remaining)" : "\(time)まで（残り\(remaining)）"))
-            for event in [BlockingEvent.started(.user(.menu)), .timeLimitReplaced(.menu)] {
+            for event in [BlockingEvent.started(.menu), .timeLimitReplaced(.menu)] {
                 let hud = try #require(HUDContent.make(for: event, status: status, now: now,
                                                        calendar: calendar, locale: locale, bundle: bundle))
                 #expect(hud.detail == (source == .timer ? rounded : (language == "en" ? "Until \(time)" : "\(time)まで")))
@@ -77,7 +77,7 @@ struct DisplayFormatTests {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try #require(TimeZone(secondsFromGMT: 0))
         let now = Date(timeIntervalSince1970: 12 * 3600)
-        let idle = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false)
+        let idle = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:])
         var settings = Settings()
         settings.timerEnabled = true
         settings.timerDuration = try #require(TimerDuration(minutes: 90))

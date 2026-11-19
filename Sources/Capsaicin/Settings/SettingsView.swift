@@ -76,28 +76,6 @@ struct SettingsView: View {
     private var general: some View {
         Section(SettingsSection.general.text("startup.group.title")) {
             toggle(.general, "launchAtLogin", \.launchesAtLogin, symbol: "power")
-            SettingsRow(
-                title: SettingsSection.general.text("resume.label"),
-                help: SettingsSection.general.text("resume.help"),
-                symbol: "arrow.clockwise",
-            ) {
-                Picker(SettingsSection.general.text("resume.label"), selection: binding(\.resumePolicy)) {
-                    Text(SettingsSection.general.text("resume.option.never")).tag(ResumePolicy.never)
-                    Text(SettingsSection.general.text("resume.option.app")).tag(ResumePolicy.afterAppRestart)
-                    Text(SettingsSection.general.text("resume.option.appAndMac")).tag(
-                        ResumePolicy.afterAppOrMacRestart,
-                    )
-                }.labelsHidden().pickerStyle(.menu)
-            }
-            if !model.app.willRestartAfterCrash {
-                let key =
-                    model.app.launchAgentStatus == .disabled ? "backgroundDisabled" : "restartUnavailable"
-                SettingsRow(
-                    title: SettingsSection.general.text(key + ".label"),
-                    help: SettingsSection.general.text(key + ".help"),
-                    symbol: "exclamationmark.triangle.fill",
-                ) {}
-            }
         }
         Section(SettingsSection.general.text("appearance.group.title")) {
             toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle")
@@ -111,17 +89,18 @@ extension SettingsView {
     @ViewBuilder
     private var sleep: some View {
         Section(SettingsSection.sleep.text("behavior.group.title")) {
-            ForEach(model.sleepRows.filter { $0.key == "display" }) { sleepRow($0) }
+            ForEach(model.displayedSleepRows.filter { $0.key == "display" }) { sleepRow($0) }
         }
         Section {
-            ForEach(model.sleepRows.filter { $0.key != "display" }) { sleepRow($0) }
+            ForEach(model.displayedSleepRows.filter { $0.key != "display" }) { sleepRow($0) }
         }
         release
     }
 
     private func sleepRow(_ row: SettingsSleepRow) -> some View {
         SettingsRow(
-            title: SettingsSection.sleep.text(row.key + ".label"), help: row.help, symbol: row.symbol,
+            title: SettingsSection.sleep.text(row.key + ".label"), subtitle: row.subtitle,
+            help: row.help, symbol: row.symbol,
             warningLabel: row.warningLabel,
         ) {
             if row.key == "lidClose" {
@@ -139,9 +118,7 @@ extension SettingsView {
                 Toggle(
                     SettingsSection.sleep.text(row.key + ".label"),
                     isOn: Binding(
-                        get: {
-                            setting == \.blocksManualSleep && model.pendingManual || row.isOn
-                        }, set: { value in Task { await model.changeSleep(row, to: value) } },
+                        get: { row.isOn }, set: { value in Task { await model.changeSleep(row, to: value) } },
                     ),
                 )
                 .labelsHidden().disabled(model.isBusy)
@@ -271,7 +248,7 @@ extension SettingsView {
         }
     }
 
-    private var helper: some View {
+    var helper: some View {
         Section {
             SettingsRow(
                 title: SettingsSection.helper.text("status.label"),
@@ -281,15 +258,17 @@ extension SettingsView {
                 switch model.helperState {
                 case .notInstalled:
                     Text(SettingsSection.helper.text("status.notInstalled")).foregroundStyle(.secondary)
-                case .partial:
+                case .unavailable:
+                    Text(SettingsSection.helper.text("status.unavailable")).foregroundStyle(.secondary)
+                case .requiresApproval:
                     Label {
-                        Text(SettingsSection.helper.text("status.partial"))
+                        Text(SettingsSection.helper.text("status.requiresApproval"))
                     } icon: {
                         Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                     }
                 case .installed:
                     Label {
-                        Text(SettingsSection.helper.text("status.installed"))
+                        Text(SettingsSection.helper.text("status.usable"))
                     } icon: {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                     }
@@ -300,10 +279,13 @@ extension SettingsView {
             ) {
                 switch model.helperState {
                 case .notInstalled: helperButton(.install)
-                case .partial:
-                    helperButton(.repair)
+                case .requiresApproval:
+                    Button(SettingsSection.helper.text("openSystemSettings.button")) {
+                        Task { await model.manage(.install) }
+                    }.buttonStyle(.bordered).disabled(model.isBusy)
                     helperButton(.remove)
                 case .installed: helperButton(.remove)
+                case .unavailable: EmptyView()
                 }
             }
         }

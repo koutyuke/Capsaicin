@@ -1,56 +1,42 @@
-import CapsaicinPlatform
 import OSLog
 
 @MainActor
 final class AppRuntime {
     let model: AppModel
     let openSettings: @MainActor () -> Void
-    private let launchedByLaunchd: Bool
-    private let registerAndStart: @MainActor (Bool) async -> LaunchAgentStatus
-    private let restartStatus: () -> LaunchAgentStatus
     private let updateLaunchAtLogin: (Bool) throws -> Void
+    private let reregisterHelper: @MainActor () async -> Void
     private let startServices: @MainActor () async -> Void
     private let stopServices: @MainActor () async -> Void
 
     init(
-        model: AppModel, launchedByLaunchd: Bool,
-        registerAndStart: @escaping @MainActor (Bool) async -> LaunchAgentStatus,
-        restartStatus: @escaping () -> LaunchAgentStatus,
+        model: AppModel,
         updateLaunchAtLogin: @escaping (Bool) throws -> Void,
+        reregisterHelper: @escaping @MainActor () async -> Void,
         startServices: @escaping @MainActor () async -> Void,
         stopServices: @escaping @MainActor () async -> Void,
         openSettings: @escaping @MainActor () -> Void,
     ) {
         self.model = model
-        self.launchedByLaunchd = launchedByLaunchd
-        self.registerAndStart = registerAndStart
-        self.restartStatus = restartStatus
         self.updateLaunchAtLogin = updateLaunchAtLogin
+        self.reregisterHelper = reregisterHelper
         self.startServices = startServices
         self.stopServices = stopServices
         self.openSettings = openSettings
         model.onLaunchAtLoginChange = { [weak self] in self?.updateLoginSetting($0) }
     }
 
-    /// false なら LaunchAgent に引き渡せたので、このプロセスは後片付けせず終わる。
-    func start() async -> Bool {
-        if launchedByLaunchd {
-            model.launchAgentStatus = restartStatus()
-        } else {
-            model.launchAgentStatus = await registerAndStart(model.settings.launchesAtLogin)
-            if model.launchAgentStatus == .ready {
-                return false
-            }
-        }
-        model.launch()
+    func start() async {
+        model.restoreBrightnessAtLaunch()
+        await reregisterHelper()
+        model.finishLaunching()
         updateLoginSetting(model.settings.launchesAtLogin)
         await startServices()
-        return true
     }
 
-    func terminate(reason: TerminationReason) async {
+    func terminate(isUserQuit: Bool) async {
         await stopServices()
-        model.terminate(reason: reason)
+        model.terminate(isUserQuit: isUserQuit)
     }
 
     private func updateLoginSetting(_ enabled: Bool) {

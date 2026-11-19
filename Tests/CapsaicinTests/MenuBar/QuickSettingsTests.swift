@@ -10,7 +10,7 @@ struct QuickSettingsTests {
           arguments: [false, true], [false, true])
     func topLevel(active: Bool, timeEnabled: Bool) throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let model = settings(fixture.model)
         model.change(\.timerEnabled, to: timeEnabled)
         model.change(\.specifiedTimeEnabled, to: timeEnabled)
@@ -103,7 +103,7 @@ struct QuickSettingsTests {
         fixture.system.isKnownUnavailable = true
         var installed = false
         let model = SettingsModel(app: fixture.model, helper: .init(
-            state: { installed ? .installed : .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { installed ? .installed : .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let controller = menu(model)
         let parent = try item("menu.quickSettings", in: controller.menu)
@@ -146,7 +146,7 @@ struct QuickSettingsTests {
             ports: system.ports,
         ), saveSettings: { _ in })
         let model = SettingsModel(app: app, helper: .init(
-            state: { .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let controller = menu(model)
         let parent = try item("menu.quickSettings", in: controller.menu)

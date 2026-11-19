@@ -171,36 +171,155 @@
         }
       }
     },
-    "helperNotReady" : {
+    "helperApprovalPending" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Because the helper is not properly installed, this setting cannot be applied. Repair it in Helper settings."
+            "value" : "This selection will take effect after you allow Capsaicin in System Settings > General > Login Items & Extensions. It has not been saved yet."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーが正しくインストールされていないため、この設定を適用できません。設定の「ヘルパー」で修復してください。"
+            "value" : "システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可すると、この選択が有効になります。まだ保存していません。"
           }
         }
       }
     },
-    "helperNotReady.a11y" : {
+    "helperApprovalPending.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warning: Helper is not available"
+            "value" : "Warning: Selection is awaiting approval in System Settings"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "警告、ヘルパーを使用できません"
+            "value" : "警告、選択した設定はシステム設定での許可待ちです"
+          }
+        }
+      }
+    },
+    "helperNotEnabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helper is not enabled"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが有効になっていません"
+          }
+        }
+      }
+    },
+    "helperNotInstalled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This setting cannot be applied because the helper is not installed. Install it in Helper settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが未インストールのため、この設定を適用できません。設定の「ヘルパー」でインストールしてください。"
+          }
+        }
+      }
+    },
+    "helperNotInstalled.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning: Helper is not installed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告、ヘルパーが未インストールです"
+          }
+        }
+      }
+    },
+    "helperRequiresApproval" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This setting cannot be applied because the helper is awaiting approval. Allow Capsaicin in System Settings > General > Login Items & Extensions; you can open it from Helper settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーが承認待ちのため、この設定を適用できません。システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可してください。設定の「ヘルパー」から開けます。"
+          }
+        }
+      }
+    },
+    "helperRequiresApproval.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning: Helper is awaiting approval in System Settings"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告、ヘルパーはシステム設定での許可待ちです"
+          }
+        }
+      }
+    },
+    "helperUnavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This setting cannot be applied because the helper is unavailable in this build. A build signed with a Team ID is required."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このビルドではヘルパーを使えないため、この設定を適用できません。署名にTeam IDがあるビルドが必要です。"
+          }
+        }
+      }
+    },
+    "helperUnavailable.a11y" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warning: Helper is unavailable in this build"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告、このビルドではヘルパーを使えません"
           }
         }
       }
@@ -228,13 +347,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Controls what your Mac and display do when you close the display while sleep prevention is on. Options other than “System sleep” require the helper."
+            "value" : "Controls what your Mac and display do when you close the display while sleep prevention is on. Options other than “System sleep” require the helper and approval in System Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中に、ディスプレイを閉じたときのMacとディスプレイの動作を制御します。「システムスリープ」以外の設定ではヘルパーのインストールが必要です。"
+            "value" : "スリープ防止中に、ディスプレイを閉じたときのMacとディスプレイの動作を制御します。「システムスリープ」以外の設定では、ヘルパーのインストールと、システム設定での許可が必要です。"
           }
         }
       }
@@ -330,13 +449,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when selecting Sleep from the Apple menu. Requires installing the helper."
+            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when selecting Sleep from the Apple menu. Requires installing the helper and approval in System Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中は、アップルメニューの「スリープ」などを選んでもMacをスリープさせません。ヘルパーのインストールが必要です。"
+            "value" : "スリープ防止中は、アップルメニューの「スリープ」などを選んでもMacをスリープさせません。ヘルパーのインストールと、システム設定での許可が必要です。"
           }
         }
       }

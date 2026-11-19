@@ -2,7 +2,7 @@ import CapsaicinCore
 
 /// CLI とアプリの間の要求と応答の形式のバージョン。形式を変えたら上げる。
 public enum IPCProtocol {
-    public static let version = 2
+    public static let version = 3
 }
 
 public enum IPCCommand: Hashable, Sendable, Codable {

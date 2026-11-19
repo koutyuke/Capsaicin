@@ -4,6 +4,22 @@ import CapsaicinPlatform
 import Testing
 
 extension SettingsTests {
+    @Test("SPEC-SET-003 SPEC-SET-005 状態の文は保存値がヘルパーを必要とし、ヘルパーを使えない行だけに出す",
+          arguments: [false, true], [HelperInstallationState.notInstalled, .requiresApproval, .unavailable, .installed])
+    func helperStatusSubtitle(hasLid: Bool, helper: HelperInstallationState) {
+        var settings = CapsaicinCore.Settings()
+        let capabilities = MachineCapabilities(hasLid: hasLid, hasInternalBattery: hasLid)
+        let disabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
+                                             brightnessUnavailable: false)
+        #expect(disabled.allSatisfy { $0.subtitle == nil })
+        settings.blocksManualSleep = true
+        let enabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
+                                            brightnessUnavailable: false)
+        #expect(enabled[0].subtitle == nil)
+        #expect(enabled[1].subtitle == (helper == .installed ? nil : SettingsSection.sleep.text("helperNotEnabled")))
+        #expect((enabled[1].subtitle != nil) == !enabled[1].warningLabel.isEmpty)
+    }
+
     @Test("SPEC-SET-005 ポップアップは保存値の4通りを表示し、オフの間はディスプレイの保存値を隠す",
           arguments: [false, true], LidCloseDisplay.allCases)
     func lidCloseSelection(manual: Bool, display: LidCloseDisplay) {
@@ -35,7 +51,7 @@ extension SettingsTests {
         #expect(fixture.savedSettings.count == 2)
     }
 
-    @Test("SPEC-SET-005 壊れたヘルパーでも保存した選択を表示し、設置せずスリープへ戻せる",
+    @Test("SPEC-SET-005 承認待ちでも保存した選択を表示し、設置せずスリープへ戻せる",
           arguments: LidCloseDisplay.allCases)
     func brokenHelperLidClose(display: LidCloseDisplay) async {
         let fixture = AppFixture()
@@ -45,12 +61,12 @@ extension SettingsTests {
         fixture.model.changeSettings(settings)
         fixture.savedSettings.removeAll()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
-            state: { .partial }, perform: { _ in Issue.record("スリープへ戻すのに設置を要求した"); return .cancelled },
+            state: { .requiresApproval }, perform: { _ in Issue.record("スリープへ戻すのに設置を要求した"); return .cancelled },
             completed: { _, _ in },
         ))
         #expect(model.lidCloseChoice.rawValue == display.rawValue)
         #expect(model.sleepRows[1].state == .onWithoutHelper)
-        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperNotReady")))
+        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")))
         await model.changeLidClose(to: .sleep)
         #expect(model.sleepRows[1].state == .editable(isOn: false))
         #expect(model.lidCloseChoice == .sleep)
@@ -61,7 +77,7 @@ extension SettingsTests {
     @Test("SPEC-SET-005 SPEC-BLK-009 反映失敗ではポップアップと2値をまとめて戻す")
     func lidCloseRollback() async {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         fixture.system.failing = [.helperOn]
         let before = fixture.model.settings
@@ -76,7 +92,7 @@ extension SettingsTests {
         #expect(fixture.savedSettings.isEmpty && errors == 1)
     }
 
-    @Test("SPEC-SET-005 SPEC-HLP-001 蓋のない Mac のスイッチも設置成功後だけ保存する",
+    @Test("SPEC-SET-005 SPEC-HLP-001 MacBook以外のスイッチも設置成功後だけ保存する",
           arguments: [false, true])
     func desktopManual(accepts: Bool) async throws {
         let system = FakeSystem()
@@ -104,7 +120,12 @@ extension SettingsTests {
     }
 
     @Test("SPEC-SET-005 明るさを0を選んだときだけ輝度の注意を出し、ヘルパーの注意を先頭に置く",
-          arguments: SettingsLidCloseChoice.allCases, [HelperInstallationState.installed, .partial, .notInstalled])
+          arguments: SettingsLidCloseChoice.allCases, [
+              HelperInstallationState.installed,
+              .requiresApproval,
+              .notInstalled,
+              .unavailable,
+          ])
     func brightnessWarning(choice: SettingsLidCloseChoice, helper: HelperInstallationState) async throws {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: SettingsHelperActions(
@@ -117,9 +138,17 @@ extension SettingsTests {
             state: { helper }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let row = unavailable.sleepRows[1]
+        #expect(row.subtitle == (choice != .sleep && helper != .installed
+                ? SettingsSection.sleep.text("helperNotEnabled") : nil))
         var keys: [String] = []
         if choice != .sleep, helper != .installed {
-            keys.append("helperNotReady")
+            let key = switch helper {
+            case .notInstalled: "helperNotInstalled"
+            case .requiresApproval: "helperRequiresApproval"
+            case .unavailable: "helperUnavailable"
+            case .installed: ""
+            }
+            keys.append(key)
         }
         if choice == .zeroBrightness {
             keys.append("brightnessUnavailable")

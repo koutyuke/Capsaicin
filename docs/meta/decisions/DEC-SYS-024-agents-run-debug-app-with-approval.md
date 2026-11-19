@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SYS-024
 title: オーナーが承認したら、エージェントは Debug アプリの起動と状態の読み取りまでを実機で行う
-status: accepted
+status: superseded
 supersedes: ["DEC-SYS-020"]
-superseded_by: []
+superseded_by: ["DEC-SYS-027"]
 requirements: []
 based_on: ["DEC-SYS-008", "DEC-LCY-002"]
 ---
@@ -21,7 +21,7 @@ based_on: ["DEC-SYS-008", "DEC-LCY-002"]
 エージェントは、確認する対象と手順をオーナーに示して承認を得たら、その範囲で次を行ってよい。
 
 - 自分の worktree でビルドした Debug アプリ（`io.github.koutyuke.capsaicin.debug`）を起動し、終了する。justfile の `app` グループのレシピを使ってよい。
-- Debug アプリが起動のときに行う LaunchAgent の登録（`~/Library/LaunchAgents` の Debug の plist）と、Debug のジョブに対する `launchctl` の `print`、`bootout`、`kickstart`。
+- Debug アプリが起動のときに行う LaunchAgent の登録（SMAppService の agent と、「ログイン時に起動する」がオンなら mainApp。`DEC-LCY-008`）と、Debug のジョブに対する `launchctl` の `print`、`bootout`、`kickstart`。
 - 状態の読み取り: `log show` と `log stream`、`launchctl print`、`pmset -g`（`assertions` などの読み取りを含む）、`ps`、Debug の CLI の `status`。
 - 承認された手順に含まれる場合だけ、Debug の CLI の `on` と `off`。
 - `screencapture` による画面写真。画面収録の許可は、オーナーが与える。

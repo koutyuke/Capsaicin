@@ -47,7 +47,7 @@ struct ControllerSettingsTests {
         #expect(controller.isBlocking)
         #expect(system.heldAssertions == [.preventUserIdleSystemSleep])
         #expect(controller.misalignments.isEmpty)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-BLK-009 巻き戻しでも合わせられなかった仕組みは、合わせられていない制御になり、次の合わせ直しで直る")
@@ -89,7 +89,7 @@ struct ControllerSettingsTests {
         controller.requestStart(from: .menu)
         #expect(controller.changeSettings(.premise()) == .applied)
         #expect(!system.sleepDisabled)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-BLK-009 バッテリー残量の条件の変更はその場で効き、成り立てば解除する")
@@ -126,7 +126,7 @@ struct ControllerSettingsTests {
         changed.lidCloseDisplay = .keepOn
         #expect(controller.changeSettings(changed) == .applied)
         #expect(controller.settings == changed)
-        #expect(system.operations == [.saveRecord])
+        #expect(system.operations.isEmpty)
         #expect(controller.misalignments.isEmpty)
         #expect(controller.isBlocking)
     }

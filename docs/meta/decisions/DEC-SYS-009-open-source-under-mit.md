@@ -5,7 +5,7 @@ title: ソースを MIT ライセンスで GitHub に公開する
 status: accepted
 supersedes: []
 superseded_by: []
-requirements: ["REQ-SYS-006", "REQ-SYS-007"]
+requirements: ["REQ-SYS-007"]
 based_on: ["DEC-SYS-004", "DEC-HLP-001"]
 ---
 

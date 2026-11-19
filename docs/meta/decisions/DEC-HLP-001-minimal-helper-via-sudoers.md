@@ -5,7 +5,7 @@ title: root の処理を専用の小さなヘルパーに限り、sudoers と起
 status: superseded
 supersedes: []
 superseded_by: ["DEC-HLP-005"]
-requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-004", "REQ-SYS-006"]
+requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-004"]
 based_on: ["EVID-HLP-001"]
 ---
 

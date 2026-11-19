@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-LCY-001
 title: 書き込んだプロセスが終了しても HIDCapsLockLED は "On" のまま残る
-status: open
+status: supported
 affects: ["DEC-LCY-001", "REQ-LCY-003", "SPEC-LCY-002", "SPEC-LCY-003"]
-evidence: []
+evidence: ["EVID-LCY-007"]
 ---
 
 # HYP-LCY-001 書き込んだプロセスが終了しても HIDCapsLockLED は "On" のまま残る
@@ -31,4 +31,4 @@ LED への最初の書き込み前に、対象へ `"Auto"` を書ける独立し
 
 ## 結果
 
-未確認。
+内蔵キーボードの実機で支持された（`EVID-LCY-007`）。`SIGKILL` と `SIGSEGV` のどちらでも LED は点いたまま残り、Caps Lock を押しても連動に戻らなかった。アプリを開き直すと `"Auto"` に戻った。Karabiner-Elements の「Manipulate caps lock LED」がオンだと、見える LED はそちらの制御に従う。

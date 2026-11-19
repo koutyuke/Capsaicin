@@ -2,10 +2,10 @@
 schema: decision
 id: DEC-LCY-008
 title: クラッシュ時の再起動を SMAppService の agent、ログイン時の起動を SMAppService の mainApp で行う
-status: accepted
+status: superseded
 supersedes: ["DEC-LCY-001", "DEC-LCY-002"]
-superseded_by: []
-requirements: ["REQ-LCY-001", "REQ-LCY-003", "REQ-LCY-005"]
+superseded_by: ["DEC-LCY-010"]
+requirements: ["REQ-LCY-001", "REQ-LCY-003"]
 based_on: ["DEC-HLP-005", "EVID-LCY-001", "EVID-LCY-002", "EVID-LCY-003", "HYP-LCY-006", "HYP-LCY-007"]
 ---
 
@@ -21,7 +21,7 @@ based_on: ["DEC-HLP-005", "EVID-LCY-001", "EVID-LCY-002", "EVID-LCY-003", "HYP-L
 - `~/Library/LaunchAgents` に plist を書かず、`launchctl bootstrap` と `bootout` も使わない。
 - daemon と agent は、システム設定でアプリの1つの項目にまとまり、そのスイッチは両方を止める（`EVID-LCY-003`）。設定画面は、項目がオフのとき、ヘルパーとクラッシュ時の再起動の両方が止まっていることを示す。
 - 登録し直しは、デーモンと同じ規則で行う（`DEC-HLP-005`）。起動時に前回登録した版と今の版を比べ、違えば登録し直す。
-- 登録や引き渡しに失敗したとき、連続してクラッシュしたときの振る舞い（`SPEC-LCY-004`、`SPEC-LCY-005`）は、agent が承認待ちの場合を加えて直す。
+- 登録や引き渡しに失敗したとき、連続してクラッシュしたときの振る舞い（再開の仕様、launchd の管理下で動く仕様）は、agent が承認待ちの場合を加えて直す。
 
 ## 背景
 

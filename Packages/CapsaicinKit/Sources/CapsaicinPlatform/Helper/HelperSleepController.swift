@@ -1,79 +1,48 @@
 import CapsaicinCore
 import Foundation
 
-public enum HelperInstallationState: Sendable {
-    case notInstalled, partial, installed
-}
-
 enum HelperError: Error, Equatable {
     case invalidSleepDisabled
-    case invalidInstallerInput
-    case unexpectedInstallerOutput
 }
 
 typealias HelperCommand = @Sendable (String, [String], TimeInterval) throws -> Data
 
-struct HelperPaths: Sendable {
-    let debug: Bool
-    static var current: Self {
-        #if DEBUG
-            Self(debug: true)
-        #else
-            Self(debug: false)
-        #endif
-    }
-
-    var label: String {
-        "io.github.koutyuke.capsaicin.helper" + (debug ? ".debug" : "")
-    }
-
-    var helper: String {
-        "/Library/PrivilegedHelperTools/\(label)"
-    }
-
-    var sudoers: String {
-        "/etc/sudoers.d/capsaicin" + (debug ? "_debug" : "")
-    }
-
-    var daemon: String {
-        "/Library/LaunchDaemons/\(label).plist"
-    }
-
-    var files: [String] {
-        [helper, sudoers, daemon]
-    }
-}
-
 @MainActor
 public final class HelperSleepController: HelperSleepControlling {
-    private let paths: HelperPaths
-    private let exists: (String) -> Bool
+    private let state: () -> HelperInstallationState
     private let run: HelperCommand
+    private let client: HelperXPCClient
 
-    public convenience init() {
-        self.init(runner: CommandRunner(executable: "/usr/bin/pmset", arguments: ["-g"], outputLimit: 65536))
+    public convenience init(registration: HelperRegistration = HelperRegistration()) {
+        let runner = CommandRunner(executable: "/usr/bin/pmset", arguments: ["-g"], outputLimit: 65536)
+        self.init(state: { registration.state },
+                  run: { try runner.run(executable: $0, arguments: $1, timeout: $2) })
     }
 
-    convenience init(runner: CommandRunner) {
-        self.init(run: { try runner.run(executable: $0, arguments: $1, timeout: $2) })
-    }
-
-    init(paths: HelperPaths = .current,
-         exists: @escaping (String) -> Bool = { FileManager.default.fileExists(atPath: $0) },
+    init(state: @escaping () -> HelperInstallationState = { .notInstalled },
+         client: HelperXPCClient = HelperXPCClient(),
          run: @escaping HelperCommand)
     {
-        self.paths = paths
-        self.exists = exists
+        self.state = state
+        self.client = client
         self.run = run
     }
 
     public var installationState: HelperInstallationState {
-        let count = paths.files.filter(exists).count
-        return count == 0 ? .notInstalled : count == 3 ? .installed : .partial
+        state()
     }
 
     public var isHelperInstalled: Bool {
         installationState == .installed
+    }
+
+    public var isHelperAwaitingApproval: Bool {
+        installationState == .requiresApproval
+    }
+
+    public var onConnectionLost: ((HelperConnectionLoss) -> Void)? {
+        get { client.onConnectionLost }
+        set { client.onConnectionLost = newValue }
     }
 
     public func readSleepDisabled() throws -> Bool {
@@ -87,10 +56,14 @@ public final class HelperSleepController: HelperSleepControlling {
     }
 
     public func turnOn() throws {
-        _ = try run("/usr/bin/sudo", ["-n", paths.helper, "on"], 5)
+        try client.request("on")
     }
 
     public func turnOff() throws {
-        _ = try run("/usr/bin/sudo", ["-n", paths.helper, "off"], 5)
+        try client.request("off")
+    }
+
+    public func closeConnection() {
+        client.closeConnection()
     }
 }

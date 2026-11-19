@@ -14,7 +14,8 @@ public final class FakeSystem {
         case setLEDLit(Bool)
         case readBrightness
         case setBrightness(Float)
-        case saveRecord
+        case saveBrightnessRecord(Float)
+        case removeBrightnessRecord
     }
 
     public struct Failure: Error {}
@@ -27,10 +28,11 @@ public final class FakeSystem {
     // MARK: 機器の状態
 
     public var powerState = PowerState(batteryLevel: 80, isOnACPower: false)
-    public var bootTime: Date
     public var isHelperInstalled = true
+    public var isHelperAwaitingApproval = false
     public var isLEDAvailable = true
     public var sleepDisabled = false
+    public private(set) var hasHelperConnection = false
     public var brightness: Float? = 0.5
     public var isKnownUnavailable = false
     public private(set) var heldAssertions: Set<AssertionKind> = []
@@ -40,8 +42,7 @@ public final class FakeSystem {
 
     // MARK: 記録
 
-    public var storedRecord: ResumeRecord?
-    public private(set) var savedRecords: [ResumeRecord] = []
+    public var brightnessRecord: BrightnessRecord?
 
     public var failing: Set<Operation> = []
     public private(set) var operations: [Operation] = []
@@ -52,13 +53,12 @@ public final class FakeSystem {
     ) {
         self.now = now
         self.calendar = calendar
-        bootTime = now.addingTimeInterval(-3600)
     }
 
     public var ports: BlockingController.Ports {
         BlockingController.Ports(
             assertions: self, helper: self, led: self, brightness: self,
-            power: self, bootTime: self, records: self, time: self,
+            power: self, brightnessRecords: self, time: self,
         )
     }
 
@@ -66,10 +66,9 @@ public final class FakeSystem {
         now = now.addingTimeInterval(interval)
     }
 
-    /// これまでの操作と保存した記録の履歴を消す。偽物の状態は変えない。
+    /// これまでの操作の履歴を消す。偽物の状態は変えない。
     public func clearHistory() {
         operations = []
-        savedRecords = []
     }
 
     private func perform(_ operation: Operation) throws {
@@ -105,11 +104,17 @@ extension FakeSystem: HelperSleepControlling {
     public func turnOn() throws {
         try perform(.helperOn)
         sleepDisabled = true
+        hasHelperConnection = true
     }
 
     public func turnOff() throws {
+        defer { closeConnection() }
         try perform(.helperOff)
         sleepDisabled = false
+    }
+
+    public func closeConnection() {
+        hasHelperConnection = false
     }
 }
 
@@ -124,7 +129,7 @@ extension FakeSystem: CapsLockLEDControlling {
     }
 }
 
-extension FakeSystem: PowerStateProviding, BootTimeProviding, TimeProviding {}
+extension FakeSystem: PowerStateProviding, TimeProviding {}
 
 extension FakeSystem: BuiltInDisplayBrightnessControlling {
     public func readBrightness() throws -> Float? {
@@ -138,15 +143,20 @@ extension FakeSystem: BuiltInDisplayBrightnessControlling {
     }
 }
 
-extension FakeSystem: ResumeRecordStoring {
-    public func load() -> ResumeRecord? {
-        storedRecord
+extension FakeSystem: BrightnessRecordStoring {
+    public func load() -> BrightnessRecord? {
+        brightnessRecord
     }
 
-    public func save(_ record: ResumeRecord) -> Bool {
-        guard (try? perform(.saveRecord)) != nil else { return false }
-        storedRecord = record
-        savedRecords.append(record)
+    public func save(_ brightness: Float) -> Bool {
+        guard (try? perform(.saveBrightnessRecord(brightness))) != nil else { return false }
+        brightnessRecord = BrightnessRecord(savedBrightness: brightness)
+        return true
+    }
+
+    public func remove() -> Bool {
+        guard (try? perform(.removeBrightnessRecord)) != nil else { return false }
+        brightnessRecord = nil
         return true
     }
 }

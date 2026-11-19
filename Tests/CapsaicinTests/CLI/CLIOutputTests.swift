@@ -10,7 +10,6 @@ struct CLIOutputTests {
         session: nil,
         batteryCondition: nil,
         misalignments: [:],
-        isRecordUnsaved: false,
     )
 
     private func render(_ outcome: IPCOutcome, status: BlockingStatus,
@@ -103,7 +102,6 @@ struct CLIOutputTests {
     @Test("SPEC-CLI-007 開始拒否と要求の拒否は標準エラーだけに理由を出す", arguments: [
         (IPCOutcome.startRejected(.batteryBelowThreshold), "the battery is below the threshold set in Settings"),
         (.startRejected(.helperNotInstalled), "the helper isn't installed; install or repair it in Settings"),
-        (.startRejected(.recordNotSaved), "couldn't save the state used to resume after a relaunch"),
         (.startRejected(.mechanismsFailed([.displaySleepAssertion, .systemSleepDisabled, .idleSleepAssertion, .led])),
          "couldn't prevent system sleep; couldn't prevent idle sleep; couldn't prevent display sleep; couldn't light the Caps Lock LED"),
     ])
@@ -140,10 +138,10 @@ struct CLIOutputTests {
 }
 
 extension CLIOutputTests {
-    @Test("SPEC-CLI-003 SPEC-CLI-007 全結果で警告を制御の順と保存失敗の順に標準エラーへ出す",
+    @Test("SPEC-CLI-003 SPEC-CLI-007 全結果で制御、輝度の記録の保存・削除の順に警告を標準エラーへ出す",
           arguments: [IPCOutcome.started, .timeLimitReplaced, .alreadyBlocking, .released, .alreadyStopped, .status,
                       .cliRequestsDisabled, .unsupportedVersion, .startRejected(.batteryBelowThreshold),
-                      .startRejected(.helperNotInstalled), .startRejected(.recordNotSaved),
+                      .startRejected(.helperNotInstalled),
                       .startRejected(.mechanismsFailed([.idleSleepAssertion]))],
           [MisalignmentDirection.leftApplied, .notApplied])
     func warnings(outcome: IPCOutcome, direction: MisalignmentDirection) throws {
@@ -152,7 +150,7 @@ extension CLIOutputTests {
         for mechanism in Mechanism.allCases.reversed() {
             status.misalignments[mechanism] = direction
         }
-        status.isRecordUnsaved = true
+        status.brightnessWarnings = [.saveFailed, .deletionFailed]
         let output = try render(outcome, status: status)
         let warnings = direction == .leftApplied
             ? "warning: couldn't restore system sleep\nwarning: couldn't restore idle sleep\n"
@@ -161,11 +159,26 @@ extension CLIOutputTests {
             + "warning: couldn't prevent display sleep\nwarning: couldn't light the Caps Lock LED\n"
         #expect(output.standardOutput == base.standardOutput)
         #expect(output.standardError == base.standardError + warnings
-            + "warning: couldn't save the state used to resume after a relaunch\n")
+            + "warning: couldn't save the display brightness record\n"
+            + "warning: couldn't delete the display brightness record\n")
         #expect(output.exitCode == IPCResponse(outcome: outcome, status: status).exitCode)
         if outcome == .released || outcome == .alreadyStopped {
             #expect(output.exitCode == .unavailable)
         }
+    }
+
+    @Test("SPEC-CLI-003 SPEC-CLI-007 輝度の記録だけの警告は標準出力と終了コードを変えない",
+          arguments: [IPCOutcome.started, .alreadyBlocking, .released, .alreadyStopped, .status],
+          [BrightnessRecordWarning.saveFailed, .deletionFailed])
+    func brightnessWarning(outcome: IPCOutcome, warning: BrightnessRecordWarning) throws {
+        var status = warning == .saveFailed ? try active() : stopped
+        let base = try render(outcome, status: status)
+        status.brightnessWarnings = [warning]
+        let output = try render(outcome, status: status)
+        #expect(output.standardOutput == base.standardOutput)
+        #expect(output.exitCode == base.exitCode)
+        let action = warning == .saveFailed ? "save" : "delete"
+        #expect(output.standardError == "warning: couldn't \(action) the display brightness record\n")
     }
 
     @Test("SPEC-CLI-007 引数の各誤りは理由とヘルプの案内を出す", arguments: [
@@ -281,7 +294,7 @@ extension CLIOutputTests {
           arguments: [(false, true), (true, false)])
     func separateStreamColors(stdout: Bool, stderr: Bool) throws {
         var status = stopped
-        status.isRecordUnsaved = true
+        status.brightnessWarnings = [.deletionFailed]
         let output = try render(.released, status: status, stdoutColor: stdout, stderrColor: stderr)
         #expect(output.standardOutput.contains("\u{1B}[") == stdout)
         #expect(output.standardError.contains("\u{1B}[") == stderr)
