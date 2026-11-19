@@ -2,10 +2,10 @@
 schema: decision
 id: DEC-HLP-001
 title: root の処理を専用の小さなヘルパーに限り、sudoers と起動時の LaunchDaemon から呼ぶ
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
-requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-004", "REQ-SYS-006"]
+superseded_by: ["DEC-HLP-005"]
+requirements: ["REQ-HLP-001", "REQ-HLP-002", "REQ-HLP-004"]
 based_on: ["EVID-HLP-001"]
 ---
 

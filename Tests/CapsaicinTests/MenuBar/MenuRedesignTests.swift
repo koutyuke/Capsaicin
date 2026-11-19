@@ -17,7 +17,7 @@ struct MenuRedesignTests {
           arguments: [false, true])
     func timeSubmenu(active: Bool) throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.hasVirtualKeyboard = true
         if active {
             fixture.model.requestStart(from: .menu)
@@ -47,7 +47,7 @@ struct MenuRedesignTests {
     func replaceTime(id: String) throws {
         let fixture = AppFixture()
         fixture.system.now = Date(timeIntervalSince1970: 0)
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 60))))
         let before = fixture.model.settings
         let battery = fixture.model.status.batteryCondition
@@ -61,7 +61,7 @@ struct MenuRedesignTests {
                 ? Date(timeIntervalSince1970: 2400) : nil))
         #expect(fixture.model.settings == before)
         #expect(fixture.model.status.batteryCondition == battery)
-        #expect(fixture.system.operations == [.saveRecord])
+        #expect(fixture.system.operations.isEmpty)
     }
 
     @Test("SPEC-MENU-008 SPEC-SET-005 SPEC-SET-006 設定と同じ2項目と選択肢を、ハードウェアと保存値から表示する",
@@ -94,7 +94,7 @@ struct MenuRedesignTests {
             #expect(entries[1].state == (choice == .sleep ? .off : .on))
         }
         #expect(entries.allSatisfy { $0.submenu == nil })
-        app.launch()
+        app.finishLaunching()
         app.requestStart(from: .menu)
         controller.refresh()
         let activeQuick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
@@ -108,7 +108,7 @@ struct MenuRedesignTests {
         let fixture = AppFixture()
         var installed = true
         let model = SettingsModel(app: fixture.model, helper: .init(
-            state: { installed ? .installed : .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { installed ? .installed : .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         await model.changeLidClose(to: .zeroBrightness)
         fixture.system.isKnownUnavailable = true
@@ -123,7 +123,7 @@ struct MenuRedesignTests {
         }
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
-        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperNotReady")) == true)
+        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")) == true)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("brightnessUnavailable")) == true)
         #expect(lid.state == .on && lid.submenu == nil)
         installed = true
@@ -138,7 +138,7 @@ struct MenuRedesignTests {
           arguments: [false, true])
     func toggleDisplay(fails: Bool) async throws {
         let fixture = AppFixture(displayBlocked: false)
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
         if fails {
             fixture.system.failing = [.createAssertion(.preventUserIdleDisplaySleep)]
@@ -284,7 +284,7 @@ extension MenuRedesignTests {
     func panelLifetime(active: Bool) throws {
         _ = NSApplication.shared
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         if active {
             fixture.model.requestStart(from: .menu)
         }

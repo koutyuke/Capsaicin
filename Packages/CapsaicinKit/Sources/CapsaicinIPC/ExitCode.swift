@@ -15,8 +15,7 @@ public extension IPCResponse {
         case .started, .timeLimitReplaced, .alreadyBlocking:
             .success
         case .released, .alreadyStopped:
-            // 解除の要求は、合わせられていない制御が残るか記録を保存できなければ完了していない。
-            status.hasWarnings ? .unavailable : .success
+            status.misalignments.isEmpty ? .success : .unavailable
         case .status:
             // 合わせられていない制御の有無によらず、状態だけで決める。
             status.isBlocking ? .success : .stopped

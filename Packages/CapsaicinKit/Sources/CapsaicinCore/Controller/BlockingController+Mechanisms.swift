@@ -1,9 +1,3 @@
-enum AlignmentFailure: Hashable {
-    case operationFailed
-    /// disablesleep の所有を保存できなかったので `on` を実行しなかった。
-    case recordNotSaved
-}
-
 extension BlockingController {
     var controllableMechanisms: Set<Mechanism> {
         var result = Set(Mechanism.allCases)
@@ -15,11 +9,13 @@ extension BlockingController {
 
     /// 扱わない仕組みと、見込みがあるべき状態と同じ仕組みは操作しない。
     @discardableResult
-    func align(_ mechanisms: [Mechanism], to targets: Set<Mechanism>) -> [Mechanism: AlignmentFailure] {
-        var failures: [Mechanism: AlignmentFailure] = [:]
+    func align(_ mechanisms: [Mechanism], to targets: Set<Mechanism>) -> Set<Mechanism> {
+        var failures: Set<Mechanism> = []
         let controllable = controllableMechanisms
         for mechanism in mechanisms where controllable.contains(mechanism) {
-            failures[mechanism] = align(mechanism, applied: targets.contains(mechanism))
+            if !align(mechanism, applied: targets.contains(mechanism)) {
+                failures.insert(mechanism)
+            }
         }
         // 今回扱わない制御の合わせ直しを先延ばしにしない。
         if misalignments.keys.allSatisfy({ mechanisms.contains($0) }) {
@@ -28,10 +24,14 @@ extension BlockingController {
         return failures
     }
 
-    private func align(_ mechanism: Mechanism, applied: Bool) -> AlignmentFailure? {
+    private func align(_ mechanism: Mechanism, applied: Bool) -> Bool {
         switch mechanism {
         case .systemSleepDisabled:
-            alignSleepDisabled(applied: applied)
+            if applied {
+                raiseSleepDisabled()
+            } else {
+                lowerSleepDisabled()
+            }
         case .idleSleepAssertion:
             set(mechanism, applied) { try setAssertion(.preventUserIdleSystemSleep, held: applied) }
         case .displaySleepAssertion:
@@ -41,17 +41,17 @@ extension BlockingController {
         }
     }
 
-    private func set(_ mechanism: Mechanism, _ applied: Bool, operation: () throws -> Void) -> AlignmentFailure? {
-        guard observed[mechanism] != applied else { return nil }
+    private func set(_ mechanism: Mechanism, _ applied: Bool, operation: () throws -> Void) -> Bool {
+        guard observed[mechanism] != applied else { return true }
         do {
             try operation()
         } catch {
             // 失敗した操作が途中まで効いたかは分からないので、状態を分からないものにする。
             observed[mechanism] = nil
-            return .operationFailed
+            return false
         }
         observed[mechanism] = applied
-        return nil
+        return true
     }
 
     private func setAssertion(_ kind: AssertionKind, held: Bool) throws {
@@ -62,59 +62,63 @@ extension BlockingController {
         }
     }
 
-    private func alignSleepDisabled(applied: Bool) -> AlignmentFailure? {
-        if applied {
-            return raiseSleepDisabled()
-        }
-        return lowerSleepDisabled()
-    }
-
-    private func raiseSleepDisabled() -> AlignmentFailure? {
+    private func raiseSleepDisabled() -> Bool {
         let reading = try? ports.helper.readSleepDisabled()
         observed[.systemSleepDisabled] = reading
-        switch SleepDisabledOwnership.raiseAction(sleepDisabled: reading, owned: record.ownsSleepDisabled) {
+        switch SleepDisabledOwnership.raiseAction(sleepDisabled: reading, owned: ownsSleepDisabled) {
         case .failUnreadable:
-            return .operationFailed
-        case .adoptOwn:
-            return nil
+            return false
         case .leaveExternal:
-            record.ownsSleepDisabled = false
-            return nil
+            return true
         case .claimThenTurnOn:
-            record.ownsSleepDisabled = true
-            guard saveRecord() else {
-                record.ownsSleepDisabled = false
-                return .recordNotSaved
-            }
-            do {
-                try ports.helper.turnOn()
-            } catch {
-                return .operationFailed
-            }
-            observed[.systemSleepDisabled] = true
-            return nil
+            ownsSleepDisabled = true
+            return sendSleepDisabledOn()
         }
     }
 
-    private func lowerSleepDisabled() -> AlignmentFailure? {
-        guard record.ownsSleepDisabled else { return nil }
+    func sendSleepDisabledOn() -> Bool {
+        do {
+            try ports.helper.turnOn()
+        } catch {
+            helperCleanupLost = true
+            return false
+        }
+        helperCleanupLost = false
+        observed[.systemSleepDisabled] = true
+        return true
+    }
+
+    func lowerSleepDisabled() -> Bool {
+        guard ownsSleepDisabled else { return true }
         let reading = try? ports.helper.readSleepDisabled()
         observed[.systemSleepDisabled] = reading
         switch SleepDisabledOwnership.lowerAction(sleepDisabled: reading) {
         case .failUnreadable:
-            return .operationFailed
+            return false
         case .releaseOwnership:
-            record.ownsSleepDisabled = false
-            return nil
+            releaseSleepDisabledOwnership()
+            return true
         case .turnOff:
+            // 承認が戻るまでデーモンは起動できない。値が残っていれば合わせ直しに残す。
+            guard !ports.helper.isHelperAwaitingApproval else { return false }
             do {
                 try ports.helper.turnOff()
             } catch {
-                return .operationFailed
+                // 設定変更や削除が失敗して抑止を続けるなら、閉じた接続の役目も戻す。
+                if isBlocking {
+                    helperCleanupLost = true
+                }
+                return false
             }
-            record.ownsSleepDisabled = false
+            releaseSleepDisabledOwnership()
             observed[.systemSleepDisabled] = false
-            return nil
+            return true
         }
+    }
+
+    func releaseSleepDisabledOwnership() {
+        ownsSleepDisabled = false
+        helperCleanupLost = false
+        ports.helper.closeConnection()
     }
 }

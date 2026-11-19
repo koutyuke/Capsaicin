@@ -1,28 +1,70 @@
 import AppKit
-import CapsaicinPlatform
+
+protocol RunningApp {
+    var bundleIdentifier: String? { get }
+    var processIdentifier: pid_t { get }
+    var isTerminated: Bool { get }
+    var bundleURL: URL? { get }
+}
+
+extension NSRunningApplication: RunningApp {}
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) var runtime: AppRuntime?
-    private var startup: Task<Bool, Never>?
+    private(set) var startup: Task<Void, Never>?
+    private var startupFinished = false
+    private var pendingReopen = false
     private var explicitUserQuit = false
 
     func applicationDidFinishLaunching(_: Notification) {
-        do {
-            let runtime = try AppComposition.make(quit: { [weak self] in self?.quitByUser() })
-            self.runtime = runtime
-            let startup = Task { await runtime.start() }
-            self.startup = startup
-            Task {
-                if await !startup.value {
-                    // 引き渡し済みで後片付けはない。Task の中で terminateLater を返すと、返答の Task が
-                    // メインキューで待たされて終了できないので、startup を外して terminateNow にする。
-                    self.startup = nil
-                    NSApplication.shared.terminate(nil)
+        launch(
+            bundleIdentifier: Bundle.main.bundleIdentifier,
+            processIdentifier: ProcessInfo.processInfo.processIdentifier,
+            runningApplications: { NSRunningApplication.runningApplications(withBundleIdentifier: $0) },
+            reopenAndTerminate: reopenAndTerminate,
+            makeRuntime: { AppComposition.make(quit: { [weak self] in self?.quitByUser() }) },
+        )
+    }
+
+    func launch(
+        bundleIdentifier: String?,
+        processIdentifier: pid_t,
+        runningApplications: (String) -> [any RunningApp],
+        reopenAndTerminate: (any RunningApp) -> Void,
+        makeRuntime: () -> AppRuntime,
+    ) {
+        if let bundleIdentifier,
+           let other = runningApplications(bundleIdentifier).first(where: {
+               $0.bundleIdentifier == bundleIdentifier && $0.processIdentifier != processIdentifier && !$0.isTerminated
+           })
+        {
+            reopenAndTerminate(other)
+            return
+        }
+        let runtime = makeRuntime()
+        self.runtime = runtime
+        startup = Task {
+            await runtime.start()
+            startupFinished = true
+            if pendingReopen {
+                pendingReopen = false
+                runtime.openSettings()
+            }
+        }
+    }
+
+    private func reopenAndTerminate(_ application: any RunningApp) {
+        Task {
+            if !application.isTerminated, let url = application.bundleURL {
+                let configuration = NSWorkspace.OpenConfiguration()
+                configuration.allowsRunningApplicationSubstitution = false
+                do {
+                    _ = try await NSWorkspace.shared.openApplication(at: url, configuration: configuration)
+                } catch {
+                    AppRuntime.log(error)
                 }
             }
-        } catch {
-            AppRuntime.log(error)
             NSApplication.shared.terminate(nil)
         }
     }
@@ -35,19 +77,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_: NSApplication, hasVisibleWindows _: Bool) -> Bool {
-        runtime?.openSettings()
+        if startupFinished {
+            runtime?.openSettings()
+        } else {
+            // 起動途中の開き直しを、設定ウインドウが準備されるまで保留する。
+            pendingReopen = true
+        }
         return false
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         guard let startup, let runtime else { return .terminateNow }
-        let reason = TerminationReasonDetector.classify(
-            explicitUserQuit: explicitUserQuit, appleEvent: NSAppleEventManager.shared().currentAppleEvent,
-        )
+        // 利用者の終了と分かるのは、アプリの終了操作を明示的に受けたときだけ。
+        let isUserQuit = explicitUserQuit
         Task {
-            if await startup.value {
-                await runtime.terminate(reason: reason)
-            }
+            await startup.value
+            await runtime.terminate(isUserQuit: isUserQuit)
             sender.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

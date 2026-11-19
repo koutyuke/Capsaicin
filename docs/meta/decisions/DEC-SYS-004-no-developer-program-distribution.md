@@ -5,7 +5,7 @@ title: Apple Developer Program に加入せず、公証せずに配る
 status: superseded
 supersedes: []
 superseded_by: ["DEC-SYS-021"]
-requirements: ["REQ-SYS-005", "REQ-SYS-006"]
+requirements: []
 based_on: ["EVID-SYS-001", "EVID-SYS-002"]
 ---
 

@@ -120,7 +120,7 @@ HUD の文字は `SPEC-HUD-004` にある。
 | サイドバー | `SPEC-SET-001` の表 |
 | 設定項目 | `SPEC-SET-002` の表 |
 | アップデートの行 | `SPEC-SET-007` の表 |
-| Web サイトとライセンスの行 | `SPEC-SET-004` の表 |
+| Webサイトとライセンスの行 | `SPEC-SET-004` の表 |
 | 項目名の横の (i) | `info.circle` |
 | 注意 | `exclamationmark.triangle.fill` |
 | エラー | `xmark.octagon.fill` |

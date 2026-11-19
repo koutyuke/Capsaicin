@@ -4,7 +4,7 @@ id: HYP-BLK-007
 title: disablesleep の値は再起動後も残る
 status: open
 affects: ["DEC-HLP-001", "REQ-HLP-004", "SPEC-HLP-003"]
-evidence: []
+evidence: ["EVID-BLK-014"]
 ---
 
 # HYP-BLK-007 disablesleep の値は再起動後も残る
@@ -28,4 +28,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+未確定。`disablesleep 1` は再起動の後に 0 だったが、ほかの電源管理アプリ（AlDente の root ヘルパーなど）が書いた可能性を除けていない（`EVID-BLK-014`）。ほかの電源管理アプリのない Mac で確かめ直すまで、どちらとも扱わない。

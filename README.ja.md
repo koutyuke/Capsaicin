@@ -83,17 +83,10 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 
 ## アンインストール
 
-1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除**をクリックしてください。Capsaicinのインターフェースは日本語のみです。ヘルパーは`/Library`と`/etc`にインストールされるため、アプリを削除した後も残ります。
+1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除…**をクリックしてください。Capsaicinが止めていたスリープを元に戻してから、macOSへのヘルパーの登録を解除します。
 2. メニューバーからCapsaicinを終了します。
-3. Terminalで、Capsaicinがログイン時の起動やクラッシュ後の再起動に使用するLaunchAgentを削除します。`launchctl`がサービスが見つからないと報告した場合は、すでにアンロードされているため、次のコマンドに進んでください。
-
-   ```bash
-   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
-   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
-   ```
-
-4. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
-5. 設定や記録も削除するには、以下を実行します。
+3. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
+4. 設定や記録も削除するには、以下を実行します。
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin

@@ -20,22 +20,7 @@ struct ControllerReleaseTests {
         #expect(system.heldAssertions.isEmpty)
         #expect(!system.sleepDisabled)
         #expect(!system.isLEDLit)
-        #expect(system.storedRecord?.session == nil)
-        #expect(system.storedRecord?.ownsSleepDisabled == false)
-    }
-
-    @Test("SPEC-LCY-007 解除ではセッションを先に消してから仕組みを戻し、クラッシュ後の起動の一覧を空にする")
-    func releaseOrder() throws {
-        let system = FakeSystem()
-        let controller = makeController(system, settings: manual)
-        controller.requestStart(from: .menu)
-        system.clearHistory()
-        controller.requestStop(from: .menu)
-        let firstSave = try #require(system.savedRecords.first)
-        #expect(firstSave.session == nil)
-        #expect(firstSave.ownsSleepDisabled)
-        #expect(system.operations.first == .saveRecord)
-        #expect(system.storedRecord?.crashLaunches == [])
+        #expect(!controller.ownsSleepDisabled)
     }
 
     @Test("SPEC-BLK-007 off に失敗しても解除を完了し、戻すべきなのに残っている制御として残す")
@@ -50,7 +35,7 @@ struct ControllerReleaseTests {
         #expect(system.heldAssertions.isEmpty)
         #expect(!system.isLEDLit)
         #expect(controller.misalignments == [.systemSleepDisabled: .leftApplied])
-        #expect(system.storedRecord?.ownsSleepDisabled == true)
+        #expect(controller.ownsSleepDisabled)
         #expect(events.events.contains(.warningsChanged))
     }
 
@@ -69,7 +54,7 @@ struct ControllerReleaseTests {
 
         system.advance(by: 1)
         controller.timePassed()
-        #expect(system.operations == [.readSleepDisabled, .helperOff, .saveRecord])
+        #expect(system.operations == [.readSleepDisabled, .helperOff])
         #expect(controller.misalignments == [.systemSleepDisabled: .leftApplied])
 
         system.failing = []
@@ -79,16 +64,18 @@ struct ControllerReleaseTests {
         #expect(!system.sleepDisabled)
     }
 
-    @Test("SPEC-BLK-007 SPEC-HLP-005 解除で下ろせなかった disablesleep は、次の開始で on を実行せずに引き継ぐ")
+    @Test("SPEC-BLK-007 SPEC-HLP-005 解除で下ろせなかった disablesleep は、次の開始で on を送って後片付けの役目を戻す")
     func nextStartAdopts() {
         let system = FakeSystem()
         let controller = makeController(system, settings: manual)
         controller.requestStart(from: .menu)
         system.failing = [.helperOff]
         controller.requestStop(from: .menu)
+        #expect(!system.hasHelperConnection)
         system.clearHistory()
         #expect(controller.requestStart(from: .menu) == .started)
-        #expect(!system.operations.contains(.helperOn))
+        #expect(system.operations.contains(.helperOn))
+        #expect(system.hasHelperConnection)
         #expect(controller.misalignments.isEmpty)
         system.failing = []
         system.advance(by: 120)
@@ -151,23 +138,6 @@ struct ControllerReleaseTests {
         controller.powerStateChanged()
         #expect(!controller.isBlocking)
         #expect(events.stateEvents.last == .released(.batteryBelowThreshold))
-    }
-
-    @Test("SPEC-LCY-007 開始以外で記録を保存できなければ処理を続け、合わせ直しの契機で保存を試み直す")
-    func unsavedRecordRetries() {
-        let system = FakeSystem()
-        let controller = makeController(system)
-        controller.requestStart(from: .menu)
-        system.failing = [.saveRecord]
-        controller.requestStop(from: .menu)
-        #expect(!controller.isBlocking)
-        #expect(controller.isRecordUnsaved)
-        #expect(controller.status.hasWarnings)
-        system.failing = []
-        system.advance(by: 60)
-        controller.timePassed()
-        #expect(!controller.isRecordUnsaved)
-        #expect(system.storedRecord?.session == nil)
     }
 
     @Test("SPEC-BLK-007 時間の条件とバッテリー残量の条件が同時に成り立てば、時間の条件で解除する")

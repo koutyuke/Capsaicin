@@ -3,7 +3,7 @@ schema: hypothesis
 id: HYP-HLP-003
 title: sudoers とヘルパーの方式は、コード署名の状態によらず動く
 status: supported
-affects: ["DEC-HLP-001", "REQ-SYS-006"]
+affects: ["DEC-HLP-001"]
 evidence: ["EVID-HLP-003"]
 ---
 
@@ -15,7 +15,7 @@ evidence: ["EVID-HLP-003"]
 
 ## 外れたときに起きること
 
-将来ほかの人に配った場合に、ヘルパーが動かない。`REQ-SYS-006` を満たせず、`DEC-HLP-001` を見直す。
+将来ほかの人に配った場合に、ヘルパーが動かない。`DEC-HLP-001` を見直す。
 
 ## 確かめ方
 

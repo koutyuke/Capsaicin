@@ -12,5 +12,6 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 | 確かめていない前提と、確かめた事実 | [`meta/hypotheses/`](meta/hypotheses/)、[`meta/evidence/`](meta/evidence/) |
 | 将来の機能 | [`meta/plans/`](meta/plans/) |
 | 進行中の作業 | [`meta/tasks/`](meta/tasks/) |
+| 実機での確認手順 | [`manual/verification/`](manual/verification/) |
 
 文書を足したり直したりする前に、[`documentation-management.md`](documentation-management.md) を読む。

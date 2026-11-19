@@ -1,8 +1,54 @@
 import AppKit
+import CapsaicinPlatform
 import SwiftUI
 import Testing
 
+@MainActor
+private protocol SettingsRowContents {
+    var rowContents: Any { get }
+}
+
+extension SettingsRow: SettingsRowContents {
+    fileprivate var rowContents: Any {
+        content()
+    }
+}
+
 extension SettingsTests {
+    @Test("SPEC-HLP-004 ヘルパーの4状態で2行を保ち、状態と管理の操作を出し分ける",
+          arguments: [HelperInstallationState.notInstalled, .requiresApproval, .installed, .unavailable])
+    func helperRows(state: HelperInstallationState) throws {
+        let fixture = AppFixture()
+        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
+                                                                    completed: { _, _ in }))
+        let defaults = try #require(UserDefaults(suiteName: "HelperRows-" + UUID().uuidString))
+        let view = SettingsView(model: model, hotkey: HotkeyController(save: { _ in true }),
+                                selection: SettingsSelection(defaults: defaults), quit: {}).helper
+        #expect(rowHelpValues(view) == [SettingsSection.helper.text("status.help"), ""])
+        func strings(_ value: Any) -> [String] {
+            if let text = value as? String {
+                return [text]
+            }
+            if let row = value as? any SettingsRowContents {
+                return strings(row.rowContents)
+            }
+            return Mirror(reflecting: value).children.flatMap { strings($0.value) }
+        }
+        let values = strings(view)
+        let key = switch state {
+        case .notInstalled: "status.notInstalled"
+        case .requiresApproval: "status.requiresApproval"
+        case .installed: "status.usable"
+        case .unavailable: "status.unavailable"
+        }
+        #expect(values.contains(SettingsSection.helper.text(key)))
+        #expect(values.contains(SettingsSection.helper.text("helperInstall.button")) == (state == .notInstalled))
+        #expect(values
+            .contains(SettingsSection.helper.text("openSystemSettings.button")) == (state == .requiresApproval))
+        #expect(values.contains(SettingsSection.helper.text("helperRemove.button"))
+            == (state == .requiresApproval || state == .installed))
+    }
+
     @Test("SPEC-SET-002 SPEC-SET-006 バッテリーは独立した見出しを持ち、内蔵バッテリーがなければグループごと出さない",
           arguments: [false, true], [false, true])
     func batteryGroup(hasBattery: Bool, enabled: Bool) throws {

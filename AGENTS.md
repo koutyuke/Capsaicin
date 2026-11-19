@@ -16,11 +16,20 @@ Capsaicin は、Mac のスリープを種類ごとに止め、止めている間
 - リリースの準備はスキル `capsaicin-release` で行う。push と PR の作成はオーナーの承認を得てから行う。
 - 判断に迷ったら、推測で埋めずに報告する。確かめていない前提は仮説（`HYP-*`）として扱う。
 
+## 画面とコマンドの名前
+
+利用者への返答、報告、チケット、文書のどれでも、設定の項目、選択肢、メニュー項目、ボタン、アラート、CLI のサブコマンドとオプションを指すときは、実装にある名前をそのまま書く。画面の名前は「」で囲む。記憶や文書から写したり、意味から言い換えたり、縮めたりしない。名前が実装と違うと、利用者はどの項目のことか分からない。
+
+- 書く前に実装から引く。画面の文言は `Sources/Capsaicin/**/*.xcstrings` の `ja` の値（英語で書くときは `en`）、CLI は `Packages/CapsaicinKit/Sources/CapsaicinIPC/CLIArguments.swift` にある。
+- 判断・根拠・確かめ終えた仮説は、書いた時点の名前を残している。そこから名前を写さない。
+- 利用者が実装と違う呼び方をしたら、実装の名前で言い直してから進める。どれを指すか決められなければ、候補を実装の名前で挙げて確かめる。
+- macOS のシステム設定の名前は実装にないので、確かめた画面の表記で書く。確かめていなければ、そのことを書き添える。
+
 ## 破ってはいけないもの
 
-1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、ヘルパーのインストールを、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。justfile の `manual` グループのレシピ（`start`、`stop`、`restart`、`status`）はアプリの起動とプロセスの停止を行うオーナー専用の操作なので、エージェントは実行しない。
+1. **開発機に永続的なシステム変更をしない。** `sudo`、`pmset` の設定変更、`launchctl` の実行、LaunchAgents・LaunchDaemons・sudoers・PrivilegedHelperTools のシステム配置先への書き込み、SMAppService による登録（ヘルパーのデーモン、mainApp）を、ビルドでもテストでも手作業でも行わない。通常の開発ツールによるキャッシュ書き込みや、Xcode によるビルド済み `.debug` アプリの LaunchServices 登録は、この禁止に含めない。禁止対象を確かめる必要があるときは、手順を書いて PM に渡す。例外として、オーナーが確認の対象と手順を承認したときに限り、自分の worktree の Debug アプリの起動と終了（justfile の `app` グループのレシピを含む）、それに伴う Debug アプリ自身による mainApp の登録、状態の読み取りを行ってよい。範囲と、承認があっても行わないことは `DEC-SYS-027` にある。
 2. **Caps Lock の入力状態を変えない。** LED の表示だけを扱う。
-3. **root で動くコードを増やさない。** ヘルパーが受け付けるのは決められたサブコマンドだけにする。ヘルパーにシェル、任意のパス、任意の環境変数を通さない。
+3. **root で行う処理を増やさない。** ヘルパーのデーモンが受け付けるのは決められた要求（`on` と `off`）だけにし、接続できる相手を同じ Team ID の Capsaicin に限る。ヘルパーにシェル、任意のパス、任意の環境変数を通さない。
 4. **本番コードに `REQ-*` と `SPEC-*` を書かない。** 仕様との対応はテスト名が持つ。
 5. **秘密情報をコードやログに書かない。**
 
@@ -51,7 +60,7 @@ Nix は以下のツールを `flake.lock` で固定して供給する。Swift �
 
 String Catalog は機能フォルダーごとに別のテーブルを置き、`Text` の `tableName` で指定する。雛形は `Sources/Capsaicin/MenuBar/MenuBar.xcstrings`、開発言語は `en` である。すべてのキーに英語と日本語の値を持たせる。Xcode は String Catalog を開くたびに独自の形（`"key" : value`、末尾の改行なし）で書き直すので、その形を正として自動整形の対象から除く。手で編集するときもこの形に合わせる。`bundle.localizedString(forKey:)` などでコードから動的に引くキーは、Xcode がコードから見つけられず `stale` を付けるので、`"extractionState" : "manual"` を付ける。`fmt-check` は `stale` のキーが残っていると失敗する。CLI の内部ターゲット名は `CapsaicinCLI` とする。アプリ名と大小文字だけが違うターゲット名にすると、中間出力が衝突するためである。生成物の名前は `capsaicin` のままである。
 
-CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どちらもアプリに付属する非公開の実行ファイルなので同じ場所にまとめ、`Contents/MacOS/Capsaicin` との衝突も避ける。ヘルパーをシステムにインストールしたり、特権を付けたりはしない。
+CLI とヘルパーはアプリの `Contents/Helpers/` に埋め込む。どちらもアプリに付属する非公開の実行ファイルなので同じ場所にまとめ、`Contents/MacOS/Capsaicin` との衝突も避ける。ヘルパーのデーモンの launchd の定義は、ビルドで構成ごとに作り、`Contents/Library/LaunchDaemons/` に置く（`DEC-HLP-005`）。クラッシュ時に起動し直す agent は持たない（`DEC-LCY-010`）。デーモンは、利用者がシステム設定で許可したときだけ root で動く。
 
 ## エージェントのスキル
 
@@ -63,16 +72,17 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 ## 検証
 
-変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
+変更後は `nix develop --command just check`、アプリの生成確認には `nix develop --command just build` を実行する。手元のビルドは ad-hoc 署名で、配布物は Release ワークフローで Developer ID により署名して公証する（`DEC-SYS-021`）。手元でヘルパーを確かめるときは、ビルド後に `just sign-debug` で Developer ID の証明書を使って署名し直す（`DEC-SYS-027`）。署名・公証済みの PR Debug ビルド（`S-Preview`、`DEC-SYS-023`）も使える。Debug の bundle ID は `io.github.koutyuke.capsaicin.debug`、Release は `io.github.koutyuke.capsaicin` である。
 
 | レシピ             | 実行すること                                                                                                                                        |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `gen`              | `project.yml` から `Capsaicin.xcodeproj` を生成する                                                                                                 |
 | `build`            | `gen` の後、arm64・macOS SDK を明示して Debug アプリをビルドする                                                                                    |
-| `status`           | オーナー専用。Debug ジョブ・plist とこのチェックアウトの対応、全 Debug プロセス、スリープの状態を読む                                               |
-| `stop`             | オーナー専用。すべてのチェックアウトの Debug アプリを終了する                                                                                       |
-| `start`            | オーナー専用。Debug アプリが動いていないことを確かめ、ジョブを外してこのチェックアウトのビルドを開く                                                |
-| `restart`          | オーナー専用。ビルドに成功してから `stop`、`start` の順に実行する                                                                                   |
+| `sign-debug`       | オーナーのキーチェーンの鍵で Debug アプリを署名し直す。既定は `Developer ID Application`。エージェントは承認を得て実行する（`DEC-SYS-027`）         |
+| `status`           | エージェントは承認を得て実行する（`DEC-SYS-027`）。Debug の bundle ID の全プロセスとこのチェックアウトのものか、スリープの状態を読む                |
+| `stop`             | エージェントはオーナーの承認を得て実行する（`DEC-SYS-027`）。Debug の bundle ID のアプリをすべて終了する                                            |
+| `start`            | エージェントは承認を得て実行する（`DEC-SYS-027`）。Debug の bundle ID のアプリが動いていなければ、このビルドを開いて起動を確かめる                  |
+| `restart`          | エージェントはオーナーの承認を得て実行する（`DEC-SYS-027`）。ビルドに成功してから `stop`、`start` の順に実行する                                    |
 | `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
 | `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
 | `prepare-release`  | `develop`（緊急は `hotfix/*`）で、指定した部分（`major`・`minor`・`patch`）の版を上げてコミットし、材料を `.build/release/` に書く。push しない     |
@@ -94,6 +104,6 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 
 開発ツールが通常のキャッシュをユーザー領域に書くことと、Xcode がビルド済み `.debug` アプリを LaunchServices に登録することは許可する。`HOME` や `CFFIXED_USER_HOME` は変更せず、SwiftPM と Swift マクロの標準の sandbox を使う。SwiftFormat には treefmt から `--cache ignore` を渡し、ユーザー領域にキャッシュを書かせない。
 
-この許可はシステム設定や常駐処理の変更には及ばない。`sudo`、`pmset` の設定変更、`launchctl` は実行しない。`~/Library/LaunchAgents`、`/Library/LaunchAgents`、`/Library/LaunchDaemons`、`/etc/sudoers`、`/etc/sudoers.d`、`/Library/PrivilegedHelperTools` への書き込みと、ヘルパーのインストールは禁止する。
+この許可はシステム設定や常駐処理の変更には及ばない。`sudo`、`pmset` の設定変更、`launchctl` は実行しない（オーナーが承認した Debug アプリの確認は例外で、範囲は `DEC-SYS-027` にある）。`~/Library/LaunchAgents`、`/Library/LaunchAgents`、`/Library/LaunchDaemons`、`/etc/sudoers`、`/etc/sudoers.d`、`/Library/PrivilegedHelperTools` への書き込みと、SMAppService による登録は禁止する（オーナーが承認した Debug アプリ自身による mainApp の登録を除く）。
 
 Git フックが必要なら `nix develop --command lefthook install` を実行する。pre-commit は `fmt-check` と `lint` だけで、自動整形、自動ステージ、テストは行わない。treefmt の `--ci` はファイルを書き換えるため、検査として直接使わず `just fmt-check` を使う。

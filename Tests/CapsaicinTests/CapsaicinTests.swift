@@ -77,7 +77,7 @@ func terminationAlertResources(language: String) throws {
 @Test("SPEC-CLI-007 SPEC-CLI-008 埋め込んだ実行ファイルは不正な引数を拒否し、CLI のヘルプは成功する")
 func embeddedExecutablesHandleArguments() throws {
     let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
-    for name in ["capsaicin", "capsaicin-helper"] {
+    for name in ["capsaicin"] {
         for arguments in [[], ["--help"], ["unexpected", "argument"]] {
             let process = Process()
             let output = Pipe()
@@ -91,9 +91,7 @@ func embeddedExecutablesHandleArguments() throws {
             let standardError = error.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
             #expect(process.terminationReason == .exit)
-            if name == "capsaicin-helper" {
-                #expect(process.terminationStatus == 64)
-            } else if arguments == ["--help"] {
+            if arguments == ["--help"] {
                 #expect(process.terminationStatus == 0)
                 #expect(standardError.isEmpty)
                 #expect(String(data: standardOutput, encoding: .utf8) == CLIOutput.help.standardOutput)
@@ -106,6 +104,33 @@ func embeddedExecutablesHandleArguments() throws {
             }
         }
     }
+}
+
+@Test("SPEC-HLP-002 SMAppService 用の定義は構成ごとのサービスだけを公開する")
+func bundledDaemonDefinition() throws {
+    let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
+    let app = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))
+    let identifier = try #require(app.bundleIdentifier)
+    let directory = app.bundleURL.appending(path: "Contents/Library/LaunchDaemons")
+    let files = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+    let label = identifier + ".helper"
+    #expect(files == [label + ".plist"])
+    let plist = try #require(PropertyListSerialization.propertyList(
+        from: Data(contentsOf: directory.appending(path: label + ".plist")), format: nil,
+    ) as? [String: Any])
+    #expect(Set(plist.keys) == ["Label", "BundleProgram", "MachServices", "RunAtLoad"])
+    #expect(plist["Label"] as? String == label)
+    #expect(plist["BundleProgram"] as? String == "Contents/Helpers/capsaicin-helper")
+    #expect(plist["MachServices"] as? [String: Bool] == [label: true])
+    #expect(plist["RunAtLoad"] as? Bool == true)
+}
+
+@Test("SPEC-LCY-003 クラッシュ時にアプリを起動し直す agent の定義をバンドルに含めない")
+func noBundledAgentDefinition() throws {
+    let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
+    let app = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))
+    let directory = app.bundleURL.appending(path: "Contents/Library/LaunchAgents")
+    #expect(!FileManager.default.fileExists(atPath: directory.path))
 }
 
 @Test("埋め込んだ実行ファイルの署名識別子は固定される")

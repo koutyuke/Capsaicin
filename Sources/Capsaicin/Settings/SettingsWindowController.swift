@@ -3,7 +3,7 @@ import CapsaicinPlatform
 import SwiftUI
 
 @MainActor
-final class SettingsWindowController: NSWindowController {
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
     let model: SettingsModel
     private let selection: SettingsSelection
 
@@ -17,18 +17,23 @@ final class SettingsWindowController: NSWindowController {
             selection: selection,
         )
         super.init(window: window)
+        window.delegate = self
         window.center()
         model.confirm = { [weak self] operation, fromSetting in
             guard let self, let window = self.window else { return false }
-            let key = SettingsModel.operationKey(operation)
+            let awaitingApproval = fromSetting && operation == .install && self.model.helperState == .requiresApproval
+            let key = awaitingApproval ? "helperApproval" : SettingsModel.operationKey(operation)
             var title = key + ".title"
-            if fromSetting, operation == .install {
+            if fromSetting, operation == .install, !awaitingApproval {
                 title = self.model.app.capabilities.hasLid
                     ? "helperInstall.lidClose.title" : "helperInstall.setting.title"
             }
+            let message = operation == .remove && !self.model.app.capabilities.hasLid
+                ? "helperRemove.manual.message" : key + ".message"
             let alert = alert(title: SettingsSection.helper.text(title),
-                              message: SettingsSection.helper.text(key + ".message"))
-            alert.addButton(withTitle: SettingsSection.helper.text(key + ".confirm"))
+                              message: SettingsSection.helper.text(message))
+            alert.addButton(withTitle: SettingsSection.helper.text(awaitingApproval
+                    ? "openSystemSettings.button" : key + ".confirm"))
             alert.addButton(withTitle: SettingsSection.helper.text("cancel"))
             return await alert.beginSheetModal(for: window) == .alertFirstButtonReturn
         }
@@ -74,6 +79,14 @@ final class SettingsWindowController: NSWindowController {
         model.refreshHelper()
         model.app.updater.refresh()
         bringToFront()
+    }
+
+    func windowDidBecomeKey(_: Notification) {
+        model.settingsWindowDidBecomeKey()
+    }
+
+    func windowWillClose(_: Notification) {
+        model.settingsWindowClosed()
     }
 
     func bringToFront() {

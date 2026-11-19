@@ -20,7 +20,7 @@ private final class FakeCLIConnection: CLIConnected {
     var closes = 0
     var response = IPCResponse(
         outcome: .status,
-        status: BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false),
+        status: BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:]),
     )
     var error: Error?
     func request(_ request: IPCRequest) async throws -> IPCResponse {
@@ -143,7 +143,7 @@ struct CLIRunnerTests {
         #expect(launcher.urls.isEmpty)
     }
 
-    @Test("SPEC-CLI-004 SPEC-LCY-005 起動は1回だけ、callback がなくてもソケットの readiness を待つ", arguments: [false, true])
+    @Test("SPEC-CLI-004 起動は1回だけ、callback がなくてもソケットの readiness を待つ", arguments: [false, true])
     func launchOnce(noCallback: Bool) async throws {
         let fixture = try CLIApplicationFixture()
         let connector = FakeCLIConnector()
@@ -301,7 +301,7 @@ struct CLIRunnerTests {
         let now = Date(timeIntervalSince1970: 0)
         connector.connection.response = IPCResponse(outcome: .timeLimitReplaced, status: BlockingStatus(
             session: BlockingSession(timeLimit: TimeLimit(date: now.addingTimeInterval(5399), source: .timer)),
-            batteryCondition: nil, misalignments: [:], isRecordUnsaved: false,
+            batteryCondition: nil, misalignments: [:],
         ))
         let runner = try CLIRunner(resolve: fixture.resolve, connector: connector,
                                    launcher: FakeCLILauncher(), clock: FakeCLIClock(), now: { now },

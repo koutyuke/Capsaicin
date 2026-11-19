@@ -7,7 +7,6 @@ struct SettingsTests {
     func defaults() {
         let settings = Settings()
         #expect(settings.launchesAtLogin)
-        #expect(settings.resumePolicy == .never)
         #expect(settings.showsHUD)
         #expect(settings.showsMenuBarIcon)
         #expect(!settings.showsDockIcon)
@@ -55,7 +54,6 @@ struct SettingsTests {
     @Test("SPEC-SET-002 保存した設定を読み直すと同じ値になる")
     func roundTrip() throws {
         var settings = Settings()
-        settings.resumePolicy = .afterAppOrMacRestart
         settings.timerDuration = minutes(90)
         settings.specifiedTime = time(23, 5)
         settings.batteryThreshold = try #require(BatteryThreshold(percent: 35))
@@ -97,11 +95,21 @@ struct SettingsTests {
         #expect(try JSONDecoder().decode(Settings.self, from: Data(json.utf8)) == expected)
     }
 
+    @Test("SPEC-LCY-008 以前の版の設定から有効な値だけを引き継ぐ")
+    func readsSettingsFromPreviousVersion() throws {
+        let data = Data(#"{"resumePolicy":"afterAppRestart","launchesAtLogin":false,"showsHUD":false}"#.utf8)
+        let settings = try JSONDecoder().decode(Settings.self, from: data)
+        #expect(!settings.launchesAtLogin && !settings.showsHUD)
+        let encoded = try JSONEncoder().encode(settings)
+        let written = try #require(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        #expect(written["resumePolicy"] == nil)
+    }
+
     @Test("SPEC-SET-002 範囲外や型の違う値は、その項目だけ既定値にする")
     func invalidValuesFallBack() throws {
         let json = """
         {"batteryThreshold": 150, "timerDuration": 0, "specifiedTime": {"hour": 24, "minute": 0},
-         "resumePolicy": "always", "showsHUD": "yes", "showsMenuBarIcon": "no", "showsDockIcon": "yes", "lidCloseDisplay": "dim"}
+         "showsHUD": "yes", "showsMenuBarIcon": "no", "showsDockIcon": "yes", "lidCloseDisplay": "dim"}
         """
         #expect(try JSONDecoder().decode(Settings.self, from: Data(json.utf8)) == Settings())
     }

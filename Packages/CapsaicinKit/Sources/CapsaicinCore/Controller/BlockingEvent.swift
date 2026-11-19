@@ -1,9 +1,9 @@
 /// 通知の時点で、コントローラーの状態は更新済みである。
 /// HUD を出すかは画面の側が、きっかけと理由から決める。
 public enum BlockingEvent: Hashable, Sendable {
-    case started(StartTrigger)
+    case started(RequestOrigin)
     case timeLimitReplaced(RequestOrigin)
-    case startRejected(StartTrigger, StartRejection)
+    case startRejected(RequestOrigin, StartRejection)
     case released(ReleaseReason)
     case warningsChanged
 }
@@ -30,22 +30,27 @@ public enum SettingsChangeResult: Hashable, Sendable {
     case reverted(failed: Set<Mechanism>)
 }
 
+public enum BrightnessRecordWarning: String, CaseIterable, Hashable, Sendable, Codable {
+    case saveFailed
+    case deletionFailed
+}
+
 public struct BlockingStatus: Hashable, Sendable, Codable {
     public var session: BlockingSession?
     public var batteryCondition: BatteryCondition?
     public var misalignments: Misalignments
-    public var isRecordUnsaved: Bool
+    public var brightnessWarnings: Set<BrightnessRecordWarning>
 
     public init(
         session: BlockingSession?,
         batteryCondition: BatteryCondition?,
         misalignments: Misalignments,
-        isRecordUnsaved: Bool,
+        brightnessWarnings: Set<BrightnessRecordWarning> = [],
     ) {
         self.session = session
         self.batteryCondition = batteryCondition
         self.misalignments = misalignments
-        self.isRecordUnsaved = isRecordUnsaved
+        self.brightnessWarnings = brightnessWarnings
     }
 
     public var isBlocking: Bool {
@@ -53,6 +58,6 @@ public struct BlockingStatus: Hashable, Sendable, Codable {
     }
 
     public var hasWarnings: Bool {
-        !misalignments.isEmpty || isRecordUnsaved
+        !misalignments.isEmpty || !brightnessWarnings.isEmpty
     }
 }

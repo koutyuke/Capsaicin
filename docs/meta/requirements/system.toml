@@ -51,30 +51,6 @@ depends_on = []
 sources = ["DEC-SYS-017", "DEC-SYS-007", "DEC-CLI-003"]
 
 [[requirements]]
-id = "REQ-SYS-005"
-title = "Apple Developer Program なしでビルドして使える"
-kind = "constraint"
-statement = "Apple Developer Program に加入していなくても、自分の Mac でソースからビルドして使える。"
-reason = "ソースからビルドする人に証明書を求めないため。配布物だけを署名する判断は DEC-SYS-021 にある。"
-priority = "must"
-status = "accepted"
-specs = []
-depends_on = []
-sources = ["DEC-SYS-021", "DEC-SYS-005"]
-
-[[requirements]]
-id = "REQ-SYS-006"
-title = "コード署名に依存しない"
-kind = "constraint"
-statement = "Capsaicin の機能は、Apple が発行した証明書によるコード署名がなくても動く。"
-reason = "将来ほかの人に無料で配る場合にも、同じ方式のまま動くようにするため。"
-priority = "must"
-status = "accepted"
-specs = []
-depends_on = []
-sources = ["DEC-SYS-021", "DEC-HLP-001", "DEC-CLI-002", "HYP-HLP-003"]
-
-[[requirements]]
 id = "REQ-SYS-007"
 title = "Capsomnia と共有しない"
 kind = "constraint"
