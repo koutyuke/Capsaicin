@@ -404,7 +404,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「メニューからのスリープも防ぐ」がオフになります。Capsaicinがオンの間でも、アップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "「メニューからのスリープも防ぐ」がオフになります。スリープ防止中でも、アップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
           }
         }
       }
@@ -415,13 +415,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“When display is closed” will be set to “System sleep”. Your Mac will sleep when you close the display or choose Sleep from the Apple menu, even while sleep prevention is on."
+            "value" : "“When display is closed” will be set to “Put Mac to sleep”. Your Mac will sleep when you close the display or choose Sleep from the Apple menu, even while sleep prevention is on."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「ディスプレイを閉じたとき」が「システムスリープ」になります。Capsaicinがオンの間でも、ディスプレイを閉じたときやアップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "「ディスプレイを閉じたとき」が「Macをスリープ」になります。スリープ防止中でも、ディスプレイを閉じたときやアップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
           }
         }
       }

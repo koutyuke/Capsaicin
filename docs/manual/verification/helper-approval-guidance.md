@@ -25,7 +25,7 @@ sleep 5
 /usr/bin/sfltool dumpbtm
 ```
 
-「スリープ」の設定、「LED」の「スリープ防止中にCaps LockのLEDを点灯」、ヘルパーの状態、システム設定の許可を `"$B/result-helper-approval-guidance.txt"` に控える。LED はオフにし、「ディスプレイを閉じたとき」を「システムスリープ（標準）」、MacBook 以外の Mac では「メニューからのスリープも防ぐ」をオフにする。
+「スリープ」の設定、「LED」の「スリープ防止中にCaps LockのLEDを点灯」、ヘルパーの状態、システム設定の許可を `"$B/result-helper-approval-guidance.txt"` に控える。LED はオフにし、「ディスプレイを閉じたとき」を「Macをスリープ（標準）」、MacBook 以外の Mac では「メニューからのスリープも防ぐ」をオフにする。
 
 ヘルパーが「未インストール」なら、設定の「ヘルパー」で「インストール…」を選び、確認の「インストール」を押す。「システム設定での許可待ち」か「有効」になったら、今回登録したことを結果に控える。許可待ちなら「システム設定を開く」から Capsaicin の項目を許可して「有効」にする。ヘルパーからの設置なのでスリープの保存値は変えない。「このビルドでは使用不可」やエラーなら始めない。
 
@@ -69,7 +69,7 @@ sleep 5
    /usr/bin/defaults export io.github.koutyuke.capsaicin.debug - | python3 -c 'import json, plistlib, sys; print(json.dumps(json.loads(plistlib.loads(sys.stdin.buffer.read()).get("capsaicin.settings", b"{}")), ensure_ascii=False, indent=2))'
    ```
 
-   期待: システム設定は開かず、選択は「システムスリープ（標準）」、MacBook 以外の Mac ではオフに戻る。`blocksManualSleep` と `lidCloseDisplay` は開始点のままである。ヘルパーの承認待ちは残るが、設定の行にはヘルパーに関する注意の記号と状態の文はない。
+   期待: システム設定は開かず、選択は「Macをスリープ（標準）」、MacBook 以外の Mac ではオフに戻る。`blocksManualSleep` と `lidCloseDisplay` は開始点のままである。ヘルパーの承認待ちは残るが、設定の行にはヘルパーに関する注意の記号と状態の文はない。
 
 4. 「オンのまま」を選び直す。MacBook 以外の Mac では「メニューからのスリープも防ぐ」をオンにする。アラートで「システム設定を開く」を押す。開いたシステム設定ではまだ許可せず、アプリの設定ウインドウに戻る。設定ウインドウは閉じない。
 
