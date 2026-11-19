@@ -41,13 +41,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "If that app controls the Caps Lock LED, the LED may not light up while preventing sleep."
+            "value" : "If a keyboard remapping app controls the Caps Lock LED, the LED may not turn on or off as expected. [Learn More…](https://github.com/koutyuke/Capsaicin#key-remapping-apps)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "そのアプリがCaps LockのLEDを制御している場合、スリープ防止中もLEDが点灯しないことがあります。"
+            "value" : "キー配列を変更するアプリがCaps LockのLEDを制御している場合、点灯・消灯が意図したとおりに動作しないことがあります。[詳しい情報…](https://github.com/koutyuke/Capsaicin/blob/main/README.ja.md#%E3%82%AD%E3%83%BC%E9%85%8D%E5%88%97%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E5%A0%B4%E5%90%88)"
           }
         }
       }

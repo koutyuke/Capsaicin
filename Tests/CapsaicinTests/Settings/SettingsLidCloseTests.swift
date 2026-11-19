@@ -153,7 +153,7 @@ extension SettingsTests {
         if choice == .zeroBrightness {
             keys.append("brightnessUnavailable")
         }
-        #expect(row.help == (keys + ["lidClose.help"]).map { SettingsSection.sleep.text($0) }.joined(separator: "\n"))
+        #expect(row.help == keys.map { SettingsSection.sleep.text($0) }.joined(separator: "\n"))
         #expect(row.warningLabel == keys.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and)))
         #expect(unavailable.lidCloseChoice == choice)
         #expect(!unavailable.isBusy)

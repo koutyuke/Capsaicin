@@ -35,36 +35,19 @@
         }
       }
     },
-    "help.a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Help for %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@の説明"
-          }
-        }
-      }
-    },
     "hud.help" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Displays a brief one-line overlay at the bottom of the screen showing status changes and warnings. Appears when using the menu or hotkey, and when turned off automatically by timer, scheduled time, or low battery. Does not appear when controlled from the CLI."
+            "value" : "Shows a small notification at the bottom of the screen when sleep prevention turns on or off."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "切り替え結果や警告などを1行で知らせる小さな表示を、画面の下部に短時間出します。メニューやホットキーでの操作時、タイマー・指定時刻・バッテリー残量で自動オフになったときにも表示されます。CLIによる操作では表示されません。"
+            "value" : "オン・オフの切り替え時に画面下部に小さな通知を表示します。"
           }
         }
       }

@@ -222,7 +222,6 @@ extension SettingsView {
         Section(SettingsSection.controls.text("hotkey.group.title")) {
             SettingsRow(
                 title: SettingsSection.controls.text("hotkey.label"),
-                help: SettingsSection.controls.text("hotkey.help"),
                 symbol: "command",
             ) {
                 HotkeyRecorder(controller: hotkey)
@@ -239,7 +238,6 @@ extension SettingsView {
             toggle(.controls, "cli", \.acceptsCLIRequests, symbol: "terminal", help: true)
             SettingsRow(
                 title: SettingsSection.controls.text("cli.path.label"),
-                help: SettingsSection.controls.text("cli.path.help"),
                 symbol: "folder",
             ) {
                 let path = bundle.bundleURL.appendingPathComponent("Contents/Helpers/capsaicin").path

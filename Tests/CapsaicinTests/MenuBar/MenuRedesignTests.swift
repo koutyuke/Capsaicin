@@ -82,7 +82,7 @@ struct MenuRedesignTests {
         #expect(quick.items.first?.identifier?.rawValue == "menu.sleep.display")
         let entries = quick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
         #expect(entries.first?.title == SettingsSection.sleep.text("display.label"))
-        #expect(entries.first?.state == .off)
+        #expect(entries.first?.state == .on)
         if hasLid {
             let choices = Array(entries.dropFirst())
             #expect(choices.map(\.title) == SettingsLidCloseChoice.allCases.map {
@@ -152,7 +152,7 @@ struct MenuRedesignTests {
         quick.performActionForItem(at: quick.index(of: display))
         await drainActions()
         #expect(fixture.model.settings.blocksDisplaySleep == !fails)
-        #expect(display.state == (fails ? .off : .on))
+        #expect(display.state == (fails ? .on : .off))
         #expect(fixture.savedSettings.count == (fails ? 0 : 1))
         #expect(errors == (fails ? 1 : 0))
     }

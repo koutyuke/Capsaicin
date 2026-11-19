@@ -62,7 +62,7 @@ struct AboutResourcesTests {
     func catalogs(language: String) throws {
         let bundle = try localizedAppBundle(language)
         for key in ["updates.group.title", "autoUpdate.label", "autoUpdate.option.off", "autoUpdate.option.check",
-                    "autoUpdate.option.install", "autoUpdate.help", "softwareUpdate.label",
+                    "autoUpdate.option.install", "softwareUpdate.label", "softwareUpdate.debugDisabled",
                     "softwareUpdate.lastChecked",
                     "softwareUpdate.neverChecked", "softwareUpdate.available", "softwareUpdate.readyToInstall",
                     "softwareUpdate.check.button", "softwareUpdate.check.a11y", "softwareUpdate.update.button",

@@ -50,8 +50,10 @@ struct SettingsSleepRow: Identifiable {
     let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
-    /// 注意の文。(i) の先頭とメニューの副題で使う。
+    /// 注意の文。説明文の先頭とメニューの副題で使う。
     var warning = ""
+    /// 保存値と逆の意味の項目名を持つ。スイッチのオンは保存値の false に当たる。
+    var inverted = false
     var warningLabel = ""
     var id: String {
         key
@@ -63,7 +65,7 @@ struct SettingsSleepRow: Identifiable {
 
     var isOn: Bool {
         switch state {
-        case let .editable(value): value
+        case let .editable(value): value != inverted
         case .onWithoutHelper: true
         }
     }
@@ -75,7 +77,8 @@ struct SettingsSleepRow: Identifiable {
         let presentation = SleepSettingsPresentation(settings: settings, isHelperInstalled: helper == .installed)
         let manual = capabilities.hasLid ? "lidClose" : "manual"
         let definitions: [Self] = [
-            Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep),
+            Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep,
+                 inverted: true),
             Self(key: manual, symbol: capabilities.hasLid ? "laptopcomputer" : "powersleep",
                  setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep),
         ]
@@ -99,7 +102,9 @@ struct SettingsSleepRow: Identifiable {
             row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and))
             let warningTexts = warnings.map { SettingsSection.sleep.text($0) }
             row.warning = warningTexts.joined(separator: "\n")
-            row.help = (warningTexts + [SettingsSection.sleep.text(row.key + ".help")]).joined(separator: "\n")
+            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので説明文を持たない。
+            let help = row.key == "lidClose" ? [] : [SettingsSection.sleep.text(row.key + ".help")]
+            row.help = (warningTexts + help).joined(separator: "\n")
             return row
         }
     }

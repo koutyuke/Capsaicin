@@ -331,8 +331,11 @@ extension MenuBarTests {
         let bundle = bundle()
         #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsLed")
             == "キー配列を変更するアプリが動作中")
-        #expect(bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsLed")
-            == "そのアプリがCaps LockのLEDを制御している場合、スリープ防止中もLEDが点灯しないことがあります。")
+        let help = bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsLed")
+        #expect(help.hasPrefix("キー配列を変更するアプリがCaps LockのLEDを制御している場合、"))
+        #expect(help.hasSuffix("[詳しい情報…](https://github.com/koutyuke/Capsaicin/blob/main/README.ja.md#"
+                + "%E3%82%AD%E3%83%BC%E9%85%8D%E5%88%97%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B%E3%82%A2"
+                + "%E3%83%97%E3%83%AA%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E5%A0%B4%E5%90%88)"))
     }
 }
 

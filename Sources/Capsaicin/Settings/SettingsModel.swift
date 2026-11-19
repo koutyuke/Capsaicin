@@ -162,7 +162,7 @@ final class SettingsModel {
         if setting == \.blocksManualSleep, value, helperState != .installed {
             await manage(.install, fromSetting: true)
         } else {
-            change(setting, to: value)
+            change(setting, to: value != row.inverted)
         }
     }
 

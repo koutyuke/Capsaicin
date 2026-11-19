@@ -24,13 +24,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lets you turn sleep prevention on or off and check its status from Terminal. When this is off, the command shows an error and can’t control Capsaicin."
+            "value" : "Lets you control Capsaicin with a command in Terminal."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ターミナルからスリープ防止の切り替え操作や現在の状態を取得することができます。オフにするとコマンドはエラーを表示し、コマンドラインからの操作ができなくなります。"
+            "value" : "ターミナルからコマンドを使って操作できるようになります。"
           }
         }
       }
@@ -82,23 +82,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "パスをコピー"
-          }
-        }
-      }
-    },
-    "cli.path.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To use the capsaicin command in Terminal, add this path to your PATH, or create a symbolic link or alias to it (for example: ln -s \"path\" ~/.local/bin/capsaicin)."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルでcapsaicinコマンドを使うには、このパスを通すか、このパスへのシンボリックリンクやエイリアスを作成してください（例：ln -s \"パス\" ~/.local/bin/capsaicin）。"
           }
         }
       }
@@ -167,23 +150,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ホットキー"
-          }
-        }
-      }
-    },
-    "hotkey.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lets you turn sleep prevention on or off with a keyboard shortcut. When you turn it on with the hotkey, the “Turn Off Automatically” conditions in Sleep settings apply."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "キー操作でスリープ防止の切り替えができるようになります。ホットキーでスリープ防止をオンにしたときは、設定の「スリープ」の「スリープ防止の自動解除」が適用されます。"
           }
         }
       }

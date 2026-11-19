@@ -57,7 +57,7 @@ extension SettingsTests {
             model: makeModel(hasBattery: hasBattery, conditionsEnabled: enabled),
             hotkey: HotkeyController(save: { _ in true }), selection: SettingsSelection(defaults: defaults), quit: {},
         )
-        // 既存の (i) 検査と同じく、Form に渡す値を調べる。プロセス内では仮想 AX ノードを列挙できない。
+        // 説明文の検査と同じく、Form に渡す値を調べる。プロセス内では仮想 AX ノードを列挙できない。
         func strings(_ value: Any) -> [String] {
             if let text = value as? String {
                 return [text]
@@ -93,7 +93,7 @@ extension SettingsTests {
         #expect(rendered.width > 0 && rendered.height > 0)
     }
 
-    @Test("SPEC-SET-005 SPEC-UI-005 (i) は連動や制約のある4種類の行だけに置き、親がオフでも増やさない",
+    @Test("SPEC-SET-005 SPEC-UI-005 説明文は項目名で足りない行だけに置き、親がオフでも増やさない",
           arguments: [false, true], [false, true])
     func sleepInfoButtons(hasLid: Bool, conditionsEnabled: Bool) throws {
         let defaults = try #require(UserDefaults(suiteName: "SettingsInfo-" + UUID().uuidString))
@@ -105,7 +105,10 @@ extension SettingsTests {
             model: model,
             hotkey: HotkeyController(save: { _ in true }), selection: selection, quit: {},
         )
-        #expect(model.sleepRows.filter { !$0.help.isEmpty }.map(\.key) == ["display", hasLid ? "lidClose" : "manual"])
+        #expect(model.sleepRows.filter { !$0.help.isEmpty }.map(\.key) == (hasLid ? ["display"] : [
+            "display",
+            "manual",
+        ]))
         // Form の仮想アクセシビリティノードはプロセス内テストでは列挙できないため、描画に渡す行を調べる。
         let help = rowHelpValues(view.release)
         #expect(help.count == 7)

@@ -8,20 +8,16 @@ extension Image {
     }
 }
 
-struct SettingsInfo: View {
-    let title: String
-    let help: String
-    @State private var isOpen = false
-    var body: some View {
-        Button { isOpen.toggle() } label: {
-            Image(systemName: "info.circle").imageScale(.small).foregroundStyle(.secondary)
+private extension VerticalAlignment {
+    /// 項目名の中心。説明文があっても、アイコンと右の操作を項目名の行にそろえる。
+    enum TitleCenter: AlignmentID {
+        static func defaultValue(in dimensions: ViewDimensions) -> CGFloat {
+            dimensions[VerticalAlignment.center]
         }
-        .buttonStyle(.borderless)
-        .help(help)
-        .accessibilityLabel(String(format: SettingsSection.general.text("help.a11y"), title))
-        .popover(isPresented: $isOpen) {
-            Text(help).font(.callout).padding(16).frame(idealWidth: 280).fixedSize(horizontal: false, vertical: true)
-        }
+    }
+
+    static var titleCenter: VerticalAlignment {
+        VerticalAlignment(TitleCenter.self)
     }
 }
 
@@ -36,9 +32,15 @@ struct SettingsRow<Content: View>: View {
     var warningLabel = ""
     var controlAccessibilityLabel: String?
     @ViewBuilder var content: () -> Content
+    /// 説明文のリンクを押せるよう、Markdown として読む。注意と説明を分ける改行は残す。
+    private var helpText: AttributedString {
+        (try? AttributedString(markdown: help, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+            ?? AttributedString(help)
+    }
+
     var body: some View {
-        HStack {
-            HStack(spacing: 8) {
+        HStack(alignment: .titleCenter) {
+            HStack(alignment: .titleCenter, spacing: 8) {
                 if let symbol = warningLabel.isEmpty ? symbol : "exclamationmark.triangle.fill" {
                     Image(symbol: symbol, bundle: Bundle(for: SettingsWindowController.self))
                         .foregroundStyle(symbol == "exclamationmark.triangle.fill" ? Color.orange : Color.secondary)
@@ -49,19 +51,22 @@ struct SettingsRow<Content: View>: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).foregroundStyle(enabled ? .primary : .secondary)
                         .disabled(!enabled)
+                        .alignmentGuide(.titleCenter) { $0[VerticalAlignment.center] }
                     if let subtitle {
                         Text(subtitle).font(.callout).foregroundStyle(.secondary)
                             .lineLimit(1).help(subtitle)
                     }
-                }
-                if !help.isEmpty {
-                    SettingsInfo(title: title, help: help)
+                    if !help.isEmpty {
+                        Text(helpText).font(.callout).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
             }
             .padding(.leading, child ? 28 : 0)
-            Spacer()
+            // システム設定と同じく、折り返した説明文と右の操作の間を広めに空ける。
+            Spacer(minLength: 24)
             content().disabled(!enabled)
-                .accessibilityLabel(controlAccessibilityLabel ?? title).accessibilityHint(help)
+                .accessibilityLabel(controlAccessibilityLabel ?? title).accessibilityHint(String(helpText.characters))
         }
         .contentShape(Rectangle())
     }
