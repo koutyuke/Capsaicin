@@ -5,16 +5,16 @@ description: Capsaicin のリリース準備を進めるときに使う。オー
 
 # capsaicin-release
 
-版の決め方、ブランチ、ラベル、リリースの流れは `docs/meta/decisions/DEC-SYS-014-git-flow-branches-and-release-pull-requests.md` に従う。このスキルではその判断を繰り返さず、実行する手順だけを定める。
+ブランチ、ラベル、リリースの流れは `docs/meta/decisions/DEC-SYS-014-git-flow-branches-and-release-pull-requests.md` に、版のどの部分を上げるかは `docs/meta/decisions/DEC-SYS-022-release-kind-chosen-by-owner.md` に従う。このスキルではその判断を繰り返さず、実行する手順だけを定める。
 
 GitHub 上で PR を `main` や `develop` にマージせず、タグの作成と push、GitHub の設定変更も行わない。リリースブランチの push と PR の作成は、まとめて承認された場合だけ行う。戻しマージの push には別の承認を得る。
 
 ## 1. 準備
 
-通常のリリースでは `develop` で次を実行する。
+通常のリリースでは、版のどの部分（`major`、`minor`、`patch`）を上げるかをオーナーに確かめる。依頼に含まれていなければ尋ね、自分で決めない。`develop` で次を実行する。
 
 ```bash
-nix develop --command just prepare-release
+nix develop --command just prepare-release {major|minor|patch}
 ```
 
 緊急の修正では `hotfix/*` で次を実行する。
@@ -31,7 +31,7 @@ nix develop --command just prepare-release patch
 
 ## 3. 互換性を確かめる
 
-通常のリリースでは `pull_requests` の各 PR について `gh pr diff <番号>` を実行する。差分と材料の `labels`、`breaking` を照らし合わせ、`I-Breaking` がないのに次を非互換に変えていないかを確かめる。
+通常のリリースでは `pull_requests` の各 PR について `gh pr diff <番号>` を実行する。差分と材料の `labels`、`breaking` を照らし合わせ、`I-Breaking` がないのに次を非互換に変えていないかを確かめる。材料の `kind` が `patch` なら、互換性を壊す変更が1つもないことを確かめる。
 
 - CLI の引数: `Packages/CapsaicinKit/Sources/CapsaicinIPC/CLIArguments.swift`
 - CLI の実行と出力: `Sources/capsaicin-cli/main.swift`、`Sources/capsaicin-cli/CLIRunner.swift`、`Sources/capsaicin-cli/CLIOutput.swift`
@@ -106,7 +106,7 @@ nix develop --command just prepare-release patch
 1. 作業ツリーが空であることを確かめ、`git fetch origin` を実行する。
 2. `develop` を `origin/develop` に fast-forward し、`origin/main` を `--no-ff` でマージする。
 3. `main` 向けの開いた `release/*` PR があれば、そのブランチにも `origin/main` を `--no-ff` でマージする。
-4. `project.yml` の版の行だけが競合した場合は、取り込む側のブランチにある版を採る。それ以外の競合は自分で決めず、オーナーに伝えて止める。
+4. `project.yml` の版の行だけが競合した場合は、`MARKETING_VERSION` は取り込む側のブランチの値を採り、`CURRENT_PROJECT_VERSION` は `origin/main` の値に1を足す。それ以外の競合は自分で決めず、オーナーに伝えて止める。
 5. 作った merge commit と push するブランチをオーナーに示し、承認を得てから push する。
 
 戻しマージでも `main` へは push せず、タグを作らない。

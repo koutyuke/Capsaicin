@@ -85,7 +85,7 @@ Git で追跡するスキルは、このリポジトリの手順に依存する 
 | `restart`          | エージェントはオーナーの承認を得て実行する（`DEC-SYS-027`）。ビルドに成功してから `stop`、`start` の順に実行する                                    |
 | `build-release`    | `gen` の後、Release 構成のアプリをビルドする                                                                                                        |
 | `dist`             | `build-release` の後、配布用の zip と `SHA256SUMS.txt` を `.build/dist/` に作る                                                                     |
-| `prepare-release`  | `develop`（`patch` なら `hotfix/*`）から、版を上げたリリース用のコミットを手元に作り、材料を `.build/release/` に書き出す。push はしない            |
+| `prepare-release`  | `develop`（緊急は `hotfix/*`）で、指定した部分（`major`・`minor`・`patch`）の版を上げてコミットし、材料を `.build/release/` に書く。push しない     |
 | `test`             | `test-scripts`、`test-package`、`test-app` を実行する                                                                                               |
 | `test-scripts`     | 一時フィクスチャで文書・整形検査スクリプトをテストする。実際の formatter による Swift・JSON の不整形検出も含む                                      |
 | `test-package`     | Xcode の Swift で3モジュールの Swift Testing を実行する                                                                                             |
