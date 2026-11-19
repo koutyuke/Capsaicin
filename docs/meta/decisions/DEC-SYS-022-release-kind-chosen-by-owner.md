@@ -26,6 +26,7 @@ based_on: ["DEC-SYS-014", "DEC-SYS-016", "DEC-SYS-019"]
 - 利用者への約束は「PATCH に上げても、CLI と設定の互換性は壊れない」である。これは方針として守るもので、ラベルの検査はその補助にとどまる。`just prepare-release patch` は、前回のタグ以降の PR に `I-Breaking` があれば止まる。PR policy は、`hotfix/*` の PR に `I-Breaking` があれば止まる。ラベルの付け忘れと、PR を経ない `hotfix/*` のコミットは、リリース用のスキルが差分を読んで確かめる。
 - `develop` からは MAJOR、MINOR、PATCH のどれでも出せる。`hotfix/*` からは PATCH だけを出せる（`DEC-SYS-014`）。
 - `develop` からの PATCH と `hotfix/*` は同じ版を使いうるので、同時に準備しない。`just prepare-release` は、`develop` での PATCH の準備を `hotfix/*` があれば止め、`hotfix/*` での準備を同じ版の `release/v*` があれば止める。
+- ビルド番号（`CURRENT_PROJECT_VERSION`）は、`main` に入る順に増やす。リリース用ブランチの準備中に hotfix を公開すると、両方が同じ番号を持つので、`main` を戻しマージするときに `main` の値に1を足す。PR policy は、`main` への PR の番号が `main` の値より大きくなければ失敗し、マージの前に止める。
 - 前回のタグ以降に出す PR がなければ、MAJOR でも準備を止める。節目だけを宣言するリリースは作らない。
 - `DEC-SYS-014` の「版」にあった、`release/*` は MINOR を上げ、`I-Breaking` があれば MAJOR（1.0.0 未満は MINOR）を上げるという決め方は、この判断に置き換える。
 
@@ -46,12 +47,14 @@ Capsaicin はライブラリではなくアプリで、版の範囲から依存�
 - [PrideVer](https://pridever.org/) をそのまま使う。意図で上げる部分を決められるが、互換性を壊す変更の扱いを定めていない（不採用）。
 - PrideVer のように意図で上げる部分を決め、PATCH には互換性を壊す変更を入れないという約束だけを加える（採用）。互換性を壊す変更を MINOR に回す運用は、[Elysia のメンテナーの説明](https://github.com/elysiajs/elysia/issues/867#issuecomment-3155752688)にも見られる。
 - MINOR を「互換性を壊す変更を含むとき」だけに限る。互換性を保った大きな改善を表せなくなる（不採用）。
+- ビルド番号を `project.yml` に持たず、`main` の履歴から CI で決める。戻しマージでの衝突そのものがなくなるが、全履歴の取得が要り、手元やプレビューのビルドと番号がずれる（不採用）。
 
 ## 理由
 
 - 判断の要る部分（どの部分を上げるか）は人が決め、機械で確かめられる部分（PATCH に `I-Breaking` がないこと、版の衝突）はスクリプトと PR policy が確かめる。
 - 利用者に意味のある約束を1つに絞るので、守るべきことが分かりやすい。
 - 1.0.0 未満の特例がなくなり、規則が単純になる。
+- ビルド番号の衝突は、Release ワークフローの検査ではマージの後にしか分からない。`main` のルールセットはベースに追いついていることを求めるので、hotfix の公開後のリリース用の PR は必ず `main` の戻しマージで更新され、その時点の PR policy で衝突を止められる。
 - Sparkle は更新の有無を `CFBundleVersion`（`CURRENT_PROJECT_VERSION`）で判断するので、表示する版の意味を変えても更新の仕組みに影響しない（`DEC-SYS-019`）。
 
 ## 影響

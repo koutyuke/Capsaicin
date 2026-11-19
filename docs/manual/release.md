@@ -153,9 +153,9 @@ S-Preview を付ける／ラベルがある PR を更新する
 
 1. `develop` に `origin/main` を merge commit で取り込み、`develop` を push する。
 2. 開いている `release/*` があれば、そのブランチにも `origin/main` を merge commit で取り込み、push する。
-3. `project.yml` のバージョンの行が競合したら、取り込む側のブランチ（`develop` または `release/*`）のバージョンを採る。
+3. `project.yml` のバージョンの行が競合したら、`MARKETING_VERSION` は取り込む側のブランチ（`develop` または `release/*`）の値を採り、`CURRENT_PROJECT_VERSION` は `origin/main` の値に1を足す。
 
-次の公開時には、zip 内の `CFBundleVersion` が latest のタグの `project.yml` にある `CURRENT_PROJECT_VERSION` より大きい必要がある。hotfix の戻しマージで同じ番号になった場合も、Release ワークフローが公開を止める。`MARKETING_VERSION` とは別に、リリース用ブランチの `CURRENT_PROJECT_VERSION` を latest より大きくしてからマージする。
+リリース用ブランチの準備中に hotfix を公開すると、両方が同じ `CURRENT_PROJECT_VERSION` を持つ。そのまま公開すると Sparkle が更新を見つけられないので、PR policy は `main` への PR の `CURRENT_PROJECT_VERSION` が `main` の値より大きくなければ失敗し、マージを止める。
 
 ## 問題のある版を取り下げる
 
