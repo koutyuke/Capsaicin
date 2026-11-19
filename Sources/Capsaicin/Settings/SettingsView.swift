@@ -68,7 +68,9 @@ struct SettingsView: View {
 
     private func navigation(_ section: SettingsSection) -> some View {
         Label { Text(section.title) } icon: {
-            Image(symbol: section.symbol, bundle: Bundle(for: SettingsWindowController.self))
+            SettingsSidebarIcon(
+                image: Image(symbol: section.symbol, bundle: Bundle(for: SettingsWindowController.self)),
+            )
         }.tag(section)
     }
 

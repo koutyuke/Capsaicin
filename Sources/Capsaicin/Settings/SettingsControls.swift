@@ -116,6 +116,23 @@ struct SettingsCopyButton: View {
     }
 }
 
+struct SettingsSidebarIcon: View {
+    let image: Image
+    @Environment(\.appearsActive) private var appearsActive
+    @Environment(\.backgroundProminence) private var prominence
+
+    var body: some View {
+        // サイドバーが既定で描くアクセントカラーのアイコンは、ウインドウがアクティブな間、
+        // Mission Control の開閉の遷移で点滅し GPU の負荷を上げる。SwiftUI だけの最小構成でも起きる。
+        // 色を明示すると起きないため、既定ならアクセントカラーになる場面（アクティブで未選択の行）だけ塗る。
+        if appearsActive, prominence != .increased {
+            image.foregroundStyle(.tint)
+        } else {
+            image
+        }
+    }
+}
+
 struct SettingsSidebarSpacer: NSViewRepresentable {
     let availableHeight: CGFloat
 
