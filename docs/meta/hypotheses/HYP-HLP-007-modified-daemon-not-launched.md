@@ -19,7 +19,7 @@ evidence: ["EVID-HLP-005"]
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（ブランチ `spike/smappservice-probe`）で確かめる。試作のデーモンの実行ファイルの末尾に1バイトを足し、Mach サービスに接続して、応答の有無と、`log show --predicate 'subsystem == "com.apple.xpc.launchd"' --last 5m` などの記録を見る。成功: 応答がなく、署名の検証の失敗の記録がある。失敗: 書き換えたデーモンが応答する。
+オーナーが、試作のアプリで確かめる。試作のデーモンの実行ファイルの末尾に1バイトを足し、Mach サービスに接続して、応答の有無と、`log show --predicate 'subsystem == "com.apple.xpc.launchd"' --last 5m` などの記録を見る。成功: 応答がなく、署名の検証の失敗の記録がある。失敗: 書き換えたデーモンが応答する。
 
 終わったら、試作のアプリを入れ直すか、`HYP-HLP-005` と同じ方法で片付ける。
 

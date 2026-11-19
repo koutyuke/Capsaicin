@@ -23,7 +23,7 @@ evidence: ["EVID-HLP-013"]
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`）と、`docs/manual/verification/` の手順書で確かめる。`sudo kill` はデーモンのプロセスだけに向ける。`SleepDisabled` が 1 のまま残ったら `sudo pmset -a disablesleep 0` で戻す。
+オーナーが、試作のアプリと、`docs/manual/verification/` の手順書で確かめる。`sudo kill` はデーモンのプロセスだけに向ける。`SleepDisabled` が 1 のまま残ったら `sudo pmset -a disablesleep 0` で戻す。
 
 ## 結果
 

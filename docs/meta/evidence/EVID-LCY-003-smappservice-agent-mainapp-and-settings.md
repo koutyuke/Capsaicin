@@ -4,7 +4,7 @@ id: EVID-LCY-003
 title: SMAppService の agent は kickstart とクラッシュで起動し、mainApp でログイン時に起動し、システム設定ではアプリの1項目にまとまった
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、試作 CapsaicinProbe を Apple Development の証明書で署名、/Applications に配置
-sources: ["29fef76:Prototypes/SMAppServiceProbe/MANUAL.md"]
+sources: ["8e003dc:docs/meta/tasks/TASK-103-smappservice-probe.md"]
 ---
 
 # EVID-LCY-003 SMAppService の agent は kickstart とクラッシュで起動し、mainApp でログイン時に起動し、システム設定ではアプリの1項目にまとまった
@@ -37,7 +37,7 @@ daemon、agent、mainApp を登録した状態で、「一般 > ログイン項�
 
 ## 確かめ方
 
-オーナーが `MANUAL.md` の手順 3、4 と片付けに沿って操作し、ログアウトとログインの前後で試作の画面の記録をとった。launchd のログと `sfltool dumpbtm` の出力で裏付けた。agent から起動したウインドウの記録（launchd から起動されたかの印）は残していないので、agent からの起動は launchd のログで確かめた。
+オーナーが、agent の登録、`kickstart`、agent から起動したアプリの `SIGSEGV` と正常終了、mainApp の登録と解除のそれぞれの後のログアウトとログイン、システム設定の確認、すべての登録の解除の順に操作し、ログアウトとログインの前後で試作の画面の記録をとった。launchd のログと `sfltool dumpbtm` の出力で裏付けた。agent から起動したウインドウの記録（launchd から起動されたかの印）は残していないので、agent からの起動は launchd のログで確かめた。
 
 ## 適用範囲
 

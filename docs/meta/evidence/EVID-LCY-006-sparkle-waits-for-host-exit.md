@@ -19,7 +19,7 @@ sources: ["Capsaicin.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.
 
 ## 確かめ方
 
-試作（ブランチ `spike/daemon-cleanup-probe`）の作業で Codex が取得済みのソース（`.build/spm/checkouts/Sparkle`、HEAD が上の revision と一致）を読み、PM が引用の行を読み直して確かめた。
+デーモンによる後片付けの試作の作業で Codex が取得済みのソース（試作の worktree の `.build/spm/checkouts/Sparkle`、HEAD が上の revision と一致）を読み、PM が引用の行を読み直して確かめた。
 
 ## 適用範囲
 

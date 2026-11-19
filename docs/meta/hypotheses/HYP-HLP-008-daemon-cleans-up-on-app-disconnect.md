@@ -23,7 +23,7 @@ evidence: ["EVID-HLP-010", "EVID-BLK-015", "EVID-HLP-013"]
 
 ## 確かめ方
 
-オーナーが、試作のアプリ（ブランチ `spike/daemon-cleanup-probe`）と、`docs/manual/verification/` の手順書で確かめる。抑止中にアプリを `kill -9` と `kill -SEGV` で終了させ、`pmset -g` とデーモンのログを見る。ヘルパーの登録は永続的なシステム変更で、`SleepDisabled` が 1 のまま残ったら `sudo pmset -a disablesleep 0` で戻す。
+オーナーが、試作のアプリと、`docs/manual/verification/` の手順書で確かめる。抑止中にアプリを `kill -9` と `kill -SEGV` で終了させ、`pmset -g` とデーモンのログを見る。ヘルパーの登録は永続的なシステム変更で、`SleepDisabled` が 1 のまま残ったら `sudo pmset -a disablesleep 0` で戻す。
 
 ## 結果
 

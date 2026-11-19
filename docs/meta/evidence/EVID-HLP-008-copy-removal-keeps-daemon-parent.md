@@ -3,8 +3,8 @@ schema: evidence
 id: EVID-HLP-008
 title: 登録したコピーを消しても動かしてもデーモンの項目は親を保ち、UID -2 にアプリの項目が作り直されると親のない古い項目は消えた
 observed_on: 2026-11-19
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、起動は 2026-11-18 14:30:57（`EVID-HLP-007` と同じ起動）。試作 `spike/daemon-cleanup-probe` の `d76d393` を、ヘルパーのラベルの接尾辞 `del30405acdda`（実験1）と `movfe691e6c6b`（実験2）でビルドし、Developer ID Application で署名し直した Debug ビルド
-sources: ["docs/meta/hypotheses/HYP-HLP-011-daemon-item-orphaned-by-copy-removal.md"]
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、起動は 2026-11-18 14:30:57（`EVID-HLP-007` と同じ起動）。デーモンによる後片付けの試作を、ヘルパーのラベルの接尾辞 `del30405acdda`（実験1）と `movfe691e6c6b`（実験2）でビルドし、Developer ID Application で署名し直した Debug ビルド
+sources: ["docs/meta/hypotheses/HYP-HLP-011-daemon-item-orphaned-by-copy-removal.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md", "7528138:docs/meta/tasks/TASK-117-probe-helper-label-suffix.md"]
 ---
 
 # EVID-HLP-008 登録したコピーを消しても動かしてもデーモンの項目は親を保ち、UID -2 にアプリの項目が作り直されると親のない古い項目は消えた

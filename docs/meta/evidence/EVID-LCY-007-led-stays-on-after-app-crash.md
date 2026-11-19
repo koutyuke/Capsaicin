@@ -3,8 +3,8 @@ schema: evidence
 id: EVID-LCY-007
 title: LED を点けたアプリを SIGKILL か SIGSEGV で終了させると、内蔵キーボードの LED は点いたまま残り、Caps Lock を押しても戻らず、アプリを開き直すと戻った
 observed_on: 2026-11-19
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、内蔵キーボード。試作 `d76d393`（Developer ID Application）。Karabiner-Elements が入っている
-sources: ["docs/meta/hypotheses/HYP-LCY-001-led-on-persists-after-exit.md"]
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、内蔵キーボード。デーモンによる後片付けの試作（Developer ID Application で署名）。Karabiner-Elements が入っている
+sources: ["docs/meta/hypotheses/HYP-LCY-001-led-on-persists-after-exit.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-LCY-007 LED を点けたアプリを SIGKILL か SIGSEGV で終了させると、内蔵キーボードの LED は点いたまま残り、Caps Lock を押しても戻らず、アプリを開き直すと戻った

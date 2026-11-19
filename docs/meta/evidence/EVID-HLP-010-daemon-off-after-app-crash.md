@@ -3,7 +3,7 @@ schema: evidence
 id: EVID-HLP-010
 title: 抑止中のアプリを SIGKILL か SIGSEGV で終了させると、接続を保つデーモンが切断を受けて off を実行し、1秒以内に SleepDisabled が 0 に戻った
 observed_on: 2026-11-19
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。試作 `spike/daemon-cleanup-probe` の `d76d393` を標準の Debug のヘルパーのラベル（`io.github.koutyuke.capsaicin.debug.helper`）でビルドし、Developer ID Application で署名した
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。デーモンによる後片付けの試作を標準の Debug のヘルパーのラベル（`io.github.koutyuke.capsaicin.debug.helper`）でビルドし、Developer ID Application で署名した
 sources: ["docs/meta/hypotheses/HYP-HLP-008-daemon-cleans-up-on-app-disconnect.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 

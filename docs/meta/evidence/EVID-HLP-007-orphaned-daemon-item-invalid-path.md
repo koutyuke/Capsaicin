@@ -3,8 +3,8 @@ schema: evidence
 id: EVID-HLP-007
 title: 親のアプリを持たない BTM のデーモンの項目が登録のたびに使い直され、launchd は BundleProgram を解決できずに Invalid path (108) で起動に失敗した
 observed_on: 2026-11-18
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、起動は 2026-11-18 14:30:57。試作 `spike/daemon-cleanup-probe` の `1b42313` を `just build` と `just sign-debug`（Developer ID Application、TeamIdentifier GG7W7F3CTU）で作った Debug ビルド
-sources: ["docs/manual/verification/app-crash-daemon-cleanup.md"]
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、起動は 2026-11-18 14:30:57。デーモンによる後片付けの試作の、ヘルパーのラベルの接尾辞を指定できるようにする前の版を `just build` と `just sign-debug`（Developer ID Application、TeamIdentifier GG7W7F3CTU）で作った Debug ビルド
+sources: ["docs/manual/verification/app-crash-daemon-cleanup.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-HLP-007 親のアプリを持たない BTM のデーモンの項目が登録のたびに使い直され、launchd は BundleProgram を解決できずに Invalid path (108) で起動に失敗した

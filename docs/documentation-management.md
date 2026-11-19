@@ -90,7 +90,9 @@ Front Matter の共通項目は `schema`、`id`、`title` である。`schema` �
 | `depends_on` | 計画なら計画、作業なら作業 |
 | `supersedes`、`superseded_by` | 判断 |
 
-根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス（削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める）、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス（削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める。コミットは `develop` の履歴にあるものに限り、マージしないブランチのコミットは指さない）、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+
+実機で確かめるための試作は、マージしないブランチに置き、リポジトリには残さない。試作で得た根拠には、結果を読み解くのに要る試作の作りと操作を本文に書き、`sources` には試作を作らせたチケットを挙げる。
 
 本文に書いた ID（`REQ-BLK-001` のような形の文字列）も、実在するものだけにする。
 

@@ -3,7 +3,7 @@ schema: evidence
 id: EVID-BLK-015
 title: 「明るさを0」で暗くしたままアプリが SIGKILL か SIGSEGV で終了しても、開くと最低限の明るさで表示され、輝度のキーとスライダーで戻せ、アプリを起動すると記録した輝度に戻った
 observed_on: 2026-11-19
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、バッテリー駆動、外部ディスプレイなし、内蔵ディスプレイの「輝度を自動調節」はオン。試作 `spike/daemon-cleanup-probe` の `d76d393` を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、バッテリー駆動、外部ディスプレイなし、内蔵ディスプレイの「輝度を自動調節」はオン。デーモンによる後片付けの試作を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した
 sources: ["docs/meta/hypotheses/HYP-BLK-013-brightness-keys-restore-from-zero.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 

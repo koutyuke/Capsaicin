@@ -4,7 +4,7 @@ id: EVID-HLP-005
 title: SMAppService のデーモンは版の入れ替えで承認を保って新しい版になり、書き換えや別の署名への差し替えでは起動されなかった
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、試作 CapsaicinProbe の版1〜3を Apple Development の証明書で署名、版1を ad-hoc でも署名、/Applications に配置
-sources: ["29fef76:Prototypes/SMAppServiceProbe/MANUAL.md"]
+sources: ["8e003dc:docs/meta/tasks/TASK-103-smappservice-probe.md"]
 ---
 
 # EVID-HLP-005 SMAppService のデーモンは版の入れ替えで承認を保って新しい版になり、書き換えや別の署名への差し替えでは起動されなかった
@@ -27,7 +27,7 @@ sources: ["29fef76:Prototypes/SMAppServiceProbe/MANUAL.md"]
 
 ## 確かめ方
 
-オーナーが `MANUAL.md` の手順 6 と 7 に沿って操作した。手順書の 7-2（末尾に1バイト）が試験にならなかったので、手順書の外で上の2つ（署名の範囲の書き換え、ad-hoc 署名への差し替え）を加えた。書き換えは、位置を `assert` で確かめる Python で1バイトだけ行った。結果は、試作の画面の記録と、launchd、xpcproxy、amfid、カーネルのログで確かめた。
+`EVID-HLP-004` と同じ試作の、埋め込んだ版の番号だけが違う3つのビルドを使い、オーナーが操作した。入れ替えのたびに状態を見て問い合わせ、登録し直してからもう一度問い合わせた。書き換えは、最初にデーモンの実行ファイルの末尾に1バイト足したが、試験にならなかった（上の最後の項目）。そこで、署名の範囲の書き換えと、ad-hoc 署名への差し替えを加えた。書き換えは、位置を `assert` で確かめる Python で1バイトだけ行った。結果は、試作の画面の記録と、launchd、xpcproxy、amfid、カーネルのログで確かめた。
 
 ## 適用範囲
 

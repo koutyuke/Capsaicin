@@ -4,14 +4,14 @@ id: EVID-HLP-004
 title: Team ID を持つ署名の試作は SMAppService.daemon を承認の後に root で動かし、署名の条件で XPC の相手を絞れ、起動時の後片付けは起動ごとに1回だった
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、試作 CapsaicinProbe を Apple Development の証明書（Team ID あり、公証なし）と ad-hoc で署名、/Applications に配置
-sources: ["29fef76:Prototypes/SMAppServiceProbe/Daemon/main.c", "29fef76:Prototypes/SMAppServiceProbe/MANUAL.md"]
+sources: ["8e003dc:docs/meta/tasks/TASK-103-smappservice-probe.md"]
 ---
 
 # EVID-HLP-004 Team ID を持つ署名の試作は SMAppService.daemon を承認の後に root で動かし、署名の条件で XPC の相手を絞れ、起動時の後片付けは起動ごとに1回だった
 
 ## 確かめた事実
 
-試作のデーモンは C で書き、`MachServices` を1つ持ち、`RunAtLoad=true`、KeepAlive なしの plist を `BundleProgram` で指す。接続のたびに、`xpc_connection_set_peer_team_identity_requirement` で同じ Team ID とアプリの署名識別子を求める。アプリの側も、同じ方法でデーモンを確かめる。デーモンは `pmset` を実行せず、`kern.bootsessionuuid` を `/Library/Application Support/CapsaicinProbe/` のファイルと比べて、違うときだけ「起動時の後片付け」を記録する。
+試作のデーモンは C で書き、`MachServices` を1つ持ち、`RunAtLoad=true`、KeepAlive なしの plist を `BundleProgram` で指す。接続のたびに、`xpc_connection_set_peer_team_identity_requirement` で同じ Team ID とアプリの署名識別子を求める。接続を受け付ける前の listener にも同じ条件を付ける。アプリの側も、同じ方法でデーモンを確かめる。接続がなくなって約30秒経つと、デーモンは自分で終了する。デーモンは `pmset` を実行せず、`kern.bootsessionuuid` を `/Library/Application Support/CapsaicinProbe/` のファイルと比べて、違うときだけ「起動時の後片付け」を記録する。
 
 Apple Development で署名し、公証していない試作で、次を確かめた。
 
@@ -29,7 +29,7 @@ ad-hoc で署名した試作（アプリとデーモンに Team ID がない）�
 
 ## 確かめ方
 
-ブランチ `spike/smappservice-probe`（push していない）の `29fef76` の試作を、オーナーが自分の Mac で `MANUAL.md` の手順 2、5、8 に沿って操作した。結果は、試作の画面の記録と、`/usr/bin/log show` による launchd、xpcproxy、amfid、カーネルのログで確かめた。
+使い捨ての試作のアプリを、オーナーが自分の Mac で操作した。試作の作りは `sources` のチケットにある。コードはリポジトリに残していない。操作したのは、登録と承認、問い合わせ、40秒待ってからの問い合わせ、ad-hoc 署名の CLI からの接続、再起動の後の問い合わせ、ad-hoc 署名の版での登録と承認である。結果は、試作の画面の記録と、`/usr/bin/log show` による launchd、xpcproxy、amfid、カーネルのログで確かめた。
 
 自宅の回線から `timestamp.apple.com`（17.157.80.35:80）に TCP で接続できず、`codesign --timestamp` は Apple Development でも Developer ID でも `A timestamp was expected but was not found.` で失敗した。ビルドだけ、別の回線で行った。
 

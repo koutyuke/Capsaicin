@@ -3,8 +3,8 @@ schema: evidence
 id: EVID-HLP-011
 title: 親のない項目が消えた後、標準のラベルのヘルパーを登録すると、新しい項目が親付きで作られ、Invalid path なしで起動した
 observed_on: 2026-11-19
-environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。`EVID-HLP-009` の再起動の後の状態から、試作 `d76d393` を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した
-sources: ["docs/meta/hypotheses/HYP-HLP-012-reboot-drops-missing-app-item.md"]
+environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。`EVID-HLP-009` の再起動の後の状態から、デーモンによる後片付けの試作を標準の Debug のヘルパーのラベルでビルドし、Developer ID Application で署名した
+sources: ["docs/meta/hypotheses/HYP-HLP-012-reboot-drops-missing-app-item.md", "7528138:docs/meta/tasks/TASK-114-daemon-cleanup-probe.md"]
 ---
 
 # EVID-HLP-011 親のない項目が消えた後、標準のラベルのヘルパーを登録すると、新しい項目が親付きで作られ、Invalid path なしで起動した
