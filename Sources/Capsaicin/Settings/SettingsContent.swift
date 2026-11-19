@@ -3,7 +3,7 @@ import CapsaicinPlatform
 import Foundation
 
 enum SettingsSection: String, CaseIterable, Identifiable {
-    case general, sleep, led, controls, helper, about
+    case general, sleep, feedback, controls, helper, about
     var id: Self {
         self
     }
@@ -16,7 +16,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .sleep: "moon.zzz"
-        case .led: "custom.capsaicin.led"
+        case .feedback: "custom.capsaicin.led"
         case .controls: "keyboard"
         case .helper: "lock.shield"
         case .about: "info.circle"

@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Battery"
+            "value" : "Turn Off Based on Battery"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バッテリー"
+            "value" : "バッテリーによる自動解除"
           }
         }
       }
@@ -30,7 +30,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電源アダプタ接続中は残量でオフにしない"
+            "value" : "電源アダプタ接続中は自動解除しない"
           }
         }
       }
@@ -47,7 +47,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "残量が少なくなったらオフにする"
+            "value" : "バッテリー残量が少ないときに自動解除"
           }
         }
       }
@@ -58,13 +58,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Low battery threshold"
+            "value" : "Battery level"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "しきい値"
+            "value" : "バッテリー残量"
           }
         }
       }
@@ -75,13 +75,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "Below %d%%"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "%d%%未満"
           }
         }
       }
@@ -483,13 +483,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn Off Automatically"
+            "value" : "Turn Off Based on Time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止の自動解除"
+            "value" : "時間による自動解除"
           }
         }
       }
@@ -506,7 +506,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止をオンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻にオフになります。"
+            "value" : "スリープ防止をオンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻に自動解除します。"
           }
         }
       }
@@ -517,13 +517,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled time"
+            "value" : "Turn off at scheduled time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指定時刻"
+            "value" : "指定時刻に自動解除"
           }
         }
       }
@@ -585,13 +585,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timer"
+            "value" : "Turn off with timer"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "タイマー"
+            "value" : "タイマーで自動解除"
           }
         }
       }

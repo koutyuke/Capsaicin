@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SET-006
 title: 「スリープ」のバッテリー残量の条件を、時間の自動解除とは別のグループ「バッテリー」にする
-status: accepted
+status: superseded
 supersedes: ["DEC-SET-005"]
-superseded_by: []
+superseded_by: ["DEC-SET-008"]
 requirements: ["REQ-SET-002", "REQ-SET-003", "REQ-SET-005", "REQ-BLK-009"]
 based_on: ["DEC-BLK-006", "DEC-UI-012"]
 ---

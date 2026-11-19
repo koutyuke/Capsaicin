@@ -22,9 +22,9 @@ statement = "設定画面は、左のサイドバーでセクションを選び�
 reason = "macOS の利用者が、使い方を覚えずに目的の項目にたどり着けるようにするため。"
 priority = "must"
 status = "accepted"
-specs = ["SPEC-SET-001"]
+specs = ["SPEC-SET-001", "SPEC-SET-009"]
 depends_on = []
-sources = ["EVID-UI-003", "DEC-UI-010"]
+sources = ["EVID-UI-003", "DEC-UI-010", "DEC-SET-008"]
 
 [[requirements]]
 id = "REQ-SET-003"

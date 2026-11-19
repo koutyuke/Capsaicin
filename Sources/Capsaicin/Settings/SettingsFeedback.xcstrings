@@ -1,0 +1,159 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "hud.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shows a small message at the bottom center of the screen when you turn sleep prevention on or off, or when it turns off automatically, so you can see at a glance when it will turn off or why it turned off."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止のオン・オフを切り替えたときや自動解除されたときに、画面下部の中央に小さなメッセージを表示します。いつオフになるかや、なぜ解除されたのかなどをひと目で確認できます。"
+          }
+        }
+      }
+    },
+    "hud.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HUD"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HUD"
+          }
+        }
+      }
+    },
+    "hud.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show HUD when switching"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切り替え時にHUDを表示"
+          }
+        }
+      }
+    },
+    "led.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lights the Caps Lock LED on your keyboard while sleep prevention is on. It doesn't affect what you type, so you can keep typing as usual and use the light as a reminder."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止がオンの間、キーボードのCaps Lock LEDを点灯させます。入力状態には影響しないため、普段通りのキー入力のまま目印として活用できます。"
+          }
+        }
+      }
+    },
+    "led.group.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caps Lock LED"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caps LockのLED"
+          }
+        }
+      }
+    },
+    "led.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light up Caps Lock LED while preventing sleep"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スリープ防止中にCaps LockのLEDを点灯"
+          }
+        }
+      }
+    },
+    "title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フィードバック"
+          }
+        }
+      }
+    },
+    "virtualKeyboard.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If a keyboard remapping app controls the Caps Lock LED, the LED may not turn on or off as expected. [Learn More…](https://github.com/koutyuke/Capsaicin#key-remapping-apps)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キー配列を変更するアプリがCaps LockのLEDを制御している場合、点灯・消灯が意図したとおりに動作しないことがあります。[詳しい情報…](https://github.com/koutyuke/Capsaicin/blob/main/README.ja.md#%E3%82%AD%E3%83%BC%E9%85%8D%E5%88%97%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E5%A0%B4%E5%90%88)"
+          }
+        }
+      }
+    },
+    "virtualKeyboard.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A keyboard remapping app is running"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "キー配列を変更するアプリが動作中"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

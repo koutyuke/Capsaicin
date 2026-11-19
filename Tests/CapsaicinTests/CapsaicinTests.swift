@@ -33,7 +33,7 @@ func menuBarApplicationBundle() throws {
 
 private let localizationTables = [
     "App", "MenuBar", "HUD", "SettingsAbout", "SettingsControls", "SettingsGeneral",
-    "SettingsHelper", "SettingsLed", "SettingsSleep",
+    "SettingsHelper", "SettingsFeedback", "SettingsSleep",
 ]
 
 @Test("SPEC-UI-011 全テーブルは英語と日本語で同じキーを持ち、値が空でない")

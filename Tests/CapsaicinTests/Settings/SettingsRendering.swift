@@ -78,7 +78,7 @@ extension SettingsTests {
         let bundle = Bundle(for: SettingsWindowController.self)
         let image = try #require(NSImage(symbolName: name, bundle: bundle, variableValue: 0))
         #expect(image.size.width > 0 && image.size.height > 0)
-        #expect(SettingsSection.led.symbol == "custom.capsaicin.led")
+        #expect(SettingsSection.feedback.symbol == "custom.capsaicin.led")
         #expect(Image(symbol: name, bundle: bundle) == Image(name, bundle: bundle))
         let rendered = try #require(ImageRenderer(content: Image(symbol: name, bundle: bundle).font(.body)).cgImage)
         #expect(rendered.width > 0 && rendered.height > 0)
@@ -154,8 +154,8 @@ extension SettingsTests {
         #expect(window.frame.size == NSSize(width: 720, height: 500))
         #expect(window.title == section.title)
         try checkToolbarTitle(window)
-        // 見出しのあるセクション（一般、スリープ防止、操作）は、見出しが先に来るので除く。
-        if [.led, .helper].contains(section) {
+        // 見出しのあるセクション（スリープ、フィードバック、操作）は、見出しが先に来るので除く。
+        if [.general, .helper].contains(section) {
             try checkFormTop(window)
         }
         try checkSidebarBottom(window)

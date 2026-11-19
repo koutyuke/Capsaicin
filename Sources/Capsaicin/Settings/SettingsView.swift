@@ -42,7 +42,7 @@ struct SettingsView: View {
                 switch selection.section {
                 case .general: general
                 case .sleep: sleep
-                case .led: led
+                case .feedback: feedback
                 case .controls: controls
                 case .helper: helper
                 case .about:
@@ -76,14 +76,13 @@ struct SettingsView: View {
 
     @ViewBuilder
     private var general: some View {
-        Section(SettingsSection.general.text("startup.group.title")) {
+        Section {
             toggle(.general, "launchAtLogin", \.launchesAtLogin, symbol: "power")
         }
-        Section(SettingsSection.general.text("appearance.group.title")) {
+        Section {
             toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle")
             toggle(.general, "dockIcon", \.showsDockIcon, symbol: "dock.rectangle")
         }
-        toggle(.general, "hud", \.showsHUD, symbol: "capsule.bottomhalf.filled", help: true)
     }
 }
 
@@ -171,7 +170,7 @@ extension SettingsView {
                                     model.app.settings.batteryThreshold.percent,
                                 ),
                             )
-                            .monospacedDigit().foregroundStyle(.secondary)
+                            .monospacedDigit().foregroundStyle(.secondary).fixedSize()
                             Slider(
                                 value: Binding(
                                     get: { Double(model.app.settings.batteryThreshold.percent) },
@@ -204,17 +203,28 @@ extension SettingsView {
     }
 
     @ViewBuilder
-    private var led: some View {
+    private var feedback: some View {
+        Section(SettingsSection.feedback.text("led.group.title")) {
+            SettingsFeedbackBanner(text: SettingsSection.feedback.text("led.description")) {
+                LEDIllustration()
+            }
+        }
+        Section { toggle(.feedback, "led", \.notifiesWithLED, symbol: "custom.capsaicin.led.fill") }
         if model.app.hasVirtualKeyboard {
             Section {
                 SettingsRow(
-                    title: SettingsSection.led.text("virtualKeyboard.label"),
-                    help: SettingsSection.led.text("virtualKeyboard.help"),
+                    title: SettingsSection.feedback.text("virtualKeyboard.label"),
+                    help: SettingsSection.feedback.text("virtualKeyboard.help"),
                     symbol: "exclamationmark.triangle.fill",
                 ) {}
             }
         }
-        Section { toggle(.led, "enabled", \.notifiesWithLED, symbol: "custom.capsaicin.led.fill") }
+        Section(SettingsSection.feedback.text("hud.group.title")) {
+            SettingsFeedbackBanner(text: SettingsSection.feedback.text("hud.description")) {
+                HUDIllustration()
+            }
+        }
+        Section { toggle(.feedback, "hud", \.showsHUD, symbol: "capsule.bottomhalf.filled") }
     }
 
     @ViewBuilder

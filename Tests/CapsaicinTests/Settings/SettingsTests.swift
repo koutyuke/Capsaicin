@@ -162,8 +162,8 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsTests-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         #expect(selection.section == .general)
-        selection.section = .led
-        #expect(SettingsSelection(defaults: defaults).section == .led)
+        selection.section = .feedback
+        #expect(SettingsSelection(defaults: defaults).section == .feedback)
         defaults.set("sleep", forKey: "settingsSection")
         #expect(SettingsSelection(defaults: defaults).section == .sleep)
         defaults.set("release", forKey: "settingsSection")
@@ -204,7 +204,14 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsRender-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         defer { defaults.removeObject(forKey: "settingsSection") }
-        #expect(SettingsSection.allCases.map(\.rawValue) == ["general", "sleep", "led", "controls", "helper", "about"])
+        #expect(SettingsSection.allCases.map(\.rawValue) == [
+            "general",
+            "sleep",
+            "feedback",
+            "controls",
+            "helper",
+            "about",
+        ])
         for section in SettingsSection.allCases {
             #expect(section.title != "title")
             selection.section = section

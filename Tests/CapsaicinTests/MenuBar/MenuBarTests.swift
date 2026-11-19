@@ -329,9 +329,9 @@ extension MenuBarTests {
     @Test("SPEC-LED-005 設定の案内もキー配列を変更するアプリと LED への影響を示す")
     func virtualKeyboardSettingsNotice() {
         let bundle = bundle()
-        #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsLed")
+        #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsFeedback")
             == "キー配列を変更するアプリが動作中")
-        let help = bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsLed")
+        let help = bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsFeedback")
         #expect(help.hasPrefix("キー配列を変更するアプリがCaps LockのLEDを制御している場合、"))
         #expect(help.hasSuffix("[詳しい情報…](https://github.com/koutyuke/Capsaicin/blob/main/README.ja.md#"
                 + "%E3%82%AD%E3%83%BC%E9%85%8D%E5%88%97%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B%E3%82%A2"
