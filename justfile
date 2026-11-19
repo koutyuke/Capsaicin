@@ -14,7 +14,7 @@ gen:
 build: gen
     /usr/bin/xcodebuild {{ xcode_args }} build
 
-# ヘルパーが使えるよう、オーナーのキーチェーンの鍵で Debug アプリを署名し直す（エージェントは承認が必要）。
+# Re-sign the Debug app with a key in the owner's keychain so it can use the helper (agents need owner approval).
 [positional-arguments]
 sign-debug identity="Developer ID Application":
     #!/usr/bin/env bash
@@ -43,7 +43,7 @@ sign-debug identity="Developer ID Application":
 build-release: gen
     /usr/bin/xcodebuild {{ xcode_base }} -configuration Release build
 
-# 確認用 Debug の追加 dylib を作らず、PR とコミットを名前に含む zip を作る。
+# Build a Debug app for checks without extra dylibs, and zip it with the PR number and commit in the name.
 [positional-arguments]
 dist-debug pr sha: gen
     #!/usr/bin/env bash
