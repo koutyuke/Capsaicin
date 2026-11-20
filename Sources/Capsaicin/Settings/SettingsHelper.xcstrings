@@ -245,7 +245,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To use this setting, allow the helper in System Settings."
+            "value" : "To use this setting, allow the helper in System Settings"
           }
         },
         "ja" : {
@@ -296,7 +296,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To keep your Mac awake when the display is closed, install the helper."
+            "value" : "To keep your Mac awake when the display is closed, install the helper"
           }
         },
         "ja" : {
@@ -330,13 +330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "To use “Prevent sleep from Apple menu”, install the helper."
+            "value" : "To use “Also prevent sleep from Apple menu”, install the helper"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「メニューからのスリープも防ぐ」を使うにはヘルパーのインストールが必要です"
+            "value" : "「Appleメニューからのスリープも防ぐ」を使うにはヘルパーのインストールが必要です"
           }
         }
       }
@@ -398,13 +398,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“Prevent sleep from Apple menu” will be turned off. Your Mac will sleep when you choose Sleep from the Apple menu, even while sleep prevention is on."
+            "value" : "“Also prevent sleep from Apple menu” will be turned off. Your Mac will sleep when you choose Sleep from the Apple menu, even while sleep prevention is on."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「メニューからのスリープも防ぐ」がオフになります。スリープ防止中でも、アップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "「Appleメニューからのスリープも防ぐ」がオフになります。スリープ防止中でも、Appleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
           }
         }
       }
@@ -421,7 +421,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「ディスプレイを閉じたとき」が「Macをスリープ」になります。スリープ防止中でも、ディスプレイを閉じたときやアップルメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "「ディスプレイを閉じたとき」が「Macをスリープ」になります。スリープ防止中でも、ディスプレイを閉じたときやAppleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
           }
         }
       }

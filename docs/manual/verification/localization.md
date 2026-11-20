@@ -34,7 +34,7 @@ just status
 
 アプリの設定の次の値を `"$B/result-localization.txt"` に控えてから変える。
 
-- 「スリープ」の「ディスプレイを閉じたとき」を「Macをスリープ（標準）」にする（MacBook 以外の Mac では「メニューからのスリープも防ぐ」をオフ）。「タイマーで自動解除」「指定時刻に自動解除」「バッテリー残量が少ないときに自動解除」をオフにする。
+- 「スリープ」の「ディスプレイを閉じたとき」を「Macをスリープ（標準）」にする（MacBook 以外の Mac では「Appleメニューからのスリープも防ぐ」をオフ）。「タイマーで自動解除」「指定時刻に自動解除」「バッテリー残量が少ないときに自動解除」をオフにする。
 - 「フィードバック」の「スリープ防止中にCaps LockのLEDを点灯」をオフにする。
 - 「フィードバック」の「切り替え時にHUDを表示」をオンにする。
 
@@ -57,8 +57,8 @@ just status
 
 3. 英語・12時間制で次を見る。
    1. メニューとサブメニューを開き、設定の6セクションを項目名の下の説明文まで読む。
-   2. 「Turn On with Time Limit」の「Custom Duration…」で1時間30分を入力し、「Turns off at …」の時刻を控えて「Turn On」で開始する。HUD とメニューの残り時間を見る。
-   3. 「Turn Sleep Prevention Off」で解除し、「Until a Time…」で午後の時刻を指定して開始する。HUD とメニューの解除の時刻を見て、解除する。
+   2. 「Turn On with Time Limit」の「Enter Duration…」で1時間30分を入力し、「Turns off at …」の時刻を控えて「Turn On」で開始する。HUD とメニューの残り時間を見る。
+   3. 「Turn Sleep Prevention Off」で解除し、「Set a Time…」で午後の時刻を指定して開始する。HUD とメニューの解除の時刻を見て、解除する。
    4. 設置の確認のアラートは、ヘルパーが「Not installed」のときに「Sleep」の「When display is closed」でヘルパーが要る選択肢を選ぶと開く。開いたら文言を読み、必ず「Cancel」を選ぶ。安全に開けなければ、アラートだけ判定不能とする。
 
    期待: メニュー、入力パネル、HUD、設定画面、開けたアラートが英語で表示される。入力する時刻、確定したらオフになる時刻、メニューと HUD の解除の時刻が OS の地域に合った12時間制で、午前・午後を区別できる。期間は英語の時間と分の単位で表示される。アプリ名とコマンドの書式は変わらない。
@@ -77,8 +77,8 @@ just status
 
    英語・24時間制で次を見る。
    1. メニューとサブメニューを開き、設定の6セクションを項目名の下の説明文まで読む。
-   2. 「Turn On with Time Limit」の「Custom Duration…」で1時間30分を入力し、「Turns off at …」の時刻を控えて「Turn On」で開始する。HUD とメニューの残り時間を見る。
-   3. 「Turn Sleep Prevention Off」で解除し、「Until a Time…」で午後の時刻を指定して開始する。HUD とメニューの解除の時刻を見て、解除する。
+   2. 「Turn On with Time Limit」の「Enter Duration…」で1時間30分を入力し、「Turns off at …」の時刻を控えて「Turn On」で開始する。HUD とメニューの残り時間を見る。
+   3. 「Turn Sleep Prevention Off」で解除し、「Set a Time…」で午後の時刻を指定して開始する。HUD とメニューの解除の時刻を見て、解除する。
    4. 設置の確認のアラートは、ヘルパーが「Not installed」のときに「Sleep」の「When display is closed」でヘルパーが要る選択肢を選ぶと開く。開いたら文言を読み、必ず「Cancel」を選ぶ。安全に開けなければ、アラートだけ判定不能とする。
 
    期待: 画面と期間は英語のまま、入力パネル、メニュー、HUD の時刻が OS の地域に合った24時間制になる。

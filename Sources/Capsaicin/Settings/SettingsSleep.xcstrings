@@ -319,7 +319,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アップルメニューからのスリープ操作も無効になります。"
+            "value" : "Appleメニューからのスリープ操作も無効になります。"
           }
         }
       }
@@ -330,13 +330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prevent sleep from Apple menu"
+            "value" : "Also prevent sleep from Apple menu"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メニューからのスリープも防ぐ"
+            "value" : "Appleメニューからのスリープも防ぐ"
           }
         }
       }

@@ -313,7 +313,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Custom Duration…"
+            "value" : "Enter Duration…"
           }
         },
         "ja" : {
@@ -347,7 +347,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Until a Time…"
+            "value" : "Set a Time…"
           }
         },
         "ja" : {
@@ -381,7 +381,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Won’t turn off while on power adapter"
+            "value" : "On power adapter (stays on even if battery is low)"
           }
         },
         "ja" : {
@@ -398,7 +398,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Until you turn it off"
+            "value" : "Continues until you turn it off"
           }
         },
         "ja" : {
@@ -707,7 +707,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin、停止中"
+            "value" : "Capsaicin、スリープ防止オフ"
           }
         }
       }
