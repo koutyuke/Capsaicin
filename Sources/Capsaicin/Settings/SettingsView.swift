@@ -272,7 +272,7 @@ extension SettingsView {
                 title: SettingsSection.helper.text("status.label"),
                 help: model.helperState == .requiresApproval
                     ? SettingsSection.helper.text("status.requiresApproval.help") : "",
-                symbol: "waveform.path.ecg",
+                symbol: "smallcircle.filled.circle",
             ) {
                 switch model.helperState {
                 case .notInstalled:
