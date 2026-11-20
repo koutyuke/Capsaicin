@@ -151,7 +151,7 @@ domain: SET
 | 見出し | カード | 項目 | アイコン | 内容 |
 | --- | --- | --- | --- | --- |
 | なし | 1 | 説明 | — | `SPEC-HLP-004` |
-| なし | 2 | 状態 | `lock.shield` | `SPEC-HLP-004` |
+| なし | 2 | 状態 | `waveform.path.ecg` | `SPEC-HLP-004` |
 | なし | 2 | 管理 | `wrench.and.screwdriver` | `SPEC-HLP-004` |
 
 このアプリについて: `SPEC-SET-004`。アップデートの設定と既定値は `SPEC-SET-007` にある。この値は Sparkle が保存し、Capsaicin の設定の保存（`DEC-SET-002`）の対象に含めない。
