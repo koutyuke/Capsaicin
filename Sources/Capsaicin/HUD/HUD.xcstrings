@@ -126,13 +126,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Helper not ready"
+            "value" : "Helper not enabled"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパー未準備"
+            "value" : "ヘルパーが無効"
           }
         }
       }
@@ -194,13 +194,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Some controls not restored"
+            "value" : "Some parts couldn't be restored"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一部を戻せません"
+            "value" : "一部を戻せませんでした"
           }
         }
       }

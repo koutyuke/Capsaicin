@@ -35,7 +35,7 @@
 | [`menu-sleep-settings.md`](menu-sleep-settings.md) | クイック設定のスリープとディスプレイの項目 | なし |
 | [`menu-battery.md`](menu-battery.md) | クイック設定のバッテリー残量の項目 | なし |
 | [`localization.md`](localization.md) | 英語・日本語の表示と時刻の表記 | システム設定 |
-| [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の下の状態の文 | ヘルパーの登録、システム設定 |
+| [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の注意 | ヘルパーの登録、システム設定 |
 
 ヘルパーの設置と承認、`on` と `off`、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直しの実測は `EVID-HLP-006` にある。設定を選んだときの承認待ちのアラートは [`helper-approval-guidance.md`](helper-approval-guidance.md) で確かめる。
 

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SET-007
 title: ヘルパーを使えない行に短い状態の文を出し、承認を待つ間の選び直しはアラートで許可を案内する
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-SET-009"]
 requirements: ["REQ-HLP-001", "REQ-SET-003", "REQ-SET-005"]
 based_on: ["DEC-HLP-005", "DEC-SET-006", "EVID-HLP-006"]
 ---

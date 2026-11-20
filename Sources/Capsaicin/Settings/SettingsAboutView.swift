@@ -11,9 +11,7 @@ struct SettingsAboutContent: View {
 
     var body: some View {
         Section {
-            SettingsRow(title: text("autoUpdate.label"), help: text("autoUpdate.help"),
-                        symbol: "arrow.triangle.2.circlepath")
-            {
+            SettingsRow(title: text("autoUpdate.label"), symbol: "arrow.triangle.2.circlepath") {
                 Picker(text("autoUpdate.label"), selection: $updater.automaticUpdateMode) {
                     Text(text("autoUpdate.option.off")).tag(AutomaticUpdateMode.off)
                     Text(text("autoUpdate.option.check")).tag(AutomaticUpdateMode.checkOnly)
@@ -126,11 +124,11 @@ struct SettingsAboutContent: View {
 }
 
 enum SettingsUpdateState: Equatable {
-    case notChecked, checked(Date), available(String), readyToInstall(String)
+    case debugDisabled, notChecked, checked(Date), available(String), readyToInstall(String)
 
     init(isEnabled: Bool, lastChecked: Date?, availableVersion: String?, installationVersion: String?) {
         if !isEnabled {
-            self = .notChecked
+            self = .debugDisabled
         } else if let installationVersion {
             self = .readyToInstall(installationVersion)
         } else if let availableVersion {
@@ -145,7 +143,7 @@ enum SettingsUpdateState: Equatable {
     var version: String? {
         switch self {
         case let .available(version), let .readyToInstall(version): version
-        case .notChecked, .checked: nil
+        case .debugDisabled, .notChecked, .checked: nil
         }
     }
 
@@ -154,6 +152,7 @@ enum SettingsUpdateState: Equatable {
             bundle.localizedString(forKey: "softwareUpdate." + key, value: nil, table: "SettingsAbout")
         }
         switch self {
+        case .debugDisabled: return text("debugDisabled")
         case .notChecked: return text("neverChecked")
         case let .available(version): return String(format: text("available"), version)
         case let .readyToInstall(version): return String(format: text("readyToInstall"), version)

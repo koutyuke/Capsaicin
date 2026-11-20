@@ -77,8 +77,7 @@ final class SettingsModel {
             }
         }
         return SettingsSleepRow.rows(settings: settings, capabilities: app.capabilities, helper: helperState,
-                                     brightnessUnavailable: app.isBrightnessKnownUnavailable,
-                                     awaitingApproval: pendingManual)
+                                     brightnessUnavailable: app.isBrightnessKnownUnavailable)
     }
 
     func refreshHelper() {
@@ -162,7 +161,7 @@ final class SettingsModel {
         if setting == \.blocksManualSleep, value, helperState != .installed {
             await manage(.install, fromSetting: true)
         } else {
-            change(setting, to: value)
+            change(setting, to: value != row.inverted)
         }
     }
 

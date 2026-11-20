@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Battery"
+            "value" : "Turn Off Based on Battery"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バッテリー"
+            "value" : "バッテリーによる自動解除"
           }
         }
       }
@@ -30,7 +30,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電源アダプタ接続中は残量でオフにしない"
+            "value" : "電源アダプタ接続中は自動解除しない"
           }
         }
       }
@@ -47,7 +47,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "残量が少なくなったらオフにする"
+            "value" : "バッテリー残量が少ないときに自動解除"
           }
         }
       }
@@ -58,13 +58,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Low battery threshold"
+            "value" : "Battery level"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "しきい値"
+            "value" : "バッテリー残量"
           }
         }
       }
@@ -75,13 +75,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "Below %d%%"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "%d%%未満"
           }
         }
       }
@@ -143,13 +143,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents the screen saver from starting and the display from turning off, even when inactive. If you turn off this setting and the display turns off, your Mac itself will not go to sleep."
+            "value" : "Your Mac stays awake even when the display turns off."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止がオンの間、操作がない場合でもスクリーンセーバーの起動やディスプレイの消灯を防ぎます。この設定をオフにしてディスプレイが消灯しても、Mac本体はスリープされません。"
+            "value" : "ディスプレイがオフになってもMacはスリープしません。"
           }
         }
       }
@@ -160,166 +160,47 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prevent display from turning off automatically"
+            "value" : "Allow display to turn off automatically"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイを自動でオフにしない"
+            "value" : "ディスプレイの自動オフを許可"
           }
         }
       }
     },
-    "helperApprovalPending" : {
+    "helperInactive" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This selection will take effect after you allow Capsaicin in System Settings > General > Login Items & Extensions. It has not been saved yet."
+            "value" : "This setting can't be applied because the helper is not enabled."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可すると、この選択が有効になります。まだ保存していません。"
+            "value" : "ヘルパーが有効になっていないため、設定を反映できません。"
           }
         }
       }
     },
-    "helperApprovalPending.a11y" : {
+    "helperInactive.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warning: Selection is awaiting approval in System Settings"
+            "value" : "Warning: Helper is not enabled"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "警告、選択した設定はシステム設定での許可待ちです"
-          }
-        }
-      }
-    },
-    "helperNotEnabled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Helper is not enabled"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーが有効になっていません"
-          }
-        }
-      }
-    },
-    "helperNotInstalled" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This setting cannot be applied because the helper is not installed. Install it in Helper settings."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーが未インストールのため、この設定を適用できません。設定の「ヘルパー」でインストールしてください。"
-          }
-        }
-      }
-    },
-    "helperNotInstalled.a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warning: Helper is not installed"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "警告、ヘルパーが未インストールです"
-          }
-        }
-      }
-    },
-    "helperRequiresApproval" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This setting cannot be applied because the helper is awaiting approval. Allow Capsaicin in System Settings > General > Login Items & Extensions; you can open it from Helper settings."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーが承認待ちのため、この設定を適用できません。システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可してください。設定の「ヘルパー」から開けます。"
-          }
-        }
-      }
-    },
-    "helperRequiresApproval.a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warning: Helper is awaiting approval in System Settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "警告、ヘルパーはシステム設定での許可待ちです"
-          }
-        }
-      }
-    },
-    "helperUnavailable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This setting cannot be applied because the helper is unavailable in this build. A build signed with a Team ID is required."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このビルドではヘルパーを使えないため、この設定を適用できません。署名にTeam IDがあるビルドが必要です。"
-          }
-        }
-      }
-    },
-    "helperUnavailable.a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warning: Helper is unavailable in this build"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "警告、このビルドではヘルパーを使えません"
+            "value" : "警告、ヘルパーが有効になっていません"
           }
         }
       }
@@ -337,23 +218,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "時間"
-          }
-        }
-      }
-    },
-    "lidClose.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controls what your Mac and display do when you close the display while sleep prevention is on. Options other than “System sleep” require the helper and approval in System Settings."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スリープ防止中に、ディスプレイを閉じたときのMacとディスプレイの動作を制御します。「システムスリープ」以外の設定では、ヘルパーのインストールと、システム設定での許可が必要です。"
           }
         }
       }
@@ -398,13 +262,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "System sleep (default)"
+            "value" : "Put Mac to sleep (default)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システムスリープ（標準）"
+            "value" : "Macをスリープ（標準）"
           }
         }
       }
@@ -415,13 +279,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Display sleep"
+            "value" : "Turn display off"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイスリープ"
+            "value" : "ディスプレイをオフ"
           }
         }
       }
@@ -449,13 +313,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when selecting Sleep from the Apple menu. Requires installing the helper and approval in System Settings."
+            "value" : "Choosing Sleep from the Apple menu also has no effect."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中は、アップルメニューの「スリープ」などを選んでもMacをスリープさせません。ヘルパーのインストールと、システム設定での許可が必要です。"
+            "value" : "Appleメニューからのスリープ操作も無効になります。"
           }
         }
       }
@@ -466,13 +330,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prevent sleep from Apple menu"
+            "value" : "Also prevent sleep from Apple menu"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メニューからのスリープも防ぐ"
+            "value" : "Appleメニューからのスリープも防ぐ"
           }
         }
       }
@@ -500,13 +364,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn Off Automatically"
+            "value" : "Turn Off Based on Time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止の自動解除"
+            "value" : "時間による自動解除"
           }
         }
       }
@@ -517,13 +381,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sleep prevention turns off automatically at this time. If this time has already passed when turned on, it turns off at this time the next day."
+            "value" : "If this time has already passed when you turn on sleep prevention, it turns off at this time the next day."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "この時刻になると自動でスリープ防止がオフになります。オンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻にオフになります。"
+            "value" : "スリープ防止をオンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻に自動解除します。"
           }
         }
       }
@@ -534,13 +398,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled time"
+            "value" : "Turn off at scheduled time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指定時刻"
+            "value" : "指定時刻に自動解除"
           }
         }
       }
@@ -602,13 +466,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timer"
+            "value" : "Turn off with timer"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "タイマー"
+            "value" : "タイマーで自動解除"
           }
         }
       }

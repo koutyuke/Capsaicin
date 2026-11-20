@@ -3,6 +3,9 @@ import Testing
 
 private final class BundleLocator: NSObject {}
 
+/// メニューで注意のある項目名の先頭に付ける記号。
+let warningMark = "\u{26A0}\u{FE0E} "
+
 func localizedAppBundle(_ language: String) throws -> Bundle {
     let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
     let app = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))
@@ -33,7 +36,7 @@ func menuBarApplicationBundle() throws {
 
 private let localizationTables = [
     "App", "MenuBar", "HUD", "SettingsAbout", "SettingsControls", "SettingsGeneral",
-    "SettingsHelper", "SettingsLed", "SettingsSleep",
+    "SettingsHelper", "SettingsFeedback", "SettingsSleep",
 ]
 
 @Test("SPEC-UI-011 全テーブルは英語と日本語で同じキーを持ち、値が空でない")

@@ -28,15 +28,15 @@ struct SettingsTests {
         #expect(rows.map(\.symbol) == ["display", "laptopcomputer"])
         let display = try #require(rows.first)
         #expect(display.state == .editable(isOn: false))
-        #expect(!display.isOn)
+        // 項目名は「許可」なので、止めていない保存値でスイッチはオンになる。
+        #expect(display.isOn)
         settings.lidCloseDisplay = .keepOn
         let missing = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .requiresApproval,
                                             brightnessUnavailable: false)
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
-        #expect(missing[1].help == SettingsSection.sleep.text("helperRequiresApproval")
-            + "\n" + SettingsSection.sleep.text("lidClose.help"))
+        #expect(missing[1].help == SettingsSection.sleep.text("helperInactive"))
     }
 
     @Test("SPEC-SET-005 SPEC-SET-006 ディスプレイを開閉できる Mac はポップアップ、それ以外はスイッチの行になる", arguments: [true, false])
@@ -48,7 +48,7 @@ struct SettingsTests {
         #expect(rows.map(\.key) == ["display", laptop ? "lidClose" : "manual"])
         #expect(rows[1].symbol == (laptop ? "laptopcomputer" : "powersleep"))
         #expect(rows[1].setting == (laptop ? nil : \.blocksManualSleep))
-        #expect(rows[1].help == SettingsSection.sleep.text(laptop ? "lidClose.help" : "manual.help"))
+        #expect(rows[1].help == (laptop ? "" : SettingsSection.sleep.text("manual.help")))
         let release = SettingsReleasePresentation(settings: settings, capabilities: capabilities)
         #expect(release.showsBattery == laptop)
         #expect(!release.timerEnabled && !release.timeEnabled && release.batteryEnabled)
@@ -162,8 +162,8 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsTests-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         #expect(selection.section == .general)
-        selection.section = .led
-        #expect(SettingsSelection(defaults: defaults).section == .led)
+        selection.section = .feedback
+        #expect(SettingsSelection(defaults: defaults).section == .feedback)
         defaults.set("sleep", forKey: "settingsSection")
         #expect(SettingsSelection(defaults: defaults).section == .sleep)
         defaults.set("release", forKey: "settingsSection")
@@ -204,7 +204,14 @@ struct SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "SettingsRender-" + UUID().uuidString))
         let selection = SettingsSelection(defaults: defaults)
         defer { defaults.removeObject(forKey: "settingsSection") }
-        #expect(SettingsSection.allCases.map(\.rawValue) == ["general", "sleep", "led", "controls", "helper", "about"])
+        #expect(SettingsSection.allCases.map(\.rawValue) == [
+            "general",
+            "sleep",
+            "feedback",
+            "controls",
+            "helper",
+            "about",
+        ])
         for section in SettingsSection.allCases {
             #expect(section.title != "title")
             selection.section = section
@@ -276,13 +283,17 @@ extension SettingsTests {
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
         }
-        for key in ["helperNotInstalled", "helperRequiresApproval", "helperApprovalPending", "helperUnavailable"] {
-            for suffix in ["", ".a11y"] {
-                #expect(bundle
-                    .localizedString(forKey: key + suffix, value: nil, table: "SettingsSleep") != key + suffix)
-            }
+        for key in ["helperInactive", "helperInactive.a11y"] {
+            #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
         }
-        for key in ["helperNotReady", "helperNotReady.a11y"] {
+        for key in [
+            "helperNotReady",
+            "helperNotEnabled",
+            "helperNotInstalled",
+            "helperRequiresApproval",
+            "helperApprovalPending",
+            "helperUnavailable",
+        ].flatMap({ [$0, $0 + ".a11y"] }) {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") == key)
         }
     }
@@ -298,7 +309,7 @@ extension SettingsTests {
                     "battery.ignoreOnAdapter.label",
                     "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.zeroBrightness",
                     "lidClose.keepOn",
-                    "lidClose.help", "brightnessUnavailable", "brightnessUnavailable.a11y", "helperNotEnabled"]
+                    "brightnessUnavailable", "brightnessUnavailable.a11y"]
         {
             #expect(japanese.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
             #expect(SettingsSection.sleep.text(key) == app.localizedString(
@@ -309,7 +320,7 @@ extension SettingsTests {
         }
         for key in ["manualAndLid.label", "manualAndLid.help", "lidDisplay.label", "lidDisplay.help",
                     "lidDisplay.turnOff", "lidDisplay.keepOn", "timer.duration.help", "time.value.help",
-                    "battery.help", "battery.threshold.help", "battery.ignoreOnAdapter.help"]
+                    "battery.help", "battery.threshold.help", "battery.ignoreOnAdapter.help", "lidClose.help"]
         {
             #expect(SettingsSection.sleep.text(key) == key)
         }

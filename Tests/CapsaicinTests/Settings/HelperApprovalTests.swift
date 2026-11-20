@@ -29,17 +29,15 @@ struct HelperApprovalTests {
         #expect(!model.isBusy)
         #expect(fixture.savedSettings.isEmpty)
         #expect(!fixture.model.settings.blocksManualSleep)
-        #expect(!model.displayedSleepRows[1].warning.isEmpty)
-        #expect(model.displayedSleepRows[1].subtitle == SettingsSection.sleep.text("helperNotEnabled"))
-        #expect(model.displayedSleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperApprovalPending")))
+        #expect(model.displayedSleepRows[1].warning == SettingsSection.sleep.text("helperInactive"))
+        #expect(model.displayedSleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperInactive")))
         #expect(model.sleepRows[1].warning.isEmpty)
-        #expect(model.sleepRows[1].subtitle == nil)
         #expect(completions == 0)
         fixture.system.clearHistory()
         state = .installed
         model.refreshHelper()
         #expect(!model.pendingManual)
-        #expect(model.displayedSleepRows[1].subtitle == nil)
+        #expect(model.displayedSleepRows[1].warning.isEmpty)
         #expect(model.lidCloseChoice == choice)
         #expect(fixture.model.settings.blocksManualSleep)
         #expect(fixture.model.settings.lidCloseDisplay.rawValue == choice.rawValue)
@@ -138,15 +136,15 @@ struct HelperApprovalTests {
         #expect(confirmations == 1 && opened == (opensSettings ? 1 : 0))
         #expect(model.pendingManual == opensSettings)
         #expect(model.displayedSleepRows[1].isOn == opensSettings)
-        #expect(model.displayedSleepRows[1].subtitle
-            == (opensSettings ? SettingsSection.sleep.text("helperNotEnabled") : nil))
+        #expect(model.displayedSleepRows[1].warning
+            == (opensSettings ? SettingsSection.sleep.text("helperInactive") : ""))
         #expect(!model.sleepRows[1].isOn)
         #expect(!app.settings.blocksManualSleep && saved.isEmpty)
         state = .installed
         model.refreshHelper()
         #expect(app.settings.blocksManualSleep == opensSettings)
         #expect(saved == (opensSettings ? [app.settings] : []))
-        #expect(model.displayedSleepRows[1].subtitle == nil)
+        #expect(model.displayedSleepRows[1].warning.isEmpty)
     }
 
     @Test("SPEC-HLP-001 選び直しは古い保留を捨て、承認後は最後の選択だけを保存する",

@@ -4,7 +4,7 @@ import Testing
 
 @MainActor
 struct SettingsAboutTests {
-    @Test("SPEC-SET-007 インストール待ち、新しい版、最終確認日時の順で4状態を決める")
+    @Test("SPEC-SET-007 更新が使えないビルドを先に分け、インストール待ち、新しい版、最終確認日時の順で状態を決める")
     func updateStates() {
         let date = Date(timeIntervalSince1970: 0)
         #expect(SettingsUpdateState(isEnabled: true, lastChecked: nil, availableVersion: nil,
@@ -16,7 +16,8 @@ struct SettingsAboutTests {
         #expect(SettingsUpdateState(isEnabled: true, lastChecked: date, availableVersion: "1.3.0",
                                     installationVersion: "1.2.0") == .readyToInstall("1.2.0"))
         #expect(SettingsUpdateState(isEnabled: false, lastChecked: date, availableVersion: "1.3.0",
-                                    installationVersion: "1.2.0") == .notChecked)
+                                    installationVersion: "1.2.0") == .debugDisabled)
+        #expect(SettingsUpdateState.debugDisabled.version == nil)
         #expect(SettingsUpdateState.notChecked.version == nil)
         #expect(SettingsUpdateState.checked(date).version == nil)
         #expect(SettingsUpdateState.available("1.2.0").version == "1.2.0")
@@ -28,7 +29,8 @@ struct SettingsAboutTests {
         let bundle = try localizedAppBundle(language)
         let locale = Locale(identifier: language)
         for (state, key, version) in [
-            (SettingsUpdateState.notChecked, "neverChecked", ""),
+            (SettingsUpdateState.debugDisabled, "debugDisabled", ""),
+            (.notChecked, "neverChecked", ""),
             (.available("1.2.0"), "available", "1.2.0"),
             (.readyToInstall("1.3.0"), "readyToInstall", "1.3.0"),
         ] {

@@ -82,7 +82,7 @@ struct MenuRedesignTests {
         #expect(quick.items.first?.identifier?.rawValue == "menu.sleep.display")
         let entries = quick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
         #expect(entries.first?.title == SettingsSection.sleep.text("display.label"))
-        #expect(entries.first?.state == .off)
+        #expect(entries.first?.state == .on)
         if hasLid {
             let choices = Array(entries.dropFirst())
             #expect(choices.map(\.title) == SettingsLidCloseChoice.allCases.map {
@@ -103,7 +103,7 @@ struct MenuRedesignTests {
         #expect(activeEntries.map(\.state) == entries.map(\.state))
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパーと輝度の注意でもチェックと操作を保ち、注意がなくなると消す")
+    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパーと輝度の注意では項目名に注意の記号を付けて操作を保ち、注意がなくなると外す")
     func sleepWarnings() async throws {
         let fixture = AppFixture()
         var installed = true
@@ -117,20 +117,18 @@ struct MenuRedesignTests {
         let controller = menu(model)
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
         let lid = try item("menu.sleep.lidClose.zeroBrightness", in: quick)
-        #expect(lid.isEnabled && lid.image != nil)
-        if #available(macOS 27, *) {
-            #expect(lid.preferredImageVisibility == .visible)
-        }
+        let title = SettingsSection.sleep.text("lidClose.zeroBrightness")
+        #expect(lid.isEnabled && lid.image == nil && lid.title == warningMark + title)
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
-        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")) == true)
+        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperInactive")) == true)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("brightnessUnavailable")) == true)
         #expect(lid.state == .on && lid.submenu == nil)
         installed = true
         fixture.system.isKnownUnavailable = false
         model.refreshHelper()
         controller.refresh()
-        #expect(lid.image == nil && lid.subtitle == nil)
+        #expect(lid.image == nil && lid.subtitle == nil && lid.title == title)
         #expect(lid.isEnabled)
     }
 
@@ -152,7 +150,7 @@ struct MenuRedesignTests {
         quick.performActionForItem(at: quick.index(of: display))
         await drainActions()
         #expect(fixture.model.settings.blocksDisplaySleep == !fails)
-        #expect(display.state == (fails ? .off : .on))
+        #expect(display.state == (fails ? .on : .off))
         #expect(fixture.savedSettings.count == (fails ? 0 : 1))
         #expect(errors == (fails ? 1 : 0))
     }

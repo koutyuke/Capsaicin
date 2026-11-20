@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-MENU-008
 title: クイック設定の選択肢を字下げせずに区切りで囲み、クイック設定の行の副題をなくす
-status: accepted
+status: superseded
 supersedes: ["DEC-MENU-007"]
-superseded_by: []
+superseded_by: ["DEC-MENU-009"]
 requirements: ["REQ-MENU-002", "REQ-MENU-007", "REQ-BLK-009"]
 based_on: ["DEC-UI-001", "DEC-UI-012", "DEC-BLK-009", "DEC-SET-006"]
 ---

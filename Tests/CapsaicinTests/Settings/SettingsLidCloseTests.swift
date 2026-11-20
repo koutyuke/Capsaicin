@@ -4,20 +4,20 @@ import CapsaicinPlatform
 import Testing
 
 extension SettingsTests {
-    @Test("SPEC-SET-003 SPEC-SET-005 状態の文は保存値がヘルパーを必要とし、ヘルパーを使えない行だけに出す",
+    @Test("SPEC-SET-003 SPEC-SET-005 ヘルパーの注意は保存値がヘルパーを必要とし、ヘルパーを使えない行だけに出す",
           arguments: [false, true], [HelperInstallationState.notInstalled, .requiresApproval, .unavailable, .installed])
-    func helperStatusSubtitle(hasLid: Bool, helper: HelperInstallationState) {
+    func helperWarning(hasLid: Bool, helper: HelperInstallationState) {
         var settings = CapsaicinCore.Settings()
         let capabilities = MachineCapabilities(hasLid: hasLid, hasInternalBattery: hasLid)
         let disabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
                                              brightnessUnavailable: false)
-        #expect(disabled.allSatisfy { $0.subtitle == nil })
+        #expect(disabled.map(\.warning) == ["", ""])
         settings.blocksManualSleep = true
         let enabled = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: helper,
                                             brightnessUnavailable: false)
-        #expect(enabled[0].subtitle == nil)
-        #expect(enabled[1].subtitle == (helper == .installed ? nil : SettingsSection.sleep.text("helperNotEnabled")))
-        #expect((enabled[1].subtitle != nil) == !enabled[1].warningLabel.isEmpty)
+        #expect(enabled[0].warning.isEmpty)
+        #expect(enabled[1].warning == (helper == .installed ? "" : SettingsSection.sleep.text("helperInactive")))
+        #expect(enabled[1].warning.isEmpty == enabled[1].warningLabel.isEmpty)
     }
 
     @Test("SPEC-SET-005 ポップアップは保存値の4通りを表示し、オフの間はディスプレイの保存値を隠す",
@@ -66,7 +66,7 @@ extension SettingsTests {
         ))
         #expect(model.lidCloseChoice.rawValue == display.rawValue)
         #expect(model.sleepRows[1].state == .onWithoutHelper)
-        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")))
+        #expect(model.sleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperInactive")))
         await model.changeLidClose(to: .sleep)
         #expect(model.sleepRows[1].state == .editable(isOn: false))
         #expect(model.lidCloseChoice == .sleep)
@@ -138,22 +138,14 @@ extension SettingsTests {
             state: { helper }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let row = unavailable.sleepRows[1]
-        #expect(row.subtitle == (choice != .sleep && helper != .installed
-                ? SettingsSection.sleep.text("helperNotEnabled") : nil))
         var keys: [String] = []
         if choice != .sleep, helper != .installed {
-            let key = switch helper {
-            case .notInstalled: "helperNotInstalled"
-            case .requiresApproval: "helperRequiresApproval"
-            case .unavailable: "helperUnavailable"
-            case .installed: ""
-            }
-            keys.append(key)
+            keys.append("helperInactive")
         }
         if choice == .zeroBrightness {
             keys.append("brightnessUnavailable")
         }
-        #expect(row.help == (keys + ["lidClose.help"]).map { SettingsSection.sleep.text($0) }.joined(separator: "\n"))
+        #expect(row.help == keys.map { SettingsSection.sleep.text($0) }.joined(separator: "\n"))
         #expect(row.warningLabel == keys.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and)))
         #expect(unavailable.lidCloseChoice == choice)
         #expect(!unavailable.isBusy)

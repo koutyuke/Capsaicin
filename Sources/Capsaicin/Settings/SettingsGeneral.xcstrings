@@ -1,23 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "appearance.group.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appearance"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "表示"
-          }
-        }
-      }
-    },
     "dockIcon.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -31,57 +14,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dockにアイコンを表示"
-          }
-        }
-      }
-    },
-    "help.a11y" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Help for %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@の説明"
-          }
-        }
-      }
-    },
-    "hud.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Displays a brief one-line overlay at the bottom of the screen showing status changes and warnings. Appears when using the menu or hotkey, and when turned off automatically by timer, scheduled time, or low battery. Does not appear when controlled from the CLI."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切り替え結果や警告などを1行で知らせる小さな表示を、画面の下部に短時間出します。メニューやホットキーでの操作時、タイマー・指定時刻・バッテリー残量で自動オフになったときにも表示されます。CLIによる操作では表示されません。"
-          }
-        }
-      }
-    },
-    "hud.label" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show HUD when switching"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切り替え時にHUDを表示"
           }
         }
       }
@@ -116,23 +48,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "メニューバーにアイコンを表示"
-          }
-        }
-      }
-    },
-    "startup.group.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Startup"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "起動"
           }
         }
       }

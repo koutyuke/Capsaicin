@@ -154,8 +154,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         item.image = nil
         item.setAccessibilityLabel(row.accessibilityLabel)
         if row.isWarning {
-            item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
-                .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
+            // 注意は画像ではなく文字の記号で示す。画像を付けると、開いたまま書き直したときに字下げがずれることがある。
+            // U+FE0E で絵文字にしない。
+            item.title = "\u{26A0}\u{FE0E} " + row.title
             item.setAccessibilityLabel(String(
                 format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: Self.self)),
                 row.accessibilityLabel ?? row.title,
@@ -165,7 +166,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.image?.isTemplate = true
         }
         if #available(macOS 27, *) {
-            // macOS 27 は既定でメニューの画像を隠すので、警告と更新の知らせのアイコンは常に表示する。
+            // macOS 27 は既定でメニューの画像を隠すので、更新の知らせのアイコンは常に表示する。
             item.preferredImageVisibility = item.image == nil ? .automatic : .visible
         }
     }

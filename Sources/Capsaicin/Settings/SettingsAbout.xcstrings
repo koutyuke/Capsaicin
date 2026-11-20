@@ -1,23 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "autoUpdate.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checks for a new version about once a day. With “Download and install,” the update is installed and Capsaicin restarts when sleep prevention is off and the Settings window is closed. Only stable releases are offered."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1日に1回ほど新しいバージョンを確認します。「ダウンロードしてインストール」では、スリープ防止がオフで、設定ウインドウが閉じているときにインストールし、Capsaicinを起動し直します。対象は安定版だけです。"
-          }
-        }
-      }
-    },
     "autoUpdate.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -222,6 +205,23 @@
         }
       }
     },
+    "softwareUpdate.debugDisabled" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not available in Debug builds"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debugビルドでは利用できません"
+          }
+        }
+      }
+    },
     "softwareUpdate.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -262,13 +262,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Not checked yet"
+            "value" : "Not checked"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "まだ確認していません"
+            "value" : "未確認"
           }
         }
       }

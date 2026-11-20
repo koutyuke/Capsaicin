@@ -22,21 +22,21 @@ statement = "設定画面は、左のサイドバーでセクションを選び�
 reason = "macOS の利用者が、使い方を覚えずに目的の項目にたどり着けるようにするため。"
 priority = "must"
 status = "accepted"
-specs = ["SPEC-SET-001"]
+specs = ["SPEC-SET-001", "SPEC-SET-009"]
 depends_on = []
-sources = ["EVID-UI-003", "DEC-UI-010"]
+sources = ["EVID-UI-003", "DEC-UI-010", "DEC-SET-008"]
 
 [[requirements]]
 id = "REQ-SET-003"
 title = "項目名だけで内容が伝わる"
 kind = "quality"
-statement = "設定の各項目は、説明文なしに項目名だけで内容が伝わり、名前だけでは結果が分かりにくい項目では、項目名の横の (i) から説明を開ける。"
+statement = "設定の各項目は、項目名だけで内容が伝わり、名前だけでは結果が分かりにくい項目では、項目名の下の説明文で補う。"
 reason = "画面を簡潔に保ちつつ、誤解しやすい項目で設定を誤らないようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-SET-003"]
 depends_on = []
-sources = ["DEC-UI-002"]
+sources = ["DEC-UI-002", "DEC-UI-016"]
 
 [[requirements]]
 id = "REQ-SET-004"
