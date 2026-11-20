@@ -15,7 +15,7 @@ extension SettingsRow: SettingsRowContents {
 }
 
 extension SettingsTests {
-    @Test("SPEC-HLP-004 ヘルパーの4状態で2行を保ち、状態と管理の操作を出し分ける",
+    @Test("SPEC-HLP-004 ヘルパーの4状態で説明のカードと2行を保ち、許可の手順・状態・操作を出し分ける",
           arguments: [HelperInstallationState.notInstalled, .requiresApproval, .installed, .unavailable])
     func helperRows(state: HelperInstallationState) throws {
         let fixture = AppFixture()
@@ -24,7 +24,9 @@ extension SettingsTests {
         let defaults = try #require(UserDefaults(suiteName: "HelperRows-" + UUID().uuidString))
         let view = SettingsView(model: model, hotkey: HotkeyController(save: { _ in true }),
                                 selection: SettingsSelection(defaults: defaults), quit: {}).helper
-        #expect(rowHelpValues(view) == [SettingsSection.helper.text("status.help"), ""])
+        let approvalHelp = SettingsSection.helper.text("status.requiresApproval.help")
+        #expect(approvalHelp != "status.requiresApproval.help")
+        #expect(rowHelpValues(view) == [state == .requiresApproval ? approvalHelp : "", ""])
         func strings(_ value: Any) -> [String] {
             if let text = value as? String {
                 return [text]
@@ -32,9 +34,16 @@ extension SettingsTests {
             if let row = value as? any SettingsRowContents {
                 return strings(row.rowContents)
             }
+            if let card = value as? SettingsIntroCard {
+                return strings(card.body)
+            }
             return Mirror(reflecting: value).children.flatMap { strings($0.value) }
         }
         let values = strings(view)
+        let message = SettingsSection.helper.text("intro.message")
+        #expect(message != "intro.message")
+        #expect(values.contains(SettingsSection.helper.text("title")))
+        #expect(values.contains(message))
         let key = switch state {
         case .notInstalled: "status.notInstalled"
         case .requiresApproval: "status.requiresApproval"

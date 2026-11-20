@@ -258,11 +258,20 @@ extension SettingsView {
         }
     }
 
+    @ViewBuilder
     var helper: some View {
+        Section {
+            SettingsIntroCard(
+                title: SettingsSection.helper.text("title"),
+                message: SettingsSection.helper.text("intro.message"),
+                symbol: "lock.shield",
+            )
+        }
         Section {
             SettingsRow(
                 title: SettingsSection.helper.text("status.label"),
-                help: SettingsSection.helper.text("status.help"),
+                help: model.helperState == .requiresApproval
+                    ? SettingsSection.helper.text("status.requiresApproval.help") : "",
                 symbol: "lock.shield",
             ) {
                 switch model.helperState {

@@ -265,7 +265,7 @@ extension SettingsTests {
         let bundle = try localizedAppBundle(language)
         let helperKeys = [
             "status.notInstalled", "status.requiresApproval", "status.usable", "status.unavailable",
-            "openSystemSettings.button", "status.help", "helperInstall.message",
+            "openSystemSettings.button", "intro.message", "status.requiresApproval.help", "helperInstall.message",
             "helperApproval.title", "helperApproval.message",
             "helperRemove.message", "helperRemove.manual.message",
             "error.helperUnavailable.title", "error.helperUnavailable.message",

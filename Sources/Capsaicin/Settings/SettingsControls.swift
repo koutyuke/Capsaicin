@@ -72,6 +72,31 @@ struct SettingsRow<Content: View>: View {
     }
 }
 
+/// システム設定の各画面の先頭にある説明のカードと同じ形で、セクションが何のためにあるかを伝える。
+struct SettingsIntroCard: View {
+    let title: String
+    let message: String
+    let symbol: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                .fill(.tint)
+                .frame(width: 26, height: 26)
+                .overlay {
+                    Image(systemName: symbol).foregroundStyle(.white)
+                }
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.headline)
+                    .accessibilityAddTraits(.isHeader)
+                Text(message).font(.callout).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
 struct SettingsDurationField: View {
     @Binding var value: TimerDuration
     @State private var input: DurationInput
