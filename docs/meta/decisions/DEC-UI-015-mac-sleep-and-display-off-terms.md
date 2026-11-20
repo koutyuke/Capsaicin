@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-UI-015
 title: 機能名は「スリープ防止」のまま、止めるものは macOS に合わせて「スリープ」「ディスプレイをオフ」と書く
-status: accepted
+status: superseded
 supersedes: ["DEC-UI-012"]
-superseded_by: []
+superseded_by: ["DEC-UI-017"]
 requirements: ["REQ-SYS-004", "REQ-SET-003"]
 based_on: []
 ---

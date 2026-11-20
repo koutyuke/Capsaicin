@@ -313,13 +313,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, choosing Sleep from the Apple menu has no effect."
+            "value" : "Choosing Sleep from the Apple menu also has no effect."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中は、アップルメニューからのスリープ操作も無効になります。"
+            "value" : "アップルメニューからのスリープ操作も無効になります。"
           }
         }
       }
