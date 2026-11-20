@@ -1,4 +1,6 @@
 import AppKit
+import CapsaicinPlatform
+import Dispatch
 
 protocol RunningApp {
     var bundleIdentifier: String? { get }
@@ -16,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var startupFinished = false
     private var pendingReopen = false
     private var explicitUserQuit = false
+    private var terminationSignal: any DispatchSourceSignal?
 
     func applicationDidFinishLaunching(_: Notification) {
         launch(
@@ -25,6 +28,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             reopenAndTerminate: reopenAndTerminate,
             makeRuntime: { AppComposition.make(quit: { [weak self] in self?.quitByUser() }) },
         )
+        guard runtime != nil else { return }
+        let source = TerminationSignal.makeSource {
+            NSApplication.shared.terminate(nil)
+        }
+        terminationSignal = source
+        source.activate()
     }
 
     func launch(
