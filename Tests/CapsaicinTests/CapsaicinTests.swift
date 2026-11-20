@@ -3,6 +3,9 @@ import Testing
 
 private final class BundleLocator: NSObject {}
 
+/// メニューで注意のある項目名の先頭に付ける記号。
+let warningMark = "\u{26A0}\u{FE0E} "
+
 func localizedAppBundle(_ language: String) throws -> Bundle {
     let products = Bundle(for: BundleLocator.self).bundleURL.deletingLastPathComponent()
     let app = try #require(Bundle(url: products.appending(path: "Capsaicin.app")))

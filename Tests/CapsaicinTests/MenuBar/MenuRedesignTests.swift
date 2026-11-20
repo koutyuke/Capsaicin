@@ -103,7 +103,7 @@ struct MenuRedesignTests {
         #expect(activeEntries.map(\.state) == entries.map(\.state))
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパーと輝度の注意でもチェックと操作を保ち、注意がなくなると消す")
+    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパーと輝度の注意では項目名に注意の記号を付けて操作を保ち、注意がなくなると外す")
     func sleepWarnings() async throws {
         let fixture = AppFixture()
         var installed = true
@@ -117,10 +117,8 @@ struct MenuRedesignTests {
         let controller = menu(model)
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
         let lid = try item("menu.sleep.lidClose.zeroBrightness", in: quick)
-        #expect(lid.isEnabled && lid.image != nil)
-        if #available(macOS 27, *) {
-            #expect(lid.preferredImageVisibility == .visible)
-        }
+        let title = SettingsSection.sleep.text("lidClose.zeroBrightness")
+        #expect(lid.isEnabled && lid.image == nil && lid.title == warningMark + title)
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
         #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperInactive")) == true)
@@ -130,7 +128,7 @@ struct MenuRedesignTests {
         fixture.system.isKnownUnavailable = false
         model.refreshHelper()
         controller.refresh()
-        #expect(lid.image == nil && lid.subtitle == nil)
+        #expect(lid.image == nil && lid.subtitle == nil && lid.title == title)
         #expect(lid.isEnabled)
     }
 

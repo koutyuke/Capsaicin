@@ -494,104 +494,19 @@
         }
       }
     },
-    "menu.warning.brightnessDeletionFailed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not delete the display brightness record"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイの明るさの記録を削除できていません"
-          }
-        }
-      }
-    },
-    "menu.warning.brightnessSaveFailed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not save the display brightness record"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイの明るさの記録を保存できませんでした"
-          }
-        }
-      }
-    },
-    "menu.warning.remainingSleepSetting.helper.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can address this in Helper settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定の「ヘルパー」で直せます"
-          }
-        }
-      }
-    },
     "menu.warning.remainingSleepSetting.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A setting that blocks sleep is still on"
+            "value" : "Part of sleep prevention is still on"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープを止める設定が残っています"
-          }
-        }
-      }
-    },
-    "menu.warning.unalignedLed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not toggle Caps Lock LED"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caps LockのLEDを切り替えられていません"
-          }
-        }
-      }
-    },
-    "menu.warning.unappliedSleep.helper.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can address this in Helper settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定の「ヘルパー」で直せます"
+            "value" : "スリープ防止の一部が解除されていません"
           }
         }
       }
@@ -602,13 +517,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Some sleep is not being prevented"
+            "value" : "Part of sleep prevention isn't on"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一部のスリープを防止できていません"
+            "value" : "スリープ防止の一部が有効になっていません"
           }
         }
       }

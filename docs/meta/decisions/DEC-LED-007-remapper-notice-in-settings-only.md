@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-LED-007
 title: キー配列を変更するアプリの案内は、設定の「フィードバック」だけに表示する
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-MENU-009"]
 requirements: ["REQ-LED-007"]
 based_on: ["DEC-LED-006"]
 ---

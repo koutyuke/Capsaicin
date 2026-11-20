@@ -7,8 +7,8 @@ struct UpdateReminderTests {
           arguments: [false, true], [false, true])
     func placement(isBlocking: Bool, hasWarnings: Bool) throws {
         let status = BlockingStatus(session: isBlocking ? BlockingSession(timeLimit: nil) : nil,
-                                    batteryCondition: nil, misalignments: [:],
-                                    brightnessWarnings: hasWarnings ? [.deletionFailed] : [])
+                                    batteryCondition: nil,
+                                    misalignments: hasWarnings ? [.systemSleepDisabled: .leftApplied] : [:])
         let bundle = try localizedAppBundle("ja")
         func rows(version: String?) -> [MenuEntry] {
             MenuContent.make(status: status, settings: Settings(), isOnACPower: false, hasInternalBattery: false,
@@ -17,10 +17,11 @@ struct UpdateReminderTests {
         let reminder = rows(version: "1.2.0")
         var prefix = [isBlocking ? "menu.header.active" : "menu.header.idle"]
         if hasWarnings {
-            prefix.append("menu.warning.brightnessDeletionFailed.title")
+            prefix += ["menu.warning.remainingSleepSetting.title", "separator.warnings"]
         }
         prefix += ["menu.update.available", "separator.update"]
         #expect(Array(reminder.prefix(prefix.count).map(\.id)) == prefix)
+        #expect(reminder.contains { $0.id == "separator.warnings" } == hasWarnings)
         let item = try #require(reminder.first { $0.id == "menu.update.available" })
         #expect(item.title == "アップデートがあります")
         #expect(item.subtitle == "バージョン1.2.0")

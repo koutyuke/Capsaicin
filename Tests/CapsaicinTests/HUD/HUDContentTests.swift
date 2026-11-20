@@ -142,7 +142,7 @@ struct HUDContentTests {
     func rejectionReasons() throws {
         let cases: [(StartRejection, String)] = [
             (.batteryBelowThreshold, "バッテリー残量不足"),
-            (.helperNotInstalled, "ヘルパー未準備"),
+            (.helperNotInstalled, "ヘルパーが無効"),
             (.mechanismsFailed([.idleSleepAssertion]), "設定の適用に失敗"),
         ]
         for (reason, expected) in cases {
@@ -166,7 +166,7 @@ struct HUDContentTests {
             .helperApprovalRevoked,
         ] {
             let value = try content(.released(reason), status: status)
-            #expect(value.detail == "一部を戻せません")
+            #expect(value.detail == "一部を戻せませんでした")
             #expect(value.symbol == "exclamationmark.triangle.fill")
             #expect(value.tone == .warning)
             #expect(value.state == "スリープ防止 オフ")

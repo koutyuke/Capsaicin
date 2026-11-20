@@ -108,28 +108,15 @@ enum MenuContent {
     }
 
     private static func warnings(status: BlockingStatus, bundle: Bundle) -> [MenuEntry] {
-        func warning(_ key: String, subtitle: String? = nil) -> MenuEntry {
-            MenuEntry(id: key, title: text(key, bundle: bundle), subtitle: subtitle, isWarning: true)
+        // LED のずれと輝度の記録の失敗は、メニューでは伝えない。どちらも `capsaicin status` には出る。
+        let rows = [MisalignmentDirection.leftApplied, .notApplied].filter { direction in
+            status.misalignments.contains { $0.key != .led && $0.value == direction }
+        }.map { direction in
+            let key = direction == .leftApplied ? "menu.warning.remainingSleepSetting.title"
+                : "menu.warning.unappliedSleep.title"
+            return MenuEntry(id: key, title: text(key, bundle: bundle), isWarning: true)
         }
-        var rows: [MenuEntry] = []
-        for direction in [MisalignmentDirection.leftApplied, .notApplied] {
-            let affected = status.misalignments.filter { $0.key != .led && $0.value == direction }
-            if !affected.isEmpty {
-                let key = direction == .leftApplied ? "menu.warning.remainingSleepSetting" : "menu.warning.unappliedSleep"
-                rows.append(warning(key + ".title", subtitle: affected[.systemSleepDisabled] == nil ? nil :
-                        text(key + ".helper.subtitle", bundle: bundle)))
-            }
-        }
-        if status.misalignments[.led] != nil {
-            rows.append(warning("menu.warning.unalignedLed.title"))
-        }
-        if status.brightnessWarnings.contains(.saveFailed) {
-            rows.append(warning("menu.warning.brightnessSaveFailed.title"))
-        }
-        if status.brightnessWarnings.contains(.deletionFailed) {
-            rows.append(warning("menu.warning.brightnessDeletionFailed.title"))
-        }
-        return rows
+        return rows.isEmpty ? [] : rows + [MenuEntry(id: "separator.warnings")]
     }
 
     private static func presets(calendar: Calendar, locale: Locale, bundle: Bundle) -> [MenuEntry] {
