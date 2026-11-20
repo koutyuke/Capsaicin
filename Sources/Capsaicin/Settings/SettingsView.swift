@@ -100,7 +100,7 @@ extension SettingsView {
 
     private func sleepRow(_ row: SettingsSleepRow) -> some View {
         SettingsRow(
-            title: SettingsSection.sleep.text(row.key + ".label"), subtitle: row.subtitle,
+            title: SettingsSection.sleep.text(row.key + ".label"),
             help: row.help, symbol: row.symbol,
             warningLabel: row.warningLabel,
         ) {

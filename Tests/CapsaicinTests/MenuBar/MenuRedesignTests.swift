@@ -123,7 +123,7 @@ struct MenuRedesignTests {
         }
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
-        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperRequiresApproval")) == true)
+        #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperInactive")) == true)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("brightnessUnavailable")) == true)
         #expect(lid.state == .on && lid.submenu == nil)
         installed = true

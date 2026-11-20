@@ -59,10 +59,6 @@ struct SettingsSleepRow: Identifiable {
         key
     }
 
-    var subtitle: String? {
-        state == .onWithoutHelper ? SettingsSection.sleep.text("helperNotEnabled") : nil
-    }
-
     var isOn: Bool {
         switch state {
         case let .editable(value): value != inverted
@@ -71,8 +67,7 @@ struct SettingsSleepRow: Identifiable {
     }
 
     static func rows(settings: Settings, capabilities: MachineCapabilities,
-                     helper: HelperInstallationState, brightnessUnavailable: Bool,
-                     awaitingApproval: Bool = false) -> [Self]
+                     helper: HelperInstallationState, brightnessUnavailable: Bool) -> [Self]
     {
         let presentation = SleepSettingsPresentation(settings: settings, isHelperInstalled: helper == .installed)
         let manual = capabilities.hasLid ? "lidClose" : "manual"
@@ -85,14 +80,9 @@ struct SettingsSleepRow: Identifiable {
         return definitions.map { row in
             var row = row
             var warnings: [String] = []
+            // 直し方は「ヘルパー」のページで示すので、ここではヘルパーの状態を区別しない。
             if row.state == .onWithoutHelper {
-                let key = switch helper {
-                case .notInstalled: "helperNotInstalled"
-                case .requiresApproval: awaitingApproval ? "helperApprovalPending" : "helperRequiresApproval"
-                case .unavailable: "helperUnavailable"
-                case .installed: ""
-                }
-                warnings.append(key)
+                warnings.append("helperInactive")
             }
             if row.key == "lidClose", SettingsLidCloseChoice(settings: settings) == .zeroBrightness,
                brightnessUnavailable

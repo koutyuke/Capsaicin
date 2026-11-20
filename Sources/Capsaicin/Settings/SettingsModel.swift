@@ -77,8 +77,7 @@ final class SettingsModel {
             }
         }
         return SettingsSleepRow.rows(settings: settings, capabilities: app.capabilities, helper: helperState,
-                                     brightnessUnavailable: app.isBrightnessKnownUnavailable,
-                                     awaitingApproval: pendingManual)
+                                     brightnessUnavailable: app.isBrightnessKnownUnavailable)
     }
 
     func refreshHelper() {

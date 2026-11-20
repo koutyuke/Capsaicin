@@ -36,7 +36,7 @@ struct SettingsTests {
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
-        #expect(missing[1].help == SettingsSection.sleep.text("helperRequiresApproval"))
+        #expect(missing[1].help == SettingsSection.sleep.text("helperInactive"))
     }
 
     @Test("SPEC-SET-005 SPEC-SET-006 ディスプレイを開閉できる Mac はポップアップ、それ以外はスイッチの行になる", arguments: [true, false])
@@ -283,13 +283,17 @@ extension SettingsTests {
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
         }
-        for key in ["helperNotInstalled", "helperRequiresApproval", "helperApprovalPending", "helperUnavailable"] {
-            for suffix in ["", ".a11y"] {
-                #expect(bundle
-                    .localizedString(forKey: key + suffix, value: nil, table: "SettingsSleep") != key + suffix)
-            }
+        for key in ["helperInactive", "helperInactive.a11y"] {
+            #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
         }
-        for key in ["helperNotReady", "helperNotReady.a11y"] {
+        for key in [
+            "helperNotReady",
+            "helperNotEnabled",
+            "helperNotInstalled",
+            "helperRequiresApproval",
+            "helperApprovalPending",
+            "helperUnavailable",
+        ].flatMap({ [$0, $0 + ".a11y"] }) {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") == key)
         }
     }
@@ -305,7 +309,7 @@ extension SettingsTests {
                     "battery.ignoreOnAdapter.label",
                     "lidClose.label", "lidClose.sleep", "lidClose.turnOff", "lidClose.zeroBrightness",
                     "lidClose.keepOn",
-                    "brightnessUnavailable", "brightnessUnavailable.a11y", "helperNotEnabled"]
+                    "brightnessUnavailable", "brightnessUnavailable.a11y"]
         {
             #expect(japanese.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
             #expect(SettingsSection.sleep.text(key) == app.localizedString(
