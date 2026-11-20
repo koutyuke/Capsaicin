@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-009
 title: バックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行でき、アプリはそれを検知できる
-status: supported
+status: refuted
 affects: ["SPEC-HLP-004", "SPEC-BLK-007"]
-evidence: ["EVID-HLP-012"]
+evidence: ["EVID-HLP-012", "EVID-HLP-017"]
 ---
 
 # HYP-HLP-009 バックグラウンドの項目をオフにすると、デーモンは SIGTERM を受けて off を実行でき、アプリはそれを検知できる
@@ -28,3 +28,5 @@ evidence: ["EVID-HLP-012"]
 ## 結果
 
 実機で支持された（`EVID-HLP-012`）。項目をオフにすると、デーモンは `SIGTERM` を受けて `off` を実行し、`SleepDisabled` は 0 になった。アプリは同じ PID のまま `interrupted` と `invalid` を受け、どちらでも `SMAppService.daemon` は `requiresApproval` だった。
+
+主張の 2（agent を登録していないアプリは終了しない）は一般には成り立たなかった（`EVID-HLP-017`）。親のアプリの記録が `enabled` だと、macOS はアプリを `SIGTERM` で終了させる。主張の 1 と 3 は成り立つ。仕様は `DEC-LCY-012` に合わせて直した。
