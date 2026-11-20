@@ -143,13 +143,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, your Mac stays awake even when the display turns off."
+            "value" : "Your Mac stays awake even when the display turns off."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中は、ディスプレイがオフになってもMacはスリープしません。"
+            "value" : "ディスプレイがオフになってもMacはスリープしません。"
           }
         }
       }
