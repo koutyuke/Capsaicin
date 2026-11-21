@@ -449,13 +449,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The helper runs a small program as root solely to switch sleep settings. It restores those settings when your Mac starts up or when Capsaicin quits without restoring them. Turning off the Capsaicin item in System Settings > General > Login Items & Extensions disables the helper."
+            "value" : "A small companion program that runs with administrator privileges. It switches system-wide sleep settings that regular sleep prevention cannot control."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープを切り替えるだけの小さなプログラムをrootで動かします。Macの起動時や、Capsaicinが後片付けできずに終了したときに、スリープ設定を元に戻します。システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目をオフにすると、ヘルパーは使えなくなります。"
+            "value" : "管理者権限で動作する小さな補助プログラムです。通常のスリープ防止では制御できない、システム全体のスリープ設定を切り替えるために使用します。"
           }
         }
       }
@@ -551,13 +551,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Awaiting approval in System Settings"
+            "value" : "Awaiting approval"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システム設定での許可待ち"
+            "value" : "システム設定の許可待ち"
           }
         }
       }
@@ -568,13 +568,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow the Capsaicin background item in System Settings > General > Login Items & Extensions."
+            "value" : "Allow background activity in System Settings > General > Login Items & Extensions."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinのバックグラウンドの項目を許可してください。"
+            "value" : "システム設定の「ログイン項目と機能拡張」でバックグラウンド実行を許可してください。"
           }
         }
       }
