@@ -5,8 +5,6 @@ import Foundation
 enum SettingsSection: String, CaseIterable, Identifiable {
     case general, sleep, feedback, controls, helper, about
 
-    static let helperSettingsURL = "capsaicin-settings://helper"
-
     var id: Self {
         self
     }
@@ -74,10 +72,6 @@ struct SettingsSleepRow: Identifiable {
         !needsHelperInstallation || isOn
     }
 
-    var helperInstallPrompt: String? {
-        needsHelperInstallation && !isOn ? SettingsSection.sleep.text("helperRequired") : nil
-    }
-
     func canSelect(_ choice: SettingsLidCloseChoice) -> Bool {
         choice == .sleep || !needsHelperInstallation
     }
@@ -109,17 +103,14 @@ struct SettingsSleepRow: Identifiable {
             row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and))
             let warningTexts = warnings.map { SettingsSection.sleep.text($0) }
             row.warning = warningTexts.joined(separator: "\n")
-            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので固定の説明文は置かない。
             var help = warningTexts
-            if let prompt = row.helperInstallPrompt {
-                help.insert(prompt, at: 0)
+            // 選んでいる値のことと読まれないよう、ヘルパーが要る選択肢を名指しして、選べるようにする条件を書く。
+            if row.needsHelperInstallation, !row.isOn {
+                help.append(SettingsSection.sleep.text(row.key + ".helperRequired"))
             }
+            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので固定の説明文は置かない。
             if row.key != "lidClose" {
                 help.append(SettingsSection.sleep.text(row.key + ".help"))
-            }
-            if row.needsHelperInstallation {
-                let label = SettingsSection.sleep.text("helperSettings.link")
-                help.append("[\(label)](\(SettingsSection.helperSettingsURL))")
             }
             row.help = help.joined(separator: "\n")
             return row

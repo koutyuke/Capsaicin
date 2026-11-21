@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | [`assertions.md`](assertions.md) | 設定ごとのアサーション | なし |
 | [`display-sleep-and-hardware-detection.md`](display-sleep-and-hardware-detection.md) | 画面消灯、スクリーンセーバー、MacBook とバッテリーの判定 | システム設定 |
-| [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の保存値、選べない項目、説明文とリンク | なし |
+| [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の保存値、選べない項目、説明文 | なし |
 | [`manual-and-lid-sleep.md`](manual-and-lid-sleep.md) | 手動のスリープとディスプレイを閉じたときのスリープを止める | ヘルパーの設置 |
 | [`disablesleep-persistence.md`](disablesleep-persistence.md) | デーモンがないときの `disablesleep` の永続性 | 管理者権限、再起動 |
 | [`led-remapper.md`](led-remapper.md) | キー配列を変更するアプリの案内の出し入れ | なし |

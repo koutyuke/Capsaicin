@@ -246,7 +246,7 @@ extension SettingsTests {
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
         }
-        for key in ["helperInactive", "helperInactive.a11y", "helperRequired", "helperSettings.link"] {
+        for key in ["helperInactive", "helperInactive.a11y", "lidClose.helperRequired", "manual.helperRequired"] {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
         }
         for key in [
@@ -256,6 +256,8 @@ extension SettingsTests {
             "helperRequiresApproval",
             "helperApprovalPending",
             "helperUnavailable",
+            "helperRequired",
+            "helperSettings.link",
         ].flatMap({ [$0, $0 + ".a11y"] }) {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") == key)
         }

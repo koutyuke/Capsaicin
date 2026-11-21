@@ -49,11 +49,6 @@ struct SettingsView: View {
                     SettingsAboutContent(updater: model.app.updater, quit: quit, bundle: bundle)
                 }
             }.formStyle(.grouped).toggleStyle(.switch)
-                .environment(\.openURL, OpenURLAction { url in
-                    guard url.absoluteString == SettingsSection.helperSettingsURL else { return .systemAction }
-                    selection.section = .helper
-                    return .handled
-                })
                 // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
                 .contentMargins(.top, -8, for: .scrollContent)
                 // About の下端はフッターで決めるため、Form 既定の下余白 20 pt を相殺する。

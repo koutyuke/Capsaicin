@@ -5,9 +5,9 @@ import Foundation
 import Testing
 
 extension SettingsTests {
-    @Test("SPEC-SET-005 SPEC-SET-003 ヘルパーの4状態と保存値に応じて選択肢、スイッチ、説明文、リンクを出し分ける",
+    @Test("SPEC-SET-005 SPEC-SET-003 ヘルパーの4状態と保存値に応じて選択肢、スイッチ、説明文を出し分ける",
           arguments: [false, true], [HelperInstallationState.notInstalled, .requiresApproval, .unavailable, .installed])
-    func helperAvailability(hasLid: Bool, helper: HelperInstallationState) throws {
+    func helperAvailability(hasLid: Bool, helper: HelperInstallationState) {
         let capabilities = MachineCapabilities(hasLid: hasLid, hasInternalBattery: hasLid)
         let installed = helper == .installed
         for savedOn in [false, true] {
@@ -30,22 +30,15 @@ extension SettingsTests {
             let expectedWarning = !installed && savedOn ? SettingsSection.sleep.text("helperInactive") : ""
             #expect(row.warning == expectedWarning)
             #expect(row.warningLabel.isEmpty == expectedWarning.isEmpty)
-            if !installed {
-                lines.append(savedOn ? expectedWarning : SettingsSection.sleep.text("helperRequired"))
+            if !expectedWarning.isEmpty {
+                lines.append(expectedWarning)
+            } else if !installed {
+                lines.append(SettingsSection.sleep.text(row.key + ".helperRequired"))
             }
             if !hasLid {
                 lines.append(SettingsSection.sleep.text("manual.help"))
             }
-            if !installed {
-                lines.append(SettingsSection.sleep.text("helperSettings.link"))
-            }
-            let help = try AttributedString(
-                markdown: row.help,
-                options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace),
-            )
-            #expect(String(help.characters) == lines.joined(separator: "\n"))
-            #expect(help.runs.compactMap { $0.link?.absoluteString }
-                == (installed ? [] : [SettingsSection.helperSettingsURL]))
+            #expect(row.help == lines.joined(separator: "\n"))
         }
     }
 
