@@ -138,12 +138,7 @@ private final class AppServices {
                 )
             }
         }
-        // メニューからの変更でも、確認・エラーが必要なときだけ既存のシートの親を前面に出す。
-        let confirm = settings.confirm
-        settings.confirm = { [weak self] operation, fromSetting in
-            self?.openSettings()
-            return await confirm(operation, fromSetting)
-        }
+        // メニューからの変更でも、エラーが必要なときだけ既存のシートの親を前面に出す。
         let showError = settings.showError
         settings.showError = { [weak self] title, message in
             self?.openSettings()

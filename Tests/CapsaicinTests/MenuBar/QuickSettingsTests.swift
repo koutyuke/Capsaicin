@@ -122,6 +122,7 @@ struct QuickSettingsTests {
             #expect(entry.title == (warns ? warningMark + choiceTitle : choiceTitle))
             #expect(entry.image == nil && entry.onStateImage?.name() == "NSMenuCheckmark")
             #expect(entry.subtitle == (warns ? model.sleepRows[1].warning : nil))
+            #expect(entry.isEnabled == (candidate == .sleep))
             let label = String(
                 format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: bundle),
                 SettingsSection.sleep.text("lidClose.label"), choiceTitle,

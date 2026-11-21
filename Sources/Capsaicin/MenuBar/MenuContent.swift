@@ -154,7 +154,8 @@ enum MenuContent {
                         let choiceTitle = SettingsSection.sleep.text("lidClose." + choice.rawValue)
                         return MenuEntry(id: "menu.sleep.lidClose." + choice.rawValue, title: choiceTitle,
                                          subtitle: selected && !row.warning.isEmpty ? row.warning : nil,
-                                         command: .lidClose(choice), isWarning: selected && !row.warningLabel.isEmpty,
+                                         command: row.canSelect(choice) ? .lidClose(choice) : nil,
+                                         isWarning: selected && !row.warningLabel.isEmpty,
                                          isChecked: selected,
                                          accessibilityLabel: String(
                                              format: text("menu.sleep.lidClose.a11y", bundle: bundle),
@@ -165,7 +166,7 @@ enum MenuContent {
             }
             return [MenuEntry(id: "menu.sleep." + row.key, title: title,
                               subtitle: row.warning.isEmpty ? nil : row.warning,
-                              command: .toggleSleep(row.key),
+                              command: row.isToggleEnabled ? .toggleSleep(row.key) : nil,
                               isWarning: !row.warningLabel.isEmpty, isChecked: row.isOn)]
         }
     }

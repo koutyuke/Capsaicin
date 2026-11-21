@@ -20,7 +20,7 @@
 | --- | --- | --- |
 | [`assertions.md`](assertions.md) | 設定ごとのアサーション | なし |
 | [`display-sleep-and-hardware-detection.md`](display-sleep-and-hardware-detection.md) | 画面消灯、スクリーンセーバー、MacBook とバッテリーの判定 | システム設定 |
-| [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の表示と説明 | なし |
+| [`lid-close-setting.md`](lid-close-setting.md) | 「ディスプレイを閉じたとき」の保存値、選べない項目、説明文とリンク | なし |
 | [`manual-and-lid-sleep.md`](manual-and-lid-sleep.md) | 手動のスリープとディスプレイを閉じたときのスリープを止める | ヘルパーの設置 |
 | [`disablesleep-persistence.md`](disablesleep-persistence.md) | デーモンがないときの `disablesleep` の永続性 | 管理者権限、再起動 |
 | [`led-remapper.md`](led-remapper.md) | キー配列を変更するアプリの案内の出し入れ | なし |
@@ -32,12 +32,12 @@
 | [`hud-hotkey-accessibility.md`](hud-hotkey-accessibility.md) | HUD、複数画面、ホットキー、アクセシビリティ | システム設定 |
 | [`settings-window-placement.md`](settings-window-placement.md) | 設定画面を開くデスクトップと前面 | システム設定 |
 | [`change-time-while-active.md`](change-time-while-active.md) | 抑止を続けたまま時間を変更する | なし |
-| [`menu-sleep-settings.md`](menu-sleep-settings.md) | クイック設定のスリープとディスプレイの項目 | なし |
+| [`menu-sleep-settings.md`](menu-sleep-settings.md) | 「クイック設定」のスリープ項目と、選べない項目の副題 | システム設定（VoiceOver の確認時） |
 | [`menu-battery.md`](menu-battery.md) | クイック設定のバッテリー残量の項目 | なし |
-| [`localization.md`](localization.md) | 英語・日本語の表示と時刻の表記 | システム設定 |
-| [`helper-approval-guidance.md`](helper-approval-guidance.md) | 承認待ちで設定を選んだときのアラートと行の注意 | ヘルパーの登録、システム設定 |
+| [`localization.md`](localization.md) | 英語・日本語の表示、時刻の表記、設置の確認（取り消しのみ） | システム設定 |
+| [`helper-approval-guidance.md`](helper-approval-guidance.md) | 「ヘルパー」からの設置、システム設定を開く操作、許可前後の「スリープ」の表示 | ヘルパーの登録・削除、システム設定 |
 
-ヘルパーの設置と承認、`on` と `off`、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直しの実測は `EVID-HLP-006` にある。設定を選んだときの承認待ちのアラートは [`helper-approval-guidance.md`](helper-approval-guidance.md) で確かめる。
+ヘルパーの設置と承認、`on` と `off`、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直しの実測は `EVID-HLP-006` にある。「インストール」の直後にはシステム設定が開かず、「システム設定を開く」を押したときだけ開くことは [`helper-approval-guidance.md`](helper-approval-guidance.md) で確かめる。
 
 製品のビルドでの、アプリの強制終了後の `off` は `EVID-HLP-014`、デーモンが落ちた後の送り直しは `EVID-HLP-015`、バックグラウンドの項目のオフでの解除は `EVID-HLP-016`、起動時の輝度は `EVID-BLK-016`、単一インスタンスは `EVID-LCY-009` にある。試作での実測（`EVID-HLP-010`〜`013`、`EVID-LCY-007`、`EVID-BLK-015`）は、これらの前提になった記録である。
 
@@ -99,7 +99,7 @@
 | --- | --- |
 | Debug プロセスが0本、または2本以上 | `ps -axo pid,ppid,comm` で PID と実行ファイルの絶対パスを読み、検証対象と照合する |
 | ログイン時に起動しない | 「ログイン時に起動」、mainApp の登録とシステム設定の「ログイン時に開く」を照合する |
-| ヘルパーが「許可待ち」になる | システム設定で Capsaicin の項目を許可する。抑止が解除された場合の仕様は `SPEC-HLP-004` にある |
+| ヘルパーが「システム設定の許可待ち」になる | 「ヘルパー」の「システム設定を開く」からシステム設定を開き、手順で許可の変更が認められている場合だけ Capsaicin の項目を許可する。抑止が解除された場合の仕様は `SPEC-HLP-004` にある |
 | ヘルパーが「このビルドでは使用不可」になる | ad-hoc 署名では使えない。手元では停止後に `just sign-debug` で Developer ID で署名し直すか、署名に Team ID がある PR Debug ビルドを使う |
 | `SleepDisabled` が戻らない | 承認済みの復旧操作 `/usr/bin/sudo /usr/bin/pmset -a disablesleep 0` の直後に `/usr/bin/pmset -g` で読む。成功しても設定変更のコマンド自体は何も出力しない。戻らなければ PM に報告する |
 | LED が通常連動に戻らない | `B` にある承認済みの LED 復旧手順を実行する。読み戻した値だけで合格にしない |

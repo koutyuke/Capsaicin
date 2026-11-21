@@ -105,7 +105,7 @@ struct AppSettingsTests {
                 return fixture.model.prepareHelperRemoval()
             }, completed: fixture.model.helperManagementCompleted,
         ))
-        model.confirm = { _, _ in true }
+        model.confirm = { _ in true }
         var errors = 0
         model.showError = { _, _ in errors += 1 }
         await model.manage(.remove)
@@ -144,8 +144,8 @@ struct AppSettingsTests {
         #expect(fixture.savedSettings == [settings])
     }
 
-    @Test("SPEC-HLP-001 設定からの設置は成功後に保存して抑止に反映する")
-    func installationFromSetting() async {
+    @Test("SPEC-HLP-001 SPEC-SET-005 設置で保存値は変わらず、設置後に選んだ値を保存して抑止に反映する")
+    func changesSleepAfterInstallation() async {
         let fixture = AppFixture()
         fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
@@ -156,6 +156,11 @@ struct AppSettingsTests {
             fixture.system.isHelperInstalled = true
             return .success
         }
+        await model.changeLidClose(to: .keepOn)
+        await model.manage(.install)
+        #expect(model.helperState == .installed)
+        #expect(model.lidCloseChoice == .sleep && fixture.savedSettings.isEmpty)
+        #expect(!fixture.system.sleepDisabled)
         await model.changeLidClose(to: .keepOn)
         #expect(fixture.model.settings.blocksManualSleep)
         #expect(fixture.model.settings.lidCloseDisplay == .keepOn)
@@ -189,7 +194,7 @@ struct AppSettingsTests {
             state: { fixture.system.isHelperInstalled ? .installed : .notInstalled },
             perform: perform, completed: fixture.model.helperManagementCompleted,
         ))
-        model.confirm = { _, _ in true }
+        model.confirm = { _ in true }
         return model
     }
 }

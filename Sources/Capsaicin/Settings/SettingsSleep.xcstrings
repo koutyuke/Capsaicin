@@ -205,6 +205,40 @@
         }
       }
     },
+    "helperRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The helper must be installed."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーのインストールが必要です。"
+          }
+        }
+      }
+    },
+    "helperSettings.link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Helper Settings…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルパーの設定…"
+          }
+        }
+      }
+    },
     "hours" : {
       "extractionState" : "manual",
       "localizations" : {

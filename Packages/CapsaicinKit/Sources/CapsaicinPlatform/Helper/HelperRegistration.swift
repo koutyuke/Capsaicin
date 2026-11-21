@@ -121,10 +121,6 @@ public final class HelperRegistration {
     public func register() throws {
         guard state != .unavailable else { throw HelperRegistrationError.unsignedBuild }
         guard !isTranslocated else { throw HelperRegistrationError.translocated }
-        if state == .requiresApproval {
-            openSettings()
-            return
-        }
         do {
             try registerService()
         } catch {
@@ -132,9 +128,6 @@ public final class HelperRegistration {
             guard state == .requiresApproval else { throw error }
         }
         saveVersion(version)
-        if state == .requiresApproval {
-            openSettings()
-        }
     }
 
     /// disablesleep の所有を解放してから、呼び出し元が登録を外す。
