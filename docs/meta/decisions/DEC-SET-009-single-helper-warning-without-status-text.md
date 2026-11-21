@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-SET-009
 title: ヘルパーを使えない行の注意を1つの文にそろえ、項目名の下の状態の文をなくす
-status: accepted
+status: superseded
 supersedes: ["DEC-SET-007"]
-superseded_by: []
+superseded_by: ["DEC-SET-011"]
 requirements: ["REQ-HLP-001", "REQ-SET-003", "REQ-SET-005"]
 based_on: ["DEC-HLP-005", "DEC-SET-006", "DEC-UI-016", "EVID-HLP-006"]
 ---

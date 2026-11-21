@@ -6,13 +6,13 @@ domain_code = "HLP"
 id = "REQ-HLP-001"
 title = "必要になったときにシステム設定の許可でヘルパーを設置できる"
 kind = "functional"
-statement = "ヘルパーが要る設定を初めてオンにしたとき、または設定画面で設置を選んだときに、システム設定で1回許可するだけでヘルパーを設置できる。"
+statement = "設定の「ヘルパー」で設置を選んだときに、システム設定で1回許可するだけでヘルパーを設置できる。"
 reason = "root 権限が必要な機能を使う利用者だけに、設置の手間と権限の付与を求めるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-001", "SPEC-HLP-006"]
 depends_on = []
-sources = ["DEC-HLP-005"]
+sources = ["DEC-HLP-005", "DEC-SET-011"]
 
 [[requirements]]
 id = "REQ-HLP-002"
