@@ -22,10 +22,8 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         model.confirm = { [weak self] operation in
             guard let self, let window = self.window else { return false }
             let key = SettingsModel.operationKey(operation)
-            let message = operation == .remove && !self.model.app.capabilities.hasLid
-                ? "helperRemove.manual.message" : key + ".message"
             let alert = alert(title: SettingsSection.helper.text(key + ".title"),
-                              message: SettingsSection.helper.text(message))
+                              message: SettingsSection.helper.text(key + ".message"))
             alert.addButton(withTitle: SettingsSection.helper.text(key + ".confirm"))
             alert.addButton(withTitle: SettingsSection.helper.text("cancel"))
             return await alert.beginSheetModal(for: window) == .alertFirstButtonReturn

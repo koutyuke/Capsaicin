@@ -27,7 +27,7 @@ struct HelperApprovalTests {
         #expect(fixture.savedSettings.isEmpty)
     }
 
-    @Test("SPEC-HLP-004 SPEC-HLP-006 戻せないので削除しない場合と、登録解除の失敗を区別して伝える",
+    @Test("SPEC-HLP-004 SPEC-HLP-006 戻せないので削除しない場合も登録解除の失敗も、削除の失敗としてやり直し方を伝える",
           arguments: [false, true])
     func removalErrors(needsReadback: Bool) async {
         let fixture = AppFixture()
@@ -35,11 +35,11 @@ struct HelperApprovalTests {
             .failure(operation: operation, details: "private test details", needsSleepDisabledReadback: needsReadback)
         }, completed: { _, _ in }))
         model.confirm = { _ in true }
-        var errors: [String] = []
-        model.showError = { _, message in errors.append(message) }
+        var errors: [[String]] = []
+        model.showError = { title, message in errors.append([title, message]) }
         await model.manage(.remove)
-        let key = needsReadback ? "helperRemove" : "helperRestore"
-        #expect(errors == [SettingsSection.helper.text("error." + key + ".message")])
+        #expect(errors == [[SettingsSection.helper.text("error.helperRemove.title"),
+                            SettingsSection.helper.text("error.helperRetry.message")]])
         #expect(fixture.savedSettings.isEmpty)
     }
 

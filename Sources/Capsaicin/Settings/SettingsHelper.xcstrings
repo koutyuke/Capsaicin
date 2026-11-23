@@ -18,23 +18,6 @@
         }
       }
     },
-    "error.helperInstall.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your saved settings have not changed."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保存した設定は変えていません。"
-          }
-        }
-      }
-    },
     "error.helperInstall.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,23 +31,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘルパーをインストールできませんでした"
-          }
-        }
-      }
-    },
-    "error.helperRemove.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The helper could not be unregistered. Your saved settings have not changed."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーの登録を解除できませんでした。保存した設定は変えていません。"
           }
         }
       }
@@ -86,36 +52,19 @@
         }
       }
     },
-    "error.helperRestore.message" : {
+    "error.helperRetry.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin could not restore the sleep setting it changed, so the helper was not removed. Your saved settings have not changed."
+            "value" : "Try again. If the problem continues, restart your Mac or reinstall Capsaicin."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicinが変更したスリープ設定を元に戻せないため、ヘルパーを削除しませんでした。保存した設定は変えていません。"
-          }
-        }
-      }
-    },
-    "error.helperRestore.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not restore sleep settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スリープ設定を元に戻せませんでした"
+            "value" : "もう一度試してください。解決しない場合は、Macを再起動するか、Capsaicinを入れ直してください。"
           }
         }
       }
@@ -126,13 +75,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin is running from a temporary App Translocation location. Move it to the Applications folder and reopen it; your saved settings have not changed."
+            "value" : "Capsaicin is running from a temporary App Translocation location. Move it to the Applications folder and reopen it."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CapsaicinがApp Translocationの一時的な場所で動いているため、「アプリケーション」フォルダーに移して開き直してください。保存した設定は変えていません。"
+            "value" : "App Translocationの一時的な場所で動いているため、「アプリケーション」フォルダーに移して開き直してください。"
           }
         }
       }
@@ -290,36 +239,19 @@
         }
       }
     },
-    "helperRemove.manual.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“Also prevent sleep from Apple menu” will be turned off. Your Mac will sleep when you choose Sleep from the Apple menu, even while sleep prevention is on."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「Appleメニューからのスリープも防ぐ」がオフになります。スリープ防止中でも、Appleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
-          }
-        }
-      }
-    },
     "helperRemove.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“When display is closed” will be set to “Put Mac to sleep”. Your Mac will sleep when you close the display or choose Sleep from the Apple menu, even while sleep prevention is on."
+            "value" : "Settings that require the helper will return to their defaults and can’t be used."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「ディスプレイを閉じたとき」が「Macをスリープ」になります。スリープ防止中でも、ディスプレイを閉じたときやAppleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "ヘルパーが必要な設定は標準に戻り、使えなくなります。"
           }
         }
       }

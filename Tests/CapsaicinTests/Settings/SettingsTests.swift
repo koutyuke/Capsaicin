@@ -224,16 +224,15 @@ struct SettingsTests {
 }
 
 extension SettingsTests {
-    @Test("SPEC-HLP-004 SPEC-HLP-006 SPEC-SET-005 4状態とエラーの文言を英日で持ち、古い状態と修復のキーを残さない",
+    @Test("SPEC-HLP-004 SPEC-HLP-006 SPEC-SET-005 4状態とエラーの文言を英日で持ち、古い状態、修復、エラーのキーを残さない",
           arguments: ["en", "ja"])
     func helperResources(language: String) throws {
         let bundle = try localizedAppBundle(language)
         let helperKeys = [
             "status.notInstalled", "status.requiresApproval", "status.usable", "status.unavailable",
             "openSystemSettings.button", "intro.message", "status.requiresApproval.help", "helperInstall.message",
-            "helperInstall.title", "error.helperInstall.message", "helperRemove.message", "helperRemove.manual.message",
-            "error.helperTranslocated.title", "error.helperTranslocated.message",
-            "error.helperRestore.title", "error.helperRestore.message",
+            "helperInstall.title", "error.helperInstall.title", "error.helperRemove.title", "error.helperRetry.message",
+            "helperRemove.message", "error.helperTranslocated.title", "error.helperTranslocated.message",
         ]
         for key in helperKeys {
             let text = bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper")
@@ -242,7 +241,8 @@ extension SettingsTests {
         }
         for key in ["status.partial", "status.installed", "helperRepair.button", "helperRepair.confirm",
                     "helperRepair.title", "helperRepair.message", "error.helperRepair.title",
-                    "error.helperRepair.message"]
+                    "error.helperRepair.message", "error.helperInstall.message", "error.helperRemove.message",
+                    "error.helperRestore.title", "error.helperRestore.message", "helperRemove.manual.message"]
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
         }

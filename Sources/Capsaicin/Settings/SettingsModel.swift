@@ -172,12 +172,12 @@ final class SettingsModel {
                 helper.completed(operation, result)
             }
         case .cancelled: break
-        case let .failure(failedOperation, details, needsReadback):
+        case let .failure(failedOperation, details, _):
             helper.completed(operation, result)
             Logger(subsystem: Bundle.main.bundleIdentifier ?? "Capsaicin", category: "Helper")
                 .error("Helper management failed: \(details, privacy: .private)")
-            showHelperError(failedOperation == .remove && !needsReadback
-                ? "helperRestore" : Self.operationKey(failedOperation))
+            // 理由は分けて伝えず、どの失敗でも利用者が試せるやり直し方を案内する。
+            showHelperError(Self.operationKey(failedOperation), message: "helperRetry")
         }
     }
 
@@ -190,9 +190,9 @@ final class SettingsModel {
         return true
     }
 
-    private func showHelperError(_ key: String) {
+    private func showHelperError(_ key: String, message: String? = nil) {
         showError(SettingsSection.helper.text("error." + key + ".title"),
-                  SettingsSection.helper.text("error." + key + ".message"))
+                  SettingsSection.helper.text("error." + (message ?? key) + ".message"))
     }
 
     static func operationKey(_ operation: HelperManagementOperation) -> String {
