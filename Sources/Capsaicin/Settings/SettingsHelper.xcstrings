@@ -381,7 +381,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Awaiting approval"
+            "value" : "Awaiting approval in System Settings"
           }
         },
         "ja" : {
@@ -398,7 +398,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Allow background activity in System Settings > General > Login Items & Extensions."
+            "value" : "Allow background activity under Login Items & Extensions in System Settings."
           }
         },
         "ja" : {
