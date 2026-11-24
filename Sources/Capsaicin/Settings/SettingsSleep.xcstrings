@@ -149,7 +149,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイがオフになってもMacはスリープしません。"
+            "value" : "ディスプレイがオフになっても、Mac本体はスリープしません。"
           }
         }
       }
@@ -415,13 +415,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "If this time has already passed when you turn on sleep prevention, it turns off at this time the next day."
+            "value" : "If this time has already passed, it will turn off at the same time tomorrow."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止をオンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻に自動解除します。"
+            "value" : "すでに過ぎていた場合は、翌日の同時刻に解除されます。"
           }
         }
       }
