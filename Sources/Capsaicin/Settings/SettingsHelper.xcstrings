@@ -64,7 +64,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "もう一度試してください。解決しない場合は、Macを再起動するか、Capsaicinを入れ直してください。"
+            "value" : "再度お試しください。それでも解決しない場合は、Macを再起動するか、Capsaicinを再インストールしてください。"
           }
         }
       }
@@ -177,13 +177,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The helper runs a small program as root only to switch sleep settings and restore them when your Mac starts up. You can remove the helper in Helper settings."
+            "value" : "This adds a small helper program that runs with administrator privileges and only switches sleep settings. You can remove it anytime in Helper settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープを切り替えるだけの小さなプログラムをrootで動かし、Macの起動時にスリープ設定を元に戻します。設定の「ヘルパー」から削除できます。"
+            "value" : "管理者権限で動作し、スリープの切り替えのみを行う小さなヘルパープログラムを追加します。このヘルパーは、設定の「ヘルパー」からいつでも削除できます。"
           }
         }
       }
@@ -245,13 +245,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Settings that require the helper will return to their defaults and can’t be used."
+            "value" : "Features that require the helper will be turned off, and their settings will return to their defaults. You can reinstall the helper anytime in Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーが必要な設定は標準に戻り、使えなくなります。"
+            "value" : "ヘルパーが必要な機能は無効になり、該当する設定はデフォルトに戻ります。ヘルパーは設定画面からいつでも再度インストールできます。"
           }
         }
       }
