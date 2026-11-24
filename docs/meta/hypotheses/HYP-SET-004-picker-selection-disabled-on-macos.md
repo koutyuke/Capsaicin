@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-SET-004
 title: macOS のメニュー形式の Picker で、selectionDisabled を付けた選択肢はグレーで選べなくなる
-status: open
+status: supported
 affects: ["SPEC-SET-005", "DEC-SET-011"]
-evidence: []
+evidence: ["EVID-SET-003"]
 ---
 
 # HYP-SET-004 macOS のメニュー形式の Picker で、selectionDisabled を付けた選択肢はグレーで選べなくなる
@@ -27,4 +27,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+支持された（`EVID-SET-003`）。ヘルパーが使えない間、MacBook の「ディスプレイを閉じたとき」のポップアップで「Macをスリープ（標準）」以外の選択肢がグレーで表示され、選べなかった。キーボードでの操作と、保存値が選べない選択肢のときの閉じたポップアップのタイトルは確かめていない。
