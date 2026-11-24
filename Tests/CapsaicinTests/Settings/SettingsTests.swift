@@ -16,7 +16,7 @@ struct SettingsTests {
         #expect(rows.map(\.key) == ["display", "lidClose"])
     }
 
-    @Test("SPEC-SET-005 保存値を表示し、ヘルパー不足でも操作でき、説明の先頭に注意を出す")
+    @Test("SPEC-SET-005 保存値を表示し、ヘルパー不足でも標準を選べ、説明の先頭に注意を出す")
     func sleepRows() throws {
         var settings = CapsaicinCore.Settings()
         settings.blocksDisplaySleep = false
@@ -36,14 +36,15 @@ struct SettingsTests {
         #expect(missing[0].state == .editable(isOn: false))
         #expect(missing[1].state == .onWithoutHelper)
         #expect(missing[1].isOn)
-        #expect(missing[1].help == SettingsSection.sleep.text("helperInactive"))
+        #expect(missing[1].help.hasPrefix(SettingsSection.sleep.text("helperInactive")))
+        #expect(missing[1].canSelect(.sleep) && !missing[1].canSelect(.keepOn))
     }
 
     @Test("SPEC-SET-005 SPEC-SET-006 ディスプレイを開閉できる Mac はポップアップ、それ以外はスイッチの行になる", arguments: [true, false])
     func hardware(laptop: Bool) {
         let settings = CapsaicinCore.Settings()
         let capabilities = MachineCapabilities(hasLid: laptop, hasInternalBattery: laptop)
-        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .notInstalled,
+        let rows = SettingsSleepRow.rows(settings: settings, capabilities: capabilities, helper: .installed,
                                          brightnessUnavailable: false)
         #expect(rows.map(\.key) == ["display", laptop ? "lidClose" : "manual"])
         #expect(rows[1].symbol == (laptop ? "laptopcomputer" : "powersleep"))
@@ -54,53 +55,15 @@ struct SettingsTests {
         #expect(!release.timerEnabled && !release.timeEnabled && release.batteryEnabled)
     }
 
-    @Test("SPEC-SET-005 SPEC-HLP-001 設置中は選択を表示して保存せず、成功後だけ2値を1回で保存する",
-          arguments: [HelperInstallationState.notInstalled],
-          [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
-    func installation(state: HelperInstallationState, choice: SettingsLidCloseChoice) async {
-        let fixture = AppFixture()
-        var installed = state
-        var completed = false
-        let model = SettingsModel(
-            app: fixture.model,
-            helper: SettingsHelperActions(state: { installed }, perform: { operation in
-                #expect(operation == .install)
-                #expect(!fixture.model.settings.blocksManualSleep)
-                #expect(fixture.savedSettings.isEmpty)
-                installed = .installed
-                return .success
-            }, completed: { _, _ in completed = true }),
-        )
-        model.confirm = { _, fromSetting in
-            #expect(fromSetting && model.pendingManual && model.isBusy)
-            #expect(model.lidCloseChoice == choice)
-            #expect(!fixture.model.settings.blocksManualSleep)
-            #expect(model.sleepRows[0].state == .editable(isOn: true))
-            await model.changeLidClose(to: .sleep)
-            #expect(model.lidCloseChoice == choice)
-            model.change(\.timerEnabled, to: true)
-            fixture.savedSettings.removeAll()
-            return true
-        }
-        await model.changeLidClose(to: choice)
-        #expect(completed && fixture.model.settings.blocksManualSleep)
-        #expect(model.sleepRows[1].state == .editable(isOn: true))
-        #expect(model.lidCloseChoice == choice)
-        #expect(fixture.model.settings.lidCloseDisplay.rawValue == choice.rawValue)
-        #expect(fixture.model.settings.timerEnabled)
-        #expect(fixture.savedSettings == [fixture.model.settings])
-        #expect(!model.pendingManual && !model.isBusy)
-    }
-
-    @Test("SPEC-SET-005 SPEC-HLP-001 確認取り消し・登録取り消し・失敗は2値を保存せずスリープに戻す",
-          arguments: [0, 1, 2], [HelperInstallationState.notInstalled])
-    func installationCancellation(outcome: Int, state: HelperInstallationState) async {
+    @Test("SPEC-HLP-001 確認取り消し・登録取り消し・失敗では保存値を変えず、失敗時だけエラーを出す",
+          arguments: [0, 1, 2])
+    func installationCancellation(outcome: Int) async {
         let fixture = AppFixture()
         var errors = 0
         var performed = false
         let model = SettingsModel(
             app: fixture.model,
-            helper: SettingsHelperActions(state: { state }, perform: { operation in
+            helper: SettingsHelperActions(state: { .notInstalled }, perform: { operation in
                 #expect(operation == .install)
                 performed = true
                 return outcome == 1 ? .cancelled : .failure(
@@ -110,29 +73,31 @@ struct SettingsTests {
                 )
             }, completed: { _, _ in }),
         )
-        model.confirm = { _, _ in outcome != 0 }
+        model.confirm = { _ in outcome != 0 }
         model.showError = { _, _ in errors += 1 }
         let before = fixture.model.settings
-        await model.changeLidClose(to: .keepOn)
+        await model.manage(.install)
         #expect(!fixture.model.settings.blocksManualSleep && fixture.savedSettings.isEmpty)
         #expect(fixture.model.settings == before)
         #expect(model.lidCloseChoice == .sleep)
-        #expect(!model.pendingManual && !model.isBusy)
+        #expect(!model.isBusy)
         #expect(performed == (outcome != 0))
         #expect(errors == (outcome == 2 ? 1 : 0))
     }
 
-    @Test("SPEC-HLP-004 セクションからの設置では設定を変えず、削除結果を所有の処理に渡す")
+    @Test("SPEC-HLP-001 SPEC-HLP-004 設置では設定を変えず、設置と削除の成功を所有の処理に渡す")
     func management() async {
         let fixture = AppFixture()
+        var state = HelperInstallationState.notInstalled
         var operations: [HelperManagementOperation] = []
         let model = SettingsModel(
             app: fixture.model,
-            helper: SettingsHelperActions(state: { .installed }, perform: { _ in
-                .success
+            helper: SettingsHelperActions(state: { state }, perform: { operation in
+                state = operation == .install ? .installed : .notInstalled
+                return .success
             }, completed: { operation, _ in operations.append(operation) }),
         )
-        model.confirm = { _, fromSetting in #expect(!fromSetting); return true }
+        model.confirm = { _ in true }
         await model.manage(.install)
         await model.manage(.remove)
         #expect(operations == [.install, .remove])
@@ -259,18 +224,15 @@ struct SettingsTests {
 }
 
 extension SettingsTests {
-    @Test("SPEC-HLP-004 SPEC-HLP-006 SPEC-SET-005 4状態とエラーの文言を英日で持ち、古い状態と修復のキーを残さない",
+    @Test("SPEC-HLP-004 SPEC-HLP-006 SPEC-SET-005 4状態とエラーの文言を英日で持ち、古い状態、修復、エラーのキーを残さない",
           arguments: ["en", "ja"])
     func helperResources(language: String) throws {
         let bundle = try localizedAppBundle(language)
         let helperKeys = [
             "status.notInstalled", "status.requiresApproval", "status.usable", "status.unavailable",
-            "openSystemSettings.button", "status.help", "helperInstall.message",
-            "helperApproval.title", "helperApproval.message",
-            "helperRemove.message", "helperRemove.manual.message",
-            "error.helperUnavailable.title", "error.helperUnavailable.message",
-            "error.helperTranslocated.title", "error.helperTranslocated.message",
-            "error.helperRestore.title", "error.helperRestore.message",
+            "openSystemSettings.button", "intro.message", "status.requiresApproval.help", "helperInstall.message",
+            "helperInstall.title", "error.helperInstall.title", "error.helperRemove.title", "error.helperRetry.message",
+            "helperRemove.message", "error.helperTranslocated.title", "error.helperTranslocated.message",
         ]
         for key in helperKeys {
             let text = bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper")
@@ -279,11 +241,12 @@ extension SettingsTests {
         }
         for key in ["status.partial", "status.installed", "helperRepair.button", "helperRepair.confirm",
                     "helperRepair.title", "helperRepair.message", "error.helperRepair.title",
-                    "error.helperRepair.message"]
+                    "error.helperRepair.message", "error.helperInstall.message", "error.helperRemove.message",
+                    "error.helperRestore.title", "error.helperRestore.message", "helperRemove.manual.message"]
         {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsHelper") == key)
         }
-        for key in ["helperInactive", "helperInactive.a11y"] {
+        for key in ["helperInactive", "helperInactive.a11y", "lidClose.helperRequired", "manual.helperRequired"] {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") != key)
         }
         for key in [
@@ -293,6 +256,8 @@ extension SettingsTests {
             "helperRequiresApproval",
             "helperApprovalPending",
             "helperUnavailable",
+            "helperRequired",
+            "helperSettings.link",
         ].flatMap({ [$0, $0 + ".a11y"] }) {
             #expect(bundle.localizedString(forKey: key, value: nil, table: "SettingsSleep") == key)
         }
@@ -324,8 +289,6 @@ extension SettingsTests {
         {
             #expect(SettingsSection.sleep.text(key) == key)
         }
-        #expect(SettingsSection.helper.text("helperInstall.lidClose.title")
-            == app.localizedString(forKey: "helperInstall.lidClose.title", value: nil, table: "SettingsHelper"))
         #expect(SettingsSection.helper.text("helperInstall.manualAndLid.title") == "helperInstall.manualAndLid.title")
     }
 }

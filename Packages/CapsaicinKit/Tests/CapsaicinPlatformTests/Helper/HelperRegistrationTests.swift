@@ -58,17 +58,18 @@ struct HelperRegistrationTests {
         #expect(calls == ["unregister", "register"])
     }
 
-    @Test("SPEC-HLP-001 SPEC-HLP-007 登録の成功時だけ版を保存し、承認待ちなら設定を開く")
-    func registration() throws {
+    @Test("SPEC-HLP-001 SPEC-HLP-007 登録の成功時だけ版を保存し、使える場合も承認待ちの場合もシステム設定を開かない",
+          arguments: [SMAppService.Status.enabled, .requiresApproval])
+    func registration(statusAfterRegister: SMAppService.Status) throws {
         let fixture = RegistrationFixture()
         fixture.status = .notRegistered
-        fixture.statusAfterRegister = .requiresApproval
+        fixture.statusAfterRegister = statusAfterRegister
         let registration = fixture.registration()
         try registration.register()
-        #expect(fixture.calls == ["register", "save:2", "settings"])
+        #expect(fixture.calls == ["register", "save:2"])
         #expect(fixture.savedVersion == "2")
         fixture.calls = []
-        try registration.register()
+        registration.openSystemSettings()
         #expect(fixture.calls == ["settings"])
         fixture.status = .notRegistered
         fixture.errors = [NSError(domain: NSPOSIXErrorDomain, code: Int(EIO))]
@@ -77,14 +78,14 @@ struct HelperRegistrationTests {
         #expect(fixture.savedVersion == "1")
     }
 
-    @Test("SPEC-HLP-001 初めての登録の EPERM は承認待ちとして扱い、設定を開く")
+    @Test("SPEC-HLP-001 初めての登録の EPERM は承認待ちとして扱い、システム設定を開かない")
     func firstRegistrationRequiresApproval() throws {
         let fixture = RegistrationFixture()
         fixture.status = .notRegistered
         fixture.statusAfterRegister = .requiresApproval
         fixture.errorsAfterRegistering = [NSError(domain: SMAppServiceErrorDomain, code: Int(EPERM))]
         try fixture.registration().register()
-        #expect(fixture.calls == ["register", "save:2", "settings"])
+        #expect(fixture.calls == ["register", "save:2"])
         fixture.status = .notRegistered
         fixture.statusAfterRegister = .notRegistered
         fixture.errorsAfterRegistering = [NSError(domain: SMAppServiceErrorDomain, code: Int(EPERM))]

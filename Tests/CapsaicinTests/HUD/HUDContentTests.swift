@@ -135,7 +135,7 @@ struct HUDContentTests {
         #expect(value.tone == .normal)
         #expect(value.state == (language == "ja" ? "スリープ防止 オフ" : "Sleep prevention off"))
         #expect(value.detail == (language == "ja"
-                ? "バックグラウンド項目オフ" : "Background item off"))
+                ? "バックグラウンド実行オフ" : "Background activity off"))
     }
 
     @Test("SPEC-HUD-002 開始拒否は理由を区別する")

@@ -43,11 +43,8 @@ struct SettingsHelperActions {
 final class SettingsModel {
     let app: AppModel
     private(set) var helperState: HelperInstallationState
-    // 許可されるまで保存値と再開用の記録を変えないため、選択は画面側だけで持つ。
-    private(set) var pendingManual = false
-    private var pendingLidClose: SettingsLidCloseChoice?
     private(set) var isBusy = false
-    @ObservationIgnored var confirm: (HelperManagementOperation, Bool) async -> Bool = { _, _ in false }
+    @ObservationIgnored var confirm: (HelperManagementOperation) async -> Bool = { _ in false }
     @ObservationIgnored var showError: (String, String) -> Void = { _, _ in }
     private let helper: SettingsHelperActions
     private var windowIsOpen = false
@@ -65,26 +62,14 @@ final class SettingsModel {
     }
 
     var lidCloseChoice: SettingsLidCloseChoice {
-        pendingLidClose ?? SettingsLidCloseChoice(settings: app.settings)
-    }
-
-    var displayedSleepRows: [SettingsSleepRow] {
-        var settings = app.settings
-        if pendingManual {
-            settings.blocksManualSleep = true
-            if let pendingLidClose, let display = LidCloseDisplay(rawValue: pendingLidClose.rawValue) {
-                settings.lidCloseDisplay = display
-            }
-        }
-        return SettingsSleepRow.rows(settings: settings, capabilities: app.capabilities, helper: helperState,
-                                     brightnessUnavailable: app.isBrightnessKnownUnavailable)
+        SettingsLidCloseChoice(settings: app.settings)
     }
 
     func refreshHelper() {
         let previous = helperState
         helperState = helper.state()
-        if helperState == .installed, !isBusy, previous == .requiresApproval || pendingManual {
-            completeInstallation()
+        if helperState == .installed, !isBusy, previous == .requiresApproval {
+            helper.completed(.install, .success)
         }
         updateApprovalTimer()
     }
@@ -96,32 +81,12 @@ final class SettingsModel {
 
     func settingsWindowClosed() {
         windowIsOpen = false
-        discardPendingSelection()
         approvalTimer?.invalidate()
         approvalTimer = nil
     }
 
-    private func discardPendingSelection() {
-        pendingManual = false
-        pendingLidClose = nil
-    }
-
-    private func completeInstallation() {
-        let selection = pendingLidClose
-        let hadPendingSelection = pendingManual
-        discardPendingSelection()
-        if hadPendingSelection {
-            if let selection {
-                saveLidClose(selection)
-            } else {
-                change(\.blocksManualSleep, to: true)
-            }
-        }
-        helper.completed(.install, .success)
-    }
-
     private func updateApprovalTimer() {
-        guard helperState == .requiresApproval, windowIsOpen || pendingManual else {
+        guard helperState == .requiresApproval, windowIsOpen else {
             approvalTimer?.invalidate()
             approvalTimer = nil
             return
@@ -154,29 +119,19 @@ final class SettingsModel {
 
     func changeSleep(_ row: SettingsSleepRow, to value: Bool) async {
         guard let setting = row.setting, !isBusy else { return }
-        if setting == \.blocksManualSleep {
-            discardPendingSelection()
-        }
         refreshHelper()
-        if setting == \.blocksManualSleep, value, helperState != .installed {
-            await manage(.install, fromSetting: true)
-        } else {
-            change(setting, to: value != row.inverted)
+        let savedValue = value != row.inverted
+        if setting == \.blocksManualSleep, savedValue, helperState != .installed {
+            return
         }
+        change(setting, to: savedValue)
     }
 
     func changeLidClose(to choice: SettingsLidCloseChoice) async {
         guard !isBusy else { return }
-        discardPendingSelection()
         refreshHelper()
-        if choice != .sleep, helperState != .installed {
-            await manage(.install, fromSetting: true, lidClose: choice)
-        } else {
-            saveLidClose(choice)
-        }
-    }
+        guard choice == .sleep || helperState == .installed else { return }
 
-    private func saveLidClose(_ choice: SettingsLidCloseChoice) {
         var settings = app.settings
         settings.blocksManualSleep = choice != .sleep
         switch choice {
@@ -188,45 +143,22 @@ final class SettingsModel {
         change(settings)
     }
 
-    func manage(_ operation: HelperManagementOperation, fromSetting: Bool = false,
-                lidClose: SettingsLidCloseChoice? = nil) async
-    {
+    func openHelperSystemSettings() {
+        helper.openSystemSettings()
+    }
+
+    func manage(_ operation: HelperManagementOperation) async {
         guard !isBusy else { return }
         isBusy = true
-        if fromSetting {
-            pendingManual = true
-            pendingLidClose = lidClose
-        }
         defer {
             isBusy = false
             refreshHelper()
         }
         helperState = helper.state()
+        guard operation != .install || canInstall(), await confirm(operation) else { return }
         if operation == .install {
-            if let errorKey = installationErrorKey {
-                discardPendingSelection()
-                showHelperError(errorKey)
-                return
-            }
-            if helperState == .requiresApproval {
-                if fromSetting, await !confirm(operation, fromSetting) {
-                    discardPendingSelection()
-                    return
-                }
-                helper.openSystemSettings()
-                return
-            }
-        }
-        guard await confirm(operation, fromSetting) else {
-            if fromSetting {
-                discardPendingSelection()
-            }
-            return
-        }
-        if operation == .install, let errorKey = installationErrorKey {
-            discardPendingSelection()
-            showHelperError(errorKey)
-            return
+            helperState = helper.state()
+            guard canInstall() else { return }
         }
         let result = await helper.perform(operation)
         finishManagement(operation, result)
@@ -236,38 +168,31 @@ final class SettingsModel {
         switch result {
         case .success:
             helperState = helper.state()
-            if operation == .remove {
-                discardPendingSelection()
+            if operation == .remove || helperState == .installed {
                 helper.completed(operation, result)
-            } else if helperState == .installed {
-                completeInstallation()
-            } else if helperState != .requiresApproval {
-                discardPendingSelection()
             }
-        case .cancelled: discardPendingSelection()
-        case let .failure(failedOperation, details, needsReadback):
-            discardPendingSelection()
+        case .cancelled: break
+        case let .failure(failedOperation, details, _):
             helper.completed(operation, result)
             Logger(subsystem: Bundle.main.bundleIdentifier ?? "Capsaicin", category: "Helper")
                 .error("Helper management failed: \(details, privacy: .private)")
-            showHelperError(failedOperation == .remove && !needsReadback
-                ? "helperRestore" : Self.operationKey(failedOperation))
+            // 理由は分けて伝えず、どの失敗でも利用者が試せるやり直し方を案内する。
+            showHelperError(Self.operationKey(failedOperation), message: "helperRetry")
         }
     }
 
-    private var installationErrorKey: String? {
-        if helper.state() == .unavailable {
-            return "helperUnavailable"
+    private func canInstall() -> Bool {
+        guard helperState == .notInstalled else { return false }
+        guard !helper.isTranslocated() else {
+            showHelperError("helperTranslocated")
+            return false
         }
-        if helper.isTranslocated() {
-            return "helperTranslocated"
-        }
-        return nil
+        return true
     }
 
-    private func showHelperError(_ key: String) {
+    private func showHelperError(_ key: String, message: String? = nil) {
         showError(SettingsSection.helper.text("error." + key + ".title"),
-                  SettingsSection.helper.text("error." + key + ".message"))
+                  SettingsSection.helper.text("error." + (message ?? key) + ".message"))
     }
 
     static func operationKey(_ operation: HelperManagementOperation) -> String {

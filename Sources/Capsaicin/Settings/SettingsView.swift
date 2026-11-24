@@ -90,10 +90,10 @@ extension SettingsView {
     @ViewBuilder
     private var sleep: some View {
         Section(SettingsSection.sleep.text("behavior.group.title")) {
-            ForEach(model.displayedSleepRows.filter { $0.key == "display" }) { sleepRow($0) }
+            ForEach(model.sleepRows.filter { $0.key == "display" }) { sleepRow($0) }
         }
         Section {
-            ForEach(model.displayedSleepRows.filter { $0.key != "display" }) { sleepRow($0) }
+            ForEach(model.sleepRows.filter { $0.key != "display" }) { sleepRow($0) }
         }
         release
     }
@@ -113,16 +113,17 @@ extension SettingsView {
                 ) {
                     ForEach(SettingsLidCloseChoice.allCases, id: \.self) { choice in
                         Text(SettingsSection.sleep.text("lidClose." + choice.rawValue)).tag(choice)
+                            .selectionDisabled(!row.canSelect(choice))
                     }
                 }.labelsHidden().pickerStyle(.menu).disabled(model.isBusy)
-            } else if let setting = row.setting {
+            } else if row.setting != nil {
                 Toggle(
                     SettingsSection.sleep.text(row.key + ".label"),
                     isOn: Binding(
                         get: { row.isOn }, set: { value in Task { await model.changeSleep(row, to: value) } },
                     ),
                 )
-                .labelsHidden().disabled(model.isBusy)
+                .labelsHidden().disabled(model.isBusy || !row.isToggleEnabled)
             }
         }
     }
@@ -258,12 +259,21 @@ extension SettingsView {
         }
     }
 
+    @ViewBuilder
     var helper: some View {
+        Section {
+            SettingsIntroCard(
+                title: SettingsSection.helper.text("title"),
+                message: SettingsSection.helper.text("intro.message"),
+                symbol: "lock.shield",
+            )
+        }
         Section {
             SettingsRow(
                 title: SettingsSection.helper.text("status.label"),
-                help: SettingsSection.helper.text("status.help"),
-                symbol: "lock.shield",
+                help: model.helperState == .requiresApproval
+                    ? SettingsSection.helper.text("status.requiresApproval.help") : "",
+                symbol: "smallcircle.filled.circle",
             ) {
                 switch model.helperState {
                 case .notInstalled:
@@ -291,7 +301,7 @@ extension SettingsView {
                 case .notInstalled: helperButton(.install)
                 case .requiresApproval:
                     Button(SettingsSection.helper.text("openSystemSettings.button")) {
-                        Task { await model.manage(.install) }
+                        model.openHelperSystemSettings()
                     }.buttonStyle(.bordered).disabled(model.isBusy)
                     helperButton(.remove)
                 case .installed: helperButton(.remove)

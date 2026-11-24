@@ -4,6 +4,7 @@ import Foundation
 
 enum SettingsSection: String, CaseIterable, Identifiable {
     case general, sleep, feedback, controls, helper, about
+
     var id: Self {
         self
     }
@@ -55,6 +56,7 @@ struct SettingsSleepRow: Identifiable {
     /// 保存値と逆の意味の項目名を持つ。スイッチのオンは保存値の false に当たる。
     var inverted = false
     var warningLabel = ""
+    var needsHelperInstallation = false
     var id: String {
         key
     }
@@ -66,6 +68,14 @@ struct SettingsSleepRow: Identifiable {
         }
     }
 
+    var isToggleEnabled: Bool {
+        !needsHelperInstallation || isOn
+    }
+
+    func canSelect(_ choice: SettingsLidCloseChoice) -> Bool {
+        choice == .sleep || !needsHelperInstallation
+    }
+
     static func rows(settings: Settings, capabilities: MachineCapabilities,
                      helper: HelperInstallationState, brightnessUnavailable: Bool) -> [Self]
     {
@@ -75,7 +85,8 @@ struct SettingsSleepRow: Identifiable {
             Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep,
                  inverted: true),
             Self(key: manual, symbol: capabilities.hasLid ? "laptopcomputer" : "powersleep",
-                 setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep),
+                 setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep,
+                 needsHelperInstallation: helper != .installed),
         ]
         return definitions.map { row in
             var row = row
@@ -92,9 +103,16 @@ struct SettingsSleepRow: Identifiable {
             row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and))
             let warningTexts = warnings.map { SettingsSection.sleep.text($0) }
             row.warning = warningTexts.joined(separator: "\n")
-            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので説明文を持たない。
-            let help = row.key == "lidClose" ? [] : [SettingsSection.sleep.text(row.key + ".help")]
-            row.help = (warningTexts + help).joined(separator: "\n")
+            var help = warningTexts
+            // 選んでいる値のことと読まれないよう、ヘルパーが要る選択肢を名指しして、選べるようにする条件を書く。
+            if row.needsHelperInstallation, !row.isOn {
+                help.append(SettingsSection.sleep.text(row.key + ".helperRequired"))
+            }
+            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので固定の説明文は置かない。
+            if row.key != "lidClose" {
+                help.append(SettingsSection.sleep.text(row.key + ".help"))
+            }
+            row.help = help.joined(separator: "\n")
             return row
         }
     }

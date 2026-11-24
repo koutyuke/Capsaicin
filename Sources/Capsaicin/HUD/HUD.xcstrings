@@ -109,13 +109,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Background item off"
+            "value" : "Background activity off"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バックグラウンド項目オフ"
+            "value" : "バックグラウンド実行オフ"
           }
         }
       }

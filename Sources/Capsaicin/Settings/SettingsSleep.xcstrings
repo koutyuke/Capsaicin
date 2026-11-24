@@ -222,6 +222,23 @@
         }
       }
     },
+    "lidClose.helperRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To choose an option other than “Put Mac to sleep (default)”, the helper must be enabled."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「Macをスリープ（標準）」以外を選ぶには、ヘルパーを有効にする必要があります。"
+          }
+        }
+      }
+    },
     "lidClose.keepOn" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -320,6 +337,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appleメニューからのスリープ操作も無効になります。"
+          }
+        }
+      }
+    },
+    "manual.helperRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To turn on “Also prevent sleep from Apple menu”, the helper must be enabled."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「Appleメニューからのスリープも防ぐ」をオンにするには、ヘルパーを有効にする必要があります。"
           }
         }
       }

@@ -19,21 +19,12 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         super.init(window: window)
         window.delegate = self
         window.center()
-        model.confirm = { [weak self] operation, fromSetting in
+        model.confirm = { [weak self] operation in
             guard let self, let window = self.window else { return false }
-            let awaitingApproval = fromSetting && operation == .install && self.model.helperState == .requiresApproval
-            let key = awaitingApproval ? "helperApproval" : SettingsModel.operationKey(operation)
-            var title = key + ".title"
-            if fromSetting, operation == .install, !awaitingApproval {
-                title = self.model.app.capabilities.hasLid
-                    ? "helperInstall.lidClose.title" : "helperInstall.setting.title"
-            }
-            let message = operation == .remove && !self.model.app.capabilities.hasLid
-                ? "helperRemove.manual.message" : key + ".message"
-            let alert = alert(title: SettingsSection.helper.text(title),
-                              message: SettingsSection.helper.text(message))
-            alert.addButton(withTitle: SettingsSection.helper.text(awaitingApproval
-                    ? "openSystemSettings.button" : key + ".confirm"))
+            let key = SettingsModel.operationKey(operation)
+            let alert = alert(title: SettingsSection.helper.text(key + ".title"),
+                              message: SettingsSection.helper.text(key + ".message"))
+            alert.addButton(withTitle: SettingsSection.helper.text(key + ".confirm"))
             alert.addButton(withTitle: SettingsSection.helper.text("cancel"))
             return await alert.beginSheetModal(for: window) == .alertFirstButtonReturn
         }

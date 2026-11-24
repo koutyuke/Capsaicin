@@ -103,7 +103,7 @@ struct MenuRedesignTests {
         #expect(activeEntries.map(\.state) == entries.map(\.state))
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパーと輝度の注意では項目名に注意の記号を付けて操作を保ち、注意がなくなると外す")
+    @Test("SPEC-MENU-008 SPEC-SET-005 選べない保存値にも注意を付け、標準へ戻せる。注意がなくなると外す")
     func sleepWarnings() async throws {
         let fixture = AppFixture()
         var installed = true
@@ -118,7 +118,8 @@ struct MenuRedesignTests {
         let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
         let lid = try item("menu.sleep.lidClose.zeroBrightness", in: quick)
         let title = SettingsSection.sleep.text("lidClose.zeroBrightness")
-        #expect(lid.isEnabled && lid.image == nil && lid.title == warningMark + title)
+        #expect(!lid.isEnabled && lid.image == nil && lid.title == warningMark + title)
+        #expect(try item("menu.sleep.lidClose.sleep", in: quick).isEnabled)
         #expect(lid.subtitle == model.sleepRows[1].warning)
         #expect(lid.subtitle?.contains(SettingsSection.sleep.text("lidClose.help")) == false)
         #expect(lid.subtitle?.hasPrefix(SettingsSection.sleep.text("helperInactive")) == true)
@@ -155,38 +156,55 @@ struct MenuRedesignTests {
         #expect(errors == (fails ? 1 : 0))
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 ヘルパー確認の取り消しと設置失敗はメニューでも保存値に戻す",
-          arguments: [0, 1, 2])
-    func helperFlow(outcome: Int) async throws {
-        let fixture = AppFixture()
-        var installed = false
-        var confirmed = false
-        var errors = 0
-        let model = SettingsModel(app: fixture.model, helper: .init(
-            state: { installed ? .installed : .notInstalled }, perform: { _ in
-                if outcome == 2 {
-                    return .failure(
-                        operation: .install,
-                        details: "test",
-                        needsSleepDisabledReadback: false,
-                    )
-                }
-                installed = true
-                return .success
-            }, completed: { _, _ in },
+    @Test("SPEC-MENU-008 開くたびにヘルパーの状態を読み、選べない項目に理由を出さない",
+          arguments: [false, true], [HelperInstallationState.notInstalled, .requiresApproval, .unavailable])
+    func helperAvailability(hasLid: Bool, unavailableState: HelperInstallationState) async throws {
+        let system = FakeSystem()
+        let before = Settings()
+        let app = AppModel(controller: BlockingController(
+            settings: before, capabilities: MachineCapabilities(hasLid: hasLid, hasInternalBattery: false),
+            ports: system.ports,
+        ), saveSettings: { _ in Issue.record("選べない値を保存した") })
+        var state = HelperInstallationState.installed
+        let model = SettingsModel(app: app, helper: .init(
+            state: { state }, perform: { _ in Issue.record("メニューから登録した"); return .cancelled },
+            completed: { _, _ in }, openSystemSettings: { Issue.record("システム設定を開いた") },
         ))
-        model.confirm = { _, fromSetting in confirmed = true; #expect(fromSetting); return outcome != 0 }
-        model.showError = { _, _ in errors += 1 }
+        model.confirm = { _ in Issue.record("メニューから確認を出した"); return false }
+        model.showError = { _, _ in Issue.record("選べない値でエラーを出した") }
         let controller = menu(model)
-        let choices = try #require(item("menu.quickSettings", in: controller.menu).submenu)
-        try choices.performActionForItem(at: choices.index(of: item("menu.sleep.lidClose.keepOn", in: choices)))
+        controller.openSettings = { Issue.record("設定を開いた") }
+        let quick = try #require(item("menu.quickSettings", in: controller.menu).submenu)
+        let entries = quick.items.filter { $0.identifier?.rawValue.hasPrefix("menu.sleep.") == true }
+        #expect(entries.allSatisfy { $0.isEnabled && $0.action != nil })
+
+        func reopen() {
+            controller.menuWillOpen(controller.menu)
+            controller.menuDidClose(controller.menu)
+        }
+        state = unavailableState
+        reopen()
+        #expect(model.helperState == unavailableState)
+        let disabled = entries.filter { !$0.isEnabled }
+        #expect(disabled.map { $0.identifier?.rawValue } == (hasLid
+                ? ["menu.sleep.lidClose.turnOff", "menu.sleep.lidClose.zeroBrightness", "menu.sleep.lidClose.keepOn"]
+                : ["menu.sleep.manual"]))
+        #expect(entries.allSatisfy { $0.subtitle == nil })
+        for entry in disabled {
+            #expect(entry.action == nil)
+            quick.performActionForItem(at: quick.index(of: entry))
+        }
         await drainActions()
-        #expect(confirmed)
-        #expect(fixture.model.settings.blocksManualSleep == (outcome == 1))
-        #expect(try item("menu.sleep.lidClose.keepOn", in: choices).state == (outcome == 1 ? .on : .off))
-        #expect(try item("menu.sleep.lidClose.sleep", in: choices).state == (outcome == 1 ? .off : .on))
-        #expect(fixture.savedSettings.count == (outcome == 1 ? 1 : 0))
-        #expect(errors == (outcome == 2 ? 1 : 0))
+        #expect(app.settings == before)
+        if hasLid {
+            let sleep = try item("menu.sleep.lidClose.sleep", in: quick)
+            #expect(sleep.isEnabled && sleep.state == .on)
+        }
+
+        state = .installed
+        reopen()
+        #expect(model.helperState == .installed)
+        #expect(entries.allSatisfy { $0.isEnabled && $0.action != nil && $0.subtitle == nil })
     }
 }
 

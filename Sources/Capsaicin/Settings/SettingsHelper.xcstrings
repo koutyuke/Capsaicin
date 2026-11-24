@@ -18,23 +18,6 @@
         }
       }
     },
-    "error.helperInstall.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to install the helper. If you changed a setting, it has been reverted."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーをインストールできませんでした。設定から操作した場合は、設定を変更前の状態に戻しています。"
-          }
-        }
-      }
-    },
     "error.helperInstall.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,23 +31,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘルパーをインストールできませんでした"
-          }
-        }
-      }
-    },
-    "error.helperRemove.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The helper could not be unregistered. Your saved settings have not changed."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーの登録を解除できませんでした。保存した設定は変えていません。"
           }
         }
       }
@@ -86,36 +52,19 @@
         }
       }
     },
-    "error.helperRestore.message" : {
+    "error.helperRetry.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin could not restore the sleep setting it changed, so the helper was not removed. Your saved settings have not changed."
+            "value" : "Try again. If the problem continues, restart your Mac or reinstall Capsaicin."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicinが変更したスリープ設定を元に戻せないため、ヘルパーを削除しませんでした。保存した設定は変えていません。"
-          }
-        }
-      }
-    },
-    "error.helperRestore.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not restore sleep settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スリープ設定を元に戻せませんでした"
+            "value" : "再度お試しください。それでも解決しない場合は、Macを再起動するか、Capsaicinを再インストールしてください。"
           }
         }
       }
@@ -126,13 +75,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin is running from a temporary App Translocation location. Move it to the Applications folder and reopen it; your saved settings have not changed."
+            "value" : "Capsaicin is running from a temporary App Translocation location. Move it to the Applications folder and reopen it."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "CapsaicinがApp Translocationの一時的な場所で動いているため、「アプリケーション」フォルダーに移して開き直してください。保存した設定は変えていません。"
+            "value" : "App Translocationの一時的な場所で動いているため、「アプリケーション」フォルダーに移して開き直してください。"
           }
         }
       }
@@ -150,40 +99,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "この場所からはヘルパーをインストールできません"
-          }
-        }
-      }
-    },
-    "error.helperUnavailable.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This build is not signed with a Team ID, so the helper cannot be used. Nothing was registered, and your saved settings have not changed."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このビルドの署名にはTeam IDがないため、ヘルパーを使えません。登録は行わず、保存した設定も変えていません。"
-          }
-        }
-      }
-    },
-    "error.helperUnavailable.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Helper unavailable in this build"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このビルドではヘルパーを使えません"
           }
         }
       }
@@ -222,40 +137,6 @@
         }
       }
     },
-    "helperApproval.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allow Capsaicin in System Settings > General > Login Items & Extensions to enable the selected setting."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinの項目を許可すると、選んだ設定が有効になります。"
-          }
-        }
-      }
-    },
-    "helperApproval.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To use this setting, allow the helper in System Settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "この設定を使うには、システム設定でヘルパーの許可が必要です"
-          }
-        }
-      }
-    },
     "helperInstall.button" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -290,53 +171,19 @@
         }
       }
     },
-    "helperInstall.lidClose.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To keep your Mac awake when the display is closed, install the helper"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイを閉じてもスリープさせないには、ヘルパーのインストールが必要です"
-          }
-        }
-      }
-    },
     "helperInstall.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The helper runs a small program as root only to switch sleep settings and restore them when your Mac starts up. Continue to System Settings > General > Login Items & Extensions and allow Capsaicin to run in the background. You can remove the helper in Helper settings."
+            "value" : "This adds a small helper program that runs with administrator privileges and only switches sleep settings. You can remove it anytime in Helper settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープを切り替えるだけの小さなプログラムをrootで動かし、Macの起動時にスリープ設定を元に戻します。続けるとシステム設定の「一般 > ログイン項目と機能拡張」が開くので、Capsaicinのバックグラウンドの項目を許可してください。設定の「ヘルパー」から削除できます。"
-          }
-        }
-      }
-    },
-    "helperInstall.setting.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To use “Also prevent sleep from Apple menu”, install the helper"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「Appleメニューからのスリープも防ぐ」を使うにはヘルパーのインストールが必要です"
+            "value" : "管理者権限で動作し、スリープの切り替えのみを行う小さなヘルパープログラムを追加します。このヘルパーは、設定の「ヘルパー」からいつでも削除できます。"
           }
         }
       }
@@ -392,36 +239,19 @@
         }
       }
     },
-    "helperRemove.manual.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“Also prevent sleep from Apple menu” will be turned off. Your Mac will sleep when you choose Sleep from the Apple menu, even while sleep prevention is on."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「Appleメニューからのスリープも防ぐ」がオフになります。スリープ防止中でも、Appleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
-          }
-        }
-      }
-    },
     "helperRemove.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "“When display is closed” will be set to “Put Mac to sleep”. Your Mac will sleep when you close the display or choose Sleep from the Apple menu, even while sleep prevention is on."
+            "value" : "Features that require the helper will be turned off, and their settings will return to their defaults. You can reinstall the helper anytime in Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "「ディスプレイを閉じたとき」が「Macをスリープ」になります。スリープ防止中でも、ディスプレイを閉じたときやAppleメニューの「スリープ」を選んだときにMacがスリープするようになります。"
+            "value" : "ヘルパーが必要な機能は無効になり、該当する設定はデフォルトに戻ります。ヘルパーは設定画面からいつでも再度インストールできます。"
           }
         }
       }
@@ -439,6 +269,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘルパーを削除しますか？"
+          }
+        }
+      }
+    },
+    "intro.message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small companion program that runs with administrator privileges. It switches system-wide sleep settings that regular sleep prevention cannot control."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理者権限で動作する小さな補助プログラムです。通常のスリープ防止では制御できない、システム全体のスリープ設定を切り替えるために使用します。"
           }
         }
       }
@@ -494,23 +341,6 @@
         }
       }
     },
-    "status.help" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The helper runs a small program as root only to switch sleep settings. It restores the sleep settings when your Mac starts up or when Capsaicin closes without restoring them. To use the helper, allow the Capsaicin background item in System Settings > General > Login Items & Extensions. Turning off that item disables the helper."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーは、スリープを切り替えるだけの小さなプログラムをrootで動かします。Macの起動時や、Capsaicinが後片付けできずに終了したときに、スリープ設定を元に戻します。使うには、システム設定の「一般 > ログイン項目と機能拡張」でCapsaicinのバックグラウンドの項目を許可してください。この項目をオフにすると、ヘルパーを使えなくなります。"
-          }
-        }
-      }
-    },
     "status.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -557,7 +387,24 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システム設定での許可待ち"
+            "value" : "システム設定の許可待ち"
+          }
+        }
+      }
+    },
+    "status.requiresApproval.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow background activity under Login Items & Extensions in System Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定の「ログイン項目と機能拡張」でバックグラウンド実行を許可してください。"
           }
         }
       }

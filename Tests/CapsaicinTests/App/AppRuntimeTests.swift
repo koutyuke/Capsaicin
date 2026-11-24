@@ -25,25 +25,24 @@ struct AppRuntimeTests {
         #expect(fixture.updates == [loginSetting, !loginSetting])
     }
 
-    @Test("SPEC-HLP-001 SPEC-LCY-002 終了時は承認待ちの選択とタイマーを破棄し、抑止を解除する")
-    func discardsApprovalOnQuit() async {
+    @Test("SPEC-HLP-001 SPEC-LCY-002 終了時は承認待ちのタイマーを止め、抑止を解除する")
+    func stopsApprovalPollingOnQuit() async {
         let fixture = RuntimeFixture()
         await fixture.runtime.start()
         fixture.app.model.requestStart(from: .menu)
         let settings = SettingsModel(app: fixture.app.model, helper: .init(
             state: { .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
-        settings.confirm = { _, _ in true }
         fixture.stopSettings = {
             #expect(fixture.app.model.status.isBlocking)
             settings.settingsWindowClosed()
         }
-        await settings.changeLidClose(to: .keepOn)
-        #expect(settings.pendingManual && settings.approvalTimer != nil)
+        settings.settingsWindowDidBecomeKey()
+        #expect(settings.approvalTimer?.isValid == true)
         await fixture.runtime.terminate(isUserQuit: true)
         #expect(fixture.calls.last == "stop")
         #expect(!fixture.app.model.status.isBlocking)
-        #expect(!settings.pendingManual && settings.lidCloseChoice == .sleep && settings.approvalTimer == nil)
+        #expect(settings.lidCloseChoice == .sleep && settings.approvalTimer == nil)
         #expect(fixture.app.savedSettings.isEmpty)
     }
 }

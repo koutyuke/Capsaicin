@@ -1,329 +1,151 @@
 import AppKit
-import CapsaicinCore
-import CapsaicinCoreTesting
 import CapsaicinPlatform
 import Testing
 
 @MainActor
 struct HelperApprovalTests {
-    @Test("SPEC-HLP-001 SPEC-SET-005 承認待ちでは選択だけを保ち、使えるになったら保存する",
-          arguments: [SettingsLidCloseChoice.turnOff, .zeroBrightness, .keepOn])
-    func holdsSelectionUntilApproval(choice: SettingsLidCloseChoice) async {
+    @Test("SPEC-HLP-001 登録ではシステム設定を開かず、明示操作でのみ開く")
+    func openSettingsOnlyOnRequest() async {
         let fixture = AppFixture()
-        fixture.model.finishLaunching()
-        fixture.model.requestStart(from: .menu)
-        let session = fixture.model.status.session
         var state = HelperInstallationState.notInstalled
-        var completions = 0
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in
-            state = .requiresApproval
-            return .success
-        }, completed: { operation, result in
-            completions += 1
-            fixture.model.helperManagementCompleted(operation, result)
-        }))
-        model.confirm = { _, _ in true }
-        await model.changeLidClose(to: choice)
-        #expect(model.pendingManual)
-        #expect(model.lidCloseChoice == choice)
-        #expect(!model.isBusy)
-        #expect(fixture.savedSettings.isEmpty)
-        #expect(!fixture.model.settings.blocksManualSleep)
-        #expect(model.displayedSleepRows[1].warning == SettingsSection.sleep.text("helperInactive"))
-        #expect(model.displayedSleepRows[1].help.hasPrefix(SettingsSection.sleep.text("helperInactive")))
-        #expect(model.sleepRows[1].warning.isEmpty)
-        #expect(completions == 0)
-        fixture.system.clearHistory()
-        state = .installed
-        model.refreshHelper()
-        #expect(!model.pendingManual)
-        #expect(model.displayedSleepRows[1].warning.isEmpty)
-        #expect(model.lidCloseChoice == choice)
-        #expect(fixture.model.settings.blocksManualSleep)
-        #expect(fixture.model.settings.lidCloseDisplay.rawValue == choice.rawValue)
-        #expect(fixture.savedSettings == [fixture.model.settings])
-        #expect(fixture.system.operations.contains(.helperOn))
-        #expect(fixture.model.status.session == session)
-        #expect(completions == 1)
-        model.refreshHelper()
-        #expect(fixture.savedSettings.count == 1)
-    }
-
-    @Test("SPEC-HLP-001 SPEC-HLP-006 承認待ちでは許可の案内で開くと選んだときだけ選択を保つ",
-          arguments: [false, true])
-    func alreadyAwaitingApproval(opensSettings: Bool) async {
-        let fixture = AppFixture()
-        var state = HelperInstallationState.requiresApproval
-        var opened = 0
-        var completed = 0
-        var confirmations = 0
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in
-            Issue.record("承認待ちで登録を繰り返した")
-            return .cancelled
-        }, completed: { _, _ in completed += 1 }, openSystemSettings: { opened += 1 }))
-        model.confirm = { operation, fromSetting in
-            confirmations += 1
-            #expect(operation == .install && fromSetting && model.isBusy)
-            #expect(opened == 0 && fixture.savedSettings.isEmpty)
-            return opensSettings
-        }
-        await model.changeLidClose(to: .keepOn)
-        #expect(confirmations == 1)
-        #expect(model.pendingManual == opensSettings)
-        #expect(model.lidCloseChoice == (opensSettings ? .keepOn : .sleep))
-        #expect(opened == (opensSettings ? 1 : 0) && completed == 0)
-        #expect(!model.isBusy && !fixture.model.settings.blocksManualSleep)
-        #expect(fixture.savedSettings.isEmpty)
-        // 「ヘルパー」からは案内を出さず、保留がある場合もそのままにする。
+        var events: [String] = []
+        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { operation in
+                #expect(operation == .install)
+                events.append("register")
+                state = .requiresApproval
+                return .success
+            }, completed: { _, _ in Issue.record("承認待ちで設置を完了した") },
+            openSystemSettings: { events.append("open") }))
+        model.confirm = { _ in events.append("confirm"); return true }
         await model.manage(.install)
-        #expect(confirmations == 1)
-        #expect(model.pendingManual == opensSettings)
-        #expect(opened == (opensSettings ? 2 : 1))
-        state = .installed
-        model.refreshHelper()
-        #expect(fixture.savedSettings.count == (opensSettings ? 1 : 0) && completed == 1)
-        #expect(fixture.model.settings.blocksManualSleep == opensSettings)
-        #expect(!model.pendingManual)
+        #expect(model.helperState == .requiresApproval)
+        #expect(events == ["confirm", "register"])
+        await model.manage(.install)
+        #expect(events == ["confirm", "register"])
+        model.openHelperSystemSettings()
+        #expect(events == ["confirm", "register", "open"])
+        #expect(fixture.savedSettings.isEmpty)
     }
 
-    @Test("SPEC-HLP-001 許可の案内を取り消すと前の保留も捨て、保存済みの選択に戻す",
-          arguments: [false, true])
-    func cancelledGuideRestoresSavedSelection(savedManual: Bool) async {
-        let fixture = AppFixture()
-        var settings = fixture.model.settings
-        settings.blocksManualSleep = savedManual
-        settings.lidCloseDisplay = .zeroBrightness
-        fixture.model.changeSettings(settings)
-        fixture.savedSettings.removeAll()
-        var state = HelperInstallationState.requiresApproval
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
-                                                                    completed: { _, _ in }))
-        model.confirm = { _, _ in true }
-        await model.changeLidClose(to: .keepOn)
-        #expect(model.pendingManual && model.lidCloseChoice == .keepOn)
-        model.confirm = { _, _ in false }
-        await model.changeLidClose(to: .turnOff)
-        #expect(!model.pendingManual)
-        #expect(model.lidCloseChoice == (savedManual ? .zeroBrightness : .sleep))
-        #expect(fixture.model.settings == settings && fixture.savedSettings.isEmpty)
-        state = .installed
-        model.refreshHelper()
-        #expect(fixture.model.settings == settings && fixture.savedSettings.isEmpty)
-    }
-
-    @Test("SPEC-HLP-001 SPEC-SET-005 MacBook以外でも許可の案内の結果に従い、承認前は保存しない",
-          arguments: [false, true])
-    func desktopPendingSelection(opensSettings: Bool) async {
-        let system = FakeSystem()
-        var saved: [CapsaicinCore.Settings] = []
-        let app = AppModel(controller: BlockingController(
-            settings: CapsaicinCore.Settings(),
-            capabilities: MachineCapabilities(hasLid: false, hasInternalBattery: false), ports: system.ports,
-        ), saveSettings: { saved.append($0) })
-        var state = HelperInstallationState.requiresApproval
-        var opened = 0
-        var confirmations = 0
-        let model = SettingsModel(app: app, helper: .init(state: { state }, perform: { _ in
-            Issue.record("承認待ちで登録を繰り返した")
-            return .cancelled
-        }, completed: { _, _ in }, openSystemSettings: { opened += 1 }))
-        model.confirm = { operation, fromSetting in
-            confirmations += 1
-            #expect(operation == .install && fromSetting && opened == 0)
-            return opensSettings
-        }
-        await model.changeSleep(model.sleepRows[1], to: true)
-        #expect(confirmations == 1 && opened == (opensSettings ? 1 : 0))
-        #expect(model.pendingManual == opensSettings)
-        #expect(model.displayedSleepRows[1].isOn == opensSettings)
-        #expect(model.displayedSleepRows[1].warning
-            == (opensSettings ? SettingsSection.sleep.text("helperInactive") : ""))
-        #expect(!model.sleepRows[1].isOn)
-        #expect(!app.settings.blocksManualSleep && saved.isEmpty)
-        state = .installed
-        model.refreshHelper()
-        #expect(app.settings.blocksManualSleep == opensSettings)
-        #expect(saved == (opensSettings ? [app.settings] : []))
-        #expect(model.displayedSleepRows[1].warning.isEmpty)
-    }
-
-    @Test("SPEC-HLP-001 選び直しは古い保留を捨て、承認後は最後の選択だけを保存する",
-          arguments: [SettingsLidCloseChoice.sleep, .turnOff])
-    func replacesPendingSelection(choice: SettingsLidCloseChoice) async {
-        let fixture = AppFixture()
-        var state = HelperInstallationState.requiresApproval
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
-                                                                    completed: { _, _ in }))
-        model.confirm = { _, _ in true }
-        await model.changeLidClose(to: .keepOn)
-        // 許可された直後の選び直しでも、読み直す前に古い選択を捨てる。
-        state = .installed
-        await model.changeLidClose(to: choice)
-        #expect(!model.pendingManual)
-        #expect(model.lidCloseChoice == choice)
-        #expect(fixture.savedSettings.count == 1)
-        #expect(fixture.savedSettings[0].blocksManualSleep == (choice != .sleep))
-        #expect(fixture.savedSettings[0].lidCloseDisplay == .turnOff)
-    }
-
-    @Test("SPEC-HLP-001 承認待ちのまま選び直すと新しい値だけを保留し、別の設定の変更は保つ")
-    func replacesSelectionWhileWaiting() async {
-        let fixture = AppFixture()
-        var state = HelperInstallationState.requiresApproval
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
-                                                                    completed: { _, _ in }))
-        model.confirm = { _, _ in true }
-        await model.changeLidClose(to: .keepOn)
-        model.change(\.timerEnabled, to: true)
-        await model.changeLidClose(to: .zeroBrightness)
-        #expect(model.pendingManual && model.lidCloseChoice == .zeroBrightness)
-        #expect(!fixture.model.settings.blocksManualSleep)
-        #expect(fixture.savedSettings.count == 1)
-        state = .installed
-        model.refreshHelper()
-        #expect(fixture.model.settings.timerEnabled)
-        #expect(fixture.model.settings.lidCloseDisplay == .zeroBrightness)
-        #expect(fixture.savedSettings.count == 2)
-    }
-
-    @Test("SPEC-HLP-004 SPEC-HLP-006 戻せないので削除しない場合と、登録解除の失敗を区別して伝える",
+    @Test("SPEC-HLP-004 SPEC-HLP-006 戻せないので削除しない場合も登録解除の失敗も、削除の失敗としてやり直し方を伝える",
           arguments: [false, true])
     func removalErrors(needsReadback: Bool) async {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: .init(state: { .installed }, perform: { operation in
             .failure(operation: operation, details: "private test details", needsSleepDisabledReadback: needsReadback)
         }, completed: { _, _ in }))
-        model.confirm = { _, _ in true }
-        var errors: [String] = []
-        model.showError = { _, message in errors.append(message) }
+        model.confirm = { _ in true }
+        var errors: [[String]] = []
+        model.showError = { title, message in errors.append([title, message]) }
         await model.manage(.remove)
-        let key = needsReadback ? "helperRemove" : "helperRestore"
-        #expect(errors == [SettingsSection.helper.text("error." + key + ".message")])
+        #expect(errors == [[SettingsSection.helper.text("error.helperRemove.title"),
+                            SettingsSection.helper.text("error.helperRetry.message")]])
         #expect(fixture.savedSettings.isEmpty)
     }
 
-    @Test("SPEC-HLP-001 SPEC-HLP-006 署名とApp Translocationのエラーでは確認も登録もせず選択を戻す",
-          arguments: [HelperInstallationState.unavailable, .notInstalled, .requiresApproval], [false, true])
-    func installationPreflight(state: HelperInstallationState, fromSetting: Bool) async {
+    @Test("SPEC-HLP-001 SPEC-HLP-006 未設置で App Translocation ならエラーを出し、使用不可なら設置を始めない",
+          arguments: [HelperInstallationState.unavailable, .notInstalled])
+    func installationPreflight(state: HelperInstallationState) async {
         let fixture = AppFixture()
         let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in
             Issue.record("使えない場所やビルドで登録した")
             return .success
-        }, completed: { _, _ in }, isTranslocated: { state != .unavailable }))
-        model.confirm = { _, _ in Issue.record("登録できないのに確認した"); return true }
+        }, completed: { _, _ in }, isTranslocated: { state == .notInstalled }))
+        model.confirm = { _ in Issue.record("登録できないのに確認した"); return true }
         var errors: [String] = []
         model.showError = { title, _ in errors.append(title) }
-        if fromSetting {
-            await model.changeLidClose(to: .keepOn)
-        } else {
-            await model.manage(.install)
-        }
-        let key = state == .unavailable ? "helperUnavailable" : "helperTranslocated"
-        #expect(errors == [SettingsSection.helper.text("error." + key + ".title")])
-        #expect(model.lidCloseChoice == .sleep && !model.pendingManual && !model.isBusy)
-        #expect(fixture.savedSettings.isEmpty)
-    }
-
-    @Test("SPEC-HLP-001 ヘルパーだけの承認後は合わせ直しだけを行い、ほかの設定は保存しない")
-    func approvalWithoutSelection() throws {
-        let fixture = AppFixture()
-        var state = HelperInstallationState.requiresApproval
-        var completed = 0
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
-                                                                    completed: { _, _ in completed += 1 }))
-        model.settingsWindowDidBecomeKey()
-        let timer = try #require(model.approvalTimer)
-        #expect(timer.timeInterval == 2 && timer.isValid)
-        state = .installed
-        timer.fire()
-        #expect(model.helperState == .installed && completed == 1)
-        #expect(fixture.savedSettings.isEmpty && !model.pendingManual)
-        #expect(!timer.isValid && model.approvalTimer == nil)
-        model.settingsWindowClosed()
+        await model.manage(.install)
+        #expect(errors ==
+            (state == .notInstalled ? [SettingsSection.helper.text("error.helperTranslocated.title")] : []))
+        #expect(!model.isBusy && fixture.savedSettings.isEmpty)
     }
 }
 
 extension SettingsTests {
-    @Test("SPEC-HLP-006 承認待ちの案内は既定ボタンとキャンセルを持つシートで、閉じてから設定を開く",
+    @Test("SPEC-HLP-006 設置の確認は既定ボタンとキャンセルを持つシートで、閉じてから登録する",
           arguments: [false, true])
-    func approvalGuideSheet(opensSettings: Bool) async throws {
+    func installationSheet(accepts: Bool) async throws {
         _ = NSApplication.shared
         let fixture = AppFixture()
-        var settingsWindow: NSWindow?
-        var opened = 0
-        let model = SettingsModel(app: fixture.model, helper: .init(state: { .requiresApproval }, perform: { _ in
-            Issue.record("許可の案内で登録を繰り返した")
-            return .cancelled
-        }, completed: { _, _ in }, openSystemSettings: {
-            #expect(settingsWindow?.attachedSheet == nil)
-            opened += 1
-        }))
+        var window: NSWindow?
+        var registrations = 0
+        let model = SettingsModel(app: fixture.model, helper: .init(state: { .notInstalled }, perform: { operation in
+            #expect(operation == .install && window?.attachedSheet == nil)
+            registrations += 1
+            return .success
+        }, completed: { _, _ in }, openSystemSettings: { Issue.record("システム設定を開いた") }))
         let controller = SettingsWindowController(model: model, hotkey: HotkeyController(save: { _ in true }), quit: {})
-        let window = try #require(controller.window)
-        settingsWindow = window
-        defer { window.close() }
-        window.setFrameOrigin(NSPoint(x: -10000, y: -10000))
-        window.orderBack(nil)
-        let change = Task { await model.changeLidClose(to: .keepOn) }
+        let settingsWindow = try #require(controller.window)
+        window = settingsWindow
+        defer { settingsWindow.close() }
+        settingsWindow.setFrameOrigin(NSPoint(x: -10000, y: -10000))
+        settingsWindow.orderBack(nil)
+        let install = Task { await model.manage(.install) }
         defer {
-            if let sheet = window.attachedSheet {
-                window.endSheet(sheet)
+            if let sheet = settingsWindow.attachedSheet {
+                settingsWindow.endSheet(sheet)
             }
         }
-        await layout(window)
-        let sheet = try #require(window.attachedSheet)
-        #expect(sheet.sheetParent === window)
-        #expect(opened == 0 && model.isBusy && fixture.savedSettings.isEmpty)
+        await layout(settingsWindow)
+        let sheet = try #require(settingsWindow.attachedSheet)
+        #expect(sheet.sheetParent === settingsWindow)
+        #expect(registrations == 0 && model.isBusy && fixture.savedSettings.isEmpty)
         func descendants(_ view: NSView) -> [NSView] {
             [view] + view.subviews.flatMap { descendants($0) }
         }
         let views = try descendants(#require(sheet.contentView))
         let text = views.compactMap { ($0 as? NSTextField)?.stringValue }
-        #expect(text.contains(SettingsSection.helper.text("helperApproval.title")))
-        #expect(text.contains(SettingsSection.helper.text("helperApproval.message")))
-        let open = try #require(sheet.defaultButtonCell?.controlView as? NSButton)
-        #expect(open.title == SettingsSection.helper.text("openSystemSettings.button"))
+        #expect(text.contains(SettingsSection.helper.text("helperInstall.title")))
+        #expect(text.contains(SettingsSection.helper.text("helperInstall.message")))
+        let confirm = try #require(sheet.defaultButtonCell?.controlView as? NSButton)
+        #expect(confirm.title == SettingsSection.helper.text("helperInstall.confirm"))
         let cancel = try #require(views.compactMap { $0 as? NSButton }.first {
             $0.title == SettingsSection.helper.text("cancel")
         })
-        (opensSettings ? open : cancel).performClick(nil)
-        await change.value
-        #expect(window.attachedSheet == nil)
-        #expect(opened == (opensSettings ? 1 : 0))
-        #expect(model.pendingManual == opensSettings && fixture.savedSettings.isEmpty)
-        #expect(model.lidCloseChoice == (opensSettings ? .keepOn : .sleep))
+        (accepts ? confirm : cancel).performClick(nil)
+        await install.value
+        #expect(settingsWindow.attachedSheet == nil)
+        #expect(registrations == (accepts ? 1 : 0))
+        #expect(fixture.savedSettings.isEmpty)
     }
 
-    @Test("SPEC-HLP-001 SPEC-HLP-004 キーウインドウへの復帰と2秒のタイマーで読み直し、閉じたら保留を捨てる",
+    @Test("SPEC-HLP-001 SPEC-HLP-004 設定が開いている間だけ承認を読み直し、完了時も保存値を変えない",
           arguments: [false, true])
-    func approvalWindowLifecycle(approve: Bool) async throws {
+    func approvalWindowLifecycle(approveWhileOpen: Bool) throws {
         _ = NSApplication.shared
         let fixture = AppFixture()
         var state = HelperInstallationState.requiresApproval
         var reads = 0
+        var completions = 0
         let model = SettingsModel(app: fixture.model, helper: .init(state: { reads += 1; return state },
                                                                     perform: { _ in .cancelled },
-                                                                    completed: { _, _ in }))
+                                                                    completed: { operation, result in
+                                                                        #expect(operation == .install)
+                                                                        if case .success = result {
+                                                                            completions += 1
+                                                                        }
+                                                                    }))
         let controller = SettingsWindowController(model: model, hotkey: HotkeyController(save: { _ in true }), quit: {})
-        model.confirm = { _, _ in true }
         let window = try #require(controller.window)
-        controller.windowDidBecomeKey(Notification(name: NSWindow.didBecomeKeyNotification, object: window))
-        await model.changeLidClose(to: .zeroBrightness)
+        #expect(model.approvalTimer == nil)
+        let becameKey = Notification(name: NSWindow.didBecomeKeyNotification, object: window)
+        controller.windowDidBecomeKey(becameKey)
         let timer = try #require(model.approvalTimer)
         #expect(timer.timeInterval == 2 && timer.isValid)
         let before = reads
         timer.fire()
-        #expect(reads > before && model.pendingManual && fixture.savedSettings.isEmpty)
-        if approve {
+        #expect(reads > before && completions == 0)
+        if approveWhileOpen {
             state = .installed
-            controller.windowDidBecomeKey(Notification(name: NSWindow.didBecomeKeyNotification, object: window))
-            #expect(fixture.savedSettings.count == 1 && model.lidCloseChoice == .zeroBrightness)
+            timer.fire()
+            #expect(model.helperState == .installed && completions == 1)
+            #expect(!timer.isValid && model.approvalTimer == nil)
         }
         window.close()
-        #expect(!model.pendingManual && !timer.isValid && model.approvalTimer == nil)
-        #expect(model.lidCloseChoice == (approve ? .zeroBrightness : .sleep))
+        #expect(!timer.isValid && model.approvalTimer == nil)
         state = .installed
-        model.refreshHelper()
-        #expect(fixture.savedSettings.count == (approve ? 1 : 0))
+        controller.windowDidBecomeKey(becameKey)
+        #expect(model.helperState == .installed && completions == 1)
+        #expect(model.lidCloseChoice == .sleep && fixture.savedSettings.isEmpty)
     }
 }
