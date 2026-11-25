@@ -22,7 +22,7 @@ assignee: Claude（Claude Code、Opus 5.5）
 - `.github/workflows/`: push と PR で `brew style` と `brew audit` を実行するワークフローと、定期実行と手動実行で Cask を更新するワークフロー。更新では `gh attestation verify --repo koutyuke/Capsaicin` で DMG の来歴を確かめてから書き換える。ワークフローに Python を直書きしない。
 - `README.md`（英語）と `LICENSE`（MIT、著作権者 `koutyuke`）。
 
-Capsaicin のリポジトリでは、このチケットのファイルだけを変える。README の更新は `TASK-131` が行う。
+Capsaicin のリポジトリでは、このチケットのファイルだけを変える。README の更新は、9f38a7e で切った別の作業が行った。
 
 してはいけないこと: `koutyuke/Capsaicin` のワークフローや秘密情報の変更、tap に Capsaicin へ書き込む権限を渡すこと、オーナーの承認なしの GitHub リポジトリの作成と push。
 
@@ -35,7 +35,7 @@ Capsaicin のリポジトリでは、このチケットのファイルだけを�
 ## 検証
 
 - オーナーの判断で、手元の Homebrew に tap を登録する確認はせず、公開した後に tap の CI で `brew style` と `brew audit` を確かめる。
-- `brew install --cask` による実際のインストールは、アプリとヘルパーの状態を変えるので、エージェントは行わない。`TASK-131` でオーナーが確かめる。
+- `brew install --cask` による実際のインストールは、アプリとヘルパーの状態を変えるので、エージェントは行わない。オーナーの Mac での確認の結果は `EVID-SYS-011` にある。
 
 ## レビュー
 

@@ -65,7 +65,11 @@ gh attestation verify "Capsaicin-{バージョン}.dmg" --repo koutyuke/Capsaici
 
 ### Homebrew
 
-自前の Homebrew tap で配布する予定です（準備中）。
+```bash
+brew install --cask koutyuke/tap/capsaicin
+```
+
+`capsaicin` コマンドも Homebrew の `bin` にリンクされます。Capsaicin はアプリ自身で更新するので、`brew upgrade` は `--greedy` を付けない限り Capsaicin を更新しません。
 
 ## トラブルシューティング
 
@@ -84,9 +88,10 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 ## アンインストール
 
 1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除…**をクリックしてください。Capsaicinが止めていたスリープを元に戻してから、macOSへのヘルパーの登録を解除します。
-2. メニューバーからCapsaicinを終了します。
-3. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
-4. 設定や記録も削除するには、以下を実行します。
+2. Homebrew でインストールした場合は、`brew uninstall --cask capsaicin` を実行します。Capsaicinを終了してから、アプリと `capsaicin` コマンドを削除するので、以降の手順は不要です。設定や記録も削除するには `--zap` を付けてください。
+3. メニューバーからCapsaicinを終了します。
+4. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
+5. 設定や記録も削除するには、以下を実行します。
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin

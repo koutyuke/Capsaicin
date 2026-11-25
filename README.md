@@ -65,7 +65,11 @@ gh attestation verify "Capsaicin-{version}.dmg" --repo koutyuke/Capsaicin
 
 ### Homebrew
 
-Distribution via a dedicated Homebrew tap is planned (coming soon).
+```bash
+brew install --cask koutyuke/tap/capsaicin
+```
+
+This also links the `capsaicin` command into Homebrew's `bin`. Capsaicin updates itself, so `brew upgrade` skips it unless you pass `--greedy`.
 
 ## Troubleshooting
 
@@ -84,9 +88,10 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 ## Uninstallation
 
 1. If you installed the helper, open Capsaicin's settings, go to **Helper**, and click **Remove…**. This turns sleep back on if Capsaicin turned it off, then unregisters the helper from macOS.
-2. Quit Capsaicin from the menu bar.
-3. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
-4. To also remove your settings and records, run:
+2. If you installed Capsaicin with Homebrew, run `brew uninstall --cask capsaicin`. This quits Capsaicin and removes the app and the `capsaicin` command, so you can skip the remaining steps. To also remove your settings and records, add `--zap`.
+3. Quit Capsaicin from the menu bar.
+4. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
+5. To also remove your settings and records, run:
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin

@@ -50,6 +50,8 @@ Capsaicin を自前の tap で配るか、公式 Cask に出すかの判断と�
 
 ## 未確認のこと
 
-- Capsaicin の DMG が、Homebrew 経由で入れたときに Gatekeeper の検査に通ること。Developer ID で署名・公証・staple した DMG とアプリ（`DEC-SYS-028`）が `spctl --assess` に通ることからの推論で、`brew install` では確かめていない。
-- 自前の tap の Cask が `brew audit` に通ること。
+確かめた日のうちに、次の3つはオーナーの Mac で確かめた（`EVID-SYS-011`）。
+
+- Capsaicin の DMG が、Homebrew 経由で入れたときに Gatekeeper の検査に通ること。
+- 自前の tap の Cask が `brew audit` に通ること（tap の CI で確かめた）。
 - 信頼していない tap から入れた Cask を、`brew uninstall --cask capsaicin` のように短い名前で消せるか。
