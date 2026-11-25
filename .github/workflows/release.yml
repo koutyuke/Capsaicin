@@ -57,6 +57,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
@@ -75,6 +76,7 @@ jobs:
           retention-days: 7
           path: |
             .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
+            .build/dist/Capsaicin-layout.dmg
             .build/dist/SHA256SUMS.txt
 
   sign-and-notarize:
@@ -147,6 +149,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
       - name: Read version
@@ -220,6 +223,7 @@ jobs:
           retention-days: 7
           path: |
             .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
+            .build/dist/Capsaicin-layout.dmg
             .build/dist/SHA256SUMS.txt
 
   release-appcast:

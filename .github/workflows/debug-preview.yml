@@ -52,6 +52,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
@@ -72,6 +73,7 @@ jobs:
           retention-days: 7
           path: |
             .build/debug-dist/${{ steps.package.outputs.zip_name }}
+            .build/debug-dist/Capsaicin-layout.dmg
             .build/debug-dist/SHA256SUMS.txt
 
   sign-and-notarize:

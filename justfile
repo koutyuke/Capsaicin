@@ -61,14 +61,23 @@ dist-debug pr sha: gen
     mkdir -p .build/debug-dist
     zip_name="Capsaicin-debug-pr${pr}-${sha:0:7}.zip"
     ditto -c -k --norsrc --noextattr --noacl --keepParent '{{ debug_app }}' ".build/debug-dist/$zip_name"
-    (cd .build/debug-dist && shasum -a 256 "$zip_name" > SHA256SUMS.txt)
+    '{{ just_executable() }}' dmg-layout '{{ debug_app }}' .build/debug-dist/Capsaicin-layout.dmg
+    (cd .build/debug-dist && shasum -a 256 "$zip_name" Capsaicin-layout.dmg > SHA256SUMS.txt)
 
-# Create an ad-hoc signed zip and SHA-256 checksum in .build/dist/ for the signing job, which makes the DMG.
+# Create an ad-hoc signed zip, a layout DMG, and SHA-256 checksums in .build/dist/ for the signing job, which makes the DMG.
 dist: build-release
     mkdir -p .build/dist
     # Exclude extended attributes and resource forks; ad-hoc signatures are in the executables.
     ditto -c -k --norsrc --noextattr --noacl --keepParent .build/xcode/Build/Products/Release/Capsaicin.app .build/dist/Capsaicin-{{ version }}.zip
-    cd .build/dist && shasum -a 256 Capsaicin-{{ version }}.zip > SHA256SUMS.txt
+    '{{ just_executable() }}' dmg-layout .build/xcode/Build/Products/Release/Capsaicin.app .build/dist/Capsaicin-layout.dmg
+    cd .build/dist && shasum -a 256 Capsaicin-{{ version }}.zip Capsaicin-layout.dmg > SHA256SUMS.txt
+
+# Create a DMG that sets only the window layout and background; the signing job swaps in the signed app.
+[private]
+dmg-layout app out:
+    mkdir -p .build/dmg
+    /usr/bin/xcrun --sdk macosx swift scripts/dmg/background.swift .build/dmg .github/assets/capsaicin-icon.png
+    dmgbuild -s scripts/dmg/settings.py -D app={{ quote(app) }} -D background=.build/dmg/background.png Capsaicin {{ quote(out) }}
 
 prepare-release kind:
     python3 scripts/prepare_release.py {{ kind }}

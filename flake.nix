@@ -19,6 +19,8 @@
     in
     {
       formatter.${system} = formatting.config.build.wrapper;
+      # CI のビルドのジョブは devShell を評価せず、DMG の見た目を作る dmgbuild だけを入れる（DEC-SYS-028）。
+      packages.${system}.dmgbuild = pkgs.python3Packages.dmgbuild;
       devShells.${system}.default = pkgs.mkShellNoCC {
         packages = with pkgs; [
           just
@@ -38,6 +40,7 @@
           gh
           ruff
           python
+          python3Packages.dmgbuild
           formatting.config.build.wrapper
         ];
         # Xcode が参照する SDK とツールチェーンはホストに任せる。
