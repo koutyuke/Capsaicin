@@ -4,7 +4,7 @@ id: EVID-HLP-017
 title: 製品のビルドで、バックグラウンドの項目をオフにすると、抑止の有無・ヘルパーの使用・「ログイン時に起動」によらず、macOS がアプリを SIGTERM で終了させた
 observed_on: 2026-11-20
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）。`feature/helper-intro-card`（`703c8b9`）の Debug ビルドを Developer ID Application の証明書で署名し直したもの
-sources: ["~/Capsaicin-verification.jYD5Gl/stream.log", "~/Capsaicin-verification.jYD5Gl/quit.log", "~/Capsaicin-verification.jYD5Gl/btm-before.txt", "~/Capsaicin-verification.jYD5Gl/btm-A-before.txt", "~/Capsaicin-verification.jYD5Gl/btm-C-before.txt", "~/Capsaicin-verification.vaBwpy/btm.off.txt"]
+sources: []
 ---
 
 # EVID-HLP-017 製品のビルドで、バックグラウンドの項目をオフにすると、抑止の有無・ヘルパーの使用・「ログイン時に起動」によらず、macOS がアプリを SIGTERM で終了させた
@@ -24,7 +24,7 @@ sources: ["~/Capsaicin-verification.jYD5Gl/stream.log", "~/Capsaicin-verificatio
 
 UID 501 のアプリの記録への更新は、smd が `Update request for unmanaged item ignored` と記録した。
 
-BTM（`sfltool dumpbtm`）の UID -2 にある親のアプリの記録 `2.io.github.koutyuke.capsaicin.debug` は、今回の各試験の前で `[enabled, allowed, not notified]` だった。`EVID-HLP-016` の検証中（11/19、`~/Capsaicin-verification.vaBwpy` ほか 11/19 00:17〜07:46 の 37 件の記録）は、同じ記録がすべて `[disabled, allowed, not notified]` だった。11/18 の記録（`~/Capsaicin-verification.Zwk6AP`）では `enabled` だった。
+BTM（`sfltool dumpbtm`）の UID -2 にある親のアプリの記録 `2.io.github.koutyuke.capsaicin.debug` は、今回の各試験の前で `[enabled, allowed, not notified]` だった。`EVID-HLP-016` の検証中（11/19 00:17〜07:46 に保存した 37 件の `sfltool dumpbtm` の出力）は、同じ記録がすべて `[disabled, allowed, not notified]` だった。11/18 に保存した出力では `enabled` だった。
 
 オーナーは、ほかのアプリでもバックグラウンドの項目をオフにすると終了することを見た（アプリ名は記録していない）。
 

@@ -4,7 +4,7 @@ id: EVID-LED-013
 title: 接続の通知の後に1秒ごとに書き直すと、抑止中に接続したキーボードが点灯した
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（2a8e733）、Karabiner-Elements 16.3.0 は終了、内蔵キーボードと Lofree Flow Lite（2.4 GHz、Bluetooth）
-sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-led-check/20261112-141149/verification-results.txt", "~/capsaicin-led-check/20261112-141149/2-applog.txt", "~/capsaicin-led-check/20261112-141149/5-mem.txt"]
+sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil"]
 ---
 
 # EVID-LED-013 接続の通知の後に1秒ごとに書き直すと、抑止中に接続したキーボードが点灯した
@@ -30,7 +30,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261112-141149/` にある。書き込みの時刻と対象は `2-applog.txt` の `LED 書き込み` の行を読み、登録 ID は `2-1-2.4g-leds.txt` と `2-1-bt-leds.txt` と照らした。
+手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。書き込みの時刻と対象はアプリのログの `LED 書き込み` の行を読み、登録 ID は手順2で保存した、2台のキーボードのサービスごとの LED の状態の一覧と照らした。
 
 ## 適用範囲
 

@@ -4,7 +4,7 @@ id: EVID-LED-010
 title: システム設定の修飾キーの割り当てと Raycast の Hyper Key では、LED の点灯が10分間保たれた
 observed_on: 2026-11-11
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（cf9d459）、Karabiner-Elements は終了、Raycast、内蔵キーボードと Lofree Flow Lite（USB）
-sources: ["/usr/bin/log", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010115/verification-results.txt", "~/capsaicin-led-check/20261111-010115/session-state.json"]
+sources: ["/usr/bin/log", "/usr/sbin/ioreg"]
 ---
 
 # EVID-LED-010 システム設定の修飾キーの割り当てと Raycast の Hyper Key では、LED の点灯が10分間保たれた
@@ -24,7 +24,7 @@ sources: ["/usr/bin/log", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B4。記録は `~/capsaicin-led-check/20261111-010115/` の `B4-*` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B4。
 
 ## 適用範囲
 

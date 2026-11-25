@@ -23,8 +23,6 @@ sources: ["docs/meta/hypotheses/HYP-BLK-013-brightness-keys-restore-from-zero.md
 - 起動の前の記録には `savedBrightness=0.375` が残っていた。試作を手で起動すると、その時点の輝度によらず 0.375 を書き、記録を消した。抑止は再開しなかった。`SIGSEGV` では、オーナーが開いた後に上げた 0.6717 が 0.375 に戻った。
 - どちらも、デーモンが切断を受けて `Disconnect cleanup off: success=true` を出し、終了の1秒後と5秒後は `SleepDisabled 0` だった。アプリは再起動しなかった。閉じたままだったので、システムのログには終了の後のスリープと、開いたときの復帰が残った。
 
-生の記録は `/Users/koutyuke/Capsaicin-verification.uLjbWk/result-brightness-crash-recovery.txt` と同じ場所のログ・画面写真にある。
-
 ## 確かめ方
 
 `docs/manual/verification/brightness-crash-recovery.md`（`b107708`）の手順で、閉じる前、閉じている間、起動の直前と直後に輝度を読み、開いたときの見え方と輝度の操作を目視した。

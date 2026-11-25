@@ -4,7 +4,7 @@ id: EVID-BLK-016
 title: 製品のビルドで暗くした後にアプリを SIGKILL で終了させ、手で起動すると、輝度が 0 のときだけ記録した値に戻し、どちらの場合も記録を消した
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、Xcode 27.2（27B52）。`feature/smappservice` の `fa4bc85` の Debug ビルドを `just sign-debug` で Developer ID Application の証明書で署名し直した。電源アダプターに接続。MacBook の内蔵ディスプレイだけを使い、外部ディスプレイはつないでいない
-sources: ["fa4bc85:docs/manual/verification/brightness-at-launch.md", "~/Capsaicin-verification.2CTPup/result-brightness-at-launch.txt", "~/Capsaicin-verification.2CTPup/record.changed.json", "~/Capsaicin-verification.2CTPup/record.zero.json"]
+sources: ["fa4bc85:docs/manual/verification/brightness-at-launch.md"]
 ---
 
 # EVID-BLK-016 製品のビルドで暗くした後にアプリを SIGKILL で終了させ、手で起動すると、輝度が 0 のときだけ記録した値に戻し、どちらの場合も記録を消した

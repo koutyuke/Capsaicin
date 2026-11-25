@@ -20,8 +20,6 @@ sources: ["docs/meta/hypotheses/HYP-LCY-009-agent-item-removed-by-unregister.md"
 - システム設定の「アプリのバックグラウンドでのアクティビティ」の「Capsaicin.app」のスイッチは、解除の前後ともオンだった。agent とデーモンは1つの行にまとまっているので、行は残った。
 - 抑止はしておらず、`SleepDisabled` はずっと 0 だった。
 
-生の記録は `/Users/koutyuke/Capsaicin-verification.3nhfxD/result-agent-unregister-cleanup.txt` と、同じ場所のログ・BTM・画面写真にある。
-
 ## 確かめ方
 
 `docs/manual/verification/agent-unregister-cleanup.md`（`b107708`）の手順で、試作を起動する前と後に `launchctl print`、`sfltool dumpbtm`、試作のログ、システム設定の画面を比べた。

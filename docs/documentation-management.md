@@ -90,7 +90,14 @@ Front Matter の共通項目は `schema`、`id`、`title` である。`schema` �
 | `depends_on` | 計画なら計画、作業なら作業 |
 | `supersedes`、`superseded_by` | 判断 |
 
-根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス（削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める。コミットは `develop` の履歴にあるものに限り、マージしないブランチのコミットは指さない）、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+根拠の `sources` だけは ID ではなく、確かめた資料の所在を次のどれかの形で書く。
+
+- Web の資料は URL。
+- リポジトリ内の資料は、Git が追跡しているファイルのリポジトリのルートからのパス。
+- 削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める。コミットは `develop` の履歴にあるものに限り、マージしないブランチのコミットは指さない。
+- OS や SDK に入っている資料（コマンド、man ページ、ヘッダー）は、`/usr/`、`/bin/`、`/sbin/`、`/System/`、`/Applications/Xcode.app/` から始まる絶対パス。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+
+ホームの作業フォルダー、アプリのデータ、ログ、Git が無視する生成物のように、書いた Mac でしか読めないファイルは、`sources` にも本文にも資料として書かない。実機で取ったログや画面写真から読み取った値は、根拠の本文に書く（[`DEC-SYS-030`](meta/decisions/DEC-SYS-030-cite-only-tracked-files.md)）。
 
 実機で確かめるための試作は、マージしないブランチに置き、リポジトリには残さない。試作で得た根拠には、結果を読み解くのに要る試作の作りと操作を本文に書き、`sources` には試作を作らせたチケットを挙げる。
 
@@ -191,6 +198,7 @@ sources = []
 - ID の形式、重複、ファイル名と `id` の一致
 - 参照項目と本文に書いた ID の実在
 - 参照項目が、指してよい層の ID だけを指していること
+- 根拠の `sources` が上の形のどれかで、指すファイルが追跡されているか、指すコミットにあること
 - 要件の `specs` と仕様の `関連要件` の一致と、`constraint` 以外の要件が仕様を持つこと
 - 列挙値（`kind`、`priority`、`status`）が許可値に含まれること
 

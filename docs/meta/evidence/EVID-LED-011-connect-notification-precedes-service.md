@@ -4,7 +4,7 @@ id: EVID-LED-011
 title: 抑止中に接続したキーボードは、接続の通知の時点でサービスがまだ一覧になく、点灯しなかった
 observed_on: 2026-11-11
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（fa6cae8）、Karabiner-Elements 16.3.0 は終了、内蔵キーボードと Lofree Flow Lite（2.4 GHz、Bluetooth）
-sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil", "~/capsaicin-led-check/20261111-221214/verification-results.txt", "~/capsaicin-led-check/20261111-221214/2-applog.txt", "~/capsaicin-led-check/20261111-221214/session-ledlog.txt"]
+sources: ["/usr/bin/log", "/usr/sbin/ioreg", "/usr/bin/hidutil"]
 ---
 
 # EVID-LED-011 抑止中に接続したキーボードは、接続の通知の時点でサービスがまだ一覧になく、点灯しなかった
@@ -34,7 +34,7 @@ Capsaicin は、`IOHIDManager` の機器の接続の通知を受けると、そ�
 
 ## 確かめ方
 
-手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。記録は `~/capsaicin-led-check/20261111-221214/` の `2-*` にある。機器とサービスの時刻は、`log show --info` で、登録 ID と `Service added` を含む行を絞って読んだ。
+手順は `fa6cae8:docs/manual/led-fix-verification.md` の手順0と手順2。機器とサービスの時刻は、`log show --info` で、登録 ID と `Service added` を含む行を絞って読んだ。
 
 ## 適用範囲
 

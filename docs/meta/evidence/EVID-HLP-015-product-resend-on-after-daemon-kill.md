@@ -4,7 +4,7 @@ id: EVID-HLP-015
 title: 製品のビルドで抑止中にデーモンを SIGKILL で終了させると、新しいデーモンが後片付けの役目を持ち、続くアプリの終了で off を実行した
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、Xcode 27.2（27B52）。`feature/smappservice` の `fa4bc85` の Debug ビルドを `just sign-debug` で Developer ID Application の証明書で署名し直した。電源アダプターに接続
-sources: ["fa4bc85:docs/manual/verification/daemon-restart-resend.md", "~/Capsaicin-verification.2CTPup/result-daemon-restart-resend.txt", "~/Capsaicin-verification.2CTPup/log.daemon-restart.matched.txt"]
+sources: ["fa4bc85:docs/manual/verification/daemon-restart-resend.md"]
 ---
 
 # EVID-HLP-015 製品のビルドで抑止中にデーモンを SIGKILL で終了させると、新しいデーモンが後片付けの役目を持ち、続くアプリの終了で off を実行した

@@ -4,7 +4,7 @@ id: EVID-HLP-016
 title: 製品のビルドで抑止中にバックグラウンドの項目をオフにすると、デーモンが off を実行し、アプリは動き続けたまま抑止を解除し、設定の保存値は変わらなかった
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、Xcode 27.2（27B52）。`feature/smappservice` の `fa4bc85` の Debug ビルドを `just sign-debug` で Developer ID Application の証明書で署名し直した。電源アダプターに接続
-sources: ["fa4bc85:docs/manual/verification/background-off-release.md", "~/Capsaicin-verification.2CTPup/result-background-off-release.txt", "~/Capsaicin-verification.2CTPup/hud.background-off.png", "~/Capsaicin-verification.2CTPup/settings.background-off.comparison.txt", "412c506:docs/manual/verification/background-off-release.md", "~/Capsaicin-verification.vaBwpy/result-background-off-release.txt", "~/Capsaicin-verification.vaBwpy/hud.background-off.png"]
+sources: ["fa4bc85:docs/manual/verification/background-off-release.md", "412c506:docs/manual/verification/background-off-release.md"]
 ---
 
 # EVID-HLP-016 製品のビルドで抑止中にバックグラウンドの項目をオフにすると、デーモンが off を実行し、アプリは動き続けたまま抑止を解除し、設定の保存値は変わらなかった

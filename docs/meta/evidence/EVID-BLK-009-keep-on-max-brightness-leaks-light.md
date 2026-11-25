@@ -4,7 +4,7 @@ id: EVID-BLK-009
 title: 「オンのまま」で最大輝度のままディスプレイを閉じると、ディスプレイの隙間から光が漏れた
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8（Apple M4 Pro）、外部ディスプレイなし、電池駆動、暗い部屋、Capsaicin の Debug ビルド 0.1.0（1）で抑止中（SleepDisabled 1、「ディスプレイを閉じたとき」は「オンのまま」、「ディスプレイを自動でオフにしない」はオン）、自動輝度調節と True Tone はオフ
-sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md", "~/Capsaicin-dimming.B7nQAG/C2-max.log", "~/Capsaicin-dimming.B7nQAG/C2-observation.txt", "~/Capsaicin-dimming.B7nQAG/initial-settings.txt"]
+sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md"]
 ---
 
 # EVID-BLK-009 「オンのまま」で最大輝度のままディスプレイを閉じると、ディスプレイの隙間から光が漏れた
@@ -21,7 +21,7 @@ sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manua
 
 ## 確かめ方
 
-手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C2 の操作1〜2。記録は `~/Capsaicin-dimming.B7nQAG/` にある。閉じていた区間と電流は、`C2-max.log` の `event=close` から `event=open` までの `timer` の行を読んだ。
+手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C2 の操作1〜2。閉じていた区間と電流は、スクリプトのログの `event=close` から `event=open` までの `timer` の行を読んだ。
 
 ## 適用範囲
 

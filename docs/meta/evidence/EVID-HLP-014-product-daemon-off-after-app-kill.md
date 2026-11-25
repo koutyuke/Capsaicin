@@ -4,7 +4,7 @@ id: EVID-HLP-014
 title: 製品のビルドで抑止中のアプリを SIGKILL で終了させると、デーモンが切断を受けて off を実行し、アプリは起動し直されなかった
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、Xcode 27.2（27B52）。`feature/smappservice` の `fa4bc85` の Debug ビルドを `just sign-debug` で Developer ID Application の証明書で署名し直した。電源アダプターに接続
-sources: ["fa4bc85:docs/manual/verification/app-crash-cleanup.md", "~/Capsaicin-verification.2CTPup/result-app-crash-cleanup.txt", "~/Capsaicin-verification.2CTPup/log.app-crash.txt"]
+sources: ["fa4bc85:docs/manual/verification/app-crash-cleanup.md"]
 ---
 
 # EVID-HLP-014 製品のビルドで抑止中のアプリを SIGKILL で終了させると、デーモンが切断を受けて off を実行し、アプリは起動し直されなかった

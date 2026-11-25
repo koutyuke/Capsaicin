@@ -25,8 +25,6 @@ sources: ["docs/meta/hypotheses/HYP-HLP-008-daemon-cleans-up-on-app-disconnect.m
 - `SIGSEGV` でも、アプリの不在の観測から `off` まで約 31 ミリ秒で、クラッシュの報告の処理による遅れは見えなかった。
 - 役目を手放した後は、アイドルの時間でデーモンが終了した。その後にアプリが `on` を送ると、launchd が新しいデーモンを起動し、新しい PID が役目を持った（2回目の `SIGKILL` の前の 27102 → 28839 → 31583）。
 
-生の記録は `/Users/koutyuke/Capsaicin-verification.1JhVae/` の `log.app-crash-*.txt`、`pmset.crash-*.txt`、`result-app-crash-daemon-cleanup.txt` にある。
-
 ## 確かめ方
 
 `docs/manual/verification/app-crash-daemon-cleanup.md`（`b107708`）の手順で、各試行の前に役目の取得、デーモンの PID、`SleepDisabled 1` を確かめ、シグナルの後に1秒と5秒で読んだ。

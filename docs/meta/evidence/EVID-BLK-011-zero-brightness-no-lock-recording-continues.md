@@ -4,7 +4,7 @@ id: EVID-BLK-011
 title: 輝度 0 でディスプレイを閉じたまま11分置いても、ディスプレイはスリープせず、ロックされず、画面収録に時計が写り続けた
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8（Apple M4 Pro）、外部ディスプレイなし、電池駆動、Capsaicin の Debug ビルド 0.1.0（1）で抑止中（SleepDisabled 1、「ディスプレイを閉じたとき」は「オンのまま」、「ディスプレイを自動でオフにしない」はオン）、自動輝度調節と True Tone はオフ、パスワードの要求は「すぐに」、スクリーンセーバーは5分後、ディスプレイの消灯は10分後
-sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md", "~/Capsaicin-dimming.B7nQAG/C4-dim.log", "~/Capsaicin-dimming.B7nQAG/C4-observation.txt", "~/Capsaicin-dimming.B7nQAG/C4-clock-samples.png", "~/Capsaicin-dimming.B7nQAG/画面収録 2026-11-12 14.59.43.mov", "~/Capsaicin-dimming.B7nQAG/initial-settings.txt"]
+sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md"]
 ---
 
 # EVID-BLK-011 輝度 0 でディスプレイを閉じたまま11分置いても、ディスプレイはスリープせず、ロックされず、画面収録に時計が写り続けた
@@ -25,7 +25,7 @@ sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manua
 
 ## 確かめ方
 
-手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C4 の操作1〜3。記録は `~/Capsaicin-dimming.B7nQAG/` にある。収録は次で解析した。
+手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C4 の操作1〜3。収録は次で解析した。
 
 ```sh
 ffmpeg -hide_banner -nostats -i "<収録>" -vf "blackdetect=d=0.5:pix_th=0.10,freezedetect=n=0.001:d=1" -an -f null -

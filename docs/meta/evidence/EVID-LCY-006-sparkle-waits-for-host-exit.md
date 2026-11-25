@@ -3,8 +3,8 @@ schema: evidence
 id: EVID-LCY-006
 title: Sparkle 2.10.1 のインストーラーは、元のアプリのプロセスが終了してから最後のインストールと起動し直しを行う
 observed_on: 2026-11-18
-environment: プロジェクトが固定している Sparkle 2.10.1（revision `ab7d71291238df6e0492143b120c9b696a35f603`、`Package.resolved`）のソース。実機では確かめていない
-sources: ["Capsaicin.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"]
+environment: プロジェクトが固定している Sparkle 2.10.1（`project.yml` の `exactVersion`、revision `ab7d71291238df6e0492143b120c9b696a35f603`）のソース。実機では確かめていない
+sources: ["55af2d1:project.yml", "https://github.com/sparkle-project/Sparkle/tree/2.10.1"]
 ---
 
 # EVID-LCY-006 Sparkle 2.10.1 のインストーラーは、元のアプリのプロセスが終了してから最後のインストールと起動し直しを行う
@@ -19,7 +19,7 @@ sources: ["Capsaicin.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.
 
 ## 確かめ方
 
-デーモンによる後片付けの試作の作業で Codex が取得済みのソース（試作の worktree の `.build/spm/checkouts/Sparkle`、HEAD が上の revision と一致）を読み、PM が引用の行を読み直して確かめた。
+デーモンによる後片付けの試作の作業で Codex が取得済みのソース（HEAD が上の revision と一致）を読み、PM が引用の行を読み直して確かめた。
 
 ## 適用範囲
 

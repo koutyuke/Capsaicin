@@ -4,7 +4,7 @@ id: EVID-LED-007
 title: 外付けキーボードは3つの接続方式で点灯し、キーボードを名乗るマウスへの書き込みは失敗しなかった
 observed_on: 2026-11-11
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（cf9d459）、Karabiner-Elements 16.3.0 は終了（常駐プロセスは残る）、Lofree Flow Lite（USB・Bluetooth Low Energy・2.4 GHz）、Razer Viper V2 Pro（USB・2.4 GHz）
-sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010115/verification-results.txt", "~/capsaicin-led-check/20261111-010115/session-state.json", "~/capsaicin-led-check/20261111-010115/session-applog.txt"]
+sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg"]
 ---
 
 # EVID-LED-007 外付けキーボードは3つの接続方式で点灯し、キーボードを名乗るマウスへの書き込みは失敗しなかった
@@ -30,7 +30,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B1。記録は `~/capsaicin-led-check/20261111-010115/` の `B1-*` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B1。
 
 ```sh
 /usr/bin/hidutil list --matching '{"PrimaryUsagePage":1,"PrimaryUsage":6}'

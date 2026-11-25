@@ -4,7 +4,7 @@ id: EVID-LCY-005
 title: 公証した Debug ビルドが作った agent の項目が残る間、同じ Team ID の Apple Development で署名し直した手元のビルドの agent も起動の制約で止まった
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、worktree の `9c53397` から `just build` で作り、`just sign-debug`（既定の「Apple Development」、TeamIdentifier GG7W7F3CTU）で署名し直した Debug ビルド。agent の項目は `EVID-LCY-004` と同じ、PR の公証したビルドが作ったもの
-sources: ["justfile", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle/LaunchAgent.swift"]
+sources: ["justfile", "a2e9e53:Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle/LaunchAgent.swift"]
 ---
 
 # EVID-LCY-005 公証した Debug ビルドが作った agent の項目が残る間、同じ Team ID の Apple Development で署名し直した手元のビルドの agent も起動の制約で止まった

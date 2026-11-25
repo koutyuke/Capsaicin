@@ -4,7 +4,7 @@ id: EVID-LCY-009
 title: 製品のビルドで Debug の動作中に同じ bundle ID の別のコピーを開くと、後から開いた方が終了し、動いていた方の設定ウインドウが前に出た
 observed_on: 2026-11-19
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、Xcode 27.2（27B52）。`feature/smappservice` の `fa4bc85` の Debug ビルドを `just sign-debug` で Developer ID Application の証明書で署名し直した。電源アダプターに接続
-sources: ["fa4bc85:docs/manual/verification/single-instance.md", "~/Capsaicin-verification.2CTPup/result-single-instance.txt", "~/Capsaicin-verification.2CTPup/start.single-instance.txt"]
+sources: ["fa4bc85:docs/manual/verification/single-instance.md"]
 ---
 
 # EVID-LCY-009 製品のビルドで Debug の動作中に同じ bundle ID の別のコピーを開くと、後から開いた方が終了し、動いていた方の設定ウインドウが前に出た

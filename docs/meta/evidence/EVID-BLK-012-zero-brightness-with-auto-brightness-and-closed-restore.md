@@ -4,7 +4,7 @@ id: EVID-BLK-012
 title: 自動輝度調節がオンでも閉じている間は輝度 0 のままで隙間から光が漏れず、閉じたままでも元の輝度に戻せた
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8（Apple M4 Pro）、外部ディスプレイなし、電源アダプター接続、暗い部屋、Capsaicin の Debug ビルド 0.1.0（1）で抑止中（「ディスプレイを閉じたとき」は「オンのまま」、「ディスプレイを自動でオフにしない」はオン）
-sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md", "~/Capsaicin-dimming-C3.zKXKKO/C3-auto-on.log", "~/Capsaicin-dimming-C3.zKXKKO/C3-auto-on-observation.txt", "~/Capsaicin-dimming-C3.zKXKKO/C3-restore-closed.log", "~/Capsaicin-dimming-C3.zKXKKO/C3-restore-closed-observation.txt", "~/Capsaicin-dimming-C3.zKXKKO/initial-settings.txt"]
+sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manual/lid-close-dimming-verification.md"]
 ---
 
 # EVID-BLK-012 自動輝度調節がオンでも閉じている間は輝度 0 のままで隙間から光が漏れず、閉じたままでも元の輝度に戻せた
@@ -32,7 +32,7 @@ sources: ["e9e7e3d:scripts/manual/display-brightness.swift", "e9e7e3d:docs/manua
 
 ## 確かめ方
 
-手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C3 の操作4〜5。記録は `~/Capsaicin-dimming-C3.zKXKKO/` にある。各ログの `event=close`、`event=open`、`event=signal-2` の行と、その間の `timer` の行を読んだ。
+手順は `e9e7e3d:docs/manual/lid-close-dimming-verification.md` の準備と C3 の操作4〜5。スクリプトの各ログの `event=close`、`event=open`、`event=signal-2` の行と、その間の `timer` の行を読んだ。
 
 ## 適用範囲
 

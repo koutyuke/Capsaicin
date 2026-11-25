@@ -4,7 +4,7 @@ id: EVID-LED-014
 title: Sidecar の仮想キーボードは Transport に "Virtual" を持ち、Capsaicin の書き込みの対象に入った
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（2a8e733）
-sources: ["/usr/bin/hidutil", "/usr/sbin/ioreg", "/usr/bin/log", "~/capsaicin-led-check/20261112-141149/2-1-before-kbds.txt", "~/capsaicin-led-check/20261112-141149/2-1-before-leds.txt", "~/capsaicin-led-check/20261112-141149/2-applog.txt"]
+sources: ["/usr/bin/hidutil", "/usr/sbin/ioreg", "/usr/bin/log"]
 ---
 
 # EVID-LED-014 Sidecar の仮想キーボードは Transport に "Virtual" を持ち、Capsaicin の書き込みの対象に入った

@@ -384,7 +384,7 @@ class CheckDocsTests(unittest.TestCase):
         self.write("README.md", "参照: `REQ-MENU-999`。")
         self.assert_error("README.md: Referenced ID does not exist: REQ-MENU-999")
 
-    def test_evidence_source_commits_must_be_in_head_history(self):
+    def test_evidence_sources_must_be_readable_from_the_repository(self):
         def git(*arguments):
             # 開発機の署名やフックの設定に左右されないよう、一時リポジトリだけの設定で実行する。
             return subprocess.run(
@@ -398,6 +398,9 @@ class CheckDocsTests(unittest.TestCase):
 
         git("init", "-q", "-b", "main")
         self.write("old.md", "削除した資料")
+        self.write("docs/current.md", "追跡している資料")
+        self.write(".gitignore", "generated/\n")
+        self.write("generated/Package.resolved", "生成物")
         git("add", "-A")
         git("commit", "-q", "-m", "base")
         base = git("rev-parse", "--short", "HEAD")
@@ -407,11 +410,32 @@ class CheckDocsTests(unittest.TestCase):
         git("commit", "-q", "-m", "probe")
         spike = git("rev-parse", "--short", "HEAD")
         git("switch", "-q", "main")
+        git("rm", "-q", "old.md")
+        git("commit", "-q", "-m", "remove")
         self.record(
             "evidence",
-            sources=[f"{base}:old.md", "docs/current.md", "https://example.com"],
+            sources=[
+                f"{base}:old.md",
+                "docs/current.md",
+                "https://example.com",
+                "/usr/share/man/man1/pmset.1",
+                "/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild",
+            ],
         )
         self.assertEqual(check_docs(self.root), [])
+        # 書いた Mac でしか読めないファイルは指さない。
+        self.write("untracked.md", "追跡していない資料")
+        for source in [
+            "~/Capsaicin-verification.abc/result.txt",
+            "/Users/someone/Capsaicin-verification.abc/result.txt",
+            "/var/log/karabiner/core_service.log",
+            "generated/Package.resolved",
+            "untracked.md",
+            "old.md",
+        ]:
+            with self.subTest(source=source):
+                self.record("evidence", sources=[source])
+                self.assert_error(f"Source is not tracked by Git: {source}.")
         self.record("evidence", sources=[f"{base}:missing.md"])
         self.assert_error(
             f"Source path does not exist in its commit: {base}:missing.md"

@@ -4,7 +4,7 @@ id: EVID-LCY-004
 title: 公証した Debug ビルドが作った agent の項目が残る間、ad-hoc 署名の手元のビルドの agent は起動の制約で止まり、同じ Team ID で署名し直すと起動した
 observed_on: 2026-11-18
 environment: Apple Silicon（Mac16,8）、macOS 27.2.1（26B131）、worktree の `b4e5628` から `just build` で作った ad-hoc 署名の Debug ビルド。/Applications には PR #15 の Developer ID 署名・公証済みの Debug ビルド（Team ID GG7W7F3CTU、bundle ID は同じ `io.github.koutyuke.capsaicin.debug`）を置いていた
-sources: ["justfile", "Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle/LaunchAgent.swift", "Sources/Capsaicin/App/AppRuntime.swift", "project.yml"]
+sources: ["justfile", "ed65a2d:Packages/CapsaicinKit/Sources/CapsaicinPlatform/Lifecycle/LaunchAgent.swift", "Sources/Capsaicin/App/AppRuntime.swift", "project.yml"]
 ---
 
 # EVID-LCY-004 公証した Debug ビルドが作った agent の項目が残る間、ad-hoc 署名の手元のビルドの agent は起動の制約で止まり、同じ Team ID で署名し直すと起動した

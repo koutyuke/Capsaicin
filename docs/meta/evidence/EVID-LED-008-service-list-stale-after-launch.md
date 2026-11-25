@@ -4,7 +4,7 @@ id: EVID-LED-008
 title: Capsaicin の書き込み先は起動後のキーボードの増減に追従せず、なくなったサービスへの書き込みが失敗し続けた
 observed_on: 2026-11-11
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（cf9d459）、Karabiner-Elements 16.3.0、Lofree Flow Lite（Bluetooth Low Energy・2.4 GHz）
-sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010115/verification-results.txt", "~/capsaicin-led-check/20261111-010115/session-state.json", "~/capsaicin-led-check/20261111-010115/session-applog.txt"]
+sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg"]
 ---
 
 # EVID-LED-008 Capsaicin の書き込み先は起動後のキーボードの増減に追従せず、なくなったサービスへの書き込みが失敗し続けた
@@ -28,7 +28,7 @@ sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-le
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B2。記録は `~/capsaicin-led-check/20261111-010115/` の `B2-*`、`B1-lofree-2.4g-*`、`session-applog.txt` にある。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B2。
 
 ```sh
 /usr/bin/hidutil list --matching '{"PrimaryUsagePage":1,"PrimaryUsage":6}'

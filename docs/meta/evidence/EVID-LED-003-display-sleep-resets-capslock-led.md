@@ -4,7 +4,7 @@ id: EVID-LED-003
 title: 画面だけのスリープで HIDCapsLockLED が "Auto" に戻り、Mac の復帰通知は来ない
 observed_on: 2026-11-08
 environment: macOS 27.0.1（ビルド 26A434）、Mac16,8（Apple M4 Pro）、Karabiner-Elements 16.3.0（DriverKit 仮想キーボード 1.8.0）が起動中、外付けキーボードは未接続
-sources: ["/var/log/karabiner/core_service.log"]
+sources: ["/usr/bin/log"]
 ---
 
 # EVID-LED-003 画面だけのスリープで HIDCapsLockLED が "Auto" に戻り、Mac の復帰通知は来ない

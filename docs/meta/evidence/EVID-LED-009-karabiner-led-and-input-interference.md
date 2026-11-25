@@ -4,7 +4,7 @@ id: EVID-LED-009
 title: Karabiner-Elements が占有するキーボードでは実機への書き込みが消され、仮想キーボードへの書き込みは点灯を保つ代わりにルールを成立させなくする
 observed_on: 2026-11-11
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（cf9d459）、Karabiner-Elements 16.3.0（仮想キーボード 1.8.0）、内蔵キーボードと Lofree Flow Lite（USB）
-sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-010115/verification-results.txt", "~/capsaicin-led-check/20261111-010115/session-state.json", "~/capsaicin-led-check/20261111-010115/session-ledlog.txt", "~/capsaicin-led-check/20261111-010115/led-service-check.c"]
+sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg"]
 ---
 
 # EVID-LED-009 Karabiner-Elements が占有するキーボードでは実機への書き込みが消され、仮想キーボードへの書き込みは点灯を保つ代わりにルールを成立させなくする
@@ -57,7 +57,7 @@ IORegistry の usage 6 のデバイスの下にある Karabiner-Core-Service の
 
 ## 確かめ方
 
-手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B3。記録は `~/capsaicin-led-check/20261111-010115/` の `B3-*` にある。1つのサービスだけに書くツールのソースは、同じ場所の `led-service-check.c` である。
+手順は `docs/manual/led-remapper-verification.md`（コミット `14fd1f7`） の B0 と B3。1つのサービスだけに書くツールは、Capsaicin の `CapsaicinLEDCreatePassiveClient` で Passive のクライアントを作り、`IOHIDServiceClientCopyServices` のうちキーボード（UsagePage 1、Usage 6）で `Product` が指定の名前（`Apple Internal Keyboard / Trackpad` か `Karabiner DriverKit VirtualHIDKeyboard 1.8.0`）のサービスだけに、`IOHIDServiceClientSetProperty` で `HIDCapsLockLED` に `On` か `Auto` を書き、書いた後の値を読み返す。
 
 ```sh
 /usr/bin/log show --start "$T0" --info --style compact \

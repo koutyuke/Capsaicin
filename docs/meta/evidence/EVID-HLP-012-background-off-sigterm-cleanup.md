@@ -20,8 +20,6 @@ sources: ["docs/meta/hypotheses/HYP-HLP-009-daemon-sigterm-on-background-off.md"
 - アプリの「ヘルパー」の「状態」は「システム設定での許可待ち」になり、警告のアイコンが出た。システム設定の行の補足は「バックグラウンドで実行中」のままだった。
 - スイッチをオンに戻すと、BTM のデーモンの項目は `[enabled, allowed, not notified]` に戻った。
 
-生の記録は `/Users/koutyuke/Capsaicin-verification.yfX2da/result-background-off-while-blocking.txt` と、同じ場所のログ・BTM・画面写真にある。
-
 ## 確かめ方
 
 `docs/manual/verification/background-off-while-blocking.md`（`b107708`）の手順で、切り替えの前後の BTM、`pmset -g`、プロセス、試作のログを読み、画面を撮った。

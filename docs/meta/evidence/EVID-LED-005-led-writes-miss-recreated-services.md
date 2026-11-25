@@ -4,7 +4,7 @@ id: EVID-LED-005
 title: 起動後に作り直された仮想キーボードに、Capsaicin の LED の書き込みが届いていなかった
 observed_on: 2026-11-10
 environment: macOS 27.2.1（26B131）、Mac16,8、Karabiner-Elements 16.3.0、Capsaicin の Debug ビルド（bd2d317 前後の作業ツリー）、外付けの機器の接続状況は未記録
-sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg", "~/Library/Application Support/io.github.koutyuke.capsaicin.debug/resume-record.json"]
+sources: ["/usr/bin/log", "/usr/bin/hidutil", "/usr/sbin/ioreg"]
 ---
 
 # EVID-LED-005 起動後に作り直された仮想キーボードに、Capsaicin の LED の書き込みが届いていなかった

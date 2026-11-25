@@ -4,7 +4,7 @@ id: EVID-LED-012
 title: Karabiner-Elements は、把握している Caps Lock の状態で実機の LED を書き直し、「Manipulate caps lock LED」をオフにしたキーボードには書かない
 observed_on: 2026-11-12
 environment: macOS 27.2.1（26B131）、Mac16,8、Capsaicin の Debug ビルド（fa6cae8）、Karabiner-Elements 16.3.0、内蔵キーボードと Lofree Flow Lite（USB）
-sources: ["/usr/bin/log", "/usr/sbin/ioreg", "~/capsaicin-led-check/20261111-221214/verification-results.txt", "~/capsaicin-led-check/20261111-221214/3-applog.txt", "https://raw.githubusercontent.com/pqrs-org/Karabiner-Elements/v16.3.0/src/share/hid_keyboard_caps_lock_led_state_manager.hpp", "https://raw.githubusercontent.com/pqrs-org/Karabiner-Elements/main/src/apps/CoreService/include/core_service/daemon/device_grabber_details/entry.hpp"]
+sources: ["/usr/bin/log", "/usr/sbin/ioreg", "https://raw.githubusercontent.com/pqrs-org/Karabiner-Elements/v16.3.0/src/share/hid_keyboard_caps_lock_led_state_manager.hpp", "https://raw.githubusercontent.com/pqrs-org/Karabiner-Elements/main/src/apps/CoreService/include/core_service/daemon/device_grabber_details/entry.hpp"]
 ---
 
 # EVID-LED-012 Karabiner-Elements は、把握している Caps Lock の状態で実機の LED を書き直し、「Manipulate caps lock LED」をオフにしたキーボードには書かない
@@ -39,7 +39,7 @@ Capsaicin は実機のキーボードだけに `"On"` を書き、仮想キー�
 
 ## 確かめ方
 
-- 手順3は `fa6cae8:docs/manual/led-fix-verification.md`。記録は `~/capsaicin-led-check/20261111-221214/` の `3-*` にある。
+- 手順3は `fa6cae8:docs/manual/led-fix-verification.md`。
 - 2行目以降は、オーナーが手順書によらずに行った。2行目のログは、`log show --info` で `updateCapslockLED` を含む行を読んだ。
 - ソースは、`sources` の URL を読んだ。
 
