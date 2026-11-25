@@ -52,9 +52,9 @@ Capsaicin はこれらのアプリとは別のアプリとして独立して作�
 
 ### GitHub Release
 
-1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.dmg` をダウンロードする。
-2. DMG を開き、`Capsaicin.app` を `Applications` のリンクにドラッグする。
-3. 「アプリケーション」フォルダーにコピーした `Capsaicin.app` を開く。
+1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.dmg` をダウンロードしてください。
+2. DMG を開き、`Capsaicin.app` を `Applications` のリンクにドラッグしてください。
+3. 「アプリケーション」フォルダーにコピーした `Capsaicin.app` を開いてください。
 
 ダウンロードした DMG が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。`SHA256SUMS.txt` を DMG と同じフォルダーに置き、そのフォルダーで実行してください。
 
@@ -71,7 +71,7 @@ brew install --cask koutyuke/tap/capsaicin
 
 `capsaicin` コマンドも Homebrew の `bin` にリンクされます。
 
-アップデートは Capsaicin がアプリの中で行うので、`brew upgrade` を実行する必要はありません。`brew upgrade` は、`--greedy` を付けない限り Capsaicin を対象にしません。
+アップデートは Capsaicin がアプリの中で行うので、`brew upgrade` を実行する必要はありません。`brew upgrade` で更新する場合は、`--greedy` オプションを付けてください。
 
 ## トラブルシューティング
 
@@ -93,7 +93,7 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 2. Homebrew でインストールした場合は、`brew uninstall --cask capsaicin` を実行します。Capsaicinを終了してから、アプリと `capsaicin` コマンドを削除するので、以降の手順は不要です。設定や記録も削除するには `--zap` を付けてください。
 3. メニューバーからCapsaicinを終了します。
 4. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
-5. 設定や記録も削除するには、以下を実行します。
+5. 設定や記録も削除するには、以下を実行してください。
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin

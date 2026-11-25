@@ -71,7 +71,7 @@ brew install --cask koutyuke/tap/capsaicin
 
 This also links the `capsaicin` command into Homebrew's `bin`.
 
-Capsaicin installs its own updates from within the app, so you don't need `brew upgrade` for it. `brew upgrade` skips Capsaicin unless you pass `--greedy`.
+Capsaicin installs its own updates from within the app, so you don't need `brew upgrade` for it. To update it with `brew upgrade`, pass `--greedy`.
 
 ## Troubleshooting
 
