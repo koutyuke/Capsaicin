@@ -223,14 +223,15 @@ jobs:
           # .DS_Store の背景の参照はボリュームに結び付くので、新しいボリュームを作らずに書き出す。
           # macOS 27 では hdiutil が非推奨なので diskutil image を使う。
           diskutil image attach --nobrowse --mountPoint "$DMG_MOUNT_PATH" dist/Capsaicin-layout.dmg --shadow "$DMG_SHADOW_PATH"
-          entries="$(cd "$DMG_MOUNT_PATH" && find . -mindepth 1 -maxdepth 1 | LC_ALL=C sort | tr '\n' ' ')"
+          # .fseventsd は、dmgbuild がマウントしたときに macOS が作る記録で、ランナーによってはある。
+          entries="$(cd "$DMG_MOUNT_PATH" && find . -mindepth 1 -maxdepth 1 ! -name .fseventsd | LC_ALL=C sort | tr '\n' ' ')"
           if [[ "$entries" != './.DS_Store ./.background.tiff ./Applications ./Capsaicin.app ' ||
             "$(readlink "$DMG_MOUNT_PATH/Applications")" != /Applications ]]; then
             echo "::error::Unexpected contents in Capsaicin-layout.dmg: $entries"
             exit 1
           fi
-          # ボリュームは最小の大きさに縮めてあるので、先に消して空きを作ってから写す。
-          rm -rf "$DMG_MOUNT_PATH/Capsaicin.app"
+          # ボリュームは最小の大きさに縮めてあるので、先に消して空きを作ってから写す。配るものに要らない記録も消す。
+          rm -rf "$DMG_MOUNT_PATH/Capsaicin.app" "$DMG_MOUNT_PATH/.fseventsd"
           ditto "$APP_PATH" "$DMG_MOUNT_PATH/Capsaicin.app"
           diskutil eject "$DMG_MOUNT_PATH"
           diskutil image create from --format ULFO --shadow "$DMG_SHADOW_PATH" dist/Capsaicin-layout.dmg "$dmg_path"

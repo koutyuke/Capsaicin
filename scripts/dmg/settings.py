@@ -12,8 +12,10 @@ symlinks = {"Applications": "/Applications"}
 icon_locations = {
     "Capsaicin.app": (190, 164),
     "Applications": (470, 164),
-    # 隠しファイルを表示する設定の人にも見えないよう、ウインドウの外へ置く
+    # 隠しファイルを表示する設定の人にも見えないよう、ウインドウの外へ置く。
+    # .fseventsd はマウントしたときに macOS が作ることがある
     ".background.tiff": (330, 520),
+    ".fseventsd": (190, 520),
 }
 # 高さはタイトルバーを含む。中身が 400 になるよう 32 を足す
 window_rect = ((200, 200), (660, 432))
