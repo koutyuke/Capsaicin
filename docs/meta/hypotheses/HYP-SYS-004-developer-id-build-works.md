@@ -4,7 +4,7 @@ id: HYP-SYS-004
 title: Developer ID で署名し公証した Release の配布物は、entitlements なしで既存の機能が動き、Sparkle で更新できる
 status: open
 affects: ["DEC-SYS-021", "DEC-SYS-019", "DEC-HLP-005"]
-evidence: []
+evidence: ["EVID-SYS-006"]
 ---
 
 # HYP-SYS-004 Developer ID で署名し公証した Release の配布物は、entitlements なしで既存の機能が動き、Sparkle で更新できる
@@ -28,7 +28,7 @@ evidence: []
 オーナーが実機で確かめる。アプリの起動、ヘルパーのインストール、Sparkle の更新、`launchctl` はエージェントが実行しない。
 
 1. 環境: 対応環境の Mac。v0.1.0 を入れ、ヘルパーを設置した状態から始める。
-2. 主張2: v0.2.0 のリリース用の PR で、確認用のビルドを入れる前に、v0.1.0 のメニューバーから「Capsaicinを終了」を選び、ターミナルで次を実行する。`launchctl bootout` が対象が見つからないと表示したら、次のコマンドに進む。
+2. 主張2: v0.2.0 のリリース用の PR で、確認用のビルドを入れる前に、v0.1.0 のメニューバーから「Capsaicinを終了」を選び、ターミナルで次を実行する。`launchctl bootout` が `Boot-out failed: 3: No such process` と表示したら、対象はすでに外れているので、次のコマンドに進む。
 
    ```sh
    launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
@@ -55,4 +55,8 @@ evidence: []
 
 ## 結果
 
-未確認。
+未確認。主張2は、アプリを入れ替える前に手順を行う場合について確かめた（`EVID-SYS-006`）。入れ替えた後に行う場合は確かめていない。
+
+主張1のうち、署名と Hardened Runtime と公証、ヘルパーのインストール（システム設定での許可を含む）と `on`・`off`、「ディスプレイを閉じたとき」の「オンのまま」、「ログイン時に起動」、ログインし直した後と再起動した後の状態を確かめた（`EVID-SYS-006`）。LED、CLI、グローバルホットキー、「今すぐ確認」による更新の確認は、まだ確かめていない。この Mac は MacBook なので、「Appleメニューからのスリープも防ぐ」は表示されず、確かめられない。
+
+主張3は、Developer ID で署名した安定版を2つ公開した後に確かめる。
