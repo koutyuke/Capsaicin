@@ -20,6 +20,13 @@ v0.1.0 を使っていた状態から、v0.2.0 のリリースノートの「v0.
 - **ログインし直したとき:** Capsaicin は `loginwindow` の起動の19秒後に起動し、スリープ防止は停止中で始まった（`SleepDisabled` 0）。ログアウトのときに開いていたアプリを開き直す `TALAppsToRelaunchAtLogin` は、loginwindow の設定になかった。設定の「ヘルパー」の状態は「有効」のままで（オーナーの目視）、スリープ防止を始めると `capsaicin-helper` が root で動き、`SleepDisabled` は 1 になった。
 - **スリープ防止中のまま再起動したとき:** ログイン後に Capsaicin が起動し、`SleepDisabled` は 0 だった。ヘルパーのデーモンは起動の後に1回だけ動き（`runs = 1`）、終了コード 0 で終わった。v0.1.0 のファイルとジョブは残っていなかった。ログインしている利用者のバックグラウンド項目は、アプリが `[enabled, allowed, notified]`、ヘルパーのデーモンが `[enabled, allowed, not notified]` で、親はアプリだった。
 
+- **LED、CLI、ホットキー:** 再起動の後に開き直した同じアプリで確かめた。設定は「CLIからの操作を許可」と Caps Lock の LED の通知がオン、「ディスプレイを閉じたとき」が「オンのまま」だった。
+  - `capsaicin status` は、停止中に `○ Sleep prevention off` と終了コード 1、オンのときに `● Sleep prevention on` と終了コード 0 を返した。
+  - `capsaicin on` は `✓ Sleep prevention on` と終了コード 0 を返し、`SleepDisabled` は 1 になり、`capsaicin-helper` が root で動き、Capsaicin が `PreventUserIdleSystemSleep` と `PreventUserIdleDisplaySleep` を持った。`capsaicin off` は `✓ Sleep prevention off` と終了コード 0 を返し、`SleepDisabled` は 0 に戻り、電源のアサーションはなくなった。
+  - 「スリープ防止の切り替え」に Control + Esc を記録すると、押すたびにオンとオフが切り替わった（`capsaicin status` と `SleepDisabled` で確かめた）。
+  - CLI でもホットキーでも、オンにすると Caps Lock の LED が点き、オフにすると消えた（オーナーの目視）。
+- **公開の前の更新の確認:** 「このアプリについて」で「今すぐ確認」を選ぶと、エラーのダイアログが出た（オーナーの画面写真）。アプリの `SUFeedURL` は `https://github.com/koutyuke/Capsaicin/releases/latest/download/appcast.xml` で、このときの Latest の v0.1.0 には `appcast.xml` が添付されていなかった（添付は `Capsaicin-0.1.0.zip` と `SHA256SUMS.txt`）。
+
 ## 確かめ方
 
 v0.1.0 の入れ直し、アプリの起動と終了、ヘルパーの設置と許可、手順2のコマンドの実行、ログインし直すことと再起動は、オーナーが行った。エージェントは各段階の後に次の読み取りだけを行った。
@@ -30,11 +37,13 @@ v0.1.0 の入れ直し、アプリの起動と終了、ヘルパーの設置と�
 - `sfltool dumpbtm` でバックグラウンド項目を読んだ。
 - `codesign -dv --verbose=2`、`spctl --assess -vv`、`xcrun stapler validate` を、DMG と「アプリケーション」のアプリに実行した。
 - `defaults read` で設定を読んだ。
+- `capsaicin`（`/Applications/Capsaicin.app/Contents/Helpers/capsaicin`）の `status`・`on`・`off` を実行し、出力と終了コードを読んだ。LED の目視、ホットキーの記録と押下、「今すぐ確認」は、オーナーが行った。
+- `gh release view v0.1.0` で、v0.1.0 の添付ファイルを読んだ。
 
 ## 適用範囲
 
-- 使ってよい: v0.1.0 からの移行の手順（アプリを入れ替える前に行う場合）と、Developer ID で署名し公証した 0.2.0 の Release の DMG の、署名、公証、ヘルパーの設置と `on`・`off`、「ログイン時に起動」、再起動の後の状態を判断するとき。
-- 使ってはいけない: アプリを入れ替えた後に移行の手順を行う場合。LED、CLI、ホットキー、更新の確認など、上に挙げていない機能。Sparkle による更新。
+- 使ってよい: v0.1.0 からの移行の手順（アプリを入れ替える前に行う場合）と、Developer ID で署名し公証した 0.2.0 の Release の DMG の、署名、公証、ヘルパーの設置と `on`・`off`、「ログイン時に起動」、再起動の後の状態、LED、CLI の `status`・`on`・`off`、グローバルホットキーを判断するとき。
+- 使ってはいけない: アプリを入れ替えた後に移行の手順を行う場合。公開した後の更新の確認と、Sparkle による更新。
 
 ## 未確認のこと
 

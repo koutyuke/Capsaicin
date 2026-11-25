@@ -4,7 +4,7 @@ id: HYP-SYS-007
 title: 分けた release-preview.yml は PR の更新で確認用のビルドを作り、分けた release.yml はマージで公開まで進む
 status: open
 affects: ["DEC-SYS-029"]
-evidence: []
+evidence: ["EVID-SYS-008"]
 ---
 
 # HYP-SYS-007 分けた release-preview.yml は PR の更新で確認用のビルドを作り、分けた release.yml はマージで公開まで進む
@@ -30,4 +30,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+未確認。主張1〜3は、`hotfix/*` からの PR（PR #27）で確かめた（`EVID-SYS-008`）。`release/v*` からの PR は、次の通常のリリースで確かめる。
