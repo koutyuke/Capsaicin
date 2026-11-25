@@ -34,7 +34,7 @@ def render(
     commit_url,
     run_url,
     artifact_url="",
-    zip_name="",
+    package_name="",
     version="",
     expires_on="",
 ):
@@ -45,9 +45,9 @@ def render(
         return f"{prefix}### 🔨 {title} · building\n\nBuilding {commit} — [view run]({run_url})"
     if state == "failed":
         return f"{prefix}### ❌ {title} · failed\n\nThe build for {commit} failed. [View run]({run_url})"
-    if state != "ready" or not artifact_url or not zip_name or not expires_on:
+    if state != "ready" or not artifact_url or not package_name or not expires_on:
         raise ValueError(
-            "A ready preview requires its artifact URL, zip name, and expiration"
+            "A ready preview requires its artifact URL, package name, and expiration"
         )
     build = (
         "Debug · `io.github.koutyuke.capsaicin.debug`"
@@ -62,7 +62,7 @@ def render(
     return (
         f"{prefix}### ✅ {title} · ready\n\n"
         "| | |\n| --- | --- |\n"
-        f"| **Download** | [{zip_name}]({artifact_url}) |\n"
+        f"| **Download** | [{package_name}]({artifact_url}) |\n"
         f"| **Commit** | {commit} |\n"
         f"| **Build** | {build} |\n"
         "| **Signing** | Developer ID · notarized · stapled |\n"
@@ -98,7 +98,7 @@ def main():
         f"{server}/{repo}/commit/{sha}",
         f"{server}/{repo}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
         os.environ.get("ARTIFACT_URL", ""),
-        os.environ.get("ZIP_NAME", ""),
+        os.environ.get("PACKAGE_NAME", ""),
         os.environ.get("VERSION", ""),
         (datetime.now(UTC) + timedelta(days=7)).date().isoformat(),
     )

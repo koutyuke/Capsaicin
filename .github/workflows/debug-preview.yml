@@ -52,6 +52,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
@@ -72,6 +73,7 @@ jobs:
           retention-days: 7
           path: |
             .build/debug-dist/${{ steps.package.outputs.zip_name }}
+            .build/debug-dist/Capsaicin-layout.dmg
             .build/debug-dist/SHA256SUMS.txt
 
   sign-and-notarize:
@@ -82,7 +84,6 @@ jobs:
     with:
       input-artifact: unsigned-debug-preview
       zip-name: ${{ needs.preview-package.outputs.zip_name }}
-      output-artifact: debug-preview
     secrets:
       DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
       DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
@@ -115,5 +116,5 @@ jobs:
           PREVIEW_KIND: debug
           PREVIEW_STATE: ${{ needs.preview-package.result == 'success' && needs.sign-and-notarize.result == 'success' && 'ready' || 'failed' }}
           ARTIFACT_URL: ${{ needs.sign-and-notarize.outputs.artifact_url }}
-          ZIP_NAME: ${{ needs.preview-package.outputs.zip_name }}
+          PACKAGE_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
         run: python3 scripts/preview_comment.py

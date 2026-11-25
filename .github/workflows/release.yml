@@ -57,6 +57,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
@@ -75,6 +76,7 @@ jobs:
           retention-days: 7
           path: |
             .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
+            .build/dist/Capsaicin-layout.dmg
             .build/dist/SHA256SUMS.txt
 
   sign-and-notarize:
@@ -91,7 +93,6 @@ jobs:
     with:
       input-artifact: ${{ github.event.action == 'closed' && 'unsigned-release-dist' || 'unsigned-release-preview' }}
       zip-name: Capsaicin-${{ needs.release-package.outputs.version || needs.preview-package.outputs.version }}.zip
-      output-artifact: ${{ github.event.action == 'closed' && 'release-dist' || 'release-preview' }}
     secrets:
       DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
       DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
@@ -123,7 +124,7 @@ jobs:
           PREVIEW_KIND: release
           PREVIEW_STATE: ${{ needs.preview-package.result == 'success' && needs.sign-and-notarize.result == 'success' && 'ready' || 'failed' }}
           ARTIFACT_URL: ${{ needs.sign-and-notarize.outputs.artifact_url }}
-          ZIP_NAME: Capsaicin-${{ needs.preview-package.outputs.version }}.zip
+          PACKAGE_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
           VERSION: ${{ needs.preview-package.outputs.version }}
         run: python3 scripts/preview_comment.py
 
@@ -148,6 +149,7 @@ jobs:
           persist-credentials: false
           ref: ${{ github.event.pull_request.merge_commit_sha }}
       - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
       - name: Select Xcode 27.2
         run: sudo xcode-select --switch /Applications/Xcode_27.2.app
       - name: Read version
@@ -221,6 +223,7 @@ jobs:
           retention-days: 7
           path: |
             .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
+            .build/dist/Capsaicin-layout.dmg
             .build/dist/SHA256SUMS.txt
 
   release-appcast:
@@ -232,11 +235,12 @@ jobs:
       contents: read
     env:
       VERSION: ${{ needs.release-package.outputs.version }}
+      DMG_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
     steps:
       # checkout やリポジトリ内の処理を実行せず、秘密鍵をビルドから隔離する。
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: release-dist
+          name: ${{ env.DMG_NAME }}
           path: dist
       - name: Install Sparkle tools
         env:
@@ -249,23 +253,32 @@ jobs:
             "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz"
           printf '%s  %s\n' "$SPARKLE_SHA256" "$RUNNER_TEMP/Sparkle.tar.xz" | shasum -a 256 -c -
           tar -xf "$RUNNER_TEMP/Sparkle.tar.xz" -C "$tools"
-      - name: Check archive and write release notes
+      - name: Check DMG and write release notes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          python3 - <<'PY'
+          shopt -s nullglob
+          images=(dist/*.dmg)
+          if [[ ${#images[@]} -ne 1 || "${images[0]}" != "dist/Capsaicin-$VERSION.dmg" ]]; then
+            echo '::error::Expected exactly the release DMG'
+            exit 1
+          fi
+
+          # マウント先のフォルダーは diskutil が作り、取り外すときに消す。
+          mount_point="$RUNNER_TEMP/capsaicin-mount"
+          diskutil image attach --readOnly --nobrowse --mountPoint "$mount_point" "${images[0]}"
+          trap 'diskutil eject "$mount_point"' EXIT
+
+          python3 - "$mount_point/Capsaicin.app/Contents/Info.plist" <<'PY'
           import base64
           import os
           import plistlib
-          import zipfile
+          import sys
           from pathlib import Path
 
           version = os.environ["VERSION"]
-          archives = list(Path("dist").glob("*.zip"))
-          if archives != [Path(f"dist/Capsaicin-{version}.zip")]:
-              raise SystemExit("Expected exactly the release zip")
-          with zipfile.ZipFile(archives[0]) as archive:
-              info = plistlib.loads(archive.read("Capsaicin.app/Contents/Info.plist"))
+          with Path(sys.argv[1]).open("rb") as info_plist:
+              info = plistlib.load(info_plist)
           public_key = info.get("SUPublicEDKey", "").strip()
           if not public_key or len(base64.b64decode(public_key, validate=True)) != 32:
               raise SystemExit("The release app must have a nonempty 32-byte SUPublicEDKey")
@@ -308,9 +321,9 @@ jobs:
           if len(base64.b64decode(signature, validate=True)) != 64:
               raise SystemExit("The appcast item must have sparkle:edSignature (check the signing key)")
           version = os.environ["VERSION"]
-          expected_url = f"https://github.com/koutyuke/Capsaicin/releases/download/v{version}/Capsaicin-{version}.zip"
+          expected_url = f"https://github.com/koutyuke/Capsaicin/releases/download/v{version}/{os.environ['DMG_NAME']}"
           if enclosure.get("url") != expected_url:
-              raise SystemExit("The appcast must point to the release zip at its tag URL")
+              raise SystemExit("The appcast must point to the release DMG at its tag URL")
           signing_block = re.search(
               rb"<!-- sparkle-signatures:\nedSignature: ([A-Za-z0-9+/]{86}==)\nlength: ([0-9]+)\n-->\n?\Z", data
           )
@@ -339,15 +352,20 @@ jobs:
       contents: write
       id-token: write
       attestations: write
+    env:
+      DMG_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: release-dist
+          name: ${{ env.DMG_NAME }}
           path: dist
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: release-appcast
           path: dist
+      - name: Write DMG checksum
+        working-directory: dist
+        run: sha256sum "$DMG_NAME" > SHA256SUMS.txt
       - name: Write release notes
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
@@ -359,7 +377,7 @@ jobs:
           printf '%s\n' "$PR_BODY" > release-notes.md
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: dist/Capsaicin-${{ needs.release-package.outputs.version }}.zip
+          subject-path: dist/${{ env.DMG_NAME }}
       - name: Create release
         env:
           GH_REPO: ${{ github.repository }}
@@ -373,7 +391,7 @@ jobs:
             args+=(--prerelease)
           fi
           gh release create "v$VERSION" \
-            "dist/Capsaicin-$VERSION.zip" \
+            "dist/$DMG_NAME" \
             dist/SHA256SUMS.txt \
             dist/appcast.xml \
             "${args[@]}"
