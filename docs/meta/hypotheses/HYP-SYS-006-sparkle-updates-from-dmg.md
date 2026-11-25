@@ -4,7 +4,7 @@ id: HYP-SYS-006
 title: Sparkle 2 は、Applications へのリンクを含む DMG から更新でき、DMG で配った版は開いて使える
 status: open
 affects: ["DEC-SYS-028"]
-evidence: ["EVID-SYS-005"]
+evidence: ["EVID-SYS-005", "EVID-SYS-006"]
 ---
 
 # HYP-SYS-006 Sparkle 2 は、Applications へのリンクを含む DMG から更新でき、DMG で配った版は開いて使える
@@ -36,4 +36,4 @@ evidence: ["EVID-SYS-005"]
 
 ## 結果
 
-未確認。主張1・2・4は、Debug の確認用ビルドで確かめた（`EVID-SYS-005`）。主張3は、DMG で配る最初の安定版を公開した後に確かめる。
+未確認。主張1・2・4は、Debug の確認用ビルドで確かめた（`EVID-SYS-005`）。主張1・2は、リリース用の PR の Release の確認用ビルドでも確かめた。このときは、開いてよいかの確認も出なかった（`EVID-SYS-006`）。主張3は、DMG で配る最初の安定版を公開した後に確かめる。
