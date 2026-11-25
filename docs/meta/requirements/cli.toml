@@ -60,7 +60,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-CLI-005", "SPEC-CLI-007"]
 depends_on = []
-sources = ["DEC-SET-001", "DEC-CLI-001"]
+sources = ["DEC-SET-001", "DEC-CLI-004"]
 
 [[requirements]]
 id = "REQ-CLI-006"
@@ -72,7 +72,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-CLI-006"]
 depends_on = []
-sources = ["DEC-CLI-001"]
+sources = ["DEC-CLI-004"]
 
 [[requirements]]
 id = "REQ-CLI-007"

@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-CLI-001
 title: CLI の設定はアプリが要求を受け付けるかを切り替え、コマンドはアプリの中に置く
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-CLI-004"]
 requirements: ["REQ-CLI-005", "REQ-CLI-006"]
 based_on: []
 ---
