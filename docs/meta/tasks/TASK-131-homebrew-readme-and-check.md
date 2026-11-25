@@ -28,7 +28,7 @@ assignee: Claude（Claude Code、Opus 5.5）
 
 ## 検証
 
-- オーナーの確認の手順書を、エージェントが書いて渡す。エージェントは `brew install` と `brew uninstall` を行わない。
+- オーナーは `docs/manual/verification/homebrew-install.md` の手順で確かめる。エージェントは `brew install` と `brew uninstall` を行わない。確かめた結果を根拠に移したら、その手順書と一覧の行を削除する。
 - `nix develop --command just check`。
 
 ## レビュー

@@ -36,6 +36,7 @@
 | [`menu-battery.md`](menu-battery.md) | クイック設定のバッテリー残量の項目 | なし |
 | [`localization.md`](localization.md) | 英語・日本語の表示、時刻の表記、設置の確認（取り消しのみ） | システム設定 |
 | [`helper-approval-guidance.md`](helper-approval-guidance.md) | 「ヘルパー」からの設置、システム設定を開く操作、許可前後の「スリープ」の表示 | ヘルパーの登録・削除、システム設定 |
+| [`homebrew-install.md`](homebrew-install.md) | Release 版を Homebrew の Cask で入れて消す（`prepare.md` と `cleanup.md` を使わない） | ヘルパーの登録・削除、アプリの入れ替え |
 
 ヘルパーの設置と承認、`on` と `off`、許可を外したときの表示、起動時の後片付け、削除、更新後の登録し直しの実測は `EVID-HLP-006` にある。「インストール」の直後にはシステム設定が開かず、「システム設定を開く」を押したときだけ開くことの実測は `EVID-SET-003` にある。
 
