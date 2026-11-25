@@ -2,7 +2,7 @@ import CapsaicinCore
 import Foundation
 
 enum MenuCommand: Equatable {
-    case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit
+    case start(StartTimeOverride?), stop, durationPanel, timePanel, settings, quit, checkForUpdates
     case toggleSleep(String), lidClose(SettingsLidCloseChoice)
     case toggleBattery
 }
@@ -22,6 +22,7 @@ enum MenuContent {
     static func make(
         status: BlockingStatus, settings: Settings, isOnACPower: Bool, hasInternalBattery: Bool,
         sleepRows: [SettingsSleepRow],
+        pendingUpdateVersion: String? = nil,
         now: Date = Date(), calendar: Calendar = .current, locale: Locale = .current, bundle: Bundle = .main,
     ) -> [MenuEntry] {
         func row(_ key: String, subtitle: String? = nil, command: MenuCommand? = nil,
@@ -32,6 +33,7 @@ enum MenuContent {
         }
         var rows = [row(status.isBlocking ? "menu.header.active" : "menu.header.idle")]
         rows += warnings(status: status, bundle: bundle)
+        rows += updateReminder(version: pendingUpdateVersion, bundle: bundle)
         let timeRows = [row("menu.header.fromNow")] + presets(calendar: calendar, locale: locale, bundle: bundle) + [
             MenuEntry(id: "separator.time"), row("menu.startUntil", command: .timePanel),
         ]
@@ -74,6 +76,13 @@ enum MenuContent {
                        row("menu.quit", command: .quit)]
     }
 
+    private static func updateReminder(version: String?, bundle: Bundle) -> [MenuEntry] {
+        guard let version else { return [] }
+        return [MenuEntry(id: "menu.update.available", title: text("menu.update.available", bundle: bundle),
+                          subtitle: String(format: text("menu.update.available.subtitle", bundle: bundle), version),
+                          command: .checkForUpdates), MenuEntry(id: "separator.update")]
+    }
+
     private static func startSubtitle(_ limit: TimeLimit?, now: Date, calendar: Calendar,
                                       locale: Locale, bundle: Bundle) -> String
     {
@@ -99,25 +108,15 @@ enum MenuContent {
     }
 
     private static func warnings(status: BlockingStatus, bundle: Bundle) -> [MenuEntry] {
-        func warning(_ key: String, subtitle: String? = nil) -> MenuEntry {
-            MenuEntry(id: key, title: text(key, bundle: bundle), subtitle: subtitle, isWarning: true)
+        // LED のずれと輝度の記録の失敗は、メニューでは伝えない。どちらも `capsaicin status` には出る。
+        let rows = [MisalignmentDirection.leftApplied, .notApplied].filter { direction in
+            status.misalignments.contains { $0.key != .led && $0.value == direction }
+        }.map { direction in
+            let key = direction == .leftApplied ? "menu.warning.remainingSleepSetting.title"
+                : "menu.warning.unappliedSleep.title"
+            return MenuEntry(id: key, title: text(key, bundle: bundle), isWarning: true)
         }
-        var rows: [MenuEntry] = []
-        for direction in [MisalignmentDirection.leftApplied, .notApplied] {
-            let affected = status.misalignments.filter { $0.key != .led && $0.value == direction }
-            if !affected.isEmpty {
-                let key = direction == .leftApplied ? "menu.warning.remainingSleepSetting" : "menu.warning.unappliedSleep"
-                rows.append(warning(key + ".title", subtitle: affected[.systemSleepDisabled] == nil ? nil :
-                        text(key + ".helper.subtitle", bundle: bundle)))
-            }
-        }
-        if status.misalignments[.led] != nil {
-            rows.append(warning("menu.warning.unalignedLed.title"))
-        }
-        if status.isRecordUnsaved {
-            rows.append(warning("menu.warning.stateSaveFailed.title"))
-        }
-        return rows
+        return rows.isEmpty ? [] : rows + [MenuEntry(id: "separator.warnings")]
     }
 
     private static func presets(calendar: Calendar, locale: Locale, bundle: Bundle) -> [MenuEntry] {
@@ -155,7 +154,8 @@ enum MenuContent {
                         let choiceTitle = SettingsSection.sleep.text("lidClose." + choice.rawValue)
                         return MenuEntry(id: "menu.sleep.lidClose." + choice.rawValue, title: choiceTitle,
                                          subtitle: selected && !row.warning.isEmpty ? row.warning : nil,
-                                         command: .lidClose(choice), isWarning: selected && !row.warningLabel.isEmpty,
+                                         command: row.canSelect(choice) ? .lidClose(choice) : nil,
+                                         isWarning: selected && !row.warningLabel.isEmpty,
                                          isChecked: selected,
                                          accessibilityLabel: String(
                                              format: text("menu.sleep.lidClose.a11y", bundle: bundle),
@@ -166,7 +166,7 @@ enum MenuContent {
             }
             return [MenuEntry(id: "menu.sleep." + row.key, title: title,
                               subtitle: row.warning.isEmpty ? nil : row.warning,
-                              command: .toggleSleep(row.key),
+                              command: row.isToggleEnabled ? .toggleSleep(row.key) : nil,
                               isWarning: !row.warningLabel.isEmpty, isChecked: row.isOn)]
         }
     }

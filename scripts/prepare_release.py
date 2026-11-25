@@ -16,6 +16,9 @@ BUILD_LINE = re.compile(
 )
 
 
+KINDS = ("major", "minor", "patch")
+
+
 class ReleaseError(Exception):
     """利用者が直せる理由で準備を止める。"""
 
@@ -29,11 +32,6 @@ def next_version(version, kind):
     return f"{major}.{minor}.{patch + 1}"
 
 
-def release_kind(version, pull_requests):
-    breaking = any(item["breaking"] for item in pull_requests)
-    return "major" if breaking and int(version.split(".")[0]) else "minor"
-
-
 def pull_request_numbers(subjects):
     return [
         int(match[1]) for subject in subjects if (match := MERGE_SUBJECT.match(subject))
@@ -43,7 +41,7 @@ def pull_request_numbers(subjects):
 def classify_labels(labels):
     types = [label for label in labels if label.startswith("T-")]
     if len(types) != 1:
-        raise ValueError("種類のラベルがちょうど1つではない")
+        raise ValueError("Expected exactly one type label.")
     return types[0], "I-Breaking" in labels
 
 
@@ -51,7 +49,9 @@ def update_project(text, version):
     versions = list(VERSION_LINE.finditer(text))
     builds = list(BUILD_LINE.finditer(text))
     if len(versions) != 1 or len(builds) != 1:
-        raise ValueError("MARKETING_VERSION と CURRENT_PROJECT_VERSION は1行ずつ必要")
+        raise ValueError(
+            "Expected one line each for MARKETING_VERSION and CURRENT_PROJECT_VERSION."
+        )
     current_version = versions[0][2]
     build = int(builds[0][2])
     text = VERSION_LINE.sub(rf'\g<1>"{version}"', text)
@@ -64,11 +64,11 @@ def command(*args, check=True):
         result = subprocess.run(args, check=False, capture_output=True, text=True)
     except FileNotFoundError as exc:
         raise ReleaseError(
-            f"{args[0]} が見つかりません。\ndevShell に入り直してください。"
+            f"error: {args[0]} was not found.\nhint: Re-enter the devShell."
         ) from exc
     if check and result.returncode:
         detail = (result.stderr.strip() or result.stdout.strip()).replace("\n", " | ")
-        raise ReleaseError(f"{' '.join(args)} に失敗しました。\n{detail}")
+        raise ReleaseError(f"error: Command failed: {' '.join(args)} ({detail}).")
     return result
 
 
@@ -83,21 +83,34 @@ def latest_release():
             versions.append((tuple(map(int, match.groups())), tag))
     if not versions:
         raise ReleaseError(
-            "リリースのタグがありません。\nv{MAJOR}.{MINOR}.{PATCH} のタグを確認してください。"
+            "error: No release tags found.\n"
+            "hint: Check for tags in the form v{MAJOR}.{MINOR}.{PATCH}."
         )
     numbers, tag = max(versions)
     return tag, ".".join(map(str, numbers))
+
+
+def branch_refs(pattern):
+    """手元と origin にある、名前が pattern に当たるブランチを返す。"""
+    return git(
+        "for-each-ref",
+        "--format=%(refname)",
+        f"refs/heads/{pattern}",
+        f"refs/remotes/origin/{pattern}",
+    ).stdout
 
 
 def ensure_ancestor(revision):
     result = git("merge-base", "--is-ancestor", revision, "HEAD", check=False)
     if result.returncode == 1:
         raise ReleaseError(
-            "main を戻しマージしていません。\nmain を develop または現在の hotfix にマージしてください。"
+            "error: main has not been merged back.\n"
+            "hint: Merge main into develop or the current hotfix branch."
         )
     if result.returncode:
         raise ReleaseError(
-            f"{revision} と HEAD の履歴を確認できません。\nGit の履歴を確認してください。"
+            f"error: Cannot check the history of {revision} and HEAD.\n"
+            "hint: Check the Git history."
         )
 
 
@@ -108,7 +121,8 @@ def read_project(path):
         current, _ = update_project(text, "0.0.0")
     except ValueError as exc:
         raise ReleaseError(
-            f"project.yml の版を読み取れません: {exc}\n版の設定を1行ずつに直してください。"
+            f"error: Cannot read the version in project.yml: {exc}\n"
+            "hint: Keep each version setting on exactly one line."
         ) from exc
     return text, current
 
@@ -128,14 +142,15 @@ def read_pull_requests(tag):
             labels = [label["name"] for label in raw["labels"]]
         except (json.JSONDecodeError, KeyError, TypeError) as exc:
             raise ReleaseError(
-                f"PR #{number} の情報を読み取れません。\ngh の認証と PR を確認してください。"
+                f"error: Cannot read PR #{number}.\n"
+                "hint: Check gh authentication and the PR."
             ) from exc
         if "S-Release" in labels:
             continue
         try:
             kind, breaking = classify_labels(labels)
         except ValueError:
-            invalid.append(f"#{number} ({', '.join(labels) or 'ラベルなし'})")
+            invalid.append(f"#{number} ({', '.join(labels) or 'no labels'})")
             continue
         pull_requests.append(
             {
@@ -149,11 +164,13 @@ def read_pull_requests(tag):
         )
     if invalid:
         raise ReleaseError(
-            f"種類のラベルがちょうど1つではない PR があります: {'; '.join(invalid)}\n各 PR に T-* ラベルを1つ付けてください。"
+            f"error: Some PRs do not have exactly one type label: {'; '.join(invalid)}.\n"
+            "hint: Add exactly one T-* label to each PR."
         )
     if not pull_requests:
         raise ReleaseError(
-            "リリース対象の PR がありません。\ndevelop に対象の PR をマージしてからやり直してください。"
+            "error: No PRs to release.\n"
+            "hint: Merge the PRs into develop, then try again."
         )
     return pull_requests
 
@@ -169,10 +186,11 @@ def patch_commits():
     ]
 
 
-def prepare(mode):
+def prepare(kind):
     if git("status", "--porcelain").stdout:
         raise ReleaseError(
-            "作業ツリーに変更があります。\n変更をコミットするか退避してからやり直してください。"
+            "error: The working tree has changes.\n"
+            "hint: Commit or stash the changes, then try again."
         )
     # マージ後に消えた release/* の追跡ブランチを残さないよう、ブランチは prune する。
     # タグは prune しない（--prune と --tags を併せると、手元だけのタグまで消えるため）。
@@ -182,7 +200,8 @@ def prepare(mode):
     )
     if any(fetch.returncode for fetch in fetches):
         raise ReleaseError(
-            "origin のブランチとタグを取得できません。\n接続と origin の設定を確認してください。"
+            "error: Cannot fetch branches and tags from origin.\n"
+            "hint: Check the connection and origin configuration."
         )
 
     tag, previous = latest_release()
@@ -192,60 +211,78 @@ def prepare(mode):
     project_text, project_version = read_project(project)
     if project_version != previous:
         raise ReleaseError(
-            f"project.yml の版 {project_version} が最新のタグ {tag} と一致しません。\n版かタグを正しい状態に直してください。"
+            f"error: Version {project_version} in project.yml does not match the latest tag {tag}.\n"
+            "hint: Correct the version or tag."
         )
 
     branch = git("branch", "--show-current").stdout.strip()
-    if mode == "patch":
-        if not branch.startswith("hotfix/"):
+    if branch.startswith("hotfix/"):
+        if kind != "patch":
             raise ReleaseError(
-                "現在のブランチが hotfix/* ではありません。\nmain から hotfix/* を作って切り替えてください。"
+                "error: A hotfix/* branch can only make a patch release.\n"
+                "hint: Run with patch, or release from develop."
             )
         if not git("rev-list", "origin/main..HEAD").stdout:
             raise ReleaseError(
-                "hotfix にリリースするコミットがありません。\n修正をコミットしてからやり直してください。"
+                "error: No commits to release on the hotfix branch.\n"
+                "hint: Commit the fix, then try again."
             )
-        kind = "patch"
         version = next_version(previous, kind)
+        # develop から同じ版の PATCH を準備中なら、どちらかが公開に失敗するので止める。
+        if branch_refs(f"release/v{version}"):
+            raise ReleaseError(
+                f"error: release/v{version} already exists.\n"
+                "hint: Complete or remove that release, then try again."
+            )
         pull_requests = []
         commits = patch_commits()
-    else:
-        if branch != "develop":
-            raise ReleaseError(
-                "現在のブランチが develop ではありません。\ndevelop に切り替えてください。"
-            )
+    elif branch == "develop":
         if git("rev-parse", "HEAD").stdout != git("rev-parse", "origin/develop").stdout:
             raise ReleaseError(
-                "develop が origin/develop と一致しません。\npush または pull して一致させてください。"
+                "error: develop does not match origin/develop.\n"
+                "hint: Push or pull to bring them in sync."
             )
-        release_refs = git(
-            "for-each-ref",
-            "--format=%(refname)",
-            "refs/heads/release/",
-            "refs/remotes/origin/release/",
-        ).stdout
-        if release_refs:
+        if branch_refs("release/"):
             raise ReleaseError(
-                "release/* ブランチが既にあります。\n進行中のリリースを完了または削除してからやり直してください。"
+                "error: A release/* branch already exists.\n"
+                "hint: Complete or remove the current release, then try again."
+            )
+        # hotfix/* も次の PATCH の版を使うので、同時に準備しない。
+        if kind == "patch" and branch_refs("hotfix/"):
+            raise ReleaseError(
+                "error: A hotfix/* branch exists.\n"
+                "hint: Complete or remove the hotfix, then try again."
             )
         pull_requests = read_pull_requests(tag)
-        kind = release_kind(previous, pull_requests)
+        breaking = [f"#{item['number']}" for item in pull_requests if item["breaking"]]
+        if kind == "patch" and breaking:
+            raise ReleaseError(
+                f"error: A patch release cannot include I-Breaking PRs: {', '.join(breaking)}.\n"
+                "hint: Run with minor or major."
+            )
         version = next_version(previous, kind)
         branch = f"release/v{version}"
         commits = []
+    else:
+        raise ReleaseError(
+            "error: The current branch is not develop or hotfix/*.\n"
+            "hint: Switch to develop, or to a hotfix/* branch for a patch release."
+        )
 
     if git("tag", "--list", f"v{version}").stdout:
         raise ReleaseError(
-            f"v{version} のタグが既にあります。\nタグと版の履歴を確認してください。"
+            f"error: Tag v{version} already exists.\n"
+            "hint: Check the tag and version history."
         )
-    if mode != "patch":
+    if not branch.startswith("hotfix/"):
         git("switch", "-c", branch)
 
     try:
         _, updated = update_project(project_text, version)
     except ValueError as exc:
         raise ReleaseError(
-            f"project.yml を更新できません: {exc}\n版の設定を1行ずつに直してください。"
+            f"error: Cannot update project.yml: {exc}\n"
+            "hint: Keep each version setting on exactly one line."
         ) from exc
     project.write_text(updated, encoding="utf-8")
     git("add", "--", str(project))
@@ -264,20 +301,21 @@ def prepare(mode):
     output.write_text(
         json.dumps(material, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
-    print(f"版: {version}")
-    print(f"材料: {output}")
+    print(f"Version: {version}")
+    print(f"Materials: {output}")
 
 
 def main(argv=None):
     args = sys.argv[1:] if argv is None else argv
-    if args not in ([], ["patch"]):
+    if len(args) != 1 or args[0] not in KINDS:
         print(
-            "使い方: prepare_release.py [patch]\n引数なし、または patch で実行してください。",
+            "usage: prepare_release.py {major|minor|patch}\n"
+            "Run with the part of the version to increase.",
             file=sys.stderr,
         )
         return 1
     try:
-        prepare(args[0] if args else "release")
+        prepare(args[0])
     except ReleaseError as exc:
         print(exc, file=sys.stderr)
         return 1

@@ -4,15 +4,15 @@ domain_code = "HLP"
 
 [[requirements]]
 id = "REQ-HLP-001"
-title = "必要になったときに一度の管理者認証でヘルパーを設置できる"
+title = "必要になったときにシステム設定の許可でヘルパーを設置できる"
 kind = "functional"
-statement = "ヘルパーが要る設定を初めてオンにしたとき、または設定画面で設置を選んだときに、管理者認証1回でヘルパーを設置できる。"
+statement = "設定の「ヘルパー」で設置を選んだときに、システム設定で1回許可するだけでヘルパーを設置できる。"
 reason = "root 権限が必要な機能を使う利用者だけに、設置の手間と権限の付与を求めるため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-001", "SPEC-HLP-006"]
 depends_on = []
-sources = ["DEC-HLP-001", "DEC-HLP-003"]
+sources = ["DEC-HLP-005", "DEC-SET-011"]
 
 [[requirements]]
 id = "REQ-HLP-002"
@@ -24,19 +24,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-002"]
 depends_on = []
-sources = ["DEC-HLP-001", "DEC-HLP-003"]
-
-[[requirements]]
-id = "REQ-HLP-003"
-title = "設置で sudo を壊さない"
-kind = "quality"
-statement = "ヘルパーの設置が失敗しても、sudo が使えない状態にならない。"
-reason = "sudoers の書式を誤ると sudo 全体が使えなくなり、利用者が自分で直せなくなるため。"
-priority = "must"
-status = "accepted"
-specs = ["SPEC-HLP-001"]
-depends_on = []
-sources = ["DEC-HLP-003", "EVID-HLP-001"]
+sources = ["DEC-HLP-005"]
 
 [[requirements]]
 id = "REQ-HLP-004"
@@ -48,7 +36,7 @@ priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-003"]
 depends_on = []
-sources = ["DEC-HLP-001", "HYP-BLK-007"]
+sources = ["DEC-HLP-005", "HYP-BLK-007"]
 
 [[requirements]]
 id = "REQ-HLP-005"
@@ -58,18 +46,18 @@ statement = "利用者は、設定の「ヘルパー」セクションで、ヘ�
 reason = "root 権限で動くものを、利用者が把握し、壊れたら直し、不要になったら取り除けるようにするため。"
 priority = "must"
 status = "accepted"
-specs = ["SPEC-HLP-004", "SPEC-HLP-006"]
+specs = ["SPEC-HLP-004", "SPEC-HLP-006", "SPEC-HLP-007"]
 depends_on = []
-sources = ["DEC-HLP-003"]
+sources = ["DEC-HLP-005"]
 
 [[requirements]]
 id = "REQ-HLP-006"
 title = "Capsaicin が立てたスリープの禁止だけを解く"
 kind = "functional"
-statement = "アプリが解除、終了、復旧でスリープの禁止（`SleepDisabled`）を解くのは、Capsaicin が立てたものだけである。"
+statement = "アプリが解除や終了でスリープの禁止（`SleepDisabled`）を解くのは、Capsaicin が立てたものだけである。アプリの起動時にすでに立っている禁止は、Capsaicin が立てたものとみなさない。"
 reason = "ほかの道具や利用者が設定したスリープの禁止を、Capsaicin の解除で取り消さないため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-HLP-005"]
 depends_on = []
-sources = ["DEC-HLP-003", "EVID-BLK-003"]
+sources = ["DEC-HLP-005", "DEC-LCY-010", "EVID-BLK-003"]

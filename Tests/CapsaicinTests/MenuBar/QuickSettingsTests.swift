@@ -10,7 +10,7 @@ struct QuickSettingsTests {
           arguments: [false, true], [false, true])
     func topLevel(active: Bool, timeEnabled: Bool) throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let model = settings(fixture.model)
         model.change(\.timerEnabled, to: timeEnabled)
         model.change(\.specifiedTimeEnabled, to: timeEnabled)
@@ -91,7 +91,7 @@ struct QuickSettingsTests {
         #expect(quick.image == nil)
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 注意は保存した選択肢とクイック設定に付き、ほかの選択肢と見出しには付かない",
+    @Test("SPEC-MENU-008 SPEC-SET-005 注意の記号は保存した選択肢とクイック設定の項目名の先頭に付け、ほかの選択肢と見出しには付けない",
           arguments: SettingsLidCloseChoice.allCases)
     func lidWarnings(choice: SettingsLidCloseChoice) throws {
         let fixture = AppFixture()
@@ -103,26 +103,33 @@ struct QuickSettingsTests {
         fixture.system.isKnownUnavailable = true
         var installed = false
         let model = SettingsModel(app: fixture.model, helper: .init(
-            state: { installed ? .installed : .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { installed ? .installed : .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let controller = menu(model)
         let parent = try item("menu.quickSettings", in: controller.menu)
         let quick = try #require(parent.submenu)
-        #expect((parent.image != nil) == (choice != .sleep))
-        #expect(parent.subtitle == nil)
+        let bundle = Bundle(for: MenuBarController.self)
+        let quickTitle = MenuContent.text("menu.quickSettings", bundle: bundle)
+        #expect(parent.title == (choice == .sleep ? quickTitle : warningMark + quickTitle))
+        #expect(parent.accessibilityLabel() == (choice == .sleep ? nil
+                : String(format: MenuContent.text("menu.warning.a11y", bundle: bundle), quickTitle)))
+        #expect(parent.image == nil && parent.subtitle == nil)
         #expect(try item("menu.header.lidClose", in: quick).image == nil)
         for candidate in SettingsLidCloseChoice.allCases {
             let entry = try item("menu.sleep.lidClose." + candidate.rawValue, in: quick)
             let warns = candidate == choice && choice != .sleep
-            #expect((entry.image != nil) == warns)
+            let choiceTitle = SettingsSection.sleep.text("lidClose." + candidate.rawValue)
+            #expect(entry.title == (warns ? warningMark + choiceTitle : choiceTitle))
+            #expect(entry.image == nil && entry.onStateImage?.name() == "NSMenuCheckmark")
             #expect(entry.subtitle == (warns ? model.sleepRows[1].warning : nil))
+            #expect(entry.isEnabled == (candidate == .sleep))
             let label = String(
-                format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: Bundle(for: MenuBarController.self)),
-                SettingsSection.sleep.text("lidClose.label"), entry.title,
+                format: MenuContent.text("menu.sleep.lidClose.a11y", bundle: bundle),
+                SettingsSection.sleep.text("lidClose.label"), choiceTitle,
             )
             #expect(entry.accessibilityLabel() == (warns
                     ? String(
-                        format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: MenuBarController.self)),
+                        format: MenuContent.text("menu.warning.a11y", bundle: bundle),
                         label,
                     )
                     : label))
@@ -131,12 +138,14 @@ struct QuickSettingsTests {
         fixture.system.isKnownUnavailable = false
         model.refreshHelper()
         controller.refresh()
-        #expect(parent.image == nil)
-        #expect(quick.items
-            .allSatisfy { $0.image == nil && ($0.identifier?.rawValue == "menu.battery" || $0.subtitle == nil) })
+        #expect(parent.title == quickTitle && parent.accessibilityLabel() == nil)
+        #expect(quick.items.allSatisfy {
+            $0.image == nil && ($0.identifier?.rawValue == "menu.battery" || $0.subtitle == nil)
+                && !$0.title.hasPrefix(warningMark)
+        })
     }
 
-    @Test("SPEC-MENU-008 SPEC-SET-005 MacBook以外の注意はオンの項目とクイック設定に付く")
+    @Test("SPEC-MENU-008 SPEC-SET-005 MacBook以外の注意の記号はオンの項目とクイック設定の項目名の先頭に付ける")
     func manualWarning() throws {
         let system = FakeSystem()
         var value = Settings()
@@ -146,16 +155,18 @@ struct QuickSettingsTests {
             ports: system.ports,
         ), saveSettings: { _ in })
         let model = SettingsModel(app: app, helper: .init(
-            state: { .partial }, perform: { _ in .cancelled }, completed: { _, _ in },
+            state: { .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
         ))
         let controller = menu(model)
         let parent = try item("menu.quickSettings", in: controller.menu)
         let quick = try #require(parent.submenu)
         let manual = try item("menu.sleep.manual", in: quick)
-        #expect(manual.state == .on && manual.isEnabled && manual.image != nil)
+        #expect(manual.state == .on && manual.isEnabled && manual.image == nil)
+        #expect(manual.title == warningMark + SettingsSection.sleep.text("manual.label"))
         #expect(manual.subtitle == model.sleepRows[1].warning)
-        #expect(parent.image != nil && parent.subtitle == nil)
-        #expect(try item("menu.sleep.display", in: quick).image == nil)
+        #expect(parent.title.hasPrefix(warningMark) && parent.image == nil && parent.subtitle == nil)
+        let display = try item("menu.sleep.display", in: quick)
+        #expect(display.image == nil && !display.title.hasPrefix(warningMark))
     }
 
     private func settings(_ app: AppModel) -> SettingsModel {

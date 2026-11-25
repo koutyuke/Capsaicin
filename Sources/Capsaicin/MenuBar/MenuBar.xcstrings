@@ -313,7 +313,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Custom Duration…"
+            "value" : "Enter Duration…"
           }
         },
         "ja" : {
@@ -347,7 +347,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Until a Time…"
+            "value" : "Set a Time…"
           }
         },
         "ja" : {
@@ -381,7 +381,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Won’t turn off while on power adapter"
+            "value" : "On power adapter (stays on even if battery is low)"
           }
         },
         "ja" : {
@@ -398,7 +398,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Until you turn it off"
+            "value" : "Continues until you turn it off"
           }
         },
         "ja" : {
@@ -443,6 +443,40 @@
         }
       }
     },
+    "menu.update.available" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Update Available"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アップデートがあります"
+          }
+        }
+      }
+    },
+    "menu.update.available.subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バージョン%@"
+          }
+        }
+      }
+    },
     "menu.warning.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -460,87 +494,19 @@
         }
       }
     },
-    "menu.warning.remainingSleepSetting.helper.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair it in Helper settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定の「ヘルパー」で修復できます"
-          }
-        }
-      }
-    },
     "menu.warning.remainingSleepSetting.title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A setting that blocks sleep is still on"
+            "value" : "Part of sleep prevention is still on"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープを止める設定が残っています"
-          }
-        }
-      }
-    },
-    "menu.warning.stateSaveFailed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not save state"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "状態を保存できていません"
-          }
-        }
-      }
-    },
-    "menu.warning.unalignedLed.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Could not toggle Caps Lock LED"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Caps LockのLEDを切り替えられていません"
-          }
-        }
-      }
-    },
-    "menu.warning.unappliedSleep.helper.subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair it in Helper settings"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定の「ヘルパー」で修復できます"
+            "value" : "スリープ防止の一部が解除されていません"
           }
         }
       }
@@ -551,13 +517,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Some sleep is not being prevented"
+            "value" : "Part of sleep prevention isn't on"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一部のスリープを防止できていません"
+            "value" : "スリープ防止の一部が有効になっていません"
           }
         }
       }
@@ -741,7 +707,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capsaicin、停止中"
+            "value" : "Capsaicin、スリープ防止オフ"
           }
         }
       }

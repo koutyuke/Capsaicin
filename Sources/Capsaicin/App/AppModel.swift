@@ -1,7 +1,9 @@
 import CapsaicinCore
 import CapsaicinIPC
 import CapsaicinPlatform
+import Foundation
 import Observation
+import OSLog
 
 enum AppAlert: Equatable {
     case settingsReverted(Set<Mechanism>)
@@ -14,12 +16,8 @@ final class AppModel {
     private(set) var status: BlockingStatus
     private(set) var settings: Settings
     let capabilities: MachineCapabilities
+    let updater: UpdateModel
     var hasVirtualKeyboard = false
-    var launchAgentStatus = LaunchAgentStatus.unavailable
-    var willRestartAfterCrash: Bool {
-        launchAgentStatus == .ready
-    }
-
     /// 出来事と、その直前のセッション（指定時刻で解除したときの表示に使う）。
     @ObservationIgnored var onEvent: ((BlockingEvent, BlockingSession?) -> Void)?
     @ObservationIgnored var onAlert: ((AppAlert) -> Void)?
@@ -28,8 +26,11 @@ final class AppModel {
     private let controller: BlockingController
     private let saveSettings: (Settings) -> Void
 
-    init(controller: BlockingController, saveSettings: @escaping (Settings) -> Void) {
+    init(controller: BlockingController, saveSettings: @escaping (Settings) -> Void,
+         updater: UpdateModel = UpdateModel())
+    {
         self.controller = controller
+        self.updater = updater
         self.saveSettings = saveSettings
         status = controller.status
         settings = controller.settings
@@ -58,9 +59,17 @@ final class AppModel {
         controller.lidOpened()
     }
 
-    func launch() {
-        controller.launch()
+    func restoreBrightnessAtLaunch() {
+        controller.restoreBrightnessAtLaunch()
+    }
+
+    func finishLaunching() {
+        controller.finishLaunching()
         refresh()
+    }
+
+    var nextBrightnessDeletionAttempt: Date? {
+        controller.nextBrightnessDeletionAttempt
     }
 
     @discardableResult
@@ -80,8 +89,10 @@ final class AppModel {
         refresh()
     }
 
-    func resetsSleepDisabledOnHelperRemoval() -> Bool {
-        controller.resetsSleepDisabledOnHelperRemoval()
+    func prepareHelperRemoval() -> Bool {
+        let result = controller.prepareHelperRemoval()
+        refresh()
+        return result
     }
 
     func helperRemovalSucceeded() {
@@ -167,20 +178,16 @@ final class AppModel {
         return IPCResponse(outcome: outcome, status: status)
     }
 
-    func terminate(reason: TerminationReason) {
-        let needsAlert: Bool
-        switch reason {
-        case .userQuit: needsAlert = controller.quitByUser()
-        case .sessionEnd:
-            controller.endSession()
-            needsAlert = false
-        case .unknown:
-            controller.terminateForUnknownReason()
-            needsAlert = false
-        }
+    func terminate(isUserQuit: Bool) {
+        controller.terminate()
         refresh()
-        if needsAlert {
+        let misalignments = status.misalignments
+        guard !misalignments.isEmpty else { return }
+        if isUserQuit {
             onAlert?(.terminationIncomplete)
+        } else {
+            Logger(subsystem: "io.github.koutyuke.capsaicin", category: "App")
+                .error("終了時に合わせられていない制御: \(String(describing: misalignments), privacy: .public)")
         }
     }
 

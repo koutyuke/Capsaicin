@@ -2,7 +2,7 @@ import Foundation
 
 /// 抑止を制御する。OS への作用はすべてポート越しに行い、状態が変わったら `onEvent` で通知する。
 ///
-/// アプリは起動したら `launch()` を呼ぶ。時刻の経過は、少なくとも 1 分ごとと解除の時刻に `timePassed()` で伝える。
+/// 時刻の経過は、少なくとも 1 分ごとと解除の時刻に `timePassed()` で伝える。
 @MainActor
 public final class BlockingController {
     public struct Ports {
@@ -11,8 +11,7 @@ public final class BlockingController {
         public var led: any CapsLockLEDControlling
         public var brightness: any BuiltInDisplayBrightnessControlling
         public var power: any PowerStateProviding
-        public var bootTime: any BootTimeProviding
-        public var records: any ResumeRecordStoring
+        public var brightnessRecords: any BrightnessRecordStoring
         public var time: any TimeProviding
 
         public init(
@@ -21,8 +20,7 @@ public final class BlockingController {
             led: any CapsLockLEDControlling,
             brightness: any BuiltInDisplayBrightnessControlling,
             power: any PowerStateProviding,
-            bootTime: any BootTimeProviding,
-            records: any ResumeRecordStoring,
+            brightnessRecords: any BrightnessRecordStoring,
             time: any TimeProviding,
         ) {
             self.assertions = assertions
@@ -30,8 +28,7 @@ public final class BlockingController {
             self.led = led
             self.brightness = brightness
             self.power = power
-            self.bootTime = bootTime
-            self.records = records
+            self.brightnessRecords = brightnessRecords
             self.time = time
         }
     }
@@ -41,22 +38,25 @@ public final class BlockingController {
     public internal(set) var settings: Settings
     public let capabilities: MachineCapabilities
     public internal(set) var session: BlockingSession?
-    public internal(set) var isRecordUnsaved = false
+    public internal(set) var misalignments: Misalignments = [:]
     public var onEvent: ((BlockingEvent) -> Void)?
 
     let ports: Ports
-    /// メモリー上の再開用の記録。保存できない間も、動いている間はこれを正とする。
-    var record: ResumeRecord
+    var ownsSleepDisabled = false
+    /// SleepDisabled の値が残っていても、後片付けの役目があるとは限らない。
+    var helperCleanupLost = false
+    var savedBrightness: Float?
+    var brightnessSaveFailed = false
+    public internal(set) var nextBrightnessDeletionAttempt: Date?
     /// 仕組みごとの、適用していると見込める状態。キーがなければ分からない。
     var observed: [Mechanism: Bool]
     var lastAlignment: Date?
-    var isLidClosed = false
+    var keepsBrightnessZero = false
 
     public init(settings: Settings, capabilities: MachineCapabilities, ports: Ports) {
         self.settings = settings
         self.capabilities = capabilities
         self.ports = ports
-        record = ResumeRecord(lastUpdated: ports.time.now)
         // アサーションはプロセスとともに消えるので、作っていないと分かる。ほかは前のプロセスから残っているかもしれない。
         observed = [.idleSleepAssertion: false, .displaySleepAssertion: false]
     }
@@ -73,8 +73,15 @@ public final class BlockingController {
         ports.brightness.isKnownUnavailable
     }
 
-    public var misalignments: Misalignments {
-        record.misalignments
+    var brightnessWarnings: Set<BrightnessRecordWarning> {
+        var warnings: Set<BrightnessRecordWarning> = []
+        if brightnessSaveFailed {
+            warnings.insert(.saveFailed)
+        }
+        if nextBrightnessDeletionAttempt != nil {
+            warnings.insert(.deletionFailed)
+        }
+        return warnings
     }
 
     public var status: BlockingStatus {
@@ -82,7 +89,7 @@ public final class BlockingController {
             session: session,
             batteryCondition: effectiveSettings.batteryCondition,
             misalignments: misalignments,
-            isRecordUnsaved: isRecordUnsaved,
+            brightnessWarnings: brightnessWarnings,
         )
     }
 
@@ -103,21 +110,19 @@ public final class BlockingController {
             let newSession = BlockingSession(timeLimit: TimeLimitRule.timeLimit(
                 override: override, settings: settings, now: now, calendar: ports.time.calendar,
             ))
-            guard isBlocking else { return start(newSession, trigger: .user(origin)) }
+            guard isBlocking else { return start(newSession, from: origin) }
             session = newSession
-            record.session = newSession
-            saveRecord()
             onEvent?(.timeLimitReplaced(origin))
             return .timeLimitReplaced
         }
     }
 
-    /// 解除を要求する。停止中なら、合わせられていない制御か保存できていない記録があるときだけ合わせ直す。
+    /// 解除を要求する。停止中なら、合わせられていない制御があるときだけ合わせ直す。
     @discardableResult
     public func requestStop(from origin: RequestOrigin) -> StopResult {
         notifyingWarnings {
             guard isBlocking else {
-                if status.hasWarnings {
+                if !misalignments.isEmpty {
                     reconcileListed()
                 }
                 return .alreadyStopped
@@ -145,12 +150,15 @@ public final class BlockingController {
 
     public func timePassed() {
         notifyingWarnings {
+            if let retry = nextBrightnessDeletionAttempt, ports.time.now >= retry {
+                removeBrightnessRecord()
+            }
             if releaseIfConditionMet() {
                 return
             }
             keepBrightnessZeroWhileClosed()
             let isDue = lastAlignment.map { ports.time.now.timeIntervalSince($0) >= Self.reconcileInterval } ?? true
-            if status.hasWarnings, isDue {
+            if !misalignments.isEmpty, isDue {
                 reconcileListed()
             }
         }

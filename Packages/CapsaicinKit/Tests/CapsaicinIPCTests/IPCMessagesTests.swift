@@ -8,7 +8,6 @@ struct IPCMessagesTests {
         session: nil,
         batteryCondition: nil,
         misalignments: [:],
-        isRecordUnsaved: false,
     )
     private var blocking: BlockingStatus {
         var status = stopped
@@ -27,10 +26,11 @@ struct IPCMessagesTests {
         }
     }
 
-    @Test("SPEC-CLI-003 応答は状態とともに読み書きできる")
+    @Test("SPEC-CLI-003 応答は状態と輝度の記録の警告を読み書きできる")
     func responseRoundTrip() throws {
         var status = blocking
         status.misalignments = [.systemSleepDisabled: .leftApplied]
+        status.brightnessWarnings = [.saveFailed, .deletionFailed]
         status.batteryCondition = try BatteryCondition(
             threshold: #require(BatteryThreshold(percent: 20)),
             ignoresOnACPower: true,
@@ -41,10 +41,10 @@ struct IPCMessagesTests {
         }
     }
 
-    @Test("SPEC-CLI-007 バージョンの違う要求は中身を読まずに拒む")
-    func versionMismatch() {
-        let data = Data(#"{"version": 1, "command": {"unknown": {}}}"#.utf8)
-        #expect(throws: IPCCoding.DecodingFailure.unsupportedVersion(1)) { try IPCCoding.decodeRequest(data) }
+    @Test("SPEC-CLI-007 バージョンの違う要求は中身を読まずに拒む", arguments: [1, 2])
+    func versionMismatch(version: Int) {
+        let data = Data(#"{"version": \#(version), "command": {"unknown": {}}}"#.utf8)
+        #expect(throws: IPCCoding.DecodingFailure.unsupportedVersion(version)) { try IPCCoding.decodeRequest(data) }
     }
 
     @Test("SPEC-CLI-001 範囲外の時間や壊れた要求は境界で拒む")
@@ -63,31 +63,35 @@ struct IPCMessagesTests {
         var leftover = blocking
         leftover.misalignments = [.led: .notApplied]
         #expect(IPCResponse(outcome: .started, status: leftover).exitCode == .success)
-        leftover.isRecordUnsaved = true
+        leftover.brightnessWarnings = [.saveFailed]
         #expect(IPCResponse(outcome: .timeLimitReplaced, status: leftover).exitCode == .success)
-        #expect(IPCResponse(outcome: .alreadyBlocking, status: blocking).exitCode == .success)
-        #expect(IPCResponse(outcome: .startRejected(.recordNotSaved), status: stopped).exitCode == .unavailable)
+        #expect(IPCResponse(outcome: .alreadyBlocking, status: leftover).exitCode == .success)
+        #expect(IPCResponse(outcome: .startRejected(.helperNotInstalled), status: stopped).exitCode == .unavailable)
         #expect(IPCResponse(outcome: .cliRequestsDisabled, status: blocking).exitCode == .unavailable)
         #expect(IPCResponse(outcome: .unsupportedVersion, status: stopped).exitCode == .unavailable)
     }
 
-    @Test("SPEC-CLI-007 SPEC-BLK-011 解除の要求は、合わせられていない制御が残るか記録を保存できなければ 69")
+    @Test("SPEC-CLI-007 SPEC-BLK-011 輝度の記録の警告だけなら解除は 0、合わせられていない制御が残れば 69")
     func stopExitCodes() {
         var leftover = stopped
         leftover.misalignments = [.systemSleepDisabled: .leftApplied]
-        var unsaved = stopped
-        unsaved.isRecordUnsaved = true
+        var deletionFailed = stopped
+        deletionFailed.brightnessWarnings = [.deletionFailed]
         #expect(IPCResponse(outcome: .released, status: stopped).exitCode == .success)
         #expect(IPCResponse(outcome: .alreadyStopped, status: stopped).exitCode == .success)
         #expect(IPCResponse(outcome: .released, status: leftover).exitCode == .unavailable)
-        #expect(IPCResponse(outcome: .alreadyStopped, status: unsaved).exitCode == .unavailable)
+        #expect(IPCResponse(outcome: .released, status: deletionFailed).exitCode == .success)
+        #expect(IPCResponse(outcome: .alreadyStopped, status: deletionFailed).exitCode == .success)
     }
 
-    @Test("SPEC-CLI-007 status は合わせられていない制御の有無によらず、抑止中なら 0、停止中なら 1")
+    @Test("SPEC-CLI-003 SPEC-CLI-007 status は警告によらず、抑止中なら 0、停止中なら 1")
     func statusExitCodes() {
         var leftover = stopped
         leftover.misalignments = [.led: .leftApplied]
-        #expect(IPCResponse(outcome: .status, status: blocking).exitCode == .success)
+        leftover.brightnessWarnings = [.deletionFailed]
+        var saveFailed = blocking
+        saveFailed.brightnessWarnings = [.saveFailed]
+        #expect(IPCResponse(outcome: .status, status: saveFailed).exitCode == .success)
         #expect(IPCResponse(outcome: .status, status: leftover).exitCode == .stopped)
         #expect(ExitCode.usage.rawValue == 64)
         #expect(ExitCode.unavailable.rawValue == 69)

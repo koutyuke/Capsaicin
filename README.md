@@ -52,17 +52,15 @@ Capsaicin is developed independently as a separate application and is not affili
 
 ### GitHub Releases
 
-1. Download `Capsaicin-{version}.zip` from [Releases](https://github.com/koutyuke/Capsaicin/releases).
-2. Unpack the zip archive and move `Capsaicin.app` to your Applications folder.
-3. Open `Capsaicin.app`.
+1. Download `Capsaicin-{version}.dmg` from [Releases](https://github.com/koutyuke/Capsaicin/releases).
+2. Open the DMG and drag `Capsaicin.app` onto the `Applications` link.
+3. Open the copy of `Capsaicin.app` in your Applications folder.
 
-Because Capsaicin is not notarized by Apple, macOS may block it on first launch. If this occurs, open **System Settings** > **Privacy & Security**, scroll to **Security**, and click **Open Anyway**.
-
-To verify that the downloaded zip archive has not been tampered with, compare it against `SHA256SUMS.txt` from the release or verify it using the [GitHub CLI](https://cli.github.com/):
+To verify that the downloaded DMG has not been tampered with, compare it against `SHA256SUMS.txt` from the release or verify it using the [GitHub CLI](https://cli.github.com/). Run these commands in the folder that contains both the DMG and `SHA256SUMS.txt`:
 
 ```bash
 shasum -a 256 -c SHA256SUMS.txt
-gh attestation verify Capsaicin-{version}.zip --repo koutyuke/Capsaicin
+gh attestation verify "Capsaicin-{version}.dmg" --repo koutyuke/Capsaicin
 ```
 
 ### Homebrew
@@ -85,17 +83,10 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 
 ## Uninstallation
 
-1. If you installed the helper, open Capsaicin's settings, go to **ヘルパー** (Helper), and click **削除** (Delete). Capsaicin's interface is in Japanese only. The helper is installed under `/Library` and `/etc`, so it remains even after you delete the app.
+1. If you installed the helper, open Capsaicin's settings, go to **Helper**, and click **Remove…**. This turns sleep back on if Capsaicin turned it off, then unregisters the helper from macOS.
 2. Quit Capsaicin from the menu bar.
-3. In Terminal, remove the LaunchAgent that Capsaicin uses to launch at login and to restart after a crash. If `launchctl` reports that the service is not found, it is already unloaded; continue to the next command.
-
-   ```bash
-   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
-   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
-   ```
-
-4. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
-5. To also remove your settings and records, run:
+3. Move `Capsaicin.app` to the Trash. If you created a symbolic link or alias for the CLI, remove it as well.
+4. To also remove your settings and records, run:
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin
@@ -104,27 +95,28 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 
 If you deleted the app before deleting the helper, reinstall Capsaicin and start again from step 1.
 
-## Building from Source
+## Development & Testing
 
-Requires Xcode 27.2 and Nix with flakes enabled.
+Requires an Apple Silicon Mac with macOS 26 or later, Xcode 27.2, and Nix with flakes enabled.
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
 cd Capsaicin
-nix develop --command just build
 ```
 
-The app will be generated at `.build/xcode/Build/Products/Debug/Capsaicin.app`.
-
-## Development & Testing
+The main commands are:
 
 ```bash
+nix develop --command just build  # Generate the Xcode project and build the Debug app
 nix develop --command just check  # Format check, linting, and all tests
 nix develop --command just test   # Script, package, and app tests
+nix develop --command just lint   # Lint code and docs, and check build tool versions
 nix develop --command just fmt    # Format all files with treefmt
 ```
 
-For more details, please refer to the documentation.
+`just build` generates the app at `.build/xcode/Build/Products/Debug/Capsaicin.app`. This build is ad-hoc signed, so the **Helper** settings show **Unavailable in this build**, and the settings that require the helper (**Also prevent sleep from Apple menu**, and options other than **Put Mac to sleep (default)** for **When display is closed**) cannot be used. Software updates are also unavailable in Debug builds.
+
+For other recipes, see the [justfile](./justfile).
 
 ## Documentation
 
@@ -143,4 +135,4 @@ Bug reports and feature requests are welcome in [Issues](https://github.com/kout
 
 Copyright 2026 koutyuke
 
-Licensed under the [MIT License](./LICENSE). Third-party notices are listed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md).
+Licensed under the [MIT License](./LICENSE).

@@ -1,0 +1,120 @@
+# 方針は DEC-SYS-023。公開用の Release ワークフローとは別に動かす。
+name: Debug preview
+
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, reopened, synchronize, labeled]
+
+permissions: {}
+
+concurrency:
+  # 無関係なラベルのイベントで、進行中の確認用ビルドを取り消さない。
+  group: debug-preview-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && github.event.label.name != 'S-Preview' && github.run_id || 'build' }}
+  cancel-in-progress: true
+
+jobs:
+  preview-start:
+    name: Mark debug preview building
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'S-Preview') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'S-Preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - name: Mark debug preview building
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_KIND: debug
+          PREVIEW_STATE: building
+        run: python3 scripts/preview_comment.py
+
+  preview-package:
+    name: Package debug preview
+    needs: [preview-start]
+    runs-on: xcode-27
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      zip_name: ${{ steps.package.outputs.zip_name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
+      # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
+      - name: Select Xcode 27.2
+        run: sudo xcode-select --switch /Applications/Xcode_27.2.app
+      - name: Package
+        id: package
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          just dist-debug "$PR_NUMBER" "$COMMIT_SHA"
+          echo "zip_name=Capsaicin-debug-pr${PR_NUMBER}-${COMMIT_SHA:0:7}.zip" >> "$GITHUB_OUTPUT"
+      - name: Upload unsigned debug preview
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-debug-preview
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            .build/debug-dist/${{ steps.package.outputs.zip_name }}
+            .build/debug-dist/Capsaicin-layout.dmg
+            .build/debug-dist/SHA256SUMS.txt
+
+  sign-and-notarize:
+    needs: [preview-package]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/sign-and-notarize.yml
+    with:
+      input-artifact: unsigned-debug-preview
+      zip-name: ${{ needs.preview-package.outputs.zip_name }}
+    secrets:
+      DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+      DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+      NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+      NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+      NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+
+  preview-comment:
+    name: Comment debug preview result
+    needs: [preview-start, preview-package, sign-and-notarize]
+    # !cancelled() は依存ジョブの失敗時にも評価し、取り消し時には投稿しない。
+    if: >-
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      contains(github.event.pull_request.labels.*.name, 'S-Preview') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'S-Preview')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - name: Update debug preview comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_KIND: debug
+          PREVIEW_STATE: ${{ needs.preview-package.result == 'success' && needs.sign-and-notarize.result == 'success' && 'ready' || 'failed' }}
+          ARTIFACT_URL: ${{ needs.sign-and-notarize.outputs.artifact_url }}
+          PACKAGE_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
+        run: python3 scripts/preview_comment.py

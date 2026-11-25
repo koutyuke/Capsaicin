@@ -5,28 +5,37 @@ private let brightnessLogger = Logger(subsystem: "io.github.koutyuke.capsaicin",
 public extension BlockingController {
     /// 閉じた通知でだけ暗くする。開始時にすでに閉じていても、この入口は呼ばない。
     func lidClosed() {
-        isLidClosed = true
         guard isBlocking, effectiveSettings.shouldZeroBrightnessOnLidClose else { return }
-        do {
-            if record.savedBrightness == nil {
-                guard let value = try ports.brightness.readBrightness(), saveBrightness(value) else { return }
+        notifyingWarnings {
+            do {
+                if savedBrightness == nil {
+                    guard let value = try ports.brightness.readBrightness() else { return }
+                    guard ports.brightnessRecords.save(value) else {
+                        brightnessSaveFailed = true
+                        return
+                    }
+                    savedBrightness = value
+                    brightnessSaveFailed = false
+                    // 原子的な保存で、削除を待っていた古い記録も置き換わった。
+                    nextBrightnessDeletionAttempt = nil
+                }
+                try ports.brightness.setBrightness(0)
+                keepsBrightnessZero = true
+            } catch {
+                brightnessLogger.error("内蔵ディスプレイを暗くできません: \(error, privacy: .public)")
             }
-            try ports.brightness.setBrightness(0)
-        } catch {
-            brightnessLogger.error("内蔵ディスプレイを暗くできません: \(error, privacy: .public)")
         }
     }
 
     func lidOpened() {
-        isLidClosed = false
-        restoreBrightness()
+        notifyingWarnings { endBrightnessControl() }
     }
 }
 
 extension BlockingController {
     func keepBrightnessZeroWhileClosed() {
         guard isBlocking, effectiveSettings.shouldZeroBrightnessOnLidClose,
-              record.savedBrightness != nil, isLidClosed else { return }
+              keepsBrightnessZero else { return }
         do {
             guard let current = try ports.brightness.readBrightness() else {
                 brightnessLogger.error("輝度を0に保つ内蔵ディスプレイが見つかりません。")
@@ -40,27 +49,37 @@ extension BlockingController {
         }
     }
 
-    /// 設定や抑止の状態ではなく、暗くした記録があることに結びつけて戻す。
-    func restoreBrightness() {
-        guard let saved = record.savedBrightness else { return }
+    func endBrightnessControl() {
+        keepsBrightnessZero = false
+        brightnessSaveFailed = false
+        restoreBrightness()
+    }
+
+    /// 起動時だけ、アプリを開く前に利用者が戻した輝度を上書きしない。
+    func restoreBrightness(onlyIfZero: Bool = false) {
+        guard let saved = savedBrightness else { return }
         do {
-            try ports.brightness.setBrightness(saved)
-            _ = saveBrightness(nil)
+            if onlyIfZero {
+                guard let current = try ports.brightness.readBrightness() else {
+                    brightnessLogger.error("輝度を読める内蔵ディスプレイが見つかりません。記録を残します。")
+                    return
+                }
+                if current == 0 {
+                    try ports.brightness.setBrightness(saved)
+                }
+            } else {
+                try ports.brightness.setBrightness(saved)
+            }
+            savedBrightness = nil
+            removeBrightnessRecord()
         } catch {
             brightnessLogger.error("内蔵ディスプレイの輝度を戻せません。記録を残します: \(error, privacy: .public)")
         }
     }
 
-    /// 輝度だけの保存失敗は抑止の警告に含めない。保存できるまでは元の記録を保つ。
-    private func saveBrightness(_ value: Float?) -> Bool {
-        var updated = record
-        updated.savedBrightness = value
-        updated.lastUpdated = ports.time.now
-        guard ports.records.save(updated) else {
-            brightnessLogger.error("内蔵ディスプレイの輝度の記録を保存できません。")
-            return false
-        }
-        record = updated
-        return true
+    /// 復元した値はメモリーに残さず、失敗したら削除だけを試み直す。
+    func removeBrightnessRecord() {
+        nextBrightnessDeletionAttempt = ports.brightnessRecords.remove()
+            ? nil : ports.time.now.addingTimeInterval(Self.reconcileInterval)
     }
 }

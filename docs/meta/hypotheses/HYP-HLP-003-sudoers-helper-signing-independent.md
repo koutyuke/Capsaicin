@@ -2,9 +2,9 @@
 schema: hypothesis
 id: HYP-HLP-003
 title: sudoers とヘルパーの方式は、コード署名の状態によらず動く
-status: open
-affects: ["DEC-HLP-001", "REQ-SYS-006"]
-evidence: []
+status: supported
+affects: ["DEC-HLP-001"]
+evidence: ["EVID-HLP-003"]
 ---
 
 # HYP-HLP-003 sudoers とヘルパーの方式は、コード署名の状態によらず動く
@@ -15,7 +15,7 @@ evidence: []
 
 ## 外れたときに起きること
 
-将来ほかの人に配った場合に、ヘルパーが動かない。`REQ-SYS-006` を満たせず、`DEC-HLP-001` を見直す。
+将来ほかの人に配った場合に、ヘルパーが動かない。`DEC-HLP-001` を見直す。
 
 ## 確かめ方
 
@@ -31,4 +31,4 @@ evidence: []
 
 ## 結果
 
-未確認。
+支持された（`EVID-HLP-003`）。CI でビルドした ad-hoc 署名の配布物を、隔離属性が付いた状態で別の Mac に入れた。その Mac で、`sudo -n` によるヘルパーの `on` と `off` がパスワードなしで終了コード 0 で終わった。再起動後には、アプリを起動しないまま `SleepDisabled` が 0 で、LaunchDaemon は終了コード 0 を残していた。確かめたのは1台の Mac、1つの macOS のバージョンだけである。

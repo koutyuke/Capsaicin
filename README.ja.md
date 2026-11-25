@@ -52,17 +52,15 @@ Capsaicin はこれらのアプリとは別のアプリとして独立して作�
 
 ### GitHub Release
 
-1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.zip` をダウンロードする。
-2. zip を展開し、`Capsaicin.app` を「アプリケーション」フォルダーに移動する。
-3. `Capsaicin.app` を開く。
+1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.dmg` をダウンロードする。
+2. DMG を開き、`Capsaicin.app` を `Applications` のリンクにドラッグする。
+3. 「アプリケーション」フォルダーにコピーした `Capsaicin.app` を開く。
 
-Capsaicin は Apple の公証を受けていないため、初回は macOS に開くのを止められます。その場合は「システム設定」>「プライバシーとセキュリティ」を開き、「セキュリティ」の「このまま開く」をクリックしてください。
-
-ダウンロードした zip が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。
+ダウンロードした DMG が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。`SHA256SUMS.txt` を DMG と同じフォルダーに置き、そのフォルダーで実行してください。
 
 ```bash
 shasum -a 256 -c SHA256SUMS.txt
-gh attestation verify Capsaicin-{バージョン}.zip --repo koutyuke/Capsaicin
+gh attestation verify "Capsaicin-{バージョン}.dmg" --repo koutyuke/Capsaicin
 ```
 
 ### Homebrew
@@ -85,17 +83,10 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 
 ## アンインストール
 
-1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除**をクリックしてください。Capsaicinのインターフェースは日本語のみです。ヘルパーは`/Library`と`/etc`にインストールされるため、アプリを削除した後も残ります。
+1. ヘルパーをインストールした場合は、Capsaicinの設定を開き、**ヘルパー**から**削除…**をクリックしてください。Capsaicinが止めていたスリープを元に戻してから、macOSへのヘルパーの登録を解除します。
 2. メニューバーからCapsaicinを終了します。
-3. Terminalで、Capsaicinがログイン時の起動やクラッシュ後の再起動に使用するLaunchAgentを削除します。`launchctl`がサービスが見つからないと報告した場合は、すでにアンロードされているため、次のコマンドに進んでください。
-
-   ```bash
-   launchctl bootout gui/$(id -u)/io.github.koutyuke.capsaicin
-   rm ~/Library/LaunchAgents/io.github.koutyuke.capsaicin.plist
-   ```
-
-4. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
-5. 設定や記録も削除するには、以下を実行します。
+3. `Capsaicin.app`をゴミ箱に移動します。CLI用のシンボリックリンクやエイリアスを作成した場合は、それも削除してください。
+4. 設定や記録も削除するには、以下を実行します。
 
    ```bash
    defaults delete io.github.koutyuke.capsaicin
@@ -104,27 +95,28 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 
 ヘルパーを削除する前にアプリを削除してしまった場合は、Capsaicinを再インストールし、手順1からやり直してください。
 
-## ソースからビルドする
+## 開発とテスト
 
-Xcode 27.2 と、flakes を有効にした Nix が必要です。
+macOS 26 以降の Apple Silicon の Mac、Xcode 27.2、flakes を有効にした Nix が必要です。
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
 cd Capsaicin
-nix develop --command just build
 ```
 
-アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` に生成されます。
-
-## 開発とテスト
+主に使うコマンドは次のとおりです。
 
 ```bash
+nix develop --command just build  # Xcode プロジェクトを生成し、Debug のアプリをビルド
 nix develop --command just check  # 整形の検査、lint、すべてのテスト
 nix develop --command just test   # 検査スクリプト、パッケージ、アプリのテスト
+nix develop --command just lint   # コードと文書の lint、ビルドツールの版の検査
 nix develop --command just fmt    # treefmt ですべてのファイルを整形
 ```
 
-詳しくはドキュメントを参照してください。
+`just build` で、アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` に生成されます。このビルドは ad-hoc 署名のため、設定の**ヘルパー**は**このビルドでは使用不可**と表示され、ヘルパーが必要な設定（**Appleメニューからのスリープも防ぐ**と、**ディスプレイを閉じたとき**の**Macをスリープ（標準）**以外の選択肢）は使えません。Debug ビルドではソフトウェアアップデートも利用できません。
+
+ほかのレシピは [justfile](./justfile) を参照してください。
 
 ## ドキュメント
 
@@ -141,4 +133,4 @@ nix develop --command just fmt    # treefmt ですべてのファイルを整形
 
 Copyright 2026 koutyuke
 
-本リポジトリは [MIT License](./LICENSE) のもとで公開されています。リポジトリに含める第三者の著作物は [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md) にあります。
+本リポジトリは [MIT License](./LICENSE) のもとで公開されています。

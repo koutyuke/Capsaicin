@@ -3,7 +3,7 @@ import CapsaicinPlatform
 import SwiftUI
 
 @MainActor
-final class SettingsWindowController: NSWindowController {
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
     let model: SettingsModel
     private let selection: SettingsSelection
 
@@ -17,16 +17,12 @@ final class SettingsWindowController: NSWindowController {
             selection: selection,
         )
         super.init(window: window)
+        window.delegate = self
         window.center()
-        model.confirm = { [weak self] operation, fromSetting in
+        model.confirm = { [weak self] operation in
             guard let self, let window = self.window else { return false }
             let key = SettingsModel.operationKey(operation)
-            var title = key + ".title"
-            if fromSetting, operation == .install {
-                title = self.model.app.capabilities.hasLid
-                    ? "helperInstall.lidClose.title" : "helperInstall.setting.title"
-            }
-            let alert = alert(title: SettingsSection.helper.text(title),
+            let alert = alert(title: SettingsSection.helper.text(key + ".title"),
                               message: SettingsSection.helper.text(key + ".message"))
             alert.addButton(withTitle: SettingsSection.helper.text(key + ".confirm"))
             alert.addButton(withTitle: SettingsSection.helper.text("cancel"))
@@ -72,7 +68,16 @@ final class SettingsWindowController: NSWindowController {
 
     func open() {
         model.refreshHelper()
+        model.app.updater.refresh()
         bringToFront()
+    }
+
+    func windowDidBecomeKey(_: Notification) {
+        model.settingsWindowDidBecomeKey()
+    }
+
+    func windowWillClose(_: Notification) {
+        model.settingsWindowClosed()
     }
 
     func bringToFront() {

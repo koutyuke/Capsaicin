@@ -2,10 +2,10 @@
 schema: decision
 id: DEC-SYS-004
 title: Apple Developer Program に加入せず、公証せずに配る
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
-requirements: ["REQ-SYS-005", "REQ-SYS-006"]
+superseded_by: ["DEC-SYS-021"]
+requirements: []
 based_on: ["EVID-SYS-001", "EVID-SYS-002"]
 ---
 

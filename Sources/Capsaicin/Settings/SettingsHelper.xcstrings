@@ -18,23 +18,6 @@
         }
       }
     },
-    "error.helperInstall.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to install the helper. If you changed a setting, it has been reverted."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーをインストールできませんでした。設定から操作した場合は、設定を変更前の状態に戻しています。"
-          }
-        }
-      }
-    },
     "error.helperInstall.title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -48,23 +31,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ヘルパーをインストールできませんでした"
-          }
-        }
-      }
-    },
-    "error.helperRemove.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Failed to remove configuration files. Some files may remain on your system."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "構成ファイルの削除に失敗しました。一部のファイルがシステムに残っている可能性があります。"
           }
         }
       }
@@ -86,36 +52,53 @@
         }
       }
     },
-    "error.helperRepair.message" : {
+    "error.helperRetry.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Failed to repair the helper. Check the installation status and try repairing again."
+            "value" : "Try again. If the problem continues, restart your Mac or reinstall Capsaicin."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーを修復できませんでした。インストールの状態を確認し、もう一度修復してください。"
+            "value" : "再度お試しください。それでも解決しない場合は、Macを再起動するか、Capsaicinを再インストールしてください。"
           }
         }
       }
     },
-    "error.helperRepair.title" : {
+    "error.helperTranslocated.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Could not repair helper"
+            "value" : "Capsaicin is running from a temporary App Translocation location. Move it to the Applications folder and reopen it."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーを修復できませんでした"
+            "value" : "App Translocationの一時的な場所で動いているため、「アプリケーション」フォルダーに移して開き直してください。"
+          }
+        }
+      }
+    },
+    "error.helperTranslocated.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Could not install helper from this location"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この場所からはヘルパーをインストールできません"
           }
         }
       }
@@ -188,53 +171,19 @@
         }
       }
     },
-    "helperInstall.lidClose.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To keep your Mac awake when the display is closed, install the helper."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ディスプレイを閉じてもスリープさせないには、ヘルパーのインストールが必要です"
-          }
-        }
-      }
-    },
     "helperInstall.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Registers a small program that switches sleep settings, a configuration allowing its execution, and an item that restores sleep settings on Mac startup. Your administrator password is required once. You can remove it anytime from Helper settings."
+            "value" : "This adds a small helper program that runs with administrator privileges and only switches sleep settings. You can remove it anytime in Helper settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ設定を切り替える小さなプログラム、その実行を許可する設定、Mac起動時にスリープ設定を元に戻す項目をシステムに登録します。管理者のパスワードが1回必要です。設定の「ヘルパー」から削除できます。"
-          }
-        }
-      }
-    },
-    "helperInstall.setting.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To use “Prevent sleep from Apple menu”, install the helper."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「メニューから選んでもスリープさせない」を使うにはヘルパーのインストールが必要です"
+            "value" : "管理者権限で動作し、スリープの切り替えのみを行う小さなヘルパープログラムを追加します。このヘルパーは、設定の「ヘルパー」からいつでも削除できます。"
           }
         }
       }
@@ -296,13 +245,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "After removal, your Mac goes to sleep when you close the display or choose Sleep from the Apple menu, even while sleep prevention is on. Your administrator password is required to remove it."
+            "value" : "Features that require the helper will be turned off, and their settings will return to their defaults. You can reinstall the helper anytime in Settings."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "削除すると、Capsaicinがオンの間でも、ディスプレイを閉じたときやメニューから選んだときにMacがスリープするようになります。削除には管理者のパスワードが必要です。"
+            "value" : "ヘルパーが必要な機能は無効になり、該当する設定はデフォルトに戻ります。ヘルパーは設定画面からいつでも再度インストールできます。"
           }
         }
       }
@@ -324,70 +273,19 @@
         }
       }
     },
-    "helperRepair.button" : {
+    "intro.message" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repair…"
+            "value" : "A small companion program that runs with administrator privileges. It switches system-wide sleep settings that regular sleep prevention cannot control."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "修復…"
-          }
-        }
-      }
-    },
-    "helperRepair.confirm" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "修復"
-          }
-        }
-      }
-    },
-    "helperRepair.message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Some of the helper's configuration files are missing. Your administrator password is required to reinstall all necessary files."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーの構成ファイルの一部が見つかりません。必要なすべてのファイルを再登録するため、管理者のパスワードが必要です。"
-          }
-        }
-      }
-    },
-    "helperRepair.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repair the helper?"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ヘルパーを修復しますか？"
+            "value" : "管理者権限で動作する小さな補助プログラムです。通常のスリープ防止では制御できない、システム全体のスリープ設定を切り替えるために使用します。"
           }
         }
       }
@@ -426,36 +324,19 @@
         }
       }
     },
-    "status.help" : {
+    "openSystemSettings.button" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Installs three components on your system: a small program that prevents sleep when closing the display or selecting sleep from the menu, a setting allowing it to run without a password, and an item that safely restores sleep settings when Mac starts up."
+            "value" : "Open System Settings"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メニューから選んだときやディスプレイを閉じたときのスリープを止める小さなプログラム、パスワードなしでの実行を許可する設定、Mac起動時にスリープ設定を安全に戻す項目の3つをシステムにインストールします。"
-          }
-        }
-      }
-    },
-    "status.installed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installed"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インストール済み"
+            "value" : "システム設定を開く"
           }
         }
       }
@@ -494,19 +375,70 @@
         }
       }
     },
-    "status.partial" : {
+    "status.requiresApproval" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incomplete configuration"
+            "value" : "Awaiting approval in System Settings"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "構成が不完全"
+            "value" : "システム設定の許可待ち"
+          }
+        }
+      }
+    },
+    "status.requiresApproval.help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow background activity under Login Items & Extensions in System Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "システム設定の「ログイン項目と機能拡張」でバックグラウンド実行を許可してください。"
+          }
+        }
+      }
+    },
+    "status.unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unavailable in this build"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このビルドでは使用不可"
+          }
+        }
+      }
+    },
+    "status.usable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有効"
           }
         }
       }

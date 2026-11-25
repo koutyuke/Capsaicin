@@ -35,7 +35,6 @@ struct CLIOutput {
 
     """)
 
-    private static let unsaved = "couldn't save the state used to resume after a relaunch"
     private static let version = "this command and the running Capsaicin are different versions"
 
     static func usesColor(isTerminal: Bool, environment: [String: String]) -> Bool {
@@ -65,8 +64,12 @@ struct CLIOutput {
                 )
             }
         }
-        if response.status.isRecordUnsaved {
-            output.standardError += diagnostic("warning", unsaved, color: stderrColor)
+        for warning in BrightnessRecordWarning.allCases where response.status.brightnessWarnings.contains(warning) {
+            let message = switch warning {
+            case .saveFailed: "couldn't save the display brightness record"
+            case .deletionFailed: "couldn't delete the display brightness record"
+            }
+            output.standardError += diagnostic("warning", message, color: stderrColor)
         }
         return output
     }
@@ -176,7 +179,6 @@ struct CLIOutput {
             }
             return "the battery is below the threshold set in Settings"
         case .helperNotInstalled: return "the helper isn't installed; install or repair it in Settings"
-        case .recordNotSaved: return unsaved
         case let .mechanismsFailed(mechanisms):
             return Mechanism.allCases.filter { mechanisms.contains($0) }
                 .map { misalignment($0, direction: .notApplied) }.joined(separator: "; ")

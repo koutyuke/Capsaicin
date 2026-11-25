@@ -5,7 +5,7 @@ title: CI を PR で必須にし、main へのリリース用の PR のマージ
 status: accepted
 supersedes: ["DEC-SYS-013"]
 superseded_by: []
-requirements: ["REQ-SYS-005", "REQ-SYS-006"]
+requirements: []
 based_on: ["DEC-SYS-004", "DEC-SYS-006", "DEC-SYS-008", "DEC-SYS-014", "HYP-HLP-003"]
 ---
 
@@ -32,7 +32,7 @@ based_on: ["DEC-SYS-004", "DEC-SYS-006", "DEC-SYS-008", "DEC-SYS-014", "HYP-HLP-
 PR を開いたとき、更新したとき、ラベルを変えたときに、Ubuntu の軽いジョブ「PR policy」で次を確かめる。
 
 - `develop` への PR: 種類のラベル（`T-*`）がちょうど1つある。
-- `main` への PR: head が `release/v*` か `hotfix/*` である。`release/*` なら `S-Release` があり、ブランチ名の版と `project.yml` の `MARKETING_VERSION` が一致する。`hotfix/*` なら `S-Hotfix` と種類のラベルがちょうど1つある。どちらも、`v{MARKETING_VERSION}` のタグがまだない。
+- `main` への PR: head が `release/v*` か `hotfix/*` である。`release/*` なら `S-Release` があり、ブランチ名の版と `project.yml` の `MARKETING_VERSION` が一致する。`hotfix/*` なら `S-Hotfix` と種類のラベルがちょうど1つあり、`I-Breaking` がない。どちらも、`v{MARKETING_VERSION}` のタグがまだなく、`CURRENT_PROJECT_VERSION` が `main` の値より大きい（`DEC-SYS-022`）。
 
 ### ルールセット
 

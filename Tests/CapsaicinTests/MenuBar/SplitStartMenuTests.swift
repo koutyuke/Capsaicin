@@ -22,7 +22,7 @@ struct SplitStartMenuTests {
         func subtitle() throws -> String {
             let status = BlockingStatus(session: nil, batteryCondition: batteryEnabled ? BatteryCondition(
                 threshold: settings.batteryThreshold, ignoresOnACPower: settings.ignoresBatteryOnACPower,
-            ) : nil, misalignments: [:], isRecordUnsaved: false)
+            ) : nil, misalignments: [:])
             let rows = try MenuContent.make(
                 status: status,
                 settings: settings,
@@ -61,7 +61,7 @@ struct SplitStartMenuTests {
         let battery = BatteryCondition(threshold: settings.batteryThreshold, ignoresOnACPower: true)
         let status = BlockingStatus(session: BlockingSession(timeLimit: nil),
                                     batteryCondition: batteryEnabled ? battery : nil,
-                                    misalignments: [:], isRecordUnsaved: false)
+                                    misalignments: [:])
         let rows = MenuContent.make(status: status, settings: settings, isOnACPower: false, hasInternalBattery: true,
                                     sleepRows: [],
                                     bundle: Bundle(for: MenuBarController.self))
@@ -123,7 +123,7 @@ struct SplitStartMenuTests {
           arguments: [false, true])
     func toggleBattery(active: Bool) throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         if active {
             fixture.model.requestStart(from: .menu)
         }
@@ -166,7 +166,7 @@ struct SplitStartMenuTests {
     @Test("SPEC-MENU-002 時間条件なしの開始は保存したタイマーと時刻を使わずバッテリー条件を保つ")
     func startWithoutTimeLimit() throws {
         let fixture = AppFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let model = settings(fixture.model)
         model.change(\.timerEnabled, to: true)
         model.change(\.specifiedTimeEnabled, to: true)

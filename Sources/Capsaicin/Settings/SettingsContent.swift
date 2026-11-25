@@ -3,7 +3,8 @@ import CapsaicinPlatform
 import Foundation
 
 enum SettingsSection: String, CaseIterable, Identifiable {
-    case general, sleep, led, controls, helper, about
+    case general, sleep, feedback, controls, helper, about
+
     var id: Self {
         self
     }
@@ -16,7 +17,7 @@ enum SettingsSection: String, CaseIterable, Identifiable {
         switch self {
         case .general: "gearshape"
         case .sleep: "moon.zzz"
-        case .led: "custom.capsaicin.led"
+        case .feedback: "custom.capsaicin.led"
         case .controls: "keyboard"
         case .helper: "lock.shield"
         case .about: "info.circle"
@@ -50,18 +51,29 @@ struct SettingsSleepRow: Identifiable {
     let setting: WritableKeyPath<Settings, Bool>?
     let state: SleepSettingRowState
     var help = ""
-    /// 注意の文。(i) の先頭とメニューの副題で使う。
+    /// 注意の文。説明文の先頭とメニューの副題で使う。
     var warning = ""
+    /// 保存値と逆の意味の項目名を持つ。スイッチのオンは保存値の false に当たる。
+    var inverted = false
     var warningLabel = ""
+    var needsHelperInstallation = false
     var id: String {
         key
     }
 
     var isOn: Bool {
         switch state {
-        case let .editable(value): value
+        case let .editable(value): value != inverted
         case .onWithoutHelper: true
         }
+    }
+
+    var isToggleEnabled: Bool {
+        !needsHelperInstallation || isOn
+    }
+
+    func canSelect(_ choice: SettingsLidCloseChoice) -> Bool {
+        choice == .sleep || !needsHelperInstallation
     }
 
     static func rows(settings: Settings, capabilities: MachineCapabilities,
@@ -70,15 +82,18 @@ struct SettingsSleepRow: Identifiable {
         let presentation = SleepSettingsPresentation(settings: settings, isHelperInstalled: helper == .installed)
         let manual = capabilities.hasLid ? "lidClose" : "manual"
         let definitions: [Self] = [
-            Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep),
+            Self(key: "display", symbol: "display", setting: \.blocksDisplaySleep, state: presentation.displaySleep,
+                 inverted: true),
             Self(key: manual, symbol: capabilities.hasLid ? "laptopcomputer" : "powersleep",
-                 setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep),
+                 setting: capabilities.hasLid ? nil : \.blocksManualSleep, state: presentation.manualSleep,
+                 needsHelperInstallation: helper != .installed),
         ]
         return definitions.map { row in
             var row = row
             var warnings: [String] = []
+            // 直し方は「ヘルパー」のページで示すので、ここではヘルパーの状態を区別しない。
             if row.state == .onWithoutHelper {
-                warnings.append("helperNotReady")
+                warnings.append("helperInactive")
             }
             if row.key == "lidClose", SettingsLidCloseChoice(settings: settings) == .zeroBrightness,
                brightnessUnavailable
@@ -88,7 +103,16 @@ struct SettingsSleepRow: Identifiable {
             row.warningLabel = warnings.map { SettingsSection.sleep.text($0 + ".a11y") }.formatted(.list(type: .and))
             let warningTexts = warnings.map { SettingsSection.sleep.text($0) }
             row.warning = warningTexts.joined(separator: "\n")
-            row.help = (warningTexts + [SettingsSection.sleep.text(row.key + ".help")]).joined(separator: "\n")
+            var help = warningTexts
+            // 選んでいる値のことと読まれないよう、ヘルパーが要る選択肢を名指しして、選べるようにする条件を書く。
+            if row.needsHelperInstallation, !row.isOn {
+                help.append(SettingsSection.sleep.text(row.key + ".helperRequired"))
+            }
+            // 「ディスプレイを閉じたとき」は、項目名と選択肢で足りるので固定の説明文は置かない。
+            if row.key != "lidClose" {
+                help.append(SettingsSection.sleep.text(row.key + ".help"))
+            }
+            row.help = help.joined(separator: "\n")
             return row
         }
     }

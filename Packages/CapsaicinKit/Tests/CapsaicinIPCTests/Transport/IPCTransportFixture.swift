@@ -5,7 +5,7 @@ import Dispatch
 import Foundation
 import Testing
 
-let transportStopped = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:], isRecordUnsaved: false)
+let transportStopped = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [:])
 
 final class IPCTransportFixture {
     let root: URL

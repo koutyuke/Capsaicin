@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-UI-012
 title: 機能名を「スリープ防止」とし、止めるものを「システムスリープ」「ディスプレイスリープ」と書く
-status: accepted
+status: superseded
 supersedes: ["DEC-UI-011"]
-superseded_by: []
+superseded_by: ["DEC-UI-015"]
 requirements: ["REQ-SYS-004", "REQ-SET-003"]
 based_on: []
 ---

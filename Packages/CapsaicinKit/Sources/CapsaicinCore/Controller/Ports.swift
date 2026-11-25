@@ -2,7 +2,7 @@ import Foundation
 
 // コントローラーが OS に作用するためのポート。すべてメインスレッドから同期で呼ぶ。
 // 失敗する操作は throw で伝える。コントローラーは失敗を合わせられていない制御か開始の拒否にする。
-// 輝度は抑止の仕組みではないので、その失敗はログに残すだけにする。
+// 輝度の読み書きの失敗はログに残す。輝度の記録を保存・削除できない場合は警告も出す。
 
 /// オンラインの内蔵ディスプレイの輝度。外部ディスプレイは操作しない。
 @MainActor
@@ -23,15 +23,23 @@ public protocol PowerAssertionControlling {
     func releaseAssertion(_ kind: AssertionKind) throws
 }
 
-/// どの操作も実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
-/// 期限を過ぎた子プロセスは止めずに終わるまで見届け、その間の読み取りと操作は子プロセスを起動せずに throw する。
+public enum HelperConnectionLoss: Sendable {
+    case interrupted, invalid
+}
+
+/// 読み取りと要求は実装が期限を持ち、期限切れは throw する（メインスレッドから同期で呼ぶため）。
+/// XPC の期限切れは接続を取り消す。読み取りの子プロセスは終わるまで見届け、その間の読み取りは throw する。
 @MainActor
 public protocol HelperSleepControlling {
-    /// ヘルパーの3つの構成要素がそろっているか。
+    /// 署名に Team ID があり、ヘルパーが登録・許可されているか。
     var isHelperInstalled: Bool { get }
+    var isHelperAwaitingApproval: Bool { get }
     func readSleepDisabled() throws -> Bool
+    /// 成功した on の接続を保つ。off はその接続があれば使い、応答結果によらず閉じる。
     func turnOn() throws
     func turnOff() throws
+    /// 要求を送らずに接続を閉じる。保っていなければ何もしない。
+    func closeConnection()
 }
 
 /// Caps Lock の LED。入力状態は変えない。
@@ -49,19 +57,23 @@ public protocol PowerStateProviding {
     var powerState: PowerState { get }
 }
 
-/// Mac の起動時刻（kern.boottime）。
-@MainActor
-public protocol BootTimeProviding {
-    /// 読めないときは取得不能を示す `Date.distantPast` を返す。過去の起動時刻としては扱わない。
-    var bootTime: Date { get }
+public struct BrightnessRecord: Codable, Equatable, Sendable {
+    /// 前の版の記録には、輝度を含まないものもある。
+    public let savedBrightness: Float?
+
+    public init(savedBrightness: Float?) {
+        self.savedBrightness = savedBrightness
+    }
 }
 
 @MainActor
-public protocol ResumeRecordStoring {
+public protocol BrightnessRecordStoring {
     /// 記録がなければ nil。読めない（壊れている、形式が違う）ときも nil を返し、実装の側でログに残す。
-    func load() -> ResumeRecord?
-    /// ファイルを置き換えて書き、書きかけの状態を残さない。保存できたら true。
-    func save(_ record: ResumeRecord) -> Bool
+    func load() -> BrightnessRecord?
+    /// ファイルを置き換えて書き、書きかけの状態を残さない。失敗は実装の側でログに残す。
+    func save(_ brightness: Float) -> Bool
+    /// すでに記録がないときも成功とする。失敗は実装の側でログに残す。
+    func remove() -> Bool
 }
 
 @MainActor

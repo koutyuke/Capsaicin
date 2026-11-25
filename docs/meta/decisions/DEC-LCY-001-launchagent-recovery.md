@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-LCY-001
 title: クラッシュ時の再起動とログイン時の起動を LaunchAgent で行う
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-LCY-008"]
 requirements: ["REQ-LCY-001", "REQ-LCY-003"]
 based_on: ["EVID-LCY-001"]
 ---

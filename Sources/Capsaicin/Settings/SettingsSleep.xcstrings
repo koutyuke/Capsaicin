@@ -7,13 +7,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Battery"
+            "value" : "Turn Off Based on Battery"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バッテリー"
+            "value" : "バッテリーによる自動解除"
           }
         }
       }
@@ -30,7 +30,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "電源アダプタ接続中は残量でオフにしない"
+            "value" : "電源アダプタ接続中は自動解除しない"
           }
         }
       }
@@ -47,7 +47,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "残量が少なくなったらオフにする"
+            "value" : "バッテリー残量が少ないときに自動解除"
           }
         }
       }
@@ -58,13 +58,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Low battery threshold"
+            "value" : "Battery level"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "しきい値"
+            "value" : "バッテリー残量"
           }
         }
       }
@@ -75,13 +75,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "Below %d%%"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d%%"
+            "value" : "%d%%未満"
           }
         }
       }
@@ -143,13 +143,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents the screen saver from starting and the display from turning off, even when inactive. If you turn off this setting and the display turns off, your Mac itself will not go to sleep."
+            "value" : "Your Mac stays awake even when the display turns off."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止がオンの間、操作がない場合でもスクリーンセーバーの起動やディスプレイの消灯を防ぎます。この設定をオフにしてディスプレイが消灯しても、Mac本体はスリープされません。"
+            "value" : "ディスプレイがオフになっても、Mac本体はスリープしません。"
           }
         }
       }
@@ -160,47 +160,47 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prevent display from turning off automatically"
+            "value" : "Allow display to turn off automatically"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイを自動でオフにしない"
+            "value" : "ディスプレイの自動オフを許可"
           }
         }
       }
     },
-    "helperNotReady" : {
+    "helperInactive" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Because the helper is not properly installed, this setting cannot be applied. Repair it in Helper settings."
+            "value" : "This setting can't be applied because the helper is not enabled."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパーが正しくインストールされていないため、この設定を適用できません。設定の「ヘルパー」で修復してください。"
+            "value" : "ヘルパーが有効になっていないため、設定を反映できません。"
           }
         }
       }
     },
-    "helperNotReady.a11y" : {
+    "helperInactive.a11y" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Warning: Helper is not available"
+            "value" : "Warning: Helper is not enabled"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "警告、ヘルパーを使用できません"
+            "value" : "警告、ヘルパーが有効になっていません"
           }
         }
       }
@@ -222,19 +222,19 @@
         }
       }
     },
-    "lidClose.help" : {
+    "lidClose.helperRequired" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Controls what your Mac and display do when you close the display while sleep prevention is on. Options other than “System sleep” require the helper."
+            "value" : "To choose an option other than “Put Mac to sleep (default)”, the helper must be enabled."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中に、ディスプレイを閉じたときのMacとディスプレイの動作を制御します。「システムスリープ」以外の設定ではヘルパーのインストールが必要です。"
+            "value" : "「Macをスリープ（標準）」以外を選ぶには、ヘルパーを有効にする必要があります。"
           }
         }
       }
@@ -279,13 +279,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "System sleep (default)"
+            "value" : "Put Mac to sleep (default)"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "システムスリープ（標準）"
+            "value" : "Macをスリープ（標準）"
           }
         }
       }
@@ -296,13 +296,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Display sleep"
+            "value" : "Turn display off"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ディスプレイスリープ"
+            "value" : "ディスプレイをオフ"
           }
         }
       }
@@ -330,13 +330,30 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "While sleep prevention is on, prevents your Mac from going to sleep even when selecting Sleep from the Apple menu. Requires installing the helper."
+            "value" : "Choosing Sleep from the Apple menu also has no effect."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止中は、アップルメニューの「スリープ」などを選んでもMacをスリープさせません。ヘルパーのインストールが必要です。"
+            "value" : "Appleメニューからのスリープ操作も無効になります。"
+          }
+        }
+      }
+    },
+    "manual.helperRequired" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To turn on “Also prevent sleep from Apple menu”, the helper must be enabled."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「Appleメニューからのスリープも防ぐ」をオンにするには、ヘルパーを有効にする必要があります。"
           }
         }
       }
@@ -347,13 +364,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prevent sleep from Apple menu"
+            "value" : "Also prevent sleep from Apple menu"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "メニューからのスリープも防ぐ"
+            "value" : "Appleメニューからのスリープも防ぐ"
           }
         }
       }
@@ -381,13 +398,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn Off Automatically"
+            "value" : "Turn Off Based on Time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "スリープ防止の自動解除"
+            "value" : "時間による自動解除"
           }
         }
       }
@@ -398,13 +415,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sleep prevention turns off automatically at this time. If this time has already passed when turned on, it turns off at this time the next day."
+            "value" : "If this time has already passed, it will turn off at the same time tomorrow."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "この時刻になると自動でスリープ防止がオフになります。オンにした時点でこの時刻を過ぎている場合は、翌日のこの時刻にオフになります。"
+            "value" : "すでに過ぎていた場合は、翌日の同時刻に解除されます。"
           }
         }
       }
@@ -415,13 +432,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Scheduled time"
+            "value" : "Turn off at scheduled time"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指定時刻"
+            "value" : "指定時刻に自動解除"
           }
         }
       }
@@ -483,13 +500,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timer"
+            "value" : "Turn off with timer"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "タイマー"
+            "value" : "タイマーで自動解除"
           }
         }
       }

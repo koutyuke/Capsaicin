@@ -8,21 +8,33 @@ import OSLog
 struct SettingsHelperActions {
     var state: () -> HelperInstallationState
     var perform: (HelperManagementOperation) async -> HelperManagementResult
-    /// 削除成功は所有の解放→設定の保存、削除失敗は読み直し、設置・修復成功は合わせ直しを行う。
+    /// 削除成功は設定の保存、削除失敗は読み直し、設置成功は合わせ直しを行う。
     var completed: (HelperManagementOperation, HelperManagementResult) -> Void
+    var isTranslocated: () -> Bool = { false }
+    var openSystemSettings: () -> Void = {}
 
-    static func live(helper: HelperSleepController, installer: HelperInstaller, bundle: Bundle = .main,
-                     restoreSleep: @escaping () -> Bool,
+    static func live(registration: HelperRegistration,
+                     prepareRemoval: @escaping () -> Bool,
                      completed: @escaping (HelperManagementOperation, HelperManagementResult) -> Void) -> Self
     {
-        Self(state: { helper.installationState }, perform: { operation in
-            let path = bundle.bundleURL.appendingPathComponent("Contents/Helpers/capsaicin-helper").path
-            switch operation {
-            case .install: return await installer.install(bundledHelperPath: path, uid: getuid())
-            case .repair: return await installer.repair(bundledHelperPath: path, uid: getuid())
-            case .remove: return await installer.remove(restoreSleep: restoreSleep())
+        Self(state: { registration.state }, perform: { operation in
+            do {
+                switch operation {
+                case .install: try registration.register()
+                case .remove:
+                    guard prepareRemoval() else {
+                        return .failure(operation: operation, details: "Could not restore SleepDisabled",
+                                        needsSleepDisabledReadback: false)
+                    }
+                    try await registration.unregister()
+                }
+                return .success
+            } catch {
+                return .failure(operation: operation, details: String(describing: error),
+                                needsSleepDisabledReadback: operation == .remove)
             }
-        }, completed: completed)
+        }, completed: completed, isTranslocated: { registration.isTranslocated },
+        openSystemSettings: { registration.openSystemSettings() })
     }
 }
 
@@ -31,12 +43,12 @@ struct SettingsHelperActions {
 final class SettingsModel {
     let app: AppModel
     private(set) var helperState: HelperInstallationState
-    private(set) var pendingManual = false
-    private var pendingLidClose: SettingsLidCloseChoice?
     private(set) var isBusy = false
-    @ObservationIgnored var confirm: (HelperManagementOperation, Bool) async -> Bool = { _, _ in false }
+    @ObservationIgnored var confirm: (HelperManagementOperation) async -> Bool = { _ in false }
     @ObservationIgnored var showError: (String, String) -> Void = { _, _ in }
     private let helper: SettingsHelperActions
+    private var windowIsOpen = false
+    @ObservationIgnored private(set) var approvalTimer: Timer?
 
     init(app: AppModel, helper: SettingsHelperActions) {
         self.app = app
@@ -50,11 +62,42 @@ final class SettingsModel {
     }
 
     var lidCloseChoice: SettingsLidCloseChoice {
-        pendingLidClose ?? SettingsLidCloseChoice(settings: app.settings)
+        SettingsLidCloseChoice(settings: app.settings)
     }
 
     func refreshHelper() {
+        let previous = helperState
         helperState = helper.state()
+        if helperState == .installed, !isBusy, previous == .requiresApproval {
+            helper.completed(.install, .success)
+        }
+        updateApprovalTimer()
+    }
+
+    func settingsWindowDidBecomeKey() {
+        windowIsOpen = true
+        refreshHelper()
+    }
+
+    func settingsWindowClosed() {
+        windowIsOpen = false
+        approvalTimer?.invalidate()
+        approvalTimer = nil
+    }
+
+    private func updateApprovalTimer() {
+        guard helperState == .requiresApproval, windowIsOpen else {
+            approvalTimer?.invalidate()
+            approvalTimer = nil
+            return
+        }
+        guard approvalTimer == nil else { return }
+        let timer = Timer(timeInterval: 2, repeats: true) { [weak self] timer in
+            guard self != nil else { timer.invalidate(); return }
+            MainActor.assumeIsolated { self?.refreshHelper() }
+        }
+        approvalTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     func change<Value>(_ key: WritableKeyPath<Settings, Value>, to value: Value) {
@@ -77,24 +120,18 @@ final class SettingsModel {
     func changeSleep(_ row: SettingsSleepRow, to value: Bool) async {
         guard let setting = row.setting, !isBusy else { return }
         refreshHelper()
-        if setting == \.blocksManualSleep, value, helperState != .installed {
-            await manage(helperState == .partial ? .repair : .install, fromSetting: true)
-        } else {
-            change(setting, to: value)
+        let savedValue = value != row.inverted
+        if setting == \.blocksManualSleep, savedValue, helperState != .installed {
+            return
         }
+        change(setting, to: savedValue)
     }
 
     func changeLidClose(to choice: SettingsLidCloseChoice) async {
         guard !isBusy else { return }
         refreshHelper()
-        if choice != .sleep, helperState != .installed {
-            await manage(helperState == .partial ? .repair : .install, fromSetting: true, lidClose: choice)
-        } else {
-            saveLidClose(choice)
-        }
-    }
+        guard choice == .sleep || helperState == .installed else { return }
 
-    private func saveLidClose(_ choice: SettingsLidCloseChoice) {
         var settings = app.settings
         settings.blocksManualSleep = choice != .sleep
         switch choice {
@@ -106,46 +143,61 @@ final class SettingsModel {
         change(settings)
     }
 
-    func manage(_ operation: HelperManagementOperation, fromSetting: Bool = false,
-                lidClose: SettingsLidCloseChoice? = nil) async
-    {
+    func openHelperSystemSettings() {
+        helper.openSystemSettings()
+    }
+
+    func manage(_ operation: HelperManagementOperation) async {
         guard !isBusy else { return }
         isBusy = true
-        pendingManual = fromSetting
-        pendingLidClose = lidClose
         defer {
-            pendingManual = false
-            pendingLidClose = nil
             isBusy = false
             refreshHelper()
         }
-        guard await confirm(operation, fromSetting) else { return }
+        helperState = helper.state()
+        guard operation != .install || canInstall(), await confirm(operation) else { return }
+        if operation == .install {
+            helperState = helper.state()
+            guard canInstall() else { return }
+        }
         let result = await helper.perform(operation)
-        helper.completed(operation, result)
+        finishManagement(operation, result)
+    }
+
+    private func finishManagement(_ operation: HelperManagementOperation, _ result: HelperManagementResult) {
         switch result {
         case .success:
-            refreshHelper()
-            if fromSetting {
-                if let lidClose {
-                    saveLidClose(lidClose)
-                } else {
-                    change(\.blocksManualSleep, to: true)
-                }
+            helperState = helper.state()
+            if operation == .remove || helperState == .installed {
+                helper.completed(operation, result)
             }
         case .cancelled: break
         case let .failure(failedOperation, details, _):
+            helper.completed(operation, result)
             Logger(subsystem: Bundle.main.bundleIdentifier ?? "Capsaicin", category: "Helper")
                 .error("Helper management failed: \(details, privacy: .private)")
-            let key = Self.operationKey(failedOperation)
-            showError(SettingsSection.helper.text("error." + key + ".title"),
-                      SettingsSection.helper.text("error." + key + ".message"))
+            // 理由は分けて伝えず、どの失敗でも利用者が試せるやり直し方を案内する。
+            showHelperError(Self.operationKey(failedOperation), message: "helperRetry")
         }
+    }
+
+    private func canInstall() -> Bool {
+        guard helperState == .notInstalled else { return false }
+        guard !helper.isTranslocated() else {
+            showHelperError("helperTranslocated")
+            return false
+        }
+        return true
+    }
+
+    private func showHelperError(_ key: String, message: String? = nil) {
+        showError(SettingsSection.helper.text("error." + key + ".title"),
+                  SettingsSection.helper.text("error." + (message ?? key) + ".message"))
     }
 
     static func operationKey(_ operation: HelperManagementOperation) -> String {
         switch operation {
         case .install: "helperInstall"
-        case .repair: "helperRepair"
         case .remove: "helperRemove"
         }
     }

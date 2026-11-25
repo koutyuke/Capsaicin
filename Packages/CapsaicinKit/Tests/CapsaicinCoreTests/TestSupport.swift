@@ -37,12 +37,10 @@ func makeController(
     _ system: FakeSystem,
     settings: Settings = .premise(),
     capabilities: MachineCapabilities = .laptop,
-    launch: Bool = true,
 ) -> BlockingController {
     let controller = BlockingController(settings: settings, capabilities: capabilities, ports: system.ports)
-    if launch {
-        controller.launch()
-    }
+    controller.restoreBrightnessAtLaunch()
+    controller.finishLaunching()
     return controller
 }
 

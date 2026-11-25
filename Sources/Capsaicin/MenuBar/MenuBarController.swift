@@ -1,6 +1,7 @@
 import AppKit
 import CapsaicinCore
 import KeyboardShortcuts
+import Observation
 
 @MainActor
 final class MenuBarController: NSObject, NSMenuDelegate {
@@ -25,6 +26,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         super.init()
         menu.delegate = self
         menu.autoenablesItems = false
+        observeUpdates()
     }
 
     func start() {
@@ -78,8 +80,23 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let rows = MenuContent.make(status: model.status, settings: model.settings,
                                     isOnACPower: isOnACPower(),
                                     hasInternalBattery: model.capabilities.hasInternalBattery,
-                                    sleepRows: settings.sleepRows, bundle: Bundle(for: Self.self))
+                                    sleepRows: settings.sleepRows,
+                                    pendingUpdateVersion: model.updater.pendingUpdateVersion,
+                                    bundle: Bundle(for: Self.self))
         update(menu, rows: rows)
+    }
+
+    private func observeUpdates() {
+        withObservationTracking {
+            _ = model.updater.pendingUpdateVersion
+            _ = model.updater.canCheckForUpdates
+        } onChange: { [weak self] in
+            // Observation は値が変わる直前に呼ぶため、次のメインキューでメニューを合わせる。
+            DispatchQueue.main.async { [weak self] in
+                self?.refresh()
+                self?.observeUpdates()
+            }
+        }
     }
 
     private func update(_ menu: NSMenu, rows: [MenuEntry]) {
@@ -97,6 +114,9 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             item.title = row.title
             item.subtitle = row.subtitle
             item.isEnabled = row.command != nil || !row.children.isEmpty
+            if row.command == .checkForUpdates {
+                item.isEnabled = model.updater.canCheckForUpdates
+            }
             item.target = self
             item.action = row.command == nil ? nil : #selector(performCommand(_:))
             item.state = row.isChecked ? .on : .off
@@ -134,12 +154,20 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         item.image = nil
         item.setAccessibilityLabel(row.accessibilityLabel)
         if row.isWarning {
-            item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
-                .withSymbolConfiguration(.init(paletteColors: [.systemOrange]))
+            // 注意は画像ではなく文字の記号で示す。画像を付けると、開いたまま書き直したときに字下げがずれることがある。
+            // U+FE0E で絵文字にしない。
+            item.title = "\u{26A0}\u{FE0E} " + row.title
             item.setAccessibilityLabel(String(
                 format: MenuContent.text("menu.warning.a11y", bundle: Bundle(for: Self.self)),
                 row.accessibilityLabel ?? row.title,
             ))
+        } else if row.command == .checkForUpdates {
+            item.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
+            item.image?.isTemplate = true
+        }
+        if #available(macOS 27, *) {
+            // macOS 27 は既定でメニューの画像を隠すので、更新の知らせのアイコンは常に表示する。
+            item.preferredImageVisibility = item.image == nil ? .automatic : .visible
         }
     }
 
@@ -160,8 +188,18 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .toggleBattery:
             settings.change(\.batteryConditionEnabled, to: !model.settings.batteryConditionEnabled)
             refresh()
+        case .settings, .checkForUpdates, .quit: performAppCommand(command)
+        }
+    }
+
+    private func performAppCommand(_ command: MenuCommand) {
+        switch command {
         case .settings: openSettings()
         case .quit: quit()
+        case .checkForUpdates:
+            menu.cancelTracking()
+            DispatchQueue.main.async { [weak self] in self?.model.updater.checkForUpdates() }
+        default: break
         }
     }
 }

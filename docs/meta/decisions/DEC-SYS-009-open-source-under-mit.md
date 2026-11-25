@@ -5,7 +5,7 @@ title: ソースを MIT ライセンスで GitHub に公開する
 status: accepted
 supersedes: []
 superseded_by: []
-requirements: ["REQ-SYS-006", "REQ-SYS-007"]
+requirements: ["REQ-SYS-007"]
 based_on: ["DEC-SYS-004", "DEC-HLP-001"]
 ---
 
@@ -34,8 +34,8 @@ based_on: ["DEC-SYS-004", "DEC-HLP-001"]
 
 ## 影響
 
-- リポジトリの直下に `LICENSE` を置く。リポジトリに含める第三者の著作物（`.agents/skills/` の外部のスキル）の著作権表示とライセンス文を `THIRD_PARTY_NOTICES.md` にまとめる。
-- 外部のスキルを `skills-lock.json` に足すときは、取得元のライセンスが再配布を許すことを確かめ、`THIRD_PARTY_NOTICES.md` を更新する。
+- リポジトリの直下に `LICENSE` を置く。
+- リポジトリに第三者の著作物を含めるときは、取得元のライセンスが再配布を許すことを確かめ、著作権表示とライセンス文を `THIRD_PARTY_NOTICES.md` にまとめる。外部のスキルは追跡しないので（`AGENTS.md`）、いまは含めるものがない。
 - 公開後の履歴は消せない前提で扱う。秘密情報や個人の情報をコミットしないこと（`AGENTS.md`）が、公開の前提になる。
 - 配布物にアプリを入れる場合は、KeyboardShortcuts のライセンス表示をアプリに含める（`DEC-KEY-002`）。
 - 第三者からの Issue や Pull Request を受け付けるかは、この判断では決めない。

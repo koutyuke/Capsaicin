@@ -6,7 +6,7 @@ import CapsaicinPlatform
 @MainActor
 enum AppComposition {
     /// 実ポートを作る唯一の入口。テストとモデルの初期化からは呼ばない。
-    static func make(quit: @escaping () -> Void) throws -> AppRuntime {
+    static func make(quit: @escaping () -> Void) -> AppRuntime {
         #if DEBUG
             let isDebug = true
         #else
@@ -16,26 +16,31 @@ enum AppComposition {
         let store = UserDefaultsSettingsStore(defaults: .standard)
         let power = PowerStateMonitor()
         let led = CapsLockLEDController()
-        let helper = HelperSleepController()
+        let registration = HelperRegistration()
+        let helper = HelperSleepController(registration: registration)
         let brightness = DisplayServicesBrightness()
-        let controller = try BlockingController(
+        let controller = BlockingController(
             settings: store.load(), capabilities: PowerMachineCapabilities.detect(),
             ports: .init(
                 assertions: PowerAssertions(), helper: helper,
-                led: led, brightness: brightness, power: power, bootTime: BootTimeProvider(),
-                records: FileResumeRecordStore(bundleID: isDebug
+                led: led, brightness: brightness, power: power,
+                brightnessRecords: FileBrightnessRecordStore(bundleID: isDebug
                     ? "io.github.koutyuke.capsaicin.debug" : "io.github.koutyuke.capsaicin"),
                 time: SystemTime(),
             ),
         )
-        let model = AppModel(controller: controller, saveSettings: { store.save($0) })
+        let model = AppModel(controller: controller, saveSettings: { store.save($0) },
+                             updater: UpdateModel(bundle: bundle))
         model.onAlert = showAlert
         let settings = SettingsModel(app: model, helper: .live(
-            helper: helper, installer: HelperInstaller(),
-            restoreSleep: model.resetsSleepDisabledOnHelperRemoval,
+            registration: registration,
+            prepareRemoval: model.prepareHelperRemoval,
             completed: model.helperManagementCompleted,
         ))
-        let agent = try LaunchAgent(executableURL: executableURL(in: bundle), isDebug: isDebug)
+        helper.onConnectionLost = { [weak controller, weak settings] loss in
+            controller?.helperConnectionLost(loss)
+            settings?.refreshHelper()
+        }
         let services = AppServices(
             model: model, settings: settings, power: power, led: led, lid: LidStateMonitor(),
             virtualKeyboard: VirtualKeyboardMonitor(), display: DisplaySleep(),
@@ -44,18 +49,13 @@ enum AppComposition {
         )
         return AppRuntime(
             model: model,
-            launchedByLaunchd: agent.wasLaunchedByLaunchd(environment: ProcessInfo.processInfo.environment),
-            registerAndStart: { await agent.registerAndStart(launchAtLogin: $0) },
-            restartStatus: { agent.restartStatus() },
-            updateLaunchAtLogin: { try agent.updateLaunchAtLogin($0) },
+            updateLaunchAtLogin: LoginItem.update,
+            reregisterHelper: {
+                await registration.reregisterIfNeeded()
+            },
             startServices: { await services.start() }, stopServices: { await services.stop() },
             openSettings: { services.openSettings() },
         )
-    }
-
-    private static func executableURL(in bundle: Bundle) throws -> URL {
-        guard let url = bundle.executableURL else { throw CocoaError(.fileNoSuchFile) }
-        return url
     }
 
     private static func showAlert(_ alert: AppAlert) {
@@ -100,9 +100,10 @@ private final class AppServices {
     private let hud: HUDPresenter
     private var settingsWindow: SettingsWindowController?
     private var minuteTimer: Timer?
-    private var releaseTimer: Timer?
+    private var deadlineTimer: Timer?
     private var wakeObservers: [any NSObjectProtocol] = []
     private var screenLock: ScreenLockObserver?
+    private var settingsCloseObserver: any NSObjectProtocol?
 
     init(model: AppModel, settings: SettingsModel, power: PowerStateMonitor, led: CapsLockLEDController,
          lid: LidStateMonitor, virtualKeyboard: VirtualKeyboardMonitor, display: DisplaySleep, server: IPCServer,
@@ -126,12 +127,18 @@ private final class AppServices {
         settingsWindow = SettingsWindowController(
             model: settings, hotkey: .live(toggle: { [weak model] in model?.toggleByHotkey() }), quit: menuBar.quit,
         )
-        // メニューからの変更でも、確認・エラーが必要なときだけ既存のシートの親を前面に出す。
-        let confirm = settings.confirm
-        settings.confirm = { [weak self] operation, fromSetting in
-            self?.openSettings()
-            return await confirm(operation, fromSetting)
+        settingsCloseObserver = NotificationCenter.default.addObserver(
+            forName: NSWindow.willCloseNotification, object: settingsWindow?.window, queue: .main,
+        ) { [weak model] _ in
+            MainActor.assumeIsolated {
+                guard let model else { return }
+                model.updater.updateInstallationConditions(
+                    isBlocking: model.status.isBlocking,
+                    settingsWindowIsOpen: false,
+                )
+            }
         }
+        // メニューからの変更でも、エラーが必要なときだけ既存のシートの親を前面に出す。
         let showError = settings.showError
         settings.showError = { [weak self] title, message in
             self?.openSettings()
@@ -140,6 +147,7 @@ private final class AppServices {
     }
 
     func start() async {
+        settings.refreshHelper()
         prepareSettingsWindow()
         model.onStatusChange = { [weak self] in self?.refresh($0) }
         model.onEvent = { [weak self] event, previous in
@@ -148,6 +156,7 @@ private final class AppServices {
         }
         menuBar.start()
         refresh(model.status)
+        model.updater.start()
         minuteTimer = Timer(timeInterval: 60, repeats: true) { [weak model] _ in
             MainActor.assumeIsolated { model?.timePassed() }
         }
@@ -193,12 +202,17 @@ private final class AppServices {
     }
 
     func stop() async {
+        settings.settingsWindowClosed()
         minuteTimer?.invalidate()
-        releaseTimer?.invalidate()
+        deadlineTimer?.invalidate()
         model.onStatusChange = nil
         model.onEvent = nil
         menuBar.stop()
         HotkeyController.stop()
+        if let settingsCloseObserver {
+            NotificationCenter.default.removeObserver(settingsCloseObserver)
+            self.settingsCloseObserver = nil
+        }
         settingsWindow?.close()
         settingsWindow = nil
         wakeObservers.forEach(NSWorkspace.shared.notificationCenter.removeObserver)
@@ -214,6 +228,8 @@ private final class AppServices {
 
     func openSettings() {
         settingsWindow?.open()
+        model.updater.updateInstallationConditions(isBlocking: model.status.isBlocking,
+                                                   settingsWindowIsOpen: settingsWindow?.window?.isVisible == true)
     }
 
     private func systemStateChanged() {
@@ -223,7 +239,9 @@ private final class AppServices {
     }
 
     private func refresh(_ status: BlockingStatus) {
-        scheduleRelease(status)
+        model.updater.updateInstallationConditions(isBlocking: status.isBlocking,
+                                                   settingsWindowIsOpen: settingsWindow?.window?.isVisible == true)
+        scheduleDeadline(status)
         menuBar.refresh()
         let policy: NSApplication.ActivationPolicy = model.settings.showsDockIcon ? .regular : .accessory
         guard NSApp.activationPolicy() != policy else { return }
@@ -234,13 +252,14 @@ private final class AppServices {
         }
     }
 
-    private func scheduleRelease(_ status: BlockingStatus) {
-        releaseTimer?.invalidate()
-        guard let date = status.session?.timeLimit?.date else { return }
+    private func scheduleDeadline(_ status: BlockingStatus) {
+        deadlineTimer?.invalidate()
+        let dates = [status.session?.timeLimit?.date, model.nextBrightnessDeletionAttempt]
+        guard let date = dates.compactMap(\.self).min() else { return }
         let timer = Timer(fire: date, interval: 0, repeats: false) { [weak model] _ in
             Task { @MainActor in model?.timePassed() }
         }
-        releaseTimer = timer
+        deadlineTimer = timer
         RunLoop.main.add(timer, forMode: .common)
     }
 }

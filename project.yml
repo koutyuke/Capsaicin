@@ -13,12 +13,15 @@ settings:
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGN_STYLE: Manual
     GENERATE_INFOPLIST_FILE: YES
-    MARKETING_VERSION: "0.1.0"
-    CURRENT_PROJECT_VERSION: "3"
+    MARKETING_VERSION: "0.2.0"
+    CURRENT_PROJECT_VERSION: "4"
 packages:
   KeyboardShortcuts:
     url: https://github.com/sindresorhus/KeyboardShortcuts
     exactVersion: 3.1.0
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.10.1
   CapsaicinKit:
     path: Packages/CapsaicinKit
 targets:
@@ -48,13 +51,20 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: capsaicin
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_CFBundleDisplayName: Capsaicin
+        INFOPLIST_FILE: Sources/Capsaicin/Info.plist
         SWIFT_EMIT_LOC_STRINGS: YES
         LOCALIZATION_PREFERS_STRING_CATALOGS: YES
       configs:
         Debug:
           PRODUCT_BUNDLE_IDENTIFIER: io.github.koutyuke.capsaicin.debug
+          SPARKLE_FEED_URL: ""
+          SPARKLE_PUBLIC_ED_KEY: ""
+        Release:
+          SPARKLE_FEED_URL: https://github.com/koutyuke/Capsaicin/releases/latest/download/appcast.xml
+          SPARKLE_PUBLIC_ED_KEY: "j11dFPcM5gV6ikr2GJQLThZvg98/AcJGcYPkfCKDjac="
     dependencies:
       - package: KeyboardShortcuts
+      - package: Sparkle
       - package: CapsaicinKit
         product: CapsaicinCore
       - package: CapsaicinKit
@@ -74,6 +84,23 @@ targets:
         copy:
           destination: wrapper
           subpath: Contents/Helpers
+    postBuildScripts:
+      # CodeSign より前に生成し、構成ごとの定義もアプリの署名に含める。
+      - name: Generate bundled daemon definition
+        script: |
+          set -eu
+          directory="${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Library/LaunchDaemons"
+          label="${PRODUCT_BUNDLE_IDENTIFIER}.helper"
+          /bin/mkdir -p "$directory"
+          plist="$directory/$label.plist"
+          /usr/bin/plutil -create xml1 "$plist"
+          /usr/bin/plutil -insert Label -string "$label" "$plist"
+          /usr/bin/plutil -insert BundleProgram -string Contents/Helpers/capsaicin-helper "$plist"
+          /usr/bin/plutil -insert MachServices -xml "<dict><key>$label</key><true/></dict>" "$plist"
+          /usr/bin/plutil -insert RunAtLoad -bool true "$plist"
+          /usr/bin/plutil -lint "$plist"
+        outputFiles:
+          - $(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Library/LaunchDaemons/$(PRODUCT_BUNDLE_IDENTIFIER).helper.plist
   CapsaicinCLI:
     productName: capsaicin
     type: tool
@@ -106,6 +133,19 @@ targets:
         GCC_C_LANGUAGE_STANDARD: c17
         GCC_WARN_INHIBIT_ALL_WARNINGS: NO
         GCC_TREAT_WARNINGS_AS_ERRORS: YES
+        CLANG_ENABLE_MODULES: YES
+        OTHER_CFLAGS: ["$(inherited)", "-fblocks"]
+      configs:
+        Debug:
+          GCC_PREPROCESSOR_DEFINITIONS:
+            - $(inherited)
+            - HELPER_APP_IDENTIFIER=\"io.github.koutyuke.capsaicin.debug\"
+            - HELPER_SERVICE_NAME=\"io.github.koutyuke.capsaicin.debug.helper\"
+        Release:
+          GCC_PREPROCESSOR_DEFINITIONS:
+            - $(inherited)
+            - HELPER_APP_IDENTIFIER=\"io.github.koutyuke.capsaicin\"
+            - HELPER_SERVICE_NAME=\"io.github.koutyuke.capsaicin.helper\"
   CapsaicinTests:
     type: bundle.unit-test
     platform: macOS
@@ -125,6 +165,7 @@ targets:
           - Resources/capsaicin.icon
     dependencies:
       - package: KeyboardShortcuts
+      - package: Sparkle
       - target: Capsaicin
       - package: CapsaicinKit
         product: CapsaicinIPC

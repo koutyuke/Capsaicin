@@ -1,74 +1,91 @@
-import CapsaicinPlatform
+import CapsaicinCore
 import Testing
 
 @MainActor
 struct AppRuntimeTests {
-    @Test("SPEC-LCY-005 引き渡しに成功した直接起動は Core と CLI を起動しない")
-    func handoff() async {
-        let fixture = RuntimeFixture(launchedByLaunchd: false, registration: .ready)
-        #expect(await !fixture.runtime.start())
-        #expect(fixture.calls == ["register"])
-        #expect(fixture.app.system.operations.isEmpty)
-    }
-
-    @Test("SPEC-LCY-005 登録・起動に失敗したらそのまま動き、再起動されないことを示す",
-          arguments: [LaunchAgentStatus.registrationFailed, .launchFailed, .disabled, .unavailable])
-    func fallback(status: LaunchAgentStatus) async {
-        let fixture = RuntimeFixture(launchedByLaunchd: false, registration: status)
-        #expect(await fixture.runtime.start())
-        #expect(!fixture.app.model.willRestartAfterCrash)
-        #expect(fixture.app.model.launchAgentStatus == status)
-        #expect(fixture.calls == ["register", "update", "start"])
-        #expect(fixture.app.system.storedRecord?.isRunning == true)
-    }
-
-    @Test("SPEC-LCY-006 launch、RunAtLoad、CLI の順に起動し、停止後に終了記録を保存する")
-    func managedLifecycle() async {
-        let fixture = RuntimeFixture(launchedByLaunchd: true)
-        #expect(await fixture.runtime.start())
-        #expect(fixture.app.model.willRestartAfterCrash)
-        #expect(fixture.calls == ["update", "start"])
+    @Test("SPEC-LCY-001 SPEC-LCY-006 SPEC-HLP-007 輝度の復元、ヘルパーの登録し直し、停止中への整合、ログイン時の起動設定、サービスの順に起動する",
+          arguments: [false, true])
+    func startupOrder(loginSetting: Bool) async {
+        let fixture = RuntimeFixture(loginSetting: loginSetting)
+        let system = fixture.app.system
+        system.brightnessRecord = BrightnessRecord(savedBrightness: 0.75)
+        system.brightness = 0
+        fixture.reregister = { [unowned fixture] in
+            #expect(system.operations == [.readBrightness, .setBrightness(0.75), .removeBrightnessRecord])
+            #expect(system.brightness == 0.75)
+            #expect(fixture.updates.isEmpty)
+        }
+        await fixture.runtime.start()
+        #expect(fixture.calls == ["helper", "update", "start"])
+        #expect(fixture.updates == [loginSetting])
+        #expect(!fixture.app.model.status.isBlocking)
         var settings = fixture.app.model.settings
-        settings.launchesAtLogin = false
+        settings.launchesAtLogin.toggle()
         fixture.app.model.changeSettings(settings)
-        #expect(fixture.updates == [true, false])
-        await fixture.runtime.terminate(reason: .userQuit)
+        #expect(fixture.updates == [loginSetting, !loginSetting])
+    }
+
+    @Test("SPEC-HLP-001 SPEC-LCY-002 終了時は承認待ちのタイマーを止め、抑止を解除する")
+    func stopsApprovalPollingOnQuit() async {
+        let fixture = RuntimeFixture()
+        await fixture.runtime.start()
+        fixture.app.model.requestStart(from: .menu)
+        let settings = SettingsModel(app: fixture.app.model, helper: .init(
+            state: { .requiresApproval }, perform: { _ in .cancelled }, completed: { _, _ in },
+        ))
+        fixture.stopSettings = {
+            #expect(fixture.app.model.status.isBlocking)
+            settings.settingsWindowClosed()
+        }
+        settings.settingsWindowDidBecomeKey()
+        #expect(settings.approvalTimer?.isValid == true)
+        await fixture.runtime.terminate(isUserQuit: true)
         #expect(fixture.calls.last == "stop")
-        #expect(fixture.app.system.storedRecord?.isRunning == false)
+        #expect(!fixture.app.model.status.isBlocking)
+        #expect(settings.lidCloseChoice == .sleep && settings.approvalTimer == nil)
+        #expect(fixture.app.savedSettings.isEmpty)
     }
 }
 
 @MainActor
 private final class RuntimeFixture {
     let app = AppFixture()
-    let launchedByLaunchd: Bool
-    let registration: LaunchAgentStatus
+    let loginSetting: Bool
     var calls: [String] = []
     var updates: [Bool] = []
+    var reregister: () -> Void = {}
+    var stopSettings: () -> Void = {}
 
-    init(launchedByLaunchd: Bool, registration: LaunchAgentStatus = .ready) {
-        self.launchedByLaunchd = launchedByLaunchd
-        self.registration = registration
+    init(loginSetting: Bool = true) {
+        self.loginSetting = loginSetting
+        var settings = app.model.settings
+        settings.launchesAtLogin = loginSetting
+        app.model.changeSettings(settings)
+        app.savedSettings = []
     }
 
     lazy var runtime = AppRuntime(
         model: app.model,
-        launchedByLaunchd: launchedByLaunchd,
-        registerAndStart: { [unowned self] _ in calls.append("register"); return registration },
-        restartStatus: { .ready },
         updateLaunchAtLogin: { [unowned self] value in
-            #expect(app.system.storedRecord?.isRunning == true)
+            #expect(app.system.operations.last == .setLEDLit(false))
             calls.append("update")
             updates.append(value)
         },
+        reregisterHelper: { [unowned self] in await reregisterHelper() },
         startServices: { [unowned self] in
-            #expect(updates == [true])
+            #expect(updates == [loginSetting])
             calls.append("start")
         },
         stopServices: { [unowned self] in
-            #expect(app.system.storedRecord?.isRunning == true)
+            stopSettings()
             calls.append("stop")
         },
         openSettings: {},
     )
+
+    private func reregisterHelper() async {
+        await Task.yield()
+        reregister()
+        calls.append("helper")
+    }
 }

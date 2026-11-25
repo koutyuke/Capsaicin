@@ -103,36 +103,36 @@
         }
       }
     },
+    "hud.reason.helperApprovalRevoked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Background activity off"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックグラウンド実行オフ"
+          }
+        }
+      }
+    },
     "hud.reason.helperUnavailableAtStart" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Helper not ready"
+            "value" : "Helper not enabled"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ヘルパー未準備"
-          }
-        }
-      }
-    },
-    "hud.reason.stateSaveFailedAtStart" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cannot save state"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "状態を保存できません"
+            "value" : "ヘルパーが無効"
           }
         }
       }
@@ -194,13 +194,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Some controls not restored"
+            "value" : "Some parts couldn't be restored"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "一部を戻せません"
+            "value" : "一部を戻せませんでした"
           }
         }
       }

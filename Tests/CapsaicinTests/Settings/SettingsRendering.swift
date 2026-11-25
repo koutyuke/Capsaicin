@@ -1,8 +1,63 @@
 import AppKit
+import CapsaicinPlatform
 import SwiftUI
 import Testing
 
+@MainActor
+private protocol SettingsRowContents {
+    var rowContents: Any { get }
+}
+
+extension SettingsRow: SettingsRowContents {
+    fileprivate var rowContents: Any {
+        content()
+    }
+}
+
 extension SettingsTests {
+    @Test("SPEC-HLP-004 ヘルパーの4状態で説明のカードと2行を保ち、許可の手順・状態・操作を出し分ける",
+          arguments: [HelperInstallationState.notInstalled, .requiresApproval, .installed, .unavailable])
+    func helperRows(state: HelperInstallationState) throws {
+        let fixture = AppFixture()
+        let model = SettingsModel(app: fixture.model, helper: .init(state: { state }, perform: { _ in .cancelled },
+                                                                    completed: { _, _ in }))
+        let defaults = try #require(UserDefaults(suiteName: "HelperRows-" + UUID().uuidString))
+        let view = SettingsView(model: model, hotkey: HotkeyController(save: { _ in true }),
+                                selection: SettingsSelection(defaults: defaults), quit: {}).helper
+        let approvalHelp = SettingsSection.helper.text("status.requiresApproval.help")
+        #expect(approvalHelp != "status.requiresApproval.help")
+        #expect(rowHelpValues(view) == [state == .requiresApproval ? approvalHelp : "", ""])
+        func strings(_ value: Any) -> [String] {
+            if let text = value as? String {
+                return [text]
+            }
+            if let row = value as? any SettingsRowContents {
+                return strings(row.rowContents)
+            }
+            if let card = value as? SettingsIntroCard {
+                return strings(card.body)
+            }
+            return Mirror(reflecting: value).children.flatMap { strings($0.value) }
+        }
+        let values = strings(view)
+        let message = SettingsSection.helper.text("intro.message")
+        #expect(message != "intro.message")
+        #expect(values.contains(SettingsSection.helper.text("title")))
+        #expect(values.contains(message))
+        let key = switch state {
+        case .notInstalled: "status.notInstalled"
+        case .requiresApproval: "status.requiresApproval"
+        case .installed: "status.usable"
+        case .unavailable: "status.unavailable"
+        }
+        #expect(values.contains(SettingsSection.helper.text(key)))
+        #expect(values.contains(SettingsSection.helper.text("helperInstall.button")) == (state == .notInstalled))
+        #expect(values
+            .contains(SettingsSection.helper.text("openSystemSettings.button")) == (state == .requiresApproval))
+        #expect(values.contains(SettingsSection.helper.text("helperRemove.button"))
+            == (state == .requiresApproval || state == .installed))
+    }
+
     @Test("SPEC-SET-002 SPEC-SET-006 バッテリーは独立した見出しを持ち、内蔵バッテリーがなければグループごと出さない",
           arguments: [false, true], [false, true])
     func batteryGroup(hasBattery: Bool, enabled: Bool) throws {
@@ -11,7 +66,7 @@ extension SettingsTests {
             model: makeModel(hasBattery: hasBattery, conditionsEnabled: enabled),
             hotkey: HotkeyController(save: { _ in true }), selection: SettingsSelection(defaults: defaults), quit: {},
         )
-        // 既存の (i) 検査と同じく、Form に渡す値を調べる。プロセス内では仮想 AX ノードを列挙できない。
+        // 説明文の検査と同じく、Form に渡す値を調べる。プロセス内では仮想 AX ノードを列挙できない。
         func strings(_ value: Any) -> [String] {
             if let text = value as? String {
                 return [text]
@@ -32,7 +87,7 @@ extension SettingsTests {
         let bundle = Bundle(for: SettingsWindowController.self)
         let image = try #require(NSImage(symbolName: name, bundle: bundle, variableValue: 0))
         #expect(image.size.width > 0 && image.size.height > 0)
-        #expect(SettingsSection.led.symbol == "custom.capsaicin.led")
+        #expect(SettingsSection.feedback.symbol == "custom.capsaicin.led")
         #expect(Image(symbol: name, bundle: bundle) == Image(name, bundle: bundle))
         let rendered = try #require(ImageRenderer(content: Image(symbol: name, bundle: bundle).font(.body)).cgImage)
         #expect(rendered.width > 0 && rendered.height > 0)
@@ -47,7 +102,7 @@ extension SettingsTests {
         #expect(rendered.width > 0 && rendered.height > 0)
     }
 
-    @Test("SPEC-SET-005 SPEC-UI-005 (i) は連動や制約のある4種類の行だけに置き、親がオフでも増やさない",
+    @Test("SPEC-SET-005 SPEC-UI-005 説明文は項目名で足りない行だけに置き、親がオフでも増やさない",
           arguments: [false, true], [false, true])
     func sleepInfoButtons(hasLid: Bool, conditionsEnabled: Bool) throws {
         let defaults = try #require(UserDefaults(suiteName: "SettingsInfo-" + UUID().uuidString))
@@ -59,7 +114,10 @@ extension SettingsTests {
             model: model,
             hotkey: HotkeyController(save: { _ in true }), selection: selection, quit: {},
         )
-        #expect(model.sleepRows.filter { !$0.help.isEmpty }.map(\.key) == ["display", hasLid ? "lidClose" : "manual"])
+        #expect(model.sleepRows.filter { !$0.help.isEmpty }.map(\.key) == (hasLid ? ["display"] : [
+            "display",
+            "manual",
+        ]))
         // Form の仮想アクセシビリティノードはプロセス内テストでは列挙できないため、描画に渡す行を調べる。
         let help = rowHelpValues(view.release)
         #expect(help.count == 7)
@@ -105,8 +163,8 @@ extension SettingsTests {
         #expect(window.frame.size == NSSize(width: 720, height: 500))
         #expect(window.title == section.title)
         try checkToolbarTitle(window)
-        // 見出しのあるセクション（一般、スリープ防止、操作）は、見出しが先に来るので除く。
-        if [.led, .helper].contains(section) {
+        // 見出しのあるセクション（スリープ、フィードバック、操作）は、見出しが先に来るので除く。
+        if [.general, .helper].contains(section) {
             try checkFormTop(window)
         }
         try checkSidebarBottom(window)
@@ -115,9 +173,7 @@ extension SettingsTests {
         let quit = accessibilityDescendants(view).first {
             $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == title
         }
-        if section == .about {
-            #expect(try #require(quit).accessibilityPerformPress?() == true)
-        } else {
+        if section != .about {
             #expect(quit == nil)
         }
         if section == .general {
@@ -127,6 +183,27 @@ extension SettingsTests {
                     <= scroll.contentSize.height + 1)
             }
         }
+    }
+
+    @Test("SPEC-SET-004 フッターの終了ボタンはメニューと同じ文言と終了処理を使う")
+    func aboutQuit() async throws {
+        _ = NSApplication.shared
+        let app = try appBundle()
+        let defaults = try #require(UserDefaults(suiteName: "AboutQuit-" + UUID().uuidString))
+        let selection = SettingsSelection(defaults: defaults)
+        var quits = 0
+        // Form の仮想 AX ノードはプロセス内では列挙できないため、同じフッターを単独で描画する。
+        let footer = SettingsAboutContent(updater: UpdateModel(), quit: { quits += 1 }, bundle: app).footer
+        let window = SettingsWindowController.makeWindow(rootView: footer.environment(\.accessibilityEnabled, true),
+                                                         selection: selection)
+        defer { window.close() }
+        await layout(window)
+        let view = try #require(window.contentView)
+        let button = try #require(accessibilityDescendants(view).first {
+            $0.accessibilityRole?() == .button && $0.accessibilityLabel?() == MenuContent.text("menu.quit", bundle: app)
+        })
+        #expect(button.accessibilityPerformPress?() == true)
+        #expect(quits == 1)
     }
 
     func saveRendering(_ window: NSWindow, to url: URL) throws {
@@ -200,7 +277,7 @@ extension SettingsTests {
         window.display()
     }
 
-    private func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
+    func accessibilityDescendants(_ element: AnyObject) -> [AnyObject] {
         [element] + (element.accessibilityChildren?() as? [AnyObject] ?? [])
             .flatMap { accessibilityDescendants($0) }
     }

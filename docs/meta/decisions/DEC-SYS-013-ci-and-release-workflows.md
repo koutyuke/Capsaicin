@@ -5,7 +5,7 @@ title: CI は静的検査だけを Nix で動かし、テストとリリース�
 status: superseded
 supersedes: ["DEC-SYS-011", "DEC-SYS-012"]
 superseded_by: ["DEC-SYS-015"]
-requirements: ["REQ-SYS-005", "REQ-SYS-006"]
+requirements: []
 based_on: ["DEC-SYS-004", "DEC-SYS-006", "DEC-SYS-008", "DEC-SYS-010", "HYP-HLP-003"]
 ---
 

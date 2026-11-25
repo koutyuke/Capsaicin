@@ -16,7 +16,7 @@ struct MenuBarTests {
     @Test("SPEC-MENU-001 SPEC-MENU-002 停止中は開始・時間指定・クイック設定・設定・終了を並べる")
     func stopped() {
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let rows = rows(fixture)
         #expect(rows.map(\.id) == ["menu.header.idle", "menu.start", "separator.start", "menu.startNoTimeLimit",
                                    "menu.startFor", "separator.sleep", "menu.quickSettings",
@@ -37,7 +37,7 @@ struct MenuBarTests {
     @Test("SPEC-MENU-001 SPEC-MENU-004 抑止中は状態・オフ・時間変更・クイック設定を並べ、電源の変化を反映する")
     func active() throws {
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         try fixture.model.requestStart(from: .menu, override: .timer(#require(TimerDuration(minutes: 90))))
         let initial = rows(fixture)
         #expect(initial.map(\.id) == ["menu.header.active", "menu.status.until", "menu.status.battery",
@@ -52,18 +52,6 @@ struct MenuBarTests {
         #expect(initial[4].children.map(\.command) == [nil] + [15, 30, 60, 120, 240, 480]
             .map { .start(.timer(TimerDuration(minutes: $0)!)) }
             + [.durationPanel, nil, .timePanel, nil, .start(.noTimeLimit)])
-    }
-
-    @Test("SPEC-MENU-004 制御の向きとヘルパーの修復を区別する", arguments: [MisalignmentDirection.leftApplied, .notApplied])
-    func helperWarning(direction: MisalignmentDirection) {
-        let status = BlockingStatus(session: nil, batteryCondition: nil,
-                                    misalignments: [.systemSleepDisabled: direction], isRecordUnsaved: false)
-        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false, hasInternalBattery: true,
-                                    sleepRows: [],
-                                    now: Date(timeIntervalSince1970: 0), calendar: calendar,
-                                    locale: Locale(identifier: "ja_JP"), bundle: bundle())
-        #expect(rows[1].title == (direction == .leftApplied ? "スリープを止める設定が残っています" : "一部のスリープを防止できていません"))
-        #expect(rows[1].subtitle == "設定の「ヘルパー」で修復できます")
     }
 
     @Test("SPEC-MENU-003 時間は1分から24時間、設定がオフなら初期値を使う")
@@ -100,23 +88,20 @@ struct MenuBarTests {
     @Test("SPEC-HUD-001 メニューとホットキー、自動解除だけを HUD に渡す",
           arguments: [RequestOrigin.menu, .hotkey, .cli])
     func hudOrigins(origin: RequestOrigin) {
-        #expect(MenuHUDRouting.shouldPresent(.started(.user(origin))) == (origin != .cli))
+        #expect(MenuHUDRouting.shouldPresent(.started(origin)) == (origin != .cli))
         #expect(MenuHUDRouting.shouldPresent(.timeLimitReplaced(origin)) == (origin == .menu))
-        #expect(MenuHUDRouting.shouldPresent(.startRejected(.user(origin), .recordNotSaved)) == (origin != .cli))
+        #expect(MenuHUDRouting.shouldPresent(.startRejected(origin, .batteryBelowThreshold)) == (origin != .cli))
         #expect(MenuHUDRouting.shouldPresent(.released(.user(origin))) == (origin != .cli))
         #expect(MenuHUDRouting.shouldPresent(.released(.timeLimit(.timer))))
         #expect(MenuHUDRouting.shouldPresent(.released(.timeLimit(.specifiedTime))))
         #expect(MenuHUDRouting.shouldPresent(.released(.batteryBelowThreshold)))
         #expect(!MenuHUDRouting.shouldPresent(.warningsChanged))
-        #expect(!MenuHUDRouting.shouldPresent(.released(.quit)))
-        #expect(!MenuHUDRouting.shouldPresent(.started(.resume)))
-        #expect(!MenuHUDRouting.shouldPresent(.startRejected(.resume, .recordNotSaved)))
     }
 
     @Test("SPEC-MENU-001 SPEC-MENU-004 NSMenu の項目を保ったまま更新し、割り当て済みのキーだけを示す")
     func nativeMenu() throws {
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let controller = MenuBarController(settings: settingsModel(fixture), isOnACPower: { false })
         controller.configureShortcut = { item in
             item.keyEquivalent = "c"
@@ -144,7 +129,7 @@ struct MenuBarTests {
     func statusIcon() throws {
         _ = NSApplication.shared
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         let controller = MenuBarController(settings: settingsModel(fixture), isOnACPower: { false })
         controller.configureShortcut = { _ in }
         defer { controller.stop() }
@@ -177,7 +162,7 @@ struct MenuBarTests {
     func visibility(initiallyVisible: Bool) throws {
         _ = NSApplication.shared
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         var settings = fixture.model.settings
         settings.showsMenuBarIcon = initiallyVisible
         fixture.model.changeSettings(settings)
@@ -202,7 +187,7 @@ struct MenuBarTests {
     @Test("SPEC-HUD-002 指定時刻で解除した出来事には直前のセッションを添える")
     func previousSession() throws {
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         try fixture.model.requestStart(from: .menu, override: .specifiedTime(#require(TimeOfDay(hour: 4, minute: 0))))
         let session = fixture.model.status.session
         var previous: BlockingSession?
@@ -277,34 +262,62 @@ extension MenuBarTests {
         #expect(MenuContent.text("menu.startAt", bundle: bundle()) == "menu.startAt")
     }
 
-    @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 警告は状態の先頭に残し、キー配列の案内は表示しない")
+    @Test("SPEC-MENU-001 SPEC-MENU-004 SPEC-LED-005 LED のずれとキー配列の案内はメニューに出さない")
     func warnings() {
         let fixture = makeFixture()
-        fixture.model.launch()
+        fixture.model.finishLaunching()
         fixture.model.requestStart(from: .menu)
-        fixture.system.failing = [.setLEDLit(false), .saveRecord]
+        fixture.system.failing = [.setLEDLit(false)]
         fixture.model.requestStop(from: .menu)
         fixture.model.hasVirtualKeyboard = true
+        #expect(fixture.model.status.misalignments[.led] == .leftApplied)
         let rows = rows(fixture)
-        #expect(rows.prefix(3).map(\.id) == [
-            "menu.header.idle",
-            "menu.warning.unalignedLed.title",
-            "menu.warning.stateSaveFailed.title",
-        ])
+        #expect(rows.first?.id == "menu.header.idle")
+        #expect(!rows.contains { $0.isWarning || $0.id == "separator.warnings" })
         #expect(!rows.contains { $0.id.contains("virtualKeyboard") })
-        #expect(rows[1].isWarning)
-        #expect(rows[1].command == nil)
-        fixture.model.hasVirtualKeyboard = false
-        #expect(!self.rows(fixture).contains { $0.id == "menu.virtualKeyboard.title" })
+    }
+
+    @Test("SPEC-MENU-001 SPEC-MENU-004 スリープのずれは向きごとに1行の警告にし、見出しの直後に区切って置く",
+          arguments: [MisalignmentDirection.leftApplied, .notApplied])
+    func sleepMisalignments(direction: MisalignmentDirection) {
+        let status = BlockingStatus(session: nil, batteryCondition: nil, misalignments: [
+            .systemSleepDisabled: direction, .idleSleepAssertion: direction, .led: direction,
+        ])
+        let rows = MenuContent.make(status: status, settings: Settings(), isOnACPower: false,
+                                    hasInternalBattery: false, sleepRows: [], bundle: bundle())
+        let key = direction == .leftApplied ? "menu.warning.remainingSleepSetting.title"
+            : "menu.warning.unappliedSleep.title"
+        #expect(rows.prefix(3).map(\.id) == ["menu.header.idle", key, "separator.warnings"])
+        #expect(rows[1].title == (direction == .leftApplied
+                ? "スリープ防止の一部が解除されていません" : "スリープ防止の一部が有効になっていません"))
+        #expect(rows[1].isWarning && rows[1].command == nil && rows[1].subtitle == nil)
+    }
+
+    @Test("SPEC-MENU-004 輝度の記録の保存・削除の失敗はメニューに出さない")
+    func brightnessWarnings() {
+        let fixture = makeFixture()
+        fixture.model.finishLaunching()
+        var settings = fixture.model.settings
+        settings.blocksManualSleep = true
+        settings.lidCloseDisplay = .zeroBrightness
+        fixture.model.changeSettings(settings)
+        fixture.model.requestStart(from: .menu)
+        fixture.system.failing = [.saveBrightnessRecord(0.5)]
+        fixture.model.lidClosed()
+        #expect(fixture.model.status.brightnessWarnings == [.saveFailed])
+        #expect(!rows(fixture).contains { $0.isWarning || $0.id == "separator.warnings" })
     }
 
     @Test("SPEC-LED-005 設定の案内もキー配列を変更するアプリと LED への影響を示す")
     func virtualKeyboardSettingsNotice() {
         let bundle = bundle()
-        #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsLed")
+        #expect(bundle.localizedString(forKey: "virtualKeyboard.label", value: nil, table: "SettingsFeedback")
             == "キー配列を変更するアプリが動作中")
-        #expect(bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsLed")
-            == "そのアプリがCaps LockのLEDを制御している場合、スリープ防止中もLEDが点灯しないことがあります。")
+        let help = bundle.localizedString(forKey: "virtualKeyboard.help", value: nil, table: "SettingsFeedback")
+        #expect(help.hasPrefix("キー配列を変更するアプリがCaps LockのLEDを制御している場合、"))
+        #expect(help.hasSuffix("[詳しい情報…](https://github.com/koutyuke/Capsaicin/blob/main/README.ja.md#"
+                + "%E3%82%AD%E3%83%BC%E9%85%8D%E5%88%97%E3%82%92%E5%A4%89%E6%9B%B4%E3%81%99%E3%82%8B%E3%82%A2"
+                + "%E3%83%97%E3%83%AA%E3%82%92%E4%BD%BF%E3%81%A3%E3%81%A6%E3%81%84%E3%82%8B%E5%A0%B4%E5%90%88)"))
     }
 }
 

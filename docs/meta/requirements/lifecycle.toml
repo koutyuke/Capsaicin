@@ -6,58 +6,46 @@ domain_code = "LCY"
 id = "REQ-LCY-001"
 title = "ログイン時に起動できる"
 kind = "functional"
-statement = "「ログイン時に起動する」がオンのとき、利用者がログインするとアプリが起動する。"
+statement = "「ログイン時に起動」がオンのとき、利用者がログインするとアプリが起動する。"
 reason = "常駐アプリとして、毎回手で起動しなくても使えるようにするため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LCY-001"]
 depends_on = []
-sources = ["DEC-LCY-001", "DEC-LCY-002"]
+sources = ["DEC-LCY-010"]
 
 [[requirements]]
 id = "REQ-LCY-002"
 title = "終了時にスリープ設定と LED を元に戻す"
 kind = "functional"
-statement = "アプリが終了するときは、Capsaicin が適用した抑止の仕組みを通常の動作に戻してから終了する。戻せなかったものは隠さずに伝え、次の起動で合わせ直す（詳細は SPEC-LCY-002）。"
+statement = "アプリが終了するときは、Capsaicin が適用した抑止の仕組みを停止中のあるべき状態に合わせる。合わせられないときのエラーのダイアログは、利用者の終了でだけ出す。"
 reason = "アプリが動いていないのに、スリープできない状態や LED の点灯を残さないため。"
 priority = "must"
 status = "accepted"
 specs = ["SPEC-LCY-002"]
 depends_on = []
-sources = ["DEC-BLK-008"]
+sources = ["DEC-BLK-008", "DEC-LCY-010"]
 
 [[requirements]]
 id = "REQ-LCY-003"
-title = "クラッシュから復旧する"
+title = "後片付けをできずに終わっても disablesleep を残さない"
 kind = "functional"
-statement = "アプリがクラッシュしたら自動で再起動し、抑止を再開しないなら、残っている抑止の仕組みを通常の動作に戻す。戻せなかったものは隠さずに伝え、戻るまで合わせ直す（詳細は SPEC-LCY-006）。"
-reason = "クラッシュで後片付けができなかった場合にも、スリープできない状態や LED の点灯を残さないため。"
+statement = "アプリがクラッシュなどで後片付けをできずに終わっても、Capsaicin が立てた disablesleep はデーモンが戻す。LED と輝度は次の起動で戻す。"
+reason = "アプリが動かなくなった後に、利用者が気づきにくいスリープの禁止を残さないため。"
 priority = "must"
 status = "accepted"
-specs = ["SPEC-LCY-003", "SPEC-LCY-006", "SPEC-LCY-007"]
+specs = ["SPEC-LCY-003", "SPEC-LCY-006", "SPEC-HLP-002"]
 depends_on = []
-sources = ["DEC-LCY-001", "HYP-LCY-001", "DEC-BLK-008"]
+sources = ["DEC-LCY-010", "EVID-HLP-010", "EVID-HLP-012", "EVID-HLP-013", "EVID-LCY-007", "EVID-BLK-015"]
 
 [[requirements]]
-id = "REQ-LCY-004"
-title = "再起動後に抑止を再開するかを選べる"
+id = "REQ-LCY-006"
+title = "同じアプリは1つだけ動く"
 kind = "functional"
-statement = "利用者は、アプリや Mac の再起動後に抑止を再開するかを、「再開しない」「アプリの再起動時だけ」「アプリと Mac の再起動時」から選べる。"
-reason = "再起動をまたいで抑止を続けたい場合と、再起動で確実に止めたい場合の両方があるため。"
+statement = "同じ bundle ID のアプリは1つだけ動く。後から起動したものは、動いているものを開き直して終了する。"
+reason = "抑止を止めずに設定を開けるようにし、複数のプロセスが LED、輝度、ヘルパーや CLI の通信を取り合うのを防ぐため。"
 priority = "must"
 status = "accepted"
-specs = ["SPEC-LCY-004", "SPEC-LCY-006", "SPEC-LCY-007"]
+specs = ["SPEC-LCY-009"]
 depends_on = []
-sources = ["DEC-LCY-003", "DEC-LCY-004"]
-
-[[requirements]]
-id = "REQ-LCY-005"
-title = "どう起動してもクラッシュ時に再起動される"
-kind = "functional"
-statement = "Finder、CLI、ログインのどこから起動しても、アプリはクラッシュしたら再起動される状態で動き、そうできないときは設定画面でそのことを示す。"
-reason = "起動の方法によって、クラッシュからの復旧が効いたり効かなかったりしないようにするため。"
-priority = "must"
-status = "accepted"
-specs = ["SPEC-LCY-005"]
-depends_on = ["REQ-LCY-003"]
-sources = ["DEC-LCY-002", "HYP-LCY-002", "HYP-LCY-003"]
+sources = ["DEC-LCY-011"]

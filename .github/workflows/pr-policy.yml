@@ -17,6 +17,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # ビルド番号をベースと比べるため、マージ結果の親（ベースの先頭）まで取る。
+          fetch-depth: 2
           fetch-tags: true
           persist-credentials: false
       - name: Check PR policy
@@ -73,6 +75,9 @@ jobs:
               if [[ "$type_label_count" -ne 1 ]]; then
                 fail "A PR from hotfix/* to main must have exactly one T-* label (found $type_label_count)."
               fi
+              if has_label I-Breaking; then
+                fail "A PR from hotfix/* to main must not have the I-Breaking label."
+              fi
               ;;
             *)
               fail "A PR to main must come from release/v* or hotfix/*."
@@ -81,4 +86,18 @@ jobs:
 
           if git show-ref --verify --quiet "refs/tags/v$version"; then
             fail "Tag v$version already exists."
+          fi
+
+          # hotfix の戻しマージで番号が並ぶと、Sparkle が更新を見つけられず公開も止まるので、マージ前に止める。
+          # HEAD は PR をベースにマージしたコミットで、1つ目の親がベースの先頭である。
+          read_build() {
+            awk '$1 == "CURRENT_PROJECT_VERSION:" { gsub(/"/, "", $2); print $2; exit }'
+          }
+          build="$(read_build < project.yml)"
+          base_build="$(git show HEAD^1:project.yml | read_build)"
+          if ! [[ "$build" =~ ^[0-9]+$ && "$base_build" =~ ^[0-9]+$ ]]; then
+            fail "Cannot read CURRENT_PROJECT_VERSION from the PR and main."
+          fi
+          if ((build <= base_build)); then
+            fail "CURRENT_PROJECT_VERSION $build must be greater than $base_build on main."
           fi

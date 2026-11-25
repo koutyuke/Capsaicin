@@ -38,24 +38,27 @@ struct SettingsView: View {
             .navigationSplitViewColumnWidth(200)
             .toolbar(removing: .sidebarToggle)
         } detail: {
-            Group {
-                if selection.section == .about {
-                    about
-                } else {
-                    Form {
-                        switch selection.section {
-                        case .general: general
-                        case .sleep: sleep
-                        case .led: led
-                        case .controls: controls
-                        case .helper: helper
-                        case .about: EmptyView()
-                        }
-                    }.formStyle(.grouped).toggleStyle(.switch)
-                        // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
-                        .contentMargins(.top, -8, for: .scrollContent)
+            Form {
+                switch selection.section {
+                case .general: general
+                case .sleep: sleep
+                case .feedback: feedback
+                case .controls: controls
+                case .helper: helper
+                case .about:
+                    SettingsAboutContent(updater: model.app.updater, quit: quit, bundle: bundle)
                 }
-            }
+            }.formStyle(.grouped).toggleStyle(.switch)
+                // grouped の Form は上に 20 pt の余白を持つ。システム設定と同じく、見出しの下から 12 pt にする。
+                .contentMargins(.top, -8, for: .scrollContent)
+                // About の下端はフッターで決めるため、Form 既定の下余白 20 pt を相殺する。
+                .contentMargins(.bottom, selection.section == .about ? -20 : 0, for: .scrollContent)
+                .navigationTitle(selection.section.title)
+                .onChange(of: selection.section, initial: true) {
+                    if selection.section == .about {
+                        model.app.updater.refresh()
+                    }
+                }
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .background {
@@ -65,42 +68,21 @@ struct SettingsView: View {
 
     private func navigation(_ section: SettingsSection) -> some View {
         Label { Text(section.title) } icon: {
-            Image(symbol: section.symbol, bundle: Bundle(for: SettingsWindowController.self))
+            SettingsSidebarIcon(
+                image: Image(symbol: section.symbol, bundle: Bundle(for: SettingsWindowController.self)),
+            )
         }.tag(section)
     }
 
     @ViewBuilder
     private var general: some View {
-        Section(SettingsSection.general.text("startup.group.title")) {
+        Section {
             toggle(.general, "launchAtLogin", \.launchesAtLogin, symbol: "power")
-            SettingsRow(
-                title: SettingsSection.general.text("resume.label"),
-                help: SettingsSection.general.text("resume.help"),
-                symbol: "arrow.clockwise",
-            ) {
-                Picker(SettingsSection.general.text("resume.label"), selection: binding(\.resumePolicy)) {
-                    Text(SettingsSection.general.text("resume.option.never")).tag(ResumePolicy.never)
-                    Text(SettingsSection.general.text("resume.option.app")).tag(ResumePolicy.afterAppRestart)
-                    Text(SettingsSection.general.text("resume.option.appAndMac")).tag(
-                        ResumePolicy.afterAppOrMacRestart,
-                    )
-                }.labelsHidden().pickerStyle(.menu)
-            }
-            if !model.app.willRestartAfterCrash {
-                let key =
-                    model.app.launchAgentStatus == .disabled ? "backgroundDisabled" : "restartUnavailable"
-                SettingsRow(
-                    title: SettingsSection.general.text(key + ".label"),
-                    help: SettingsSection.general.text(key + ".help"),
-                    symbol: "exclamationmark.triangle.fill",
-                ) {}
-            }
         }
-        Section(SettingsSection.general.text("appearance.group.title")) {
+        Section {
             toggle(.general, "menuBarIcon", \.showsMenuBarIcon, symbol: "menubar.rectangle")
             toggle(.general, "dockIcon", \.showsDockIcon, symbol: "dock.rectangle")
         }
-        toggle(.general, "hud", \.showsHUD, symbol: "capsule.bottomhalf.filled", help: true)
     }
 }
 
@@ -118,7 +100,8 @@ extension SettingsView {
 
     private func sleepRow(_ row: SettingsSleepRow) -> some View {
         SettingsRow(
-            title: SettingsSection.sleep.text(row.key + ".label"), help: row.help, symbol: row.symbol,
+            title: SettingsSection.sleep.text(row.key + ".label"),
+            help: row.help, symbol: row.symbol,
             warningLabel: row.warningLabel,
         ) {
             if row.key == "lidClose" {
@@ -130,18 +113,17 @@ extension SettingsView {
                 ) {
                     ForEach(SettingsLidCloseChoice.allCases, id: \.self) { choice in
                         Text(SettingsSection.sleep.text("lidClose." + choice.rawValue)).tag(choice)
+                            .selectionDisabled(!row.canSelect(choice))
                     }
                 }.labelsHidden().pickerStyle(.menu).disabled(model.isBusy)
-            } else if let setting = row.setting {
+            } else if row.setting != nil {
                 Toggle(
                     SettingsSection.sleep.text(row.key + ".label"),
                     isOn: Binding(
-                        get: {
-                            setting == \.blocksManualSleep && model.pendingManual || row.isOn
-                        }, set: { value in Task { await model.changeSleep(row, to: value) } },
+                        get: { row.isOn }, set: { value in Task { await model.changeSleep(row, to: value) } },
                     ),
                 )
-                .labelsHidden().disabled(model.isBusy)
+                .labelsHidden().disabled(model.isBusy || !row.isToggleEnabled)
             }
         }
     }
@@ -189,7 +171,7 @@ extension SettingsView {
                                     model.app.settings.batteryThreshold.percent,
                                 ),
                             )
-                            .monospacedDigit().foregroundStyle(.secondary)
+                            .monospacedDigit().foregroundStyle(.secondary).fixedSize()
                             Slider(
                                 value: Binding(
                                     get: { Double(model.app.settings.batteryThreshold.percent) },
@@ -222,17 +204,28 @@ extension SettingsView {
     }
 
     @ViewBuilder
-    private var led: some View {
+    private var feedback: some View {
+        Section(SettingsSection.feedback.text("led.group.title")) {
+            SettingsFeedbackBanner(text: SettingsSection.feedback.text("led.description")) {
+                LEDIllustration()
+            }
+        }
+        Section { toggle(.feedback, "led", \.notifiesWithLED, symbol: "custom.capsaicin.led.fill") }
         if model.app.hasVirtualKeyboard {
             Section {
                 SettingsRow(
-                    title: SettingsSection.led.text("virtualKeyboard.label"),
-                    help: SettingsSection.led.text("virtualKeyboard.help"),
+                    title: SettingsSection.feedback.text("virtualKeyboard.label"),
+                    help: SettingsSection.feedback.text("virtualKeyboard.help"),
                     symbol: "exclamationmark.triangle.fill",
                 ) {}
             }
         }
-        Section { toggle(.led, "enabled", \.notifiesWithLED, symbol: "custom.capsaicin.led.fill") }
+        Section(SettingsSection.feedback.text("hud.group.title")) {
+            SettingsFeedbackBanner(text: SettingsSection.feedback.text("hud.description")) {
+                HUDIllustration()
+            }
+        }
+        Section { toggle(.feedback, "hud", \.showsHUD, symbol: "capsule.bottomhalf.filled") }
     }
 
     @ViewBuilder
@@ -240,7 +233,6 @@ extension SettingsView {
         Section(SettingsSection.controls.text("hotkey.group.title")) {
             SettingsRow(
                 title: SettingsSection.controls.text("hotkey.label"),
-                help: SettingsSection.controls.text("hotkey.help"),
                 symbol: "command",
             ) {
                 HotkeyRecorder(controller: hotkey)
@@ -257,7 +249,6 @@ extension SettingsView {
             toggle(.controls, "cli", \.acceptsCLIRequests, symbol: "terminal", help: true)
             SettingsRow(
                 title: SettingsSection.controls.text("cli.path.label"),
-                help: SettingsSection.controls.text("cli.path.help"),
                 symbol: "folder",
             ) {
                 let path = bundle.bundleURL.appendingPathComponent("Contents/Helpers/capsaicin").path
@@ -268,25 +259,36 @@ extension SettingsView {
         }
     }
 
-    private var helper: some View {
+    @ViewBuilder
+    var helper: some View {
+        Section {
+            SettingsIntroCard(
+                title: SettingsSection.helper.text("title"),
+                message: SettingsSection.helper.text("intro.message"),
+                symbol: "lock.shield",
+            )
+        }
         Section {
             SettingsRow(
                 title: SettingsSection.helper.text("status.label"),
-                help: SettingsSection.helper.text("status.help"),
-                symbol: "lock.shield",
+                help: model.helperState == .requiresApproval
+                    ? SettingsSection.helper.text("status.requiresApproval.help") : "",
+                symbol: "smallcircle.filled.circle",
             ) {
                 switch model.helperState {
                 case .notInstalled:
                     Text(SettingsSection.helper.text("status.notInstalled")).foregroundStyle(.secondary)
-                case .partial:
+                case .unavailable:
+                    Text(SettingsSection.helper.text("status.unavailable")).foregroundStyle(.secondary)
+                case .requiresApproval:
                     Label {
-                        Text(SettingsSection.helper.text("status.partial"))
+                        Text(SettingsSection.helper.text("status.requiresApproval"))
                     } icon: {
                         Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                     }
                 case .installed:
                     Label {
-                        Text(SettingsSection.helper.text("status.installed"))
+                        Text(SettingsSection.helper.text("status.usable"))
                     } icon: {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                     }
@@ -297,10 +299,13 @@ extension SettingsView {
             ) {
                 switch model.helperState {
                 case .notInstalled: helperButton(.install)
-                case .partial:
-                    helperButton(.repair)
+                case .requiresApproval:
+                    Button(SettingsSection.helper.text("openSystemSettings.button")) {
+                        model.openHelperSystemSettings()
+                    }.buttonStyle(.bordered).disabled(model.isBusy)
                     helperButton(.remove)
                 case .installed: helperButton(.remove)
+                case .unavailable: EmptyView()
                 }
             }
         }
@@ -308,27 +313,6 @@ extension SettingsView {
 }
 
 extension SettingsView {
-    private var about: some View {
-        VStack(spacing: 8) {
-            Image(nsImage: NSWorkspace.shared.icon(forFile: bundle.bundlePath)).resizable().frame(
-                width: 96, height: 96,
-            )
-            .accessibilityLabel(SettingsSection.about.text("icon.a11y"))
-            Text(verbatim: "Capsaicin").font(.title)
-            Text(
-                String(
-                    format: SettingsSection.about.text("version"),
-                    bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—",
-                    bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "—",
-                ),
-            )
-            .font(.callout).foregroundStyle(.secondary).textSelection(.enabled)
-            Button(MenuContent.text("menu.quit", bundle: bundle), action: quit)
-                .buttonStyle(.bordered)
-                .padding(.top, 8)
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
     private func helperButton(_ operation: HelperManagementOperation) -> some View {
         Button(SettingsSection.helper.text(SettingsModel.operationKey(operation) + ".button")) {
             Task { await model.manage(operation) }

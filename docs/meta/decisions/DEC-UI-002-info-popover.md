@@ -2,9 +2,9 @@
 schema: decision
 id: DEC-UI-002
 title: 設定の (i) の説明はポップオーバーを主にし、ツールチップも付ける
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
+superseded_by: ["DEC-UI-016"]
 requirements: ["REQ-SET-003", "REQ-UI-003"]
 based_on: []
 ---

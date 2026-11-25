@@ -2,11 +2,11 @@
 schema: decision
 id: DEC-LCY-004
 title: 終了理由が不明なら後片付けだけ行い、自動再開しない
-status: accepted
+status: superseded
 supersedes: []
-superseded_by: []
-requirements: [REQ-LCY-002, REQ-LCY-004]
-based_on: [DEC-LCY-003, HYP-LCY-005]
+superseded_by: ["DEC-LCY-010"]
+requirements: ["REQ-LCY-002"]
+based_on: ["DEC-LCY-003", "HYP-LCY-005"]
 ---
 
 # DEC-LCY-004 終了理由が不明なら後片付けだけ行い、自動再開しない
@@ -30,7 +30,7 @@ based_on: [DEC-LCY-003, HYP-LCY-005]
 
 本当はログアウトや Mac の再起動だった場合も、理由を取得できなければ抑止は再開されない。この制約は利用者が承認した。
 
-記録を保存できないまま終了した場合は、古い記録に従って再開し得る。`SPEC-LCY-007` の既知の保存失敗の制約は、この終了にも適用する。
+記録を保存できないまま終了した場合は、古い記録に従って再開し得る。再開用の記録の仕様 の既知の保存失敗の制約は、この終了にも適用する。
 
 ## 覆す条件
 

@@ -90,7 +90,9 @@ Front Matter の共通項目は `schema`、`id`、`title` である。`schema` �
 | `depends_on` | 計画なら計画、作業なら作業 |
 | `supersedes`、`superseded_by` | 判断 |
 
-根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス（削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める）、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+根拠の `sources` だけは ID ではなく、確かめた資料の所在を書く。Web の資料は URL、リポジトリ内の資料はパス（削除した資料は、それを含むコミットとパスを `d6cb7b3:docs/requirements.md` の形で書く。`git show` で読める。コミットは `develop` の履歴にあるものに限り、マージしないブランチのコミットは指さない）、OS や SDK に入っている資料（man ページ、ヘッダー）は絶対パスで書く。例: `/usr/share/man/man1/pmset.1`、`/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/IOKit.framework/Headers/pwr_mgt/IOPMLib.h`。
+
+実機で確かめるための試作は、マージしないブランチに置き、リポジトリには残さない。試作で得た根拠には、結果を読み解くのに要る試作の作りと操作を本文に書き、`sources` には試作を作らせたチケットを挙げる。
 
 本文に書いた ID（`REQ-BLK-001` のような形の文字列）も、実在するものだけにする。
 
@@ -141,6 +143,7 @@ sources = []
 - 製品と仕様には現在の正しい状態だけを書く。検討した案、以前の挙動、編集の経緯は書かない。それらは判断の `選択肢`、Git の履歴、作業の記録が持つ。
 - 製品と仕様に日付や「現時点では」のような時点表現を書かない。日付が意味を持つ根拠（`observed_on`）と作業の記録だけが日付を持つ。
 - 「蓋」は書かない。ディスプレイを閉じられる Mac は「MacBook」、閉じられない Mac は「MacBook 以外の Mac」、操作は「ディスプレイを閉じる」「ディスプレイを開く」と書く。API や設定の名前（`AppleClamshellState` など）はそのまま書く。
+- 画面に出る名前（設定の項目、選択肢、メニュー項目、ボタン）は、String Catalog の値をそのまま「」で書く（[`AGENTS.md`](../AGENTS.md) の「画面とコマンドの名前」）。画面の文言を変えたら、同じ変更で製品・要件・仕様・手順書・採用中の判断・未確認の仮説にある名前を直す。根拠、確かめ終えた仮説、置き換えられた判断は、書いた時点の名前のまま残す。
 - 同じ規則を2か所に書かない。他の層が持つ命題は ID で参照する。
   - 悪い例: `ヘルパーは sudoers で起動する。`
   - 良い例: `ヘルパーの起動方法は DEC-HLP-001 を参照。`
