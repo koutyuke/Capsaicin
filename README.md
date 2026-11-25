@@ -69,7 +69,9 @@ gh attestation verify "Capsaicin-{version}.dmg" --repo koutyuke/Capsaicin
 brew install --cask koutyuke/tap/capsaicin
 ```
 
-This also links the `capsaicin` command into Homebrew's `bin`. Capsaicin updates itself, so `brew upgrade` skips it unless you pass `--greedy`.
+This also links the `capsaicin` command into Homebrew's `bin`.
+
+Capsaicin installs its own updates from within the app, so you don't need `brew upgrade` for it. `brew upgrade` skips Capsaicin unless you pass `--greedy`.
 
 ## Troubleshooting
 

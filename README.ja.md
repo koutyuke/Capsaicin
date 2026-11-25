@@ -69,7 +69,9 @@ gh attestation verify "Capsaicin-{バージョン}.dmg" --repo koutyuke/Capsaici
 brew install --cask koutyuke/tap/capsaicin
 ```
 
-`capsaicin` コマンドも Homebrew の `bin` にリンクされます。Capsaicin はアプリ自身で更新するので、`brew upgrade` は `--greedy` を付けない限り Capsaicin を更新しません。
+`capsaicin` コマンドも Homebrew の `bin` にリンクされます。
+
+アップデートは Capsaicin がアプリの中で行うので、`brew upgrade` を実行する必要はありません。`brew upgrade` は、`--greedy` を付けない限り Capsaicin を対象にしません。
 
 ## トラブルシューティング
 
