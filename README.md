@@ -95,27 +95,28 @@ In the settings window, turn off `Devices > (your keyboard) > Manipulate caps lo
 
 If you deleted the app before deleting the helper, reinstall Capsaicin and start again from step 1.
 
-## Building from Source
+## Development & Testing
 
-Requires Xcode 27.2 and Nix with flakes enabled.
+Requires an Apple Silicon Mac with macOS 26 or later, Xcode 27.2, and Nix with flakes enabled.
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
 cd Capsaicin
-nix develop --command just build
 ```
 
-The app will be generated at `.build/xcode/Build/Products/Debug/Capsaicin.app`.
-
-## Development & Testing
+The main commands are:
 
 ```bash
+nix develop --command just build  # Generate the Xcode project and build the Debug app
 nix develop --command just check  # Format check, linting, and all tests
 nix develop --command just test   # Script, package, and app tests
+nix develop --command just lint   # Lint code and docs, and check build tool versions
 nix develop --command just fmt    # Format all files with treefmt
 ```
 
-For more details, please refer to the documentation.
+`just build` generates the app at `.build/xcode/Build/Products/Debug/Capsaicin.app`. This build is ad-hoc signed, so the **Helper** settings show **Unavailable in this build**, and the settings that require the helper (**Also prevent sleep from Apple menu**, and options other than **Put Mac to sleep (default)** for **When display is closed**) cannot be used. Software updates are also unavailable in Debug builds.
+
+For other recipes, see the [justfile](./justfile).
 
 ## Documentation
 

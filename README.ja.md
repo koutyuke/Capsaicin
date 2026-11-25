@@ -95,27 +95,28 @@ Karabiner-Elements などのキー配列を変更するアプリが Caps Lock �
 
 ヘルパーを削除する前にアプリを削除してしまった場合は、Capsaicinを再インストールし、手順1からやり直してください。
 
-## ソースからビルドする
+## 開発とテスト
 
-Xcode 27.2 と、flakes を有効にした Nix が必要です。
+macOS 26 以降の Apple Silicon の Mac、Xcode 27.2、flakes を有効にした Nix が必要です。
 
 ```bash
 git clone https://github.com/koutyuke/Capsaicin.git
 cd Capsaicin
-nix develop --command just build
 ```
 
-アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` に生成されます。
-
-## 開発とテスト
+主に使うコマンドは次のとおりです。
 
 ```bash
+nix develop --command just build  # Xcode プロジェクトを生成し、Debug のアプリをビルド
 nix develop --command just check  # 整形の検査、lint、すべてのテスト
 nix develop --command just test   # 検査スクリプト、パッケージ、アプリのテスト
+nix develop --command just lint   # コードと文書の lint、ビルドツールの版の検査
 nix develop --command just fmt    # treefmt ですべてのファイルを整形
 ```
 
-詳しくはドキュメントを参照してください。
+`just build` で、アプリは `.build/xcode/Build/Products/Debug/Capsaicin.app` に生成されます。このビルドは ad-hoc 署名のため、設定の**ヘルパー**は**このビルドでは使用不可**と表示され、ヘルパーが必要な設定（**Appleメニューからのスリープも防ぐ**と、**ディスプレイを閉じたとき**の**Macをスリープ（標準）**以外の選択肢）は使えません。Debug ビルドではソフトウェアアップデートも利用できません。
+
+ほかのレシピは [justfile](./justfile) を参照してください。
 
 ## ドキュメント
 
