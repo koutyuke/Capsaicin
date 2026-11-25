@@ -4,7 +4,7 @@ id: HYP-SYS-004
 title: Developer ID で署名し公証した Release の配布物は、entitlements なしで既存の機能が動き、Sparkle で更新できる
 status: open
 affects: ["DEC-SYS-021", "DEC-SYS-019", "DEC-HLP-005"]
-evidence: ["EVID-SYS-006"]
+evidence: ["EVID-SYS-006", "EVID-SYS-009"]
 ---
 
 # HYP-SYS-004 Developer ID で署名し公証した Release の配布物は、entitlements なしで既存の機能が動き、Sparkle で更新できる
@@ -57,6 +57,6 @@ evidence: ["EVID-SYS-006"]
 
 未確認。主張2は、アプリを入れ替える前に手順を行う場合について確かめた（`EVID-SYS-006`）。入れ替えた後に行う場合は確かめていない。
 
-主張1のうち、署名と Hardened Runtime と公証、ヘルパーのインストール（システム設定での許可を含む）と `on`・`off`、「ディスプレイを閉じたとき」の「オンのまま」、「ログイン時に起動」、ログインし直した後と再起動した後の状態、LED、CLI の `on`・`off`・`status`、グローバルホットキーを確かめた（`EVID-SYS-006`）。「今すぐ確認」による更新の確認は、公開の前は Latest に `appcast.xml` がなくエラーになったので、公開した後に確かめる。この Mac は MacBook なので、「Appleメニューからのスリープも防ぐ」は表示されず、確かめられない。
+主張1のうち、署名と Hardened Runtime と公証、ヘルパーのインストール（システム設定での許可を含む）と `on`・`off`、「ディスプレイを閉じたとき」の「オンのまま」、「ログイン時に起動」、ログインし直した後と再起動した後の状態、LED、CLI の `on`・`off`・`status`、グローバルホットキーを確かめた（`EVID-SYS-006`）。「今すぐ確認」による更新の確認は、公開の前は Latest に `appcast.xml` がなくエラーになったが、公開した後は新しい版を見つけた（`EVID-SYS-009`）。この Mac は MacBook なので、「Appleメニューからのスリープも防ぐ」は表示されず、確かめられない。
 
-主張3は、Developer ID で署名した安定版を2つ公開した後に確かめる。
+主張3は、リリース用の PR の確認用ビルド 0.2.0 (4) から、公開した 0.2.0 (5) への更新で確かめた（`EVID-SYS-009`）。どちらも Developer ID で署名し公証した版である。更新前の版は公開した安定版ではないので、安定版どうしの更新は次の安定版で確かめる。
