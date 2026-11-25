@@ -1,0 +1,136 @@
+# 公開（release.yml）と、確認用のビルド（release-preview.yml）の両方から呼ぶ。
+# 確認用のビルドでも同じ定義で動かし、公開の前に appcast の生成と検査を確かめる（DEC-SYS-029）。
+name: Sign release appcast
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      dmg-name:
+        required: true
+        type: string
+      sparkle-version:
+        required: true
+        type: string
+      sparkle-sha256:
+        required: true
+        type: string
+    secrets:
+      SPARKLE_ED_PRIVATE_KEY:
+        required: true
+
+permissions: {}
+
+jobs:
+  release-appcast:
+    name: Sign release appcast
+    runs-on: xcode-27
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ inputs.version }}
+      DMG_NAME: ${{ inputs.dmg-name }}
+    steps:
+      # checkout やリポジトリ内の処理を実行せず、秘密鍵をビルドから隔離する。
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ env.DMG_NAME }}
+          path: dist
+      - name: Install Sparkle tools
+        env:
+          SPARKLE_VERSION: ${{ inputs.sparkle-version }}
+          SPARKLE_SHA256: ${{ inputs.sparkle-sha256 }}
+        run: |
+          tools="$RUNNER_TEMP/sparkle"
+          mkdir -p "$tools"
+          curl -fsSL -o "$RUNNER_TEMP/Sparkle.tar.xz" \
+            "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz"
+          printf '%s  %s\n' "$SPARKLE_SHA256" "$RUNNER_TEMP/Sparkle.tar.xz" | shasum -a 256 -c -
+          tar -xf "$RUNNER_TEMP/Sparkle.tar.xz" -C "$tools"
+      - name: Check DMG and write release notes
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          shopt -s nullglob
+          images=(dist/*.dmg)
+          if [[ ${#images[@]} -ne 1 || "${images[0]}" != "dist/Capsaicin-$VERSION.dmg" ]]; then
+            echo '::error::Expected exactly the release DMG'
+            exit 1
+          fi
+
+          # マウント先のフォルダーは diskutil が作り、取り外すときに消す。
+          mount_point="$RUNNER_TEMP/capsaicin-mount"
+          diskutil image attach --readOnly --nobrowse --mountPoint "$mount_point" "${images[0]}"
+          trap 'diskutil eject "$mount_point"' EXIT
+
+          python3 - "$mount_point/Capsaicin.app/Contents/Info.plist" <<'PY'
+          import base64
+          import os
+          import plistlib
+          import sys
+          from pathlib import Path
+
+          version = os.environ["VERSION"]
+          with Path(sys.argv[1]).open("rb") as info_plist:
+              info = plistlib.load(info_plist)
+          public_key = info.get("SUPublicEDKey", "").strip()
+          if not public_key or len(base64.b64decode(public_key, validate=True)) != 32:
+              raise SystemExit("The release app must have a nonempty 32-byte SUPublicEDKey")
+          body = os.environ["PR_BODY"]
+          if not body.strip():
+              raise SystemExit("The pull request body is empty")
+          Path(f"dist/Capsaicin-{version}.md").write_text(body + "\n", encoding="utf-8")
+          PY
+      # 秘密鍵はこのステップだけに渡し、ファイルやコマンドの引数には書かない。
+      - name: Generate signed appcast
+        env:
+          SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+        run: |
+          if [[ -z "$SPARKLE_ED_PRIVATE_KEY" ]]; then
+            echo "::error::SPARKLE_ED_PRIVATE_KEY is not set"
+            exit 1
+          fi
+          printf '%s\n' "$SPARKLE_ED_PRIVATE_KEY" | "$RUNNER_TEMP/sparkle/bin/generate_appcast" \
+            --ed-key-file - \
+            --embed-release-notes \
+            --download-url-prefix "https://github.com/koutyuke/Capsaicin/releases/download/v$VERSION/" \
+            -o dist/appcast.xml dist
+      - name: Require archive and feed signatures
+        run: |
+          python3 - <<'PY'
+          import base64
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          data = Path("dist/appcast.xml").read_bytes()
+          items = ET.fromstring(data).findall("./channel/item")
+          if len(items) != 1:
+              raise SystemExit("The appcast must contain exactly one item")
+          enclosure = items[0].find("enclosure")
+          if enclosure is None:
+              raise SystemExit("The appcast item must have an enclosure")
+          signature = enclosure.get("{http://www.andymatuschak.org/xml-namespaces/sparkle}edSignature", "")
+          if len(base64.b64decode(signature, validate=True)) != 64:
+              raise SystemExit("The appcast item must have sparkle:edSignature (check the signing key)")
+          version = os.environ["VERSION"]
+          expected_url = f"https://github.com/koutyuke/Capsaicin/releases/download/v{version}/{os.environ['DMG_NAME']}"
+          if enclosure.get("url") != expected_url:
+              raise SystemExit("The appcast must point to the release DMG at its tag URL")
+          signing_block = re.search(
+              rb"<!-- sparkle-signatures:\nedSignature: ([A-Za-z0-9+/]{86}==)\nlength: ([0-9]+)\n-->\n?\Z", data
+          )
+          if signing_block is None or int(signing_block[2]) != signing_block.start():
+              raise SystemExit("The appcast must have a feed signature (check SURequireSignedFeed)")
+          print("One item, archive signature, tag URL, and feed signature checked")
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-appcast
+          if-no-files-found: error
+          retention-days: 7
+          path: dist/appcast.xml

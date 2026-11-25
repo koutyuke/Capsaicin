@@ -106,7 +106,7 @@ Developer ID Application 証明書の有効期限は 2027年12月17日である�
 
 1. `develop` で、エージェントにスキル `capsaicin-release` を使ってリリースの準備を進めるよう依頼する。
 2. エージェントが示したバージョン、プレリリースにするか、PR の本文を確かめる。問題がなければ、ブランチの push と PR の作成を承認する。プレリリースにするかは、マージの前なら PR の `S-Prerelease` を付け外しして変えられる。
-3. PR の `Release preview` コメントが `ready` になったら、「Download」から確認用の `Capsaicin-{バージョン}.dmg` をダウンロードする。コメントは種類ごとに1つで、ビルドの前に `building`、成功時に `ready`、失敗時に `failed` へ書き換わる。`ready` にはコミット、Release の版、署名と公証の状態、artifact の期限（7日間）、実行のログが表示される。
+3. PR を開くと、Release preview ワークフローが確認用のビルドを作る。公開と同じ定義で appcast も作って検査するが、公開はしない。PR の `Release preview` コメントが `ready` になったら、「Download」から確認用の `Capsaicin-{バージョン}.dmg` をダウンロードする。コメントは種類ごとに1つで、ビルドの前に `building`、成功時に `ready`、失敗時に `failed` へ書き換わる。`ready` にはコミット、Release の版、署名と公証の状態、artifact の期限（7日間）、実行のログが表示される。
 
    Release の確認用ビルドは、インストール済みの正式版を置き換える。DMG を開き、`Capsaicin.app` を `Applications` のリンクへドラッグして「アプリケーション」フォルダーにコピーする。DMG をダウンロードしたフォルダーで、ファイル名を実際のものに置き換えて次を実行する。`codesign` の出力に `Authority=Developer ID Application`、両方の `spctl` の出力に `source=Notarized Developer ID` が含まれることを確かめる。その後、「アプリケーション」フォルダーからアプリを開き、実機で既存の機能が動くことを確かめる。
 
@@ -116,7 +116,7 @@ Developer ID Application 証明書の有効期限は 2027年12月17日である�
    spctl --assess --type execute -vv /Applications/Capsaicin.app
    ```
 4. 必要な修正を PR の本文に反映し、PR をマージする。マージした時点の本文がリリースノートになる。
-5. Release ワークフローの成功を待つ。GitHub Release が公開され、`Capsaicin-{バージョン}.dmg`、`SHA256SUMS.txt`、`appcast.xml` が添付されていることを確かめる。プレリリースにも `appcast.xml` は付くが、アプリに配信されるのは latest の安定版だけである。
+5. マージすると、Release ワークフローが公開する。実行が成功と表示されても、ジョブが skipped なら公開されていない。実行のジョブの Package release、Sign and notarize、Sign release appcast、Publish がすべて成功したことと、GitHub Release が公開され、`Capsaicin-{バージョン}.dmg`、`SHA256SUMS.txt`、`appcast.xml` が添付されていることを確かめる。プレリリースにも `appcast.xml` は付くが、アプリに配信されるのは latest の安定版だけである。
 6. DMG をダウンロードし、ファイル名を実際のものに置き換えて、このリポジトリのワークフローでビルドされたものかを確かめる。
 
    ```sh
@@ -171,5 +171,7 @@ S-Preview を付ける／ラベルがある PR を更新する
 ## 失敗したとき
 
 - ランナーの一時的な不調でワークフローが失敗したときは、同じワークフローを再実行する。
+- PR の本文が空だと、確認用のビルドは appcast を作れずに `failed` になる。本文を直しても確認用のビルドは動き直さず、再実行も元のイベントの空の本文を使う。本文を直してから、PR のブランチに push するか、PR を閉じて開き直す。
+- 再実行は、マージしたコミットのワークフローの定義で動く。ワークフローの誤りで公開できなかったときは、再実行では直らないので、`main` から `hotfix/<内容>` を切ってワークフローを直し、次の PATCH のバージョンとして公開する（「緊急の修正」）。
 - PR をマージした後にコードを直す必要があるときは、`v*` のタグを削除も更新もせず、次の PATCH のバージョンを出す。
 - 公開済みの GitHub Release は immutable なので、添付ファイルを差し替えられない。問題のあるバージョンはリリースノートで知らせ、次の PATCH のバージョンを出す。

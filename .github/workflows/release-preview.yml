@@ -1,0 +1,143 @@
+# 方針は docs/meta/decisions/DEC-SYS-015-pull-request-ci-and-release-on-merge.md と
+# docs/meta/decisions/DEC-SYS-029-separate-release-preview-and-publish-workflows.md、
+# 手順は docs/manual/release.md にある。公開は release.yml が行う。
+name: Release preview
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: release-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview-start:
+    name: Mark release preview building
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (startsWith(github.head_ref, 'release/v') || startsWith(github.head_ref, 'hotfix/'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # コメント処理は、この実行のワークフローと同じコミットから読む。
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - name: Mark release preview building
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_KIND: release
+          PREVIEW_STATE: building
+        run: python3 scripts/preview_comment.py
+
+  preview-package:
+    name: Package release preview
+    needs: [preview-start]
+    runs-on: xcode-27
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      sparkle_version: ${{ steps.version.outputs.sparkle_version }}
+      sparkle_sha256: ${{ steps.version.outputs.sparkle_sha256 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: ./.github/actions/build-tools
+      - uses: ./.github/actions/dmgbuild
+      # 使い捨てのランナーなので、開発機と違って Xcode の選択を変えてよい。
+      - name: Select Xcode 27.2
+        run: sudo xcode-select --switch /Applications/Xcode_27.2.app
+      - name: Read version
+        id: version
+        run: |
+          source .github/build-tools.env
+          {
+            echo "version=$(just --evaluate version)"
+            echo "sparkle_version=$SPARKLE_VERSION"
+            echo "sparkle_sha256=$SPARKLE_SHA256"
+          } >> "$GITHUB_OUTPUT"
+      - name: Package
+        run: just dist
+      # .build は隠しフォルダーなので、送るファイルを名前で指定して隠しファイルの除外を外す。
+      - name: Upload unsigned release preview
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-release-preview
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            .build/dist/Capsaicin-${{ steps.version.outputs.version }}.zip
+            .build/dist/Capsaicin-layout.dmg
+            .build/dist/SHA256SUMS.txt
+
+  sign-and-notarize:
+    name: Sign and notarize
+    needs: [preview-package]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/sign-and-notarize.yml
+    with:
+      input-artifact: unsigned-release-preview
+      zip-name: Capsaicin-${{ needs.preview-package.outputs.version }}.zip
+    secrets:
+      DEVELOPER_ID_P12_BASE64: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+      DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+      NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+      NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
+      NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
+
+  release-appcast:
+    name: Sign release appcast
+    needs: [preview-package, sign-and-notarize]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-appcast.yml
+    with:
+      version: ${{ needs.preview-package.outputs.version }}
+      dmg-name: ${{ needs.sign-and-notarize.outputs.dmg_name }}
+      sparkle-version: ${{ needs.preview-package.outputs.sparkle_version }}
+      sparkle-sha256: ${{ needs.preview-package.outputs.sparkle_sha256 }}
+    secrets:
+      SPARKLE_ED_PRIVATE_KEY: ${{ secrets.SPARKLE_ED_PRIVATE_KEY }}
+
+  preview-comment:
+    name: Comment release preview
+    needs: [preview-start, preview-package, sign-and-notarize, release-appcast]
+    # ビルド、署名、appcast のどれかが失敗しても failed と書き込むため、!cancelled() で評価する。
+    # 取り消された実行では書き込まない。
+    if: >-
+      !cancelled() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (startsWith(github.head_ref, 'release/v') || startsWith(github.head_ref, 'hotfix/'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ github.workflow_sha }}
+      - name: Update release preview comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_KIND: release
+          PREVIEW_STATE: ${{ needs.preview-package.result == 'success' && needs.sign-and-notarize.result == 'success' && needs.release-appcast.result == 'success' && 'ready' || 'failed' }}
+          ARTIFACT_URL: ${{ needs.sign-and-notarize.outputs.artifact_url }}
+          PACKAGE_NAME: ${{ needs.sign-and-notarize.outputs.dmg_name }}
+          VERSION: ${{ needs.preview-package.outputs.version }}
+        run: python3 scripts/preview_comment.py
