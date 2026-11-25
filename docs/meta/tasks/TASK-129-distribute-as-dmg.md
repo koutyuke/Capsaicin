@@ -2,7 +2,7 @@
 schema: task
 id: TASK-129
 title: 公開物、Sparkle の更新、確認用のビルドを DMG にする
-status: todo
+status: in_review
 requirements: ["REQ-SYS-008"]
 depends_on: []
 assignee: Codex（OpenCode openai/gpt-6.2-sol）
@@ -79,4 +79,11 @@ assignee: Codex（OpenCode openai/gpt-6.2-sol）
 
 ## レビュー
 
-未レビュー。
+PM（Claude）のレビューで、次を PM が直した。
+
+- 開発機と CI のランナー（macOS 27）では `hdiutil create`、`attach`、`detach` が非推奨で、`diskutil image` を使うよう警告が出る。DMG の作成を `diskutil image create from --format ULFO --volumeName Capsaicin` に、appcast のジョブのマウントを `diskutil image attach --readOnly --nobrowse --mountPoint` と `diskutil eject` に変えた。手元で Release ビルドから DMG を作り、APFS・lzfse であること、マウントした中身、署名の検証、取り外し後にマウント先が残らないことを確かめた。`DEC-SYS-028` も合わせて直した。
+- DMG の素材のフォルダーを `mktemp -d` から固定のパスと `mkdir -p` に変え、権限を直す `chmod` と、後片付けの symlink の検査をなくした。
+- `justfile` のレシピの説明は `just --list` に出る英語のまま残し、範囲外の訳し直しを戻した。
+- `README.ja.md` の検証の案内を、周りと同じ敬体に戻した。`AGENTS.md` の `dist` の説明を、Debug の確認用ビルドにも当てはまる書き方にした。
+
+Debug の確認用ビルドを正式版と並べて入れる手順（`Capsaicin Debug.app` に改名する）は、実機で確かめていない。`HYP-SYS-006` の確認と一緒に確かめる。

@@ -14,7 +14,7 @@ based_on: ["DEC-SYS-015", "DEC-SYS-019", "DEC-SYS-021", "DEC-SYS-023", "HYP-SYS-
 ## 結論
 
 - 利用者が受け取るものを、zip から DMG に変える。対象は、GitHub Release に添付する公開物、Sparkle の appcast の `enclosure`、リリース用の PR と `develop` への PR の確認用のビルド（`DEC-SYS-015`、`DEC-SYS-023`）のすべてである。名前は zip の名前の拡張子を `.dmg` に変えたもの（`Capsaicin-{版}.dmg`、`Capsaicin-debug-pr{PR番号}-{コミットの先頭7桁}.dmg`）にする。
-- DMG はボリューム名を `Capsaicin` にし、`Capsaicin.app` と、`/Applications` を指すシンボリックリンク `Applications` だけを入れる。形式は APFS・lzfse 圧縮（`hdiutil` の `ULFO`）にする。背景画像やアイコンの配置は付けない。
+- DMG はボリューム名を `Capsaicin` にし、`Capsaicin.app` と、`/Applications` を指すシンボリックリンク `Applications` だけを入れる。形式は APFS・lzfse 圧縮（`ULFO`）にし、`diskutil image create from` で作る。macOS 27 では `hdiutil create` が非推奨で、`diskutil image` を使うよう警告が出る。背景画像やアイコンの配置は付けない。
 - 署名のジョブ（`DEC-SYS-021`）は、アプリを今までどおり署名・公証・staple した後に DMG を作り、DMG を Developer ID で署名し、公証し、staple する。アプリと DMG のどちらも `stapler validate` と `spctl --assess` を通らなければ、artifact を作らずに止める。
 - ビルドのジョブから署名のジョブへアプリを渡す形は、`just dist` と `just dist-debug` が作る ad-hoc 署名の zip のまま変えない。この zip は CI の中だけで使い、利用者には渡さない。
 - 署名のジョブは DMG を `actions/upload-artifact` の `archive: false` でアップロードする。PR のコメントの Download からは DMG を直接ダウンロードできる。
@@ -65,4 +65,4 @@ Sparkle の文書は、Web で配る形として、Developer ID で署名して�
 
 - `HYP-SYS-006` が外れ、Sparkle が DMG から更新できないと分かったら、更新だけ zip に戻すかを比べ直す。
 - Apple の公証で DMG を扱えなくなるか、DMG での配布を Apple が勧めなくなったら見直す。
-- `hdiutil` での DMG の作成が CI で繰り返し失敗し、再実行で直らないときは、作り方を見直す。
+- `diskutil image` での DMG の作成が CI で繰り返し失敗し、再実行で直らないときは、作り方を見直す。

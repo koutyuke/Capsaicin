@@ -52,15 +52,15 @@ Capsaicin はこれらのアプリとは別のアプリとして独立して作�
 
 ### GitHub Release
 
-1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.zip` をダウンロードする。
-2. zip を展開し、`Capsaicin.app` を「アプリケーション」フォルダーに移動する。
-3. `Capsaicin.app` を開く。
+1. [Releases](https://github.com/koutyuke/Capsaicin/releases) から `Capsaicin-{バージョン}.dmg` をダウンロードする。
+2. DMG を開き、`Capsaicin.app` を `Applications` のリンクにドラッグする。
+3. 「アプリケーション」フォルダーにコピーした `Capsaicin.app` を開く。
 
-ダウンロードした zip が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。
+ダウンロードした DMG が改ざんされていないかは、同じリリースの `SHA256SUMS.txt` と照合するか、[GitHub CLI](https://cli.github.com/) で確かめられます。`SHA256SUMS.txt` を DMG と同じフォルダーに置き、そのフォルダーで実行してください。
 
 ```bash
 shasum -a 256 -c SHA256SUMS.txt
-gh attestation verify Capsaicin-{バージョン}.zip --repo koutyuke/Capsaicin
+gh attestation verify "Capsaicin-{バージョン}.dmg" --repo koutyuke/Capsaicin
 ```
 
 ### Homebrew

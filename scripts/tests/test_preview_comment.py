@@ -20,7 +20,7 @@ class PreviewCommentTests(unittest.TestCase):
                         "commit-url",
                         "run-url",
                         "artifact-url",
-                        "Capsaicin.zip",
+                        "Capsaicin-1.2.3.dmg",
                         "1.2.3",
                         "2026-11-25",
                     )
@@ -33,7 +33,7 @@ class PreviewCommentTests(unittest.TestCase):
                             else "Release 1.2.3"
                         )
                         for row in (
-                            "| **Download** | [Capsaicin.zip](artifact-url) |",
+                            "| **Download** | [Capsaicin-1.2.3.dmg](artifact-url) |",
                             "| **Commit** | [`abc1234`](commit-url) |",
                             f"| **Build** | {build} |",
                             "| **Signing** | Developer ID · notarized · stapled |",
@@ -82,6 +82,28 @@ class PreviewCommentTests(unittest.TestCase):
         ):
             comment.main()
             api.assert_called_once_with("repos/owner/repo/pulls/7")
+
+    def test_ready_preview_links_the_package_from_environment(self):
+        package_name = "Capsaicin-debug-pr7-abc1234.dmg"
+        env = {
+            "GITHUB_EVENT_PATH": "unused.json",
+            "GITHUB_REPOSITORY": "owner/repo",
+            "GITHUB_RUN_ID": "42",
+            "GITHUB_SERVER_URL": "https://github.com",
+            "PREVIEW_KIND": "debug",
+            "PREVIEW_STATE": "ready",
+            "ARTIFACT_URL": "artifact-url",
+            "PACKAGE_NAME": package_name,
+        }
+        head = {"sha": "abc1234" + "0" * 33}
+        event = {"number": 7, "pull_request": {"head": head}}
+        with (
+            patch.dict(os.environ, env, clear=True),
+            patch.object(comment.Path, "read_text", return_value=json.dumps(event)),
+            patch.object(comment, "api", side_effect=[{"head": head}, [], {}]) as api,
+        ):
+            comment.main()
+            self.assertIn(f"[{package_name}](artifact-url)", api.call_args.args[-1])
 
 
 if __name__ == "__main__":

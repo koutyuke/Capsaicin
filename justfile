@@ -43,7 +43,7 @@ sign-debug identity="Developer ID Application":
 build-release: gen
     /usr/bin/xcodebuild {{ xcode_base }} -configuration Release build
 
-# Build a Debug app for checks without extra dylibs, and zip it with the PR number and commit in the name.
+# Build a Debug app for checks without extra dylibs, and zip it with the PR number and commit in the name for the signing job.
 [positional-arguments]
 dist-debug pr sha: gen
     #!/usr/bin/env bash
@@ -63,7 +63,7 @@ dist-debug pr sha: gen
     ditto -c -k --norsrc --noextattr --noacl --keepParent '{{ debug_app }}' ".build/debug-dist/$zip_name"
     (cd .build/debug-dist && shasum -a 256 "$zip_name" > SHA256SUMS.txt)
 
-# Create a distribution zip and SHA-256 checksum in .build/dist/.
+# Create an ad-hoc signed zip and SHA-256 checksum in .build/dist/ for the signing job, which makes the DMG.
 dist: build-release
     mkdir -p .build/dist
     # Exclude extended attributes and resource forks; ad-hoc signatures are in the executables.

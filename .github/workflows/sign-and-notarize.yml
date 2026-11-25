@@ -9,9 +9,6 @@ on:
       zip-name:
         required: true
         type: string
-      output-artifact:
-        required: true
-        type: string
     secrets:
       DEVELOPER_ID_P12_BASE64:
         required: true
@@ -27,6 +24,9 @@ on:
       artifact_url:
         description: 署名と公証を終えた artifact の URL
         value: ${{ jobs.sign-and-notarize.outputs.artifact_url }}
+      dmg_name:
+        description: 署名と公証を終えた DMG のファイル名
+        value: ${{ jobs.sign-and-notarize.outputs.dmg_name }}
 
 permissions: {}
 
@@ -38,6 +38,7 @@ jobs:
       contents: read
     outputs:
       artifact_url: ${{ steps.upload.outputs.artifact-url }}
+      dmg_name: ${{ steps.notarize.outputs.dmg_name }}
     env:
       ZIP_NAME: ${{ inputs.zip-name }}
     steps:
@@ -50,6 +51,7 @@ jobs:
             echo "NOTARY_KEY_PATH=$RUNNER_TEMP/AuthKey.p8"
             echo "APP_PATH=$RUNNER_TEMP/capsaicin-package/Capsaicin.app"
             echo "NOTARY_ARCHIVE_PATH=$RUNNER_TEMP/Capsaicin-notarization.zip"
+            echo "DMG_SOURCE_PATH=$RUNNER_TEMP/capsaicin-dmg"
           } >> "$GITHUB_ENV"
       # どの secret が不足しているかを、秘密情報を使う前にまとめて示す。
       - name: Require signing secrets
@@ -157,67 +159,78 @@ jobs:
           umask 077
           printf '%s\n' "$NOTARY_API_KEY" > "$NOTARY_KEY_PATH"
           chmod 600 "$NOTARY_KEY_PATH"
-      - name: Submit for notarization
+      - name: Notarize and validate app and DMG
+        id: notarize
         env:
           NOTARY_API_KEY_ID: ${{ secrets.NOTARY_API_KEY_ID }}
           NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
         run: |
-          ditto -c -k --keepParent "$APP_PATH" "$NOTARY_ARCHIVE_PATH"
-          set +e
-          result="$(
-            xcrun notarytool submit "$NOTARY_ARCHIVE_PATH" \
-              --key "$NOTARY_KEY_PATH" \
-              --key-id "$NOTARY_API_KEY_ID" \
-              --issuer "$NOTARY_API_ISSUER_ID" \
-              --wait \
-              --output-format json
-          )"
-          command_status=$?
-          set -e
-          printf '%s\n' "$result"
-
-          submission_id="$(jq -r '.id // empty' <<< "$result" 2>/dev/null || true)"
-          notarization_status="$(jq -r '.status // empty' <<< "$result" 2>/dev/null || true)"
-          if [[ $command_status -ne 0 || "$notarization_status" != Accepted ]]; then
-            if [[ -n "$submission_id" ]]; then
-              xcrun notarytool log "$submission_id" \
+          notarize() {
+            local result command_status=0 submission_id notarization_status
+            result="$(
+              xcrun notarytool submit "$1" \
                 --key "$NOTARY_KEY_PATH" \
                 --key-id "$NOTARY_API_KEY_ID" \
-                --issuer "$NOTARY_API_ISSUER_ID" || true
+                --issuer "$NOTARY_API_ISSUER_ID" \
+                --wait \
+                --output-format json
+            )" || command_status=$?
+            printf '%s\n' "$result"
+
+            submission_id="$(jq -r '.id // empty' <<< "$result" 2>/dev/null || true)"
+            notarization_status="$(jq -r '.status // empty' <<< "$result" 2>/dev/null || true)"
+            if [[ $command_status -ne 0 || "$notarization_status" != Accepted ]]; then
+              if [[ -n "$submission_id" ]]; then
+                xcrun notarytool log "$submission_id" \
+                  --key "$NOTARY_KEY_PATH" \
+                  --key-id "$NOTARY_API_KEY_ID" \
+                  --issuer "$NOTARY_API_ISSUER_ID" || true
+              fi
+              echo "::error::Notarization was not accepted for $(basename "$1") (status: ${notarization_status:-unknown})"
+              return 1
             fi
-            echo "::error::Notarization was not accepted (status: ${notarization_status:-unknown})"
-            exit 1
-          fi
-      - name: Staple and validate
-        run: |
-          xcrun stapler staple "$APP_PATH"
-          xcrun stapler validate "$APP_PATH"
-          if ! assessment="$(spctl --assess --type execute -vv "$APP_PATH" 2>&1)"; then
+          }
+
+          staple_and_assess() {
+            local target="$1" assessment status=0
+            shift
+            xcrun stapler staple "$target"
+            xcrun stapler validate "$target"
+            assessment="$(spctl --assess "$@" -vv "$target" 2>&1)" || status=$?
             printf '%s\n' "$assessment"
-            exit 1
-          fi
-          printf '%s\n' "$assessment"
-          if ! grep -F 'source=Notarized Developer ID' <<< "$assessment" >/dev/null; then
-            echo '::error::Gatekeeper assessment did not report source=Notarized Developer ID'
-            exit 1
-          fi
-      - name: Repackage signed app
-        run: |
-          mkdir -p signed-dist
-          ditto -c -k --norsrc --noextattr --noacl --keepParent \
-            "$APP_PATH" "signed-dist/$ZIP_NAME"
-          (cd signed-dist && shasum -a 256 "$ZIP_NAME" > SHA256SUMS.txt)
-      - name: Upload signed package
+            if (( status != 0 )); then
+              return "$status"
+            fi
+            if ! grep -F 'source=Notarized Developer ID' <<< "$assessment" >/dev/null; then
+              echo "::error::Gatekeeper assessment for $(basename "$target") did not report source=Notarized Developer ID"
+              return 1
+            fi
+          }
+
+          ditto -c -k --keepParent "$APP_PATH" "$NOTARY_ARCHIVE_PATH"
+          notarize "$NOTARY_ARCHIVE_PATH"
+          staple_and_assess "$APP_PATH" --type execute
+
+          dmg_name="${ZIP_NAME%.zip}.dmg"
+          dmg_path="signed-dist/$dmg_name"
+          mkdir -p signed-dist "$DMG_SOURCE_PATH"
+          ditto "$APP_PATH" "$DMG_SOURCE_PATH/Capsaicin.app"
+          ln -s /Applications "$DMG_SOURCE_PATH/Applications"
+          # macOS 27 では hdiutil create が非推奨なので diskutil image を使う。フォルダーからは APFS のボリュームになる。
+          diskutil image create from --format ULFO --volumeName Capsaicin "$DMG_SOURCE_PATH" "$dmg_path"
+          codesign --timestamp --keychain "$KEYCHAIN_PATH" --sign "Developer ID Application" "$dmg_path"
+          notarize "$dmg_path"
+          staple_and_assess "$dmg_path" --type open --context context:primary-signature
+          echo "dmg_name=$dmg_name" >> "$GITHUB_OUTPUT"
+      - name: Upload signed DMG
         id: upload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: ${{ inputs.output-artifact }}
+          archive: false
           if-no-files-found: error
           retention-days: 7
-          path: |
-            signed-dist/${{ inputs.zip-name }}
-            signed-dist/SHA256SUMS.txt
-      - name: Clean up signing credentials
+          path: signed-dist/${{ steps.notarize.outputs.dmg_name }}
+      - name: Clean up signing credentials and temporary files
         if: always()
         run: |
           if [[ -f "$KEYCHAIN_LIST_PATH" ]]; then
@@ -236,3 +249,4 @@ jobs:
             "$P12_PATH" \
             "$NOTARY_KEY_PATH" \
             "$NOTARY_ARCHIVE_PATH"
+          rm -rf "$DMG_SOURCE_PATH"
